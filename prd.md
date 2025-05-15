@@ -665,7 +665,7 @@ dental-dashboard/
 │   │   │   ├── clinics/    # Clinic-related endpoints
 │   │   │   ├── dashboards/ # Dashboard configuration endpoints
 │   │   │   ├── google/     # Google Sheets integration endpoints
-│   │   │   ├── metrics/    # Metrics and KPI endpoints
+│   │   │   ├── KPIs/       # Metrics and KPI endpoints
 │   │   │   └── users/      # User management endpoints
 │   │   ├── auth/           # Authentication-related pages
 │   │   │   ├── signin/     # Sign in page
@@ -698,6 +698,7 @@ dental-dashboard/
 │   │       ├── client.ts   # Browser client
 │   │       ├── server.ts   # Server client
 │   │       └── middleware.ts # Middleware client
+│   ├── repositories/       # Data querying and caching
 │   ├── utils/              # Pure utility functions
 │   │   ├── date/           # Date formatting and manipulation
 │   │   ├── string/         # String operations and formatting
@@ -715,9 +716,10 @@ dental-dashboard/
 │   │   ├── supabase.ts     # Supabase generated types
 │   │   └── database.ts     # Database types
 │   ├── services/           # Business logic services
+│   │   ├── calculations/   # Complex calculations and transformations
 │   │   ├── clinics/        # Clinic-related services
 │   │   ├── google/         # Google integration services
-│   │   ├── metrics/        # Metric calculation services
+│   │   ├── KPIs/           # Dedicated metrics service that centralizes all KPI calculations
 │   │   └── users/          # User-related services
 │   └── styles/             # Global and modular styles
 │       ├── globals.css     # Global CSS
