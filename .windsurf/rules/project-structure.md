@@ -1,0 +1,166 @@
+---
+trigger: model_decision
+description: Project structure and file organization guidelines
+globs: 
+---
+ Project Structure
+
+## Main Structure
+
+- We use Turborepo with pnpm workspaces
+- Main app is in `src/app`
+- Packages are in the `root` folder
+- Server actions are in `apps/web/utils/actions` folder
+
+```tree
+dental-dashboard/
+├── .npmrc                  # pnpm configuration (strict-peer-dependencies=true)
+├── pnpm-lock.yaml          # pnpm lockfile (must be committed)
+├── pnpm-workspace.yaml     # Workspace configuration
+├── package.json            # Root package configuration
+├── .env                    # Environment variables (includes NEXT_PUBLIC_SUPABASE_URL, NEXT_PUBLIC_SUPABASE_ANON_KEY)
+├── .env.example            # Example environment variables
+├── .eslintrc.js            # ESLint configuration
+├── next.config.js          # Next.js configuration
+├── middleware.ts           # Supabase auth session middleware
+├── prisma/                 # Prisma database schemas and migrations
+│   ├── schema.prisma       # Prisma schema definition
+│   └── migrations/         # Database migrations
+├── supabase/               # Supabase specific configuration
+│   ├── schema/             # SQL schema definitions for Supabase
+│   │   ├── auth.sql        # Auth related schema
+│   │   ├── storage.sql     # Storage related schema
+│   │   └── rls.sql         # Row Level Security policies
+│   ├── functions/          # Edge functions
+│   ├── migrations/         # Supabase migrations
+│   └── seed-data/          # Seed data for development
+├── public/                 # Static assets
+├── src/                    # Application source code
+│   ├── app/                # Next.js app directory (App Router)
+│   │   ├── api/            # API routes
+│   │   │   ├── auth/       # Authentication routes
+│   │   │   │   └── callback/route.ts  # Auth callback handler
+│   │   │   ├── clinics/    # Clinic-related endpoints
+│   │   │   ├── dashboards/ # Dashboard configuration endpoints
+│   │   │   ├── google/     # Google Sheets integration endpoints
+│   │   │   ├── KPIs/       # Metrics and KPI endpoints
+│   │   │   └── users/      # User management endpoints
+│   │   ├── auth/           # Authentication-related pages
+│   │   │   ├── signin/     # Sign in page
+│   │   │   ├── signup/     # Sign up page
+│   │   │   └── callback/route.ts # Auth callback handler
+│   │   ├── (dashboard)/    # Dashboard pages (protected routes)
+│   │   │   ├── page.tsx    # Main dashboard page
+│   │   │   ├── layout.tsx  # Dashboard layout
+│   │   │   ├── clinics/    # Clinic-specific views
+│   │   │   ├── providers/  # Provider-specific views
+│   │   │   ├── metrics/    # Metrics detail pages
+│   │   │   └── settings/   # Dashboard settings
+│   │   ├── google/         # Google integration pages
+│   │   │   ├── connect/    # Connection setup
+│   │   │   └── mapping/    # Column mapping interface
+│   │   └── layout.tsx      # Root layout
+│   ├── components/         # Reusable components
+│   │   ├── ui/             # shadcn/ui components
+│   │   ├── charts/         # Chart components
+│   │   ├── dashboards/     # Dashboard-specific components
+│   │   ├── forms/          # Form components
+│   │   ├── layout/         # Layout components
+│   │   ├── auth/           # Authentication components
+│   │   └── metrics/        # Metric-specific components
+│   ├── lib/                # Domain-specific libraries and clients
+│   │   ├── api/            # API client configuration
+│   │   ├── db/             # Database connection and helpers
+│   │   ├── google/         # Google API integration
+│   │   └── supabase/       # Supabase client configuration
+│   │       ├── client.ts   # Browser client
+│   │       ├── server.ts   # Server client
+│   │       └── middleware.ts # Middleware client
+│   ├── repositories/       # Data querying and caching
+│   ├── utils/              # Pure utility functions
+│   │   ├── date/           # Date formatting and manipulation
+│   │   ├── string/         # String operations and formatting
+│   │   ├── number/         # Number formatting and calculations
+│   │   └── format/         # General formatting utilities
+│   ├── actions/            # Server actions (Next.js)
+│   │   ├── auth/           # Authentication actions (moved from lib)
+│   │   ├── clinics/        # Clinic-related mutations
+│   │   ├── metrics/        # Metrics-related mutations
+│   │   └── users/          # User-related mutations
+│   ├── hooks/              # Custom React hooks
+│   │   ├── useSupabase.ts  # Supabase client hook
+│   │   └── useAuth.ts      # Authentication hook
+│   ├── types/              # TypeScript type definitions
+│   │   ├── supabase.ts     # Supabase generated types
+│   │   └── database.ts     # Database types
+│   ├── services/           # Business logic services
+│   │   ├── calculations/   # Complex calculations and transformations
+│   │   ├── clinics/        # Clinic-related services
+│   │   ├── google/         # Google integration services
+│   │   ├── KPIs/           # Dedicated metrics service that centralizes all KPI calculations
+│   │   └── users/          # User-related services
+│   └── styles/             # Global and modular styles
+│       ├── globals.css     # Global CSS
+│       ├── themes/         # Theme configurations
+│       └── components/     # Component-specific styles
+├── tests/                  # Test files
+│   ├── unit/               # Unit tests
+│   ├── integration/        # Integration tests
+│   └── e2e/                # End-to-end tests
+├── turbo.json               # Turborepo pipeline configuration (build, dev, lint, test scripts)
+└── README.md               # Project documentation
+
+## Key Directory Organization
+### Libraries and Utils
+
+- src/lib/: Domain-specific libraries and API clients. Houses core integrations (Supabase, Google, etc.)
+- src/utils/: Pure utility functions organized by type (date, string, number, format). No side effects or app state.
+- src/actions/: All server-side mutations using Next.js server actions, organized by domain (auth, clinics, etc.)
+
+### Styles and UI
+
+- src/styles/: All styling concerns including global CSS, themes, and component styles
+- src/components/: Reusable React components, organized by domain and function
+
+### Business Logic
+
+- src/services/: Core business logic and data transformation services
+- src/hooks/: React hooks for state management and shared behaviors
+
+### Configuration
+
+- turbo.json: Turborepo pipeline configuration for build, test, and development tasks
+
+### File Naming Conventions
+
+- React Components: PascalCase (e.g., MetricsCard.tsx)
+- Utility Functions: camelCase (e.g., formatDate.ts)
+- Pages & Layouts: lowercase (e.g., page.tsx, layout.tsx)
+- Route Handlers: lowercase (e.g., route.ts)
+- Test Files: Same name as the file being tested with .test.ts suffix
+
+### Import Conventions
+
+- Always use absolute imports with @/ prefix
+- Group imports in the following order:
+
+- React and Next.js imports
+- Third-party library imports
+- Local absolute imports (components, utils, etc.)
+- Local relative imports
+- Type imports
+
+
+
+### Example:
+
+```tsx
+tsximport { useState, useEffect } from 'react'
+import { useRouter } from 'next/navigation'
+import { format } from 'date-fns'
+import { Card } from '@/components/ui/card'
+import { formatCurrency } from '@/utils/format/currency'
+import { MetricsService } from '@/services/metrics'
+import styles from './styles.module.css'
+import type { Metric } from '@/types/metrics'
+This structure follows Next.js App Router conventions while implementing clean code architecture with proper separation of concerns.
