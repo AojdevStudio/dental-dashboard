@@ -1,4 +1,4 @@
-import { Skeleton } from "@/components/ui/skeleton"
+import { Skeleton } from "@/components/ui/skeleton";
 
 export default function ResetPasswordLoading() {
   return (
@@ -6,10 +6,10 @@ export default function ResetPasswordLoading() {
       <div className="relative z-10 w-full max-w-sm rounded-3xl bg-gradient-to-r from-[#ffffff10] to-[#121212] backdrop-blur-sm shadow-2xl p-8 flex flex-col items-center">
         {/* Logo skeleton */}
         <Skeleton className="w-24 h-24 rounded-full bg-white/10 mb-6" />
-        
+
         {/* Title skeleton */}
         <Skeleton className="h-8 w-48 bg-white/10 mb-6 rounded-lg" />
-        
+
         {/* Form skeleton */}
         <div className="flex flex-col w-full gap-4">
           <div className="w-full flex flex-col gap-3">
@@ -21,5 +21,5 @@ export default function ResetPasswordLoading() {
         </div>
       </div>
     </div>
-  )
+  );
 }

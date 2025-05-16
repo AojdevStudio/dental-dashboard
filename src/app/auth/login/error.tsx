@@ -1,18 +1,18 @@
-'use client'
+"use client";
 
-import { useEffect } from 'react'
-import { Button } from '@/components/ui/button'
+import { useEffect } from "react";
+import { Button } from "@/components/ui/button";
 
 export default function LoginError({
   error,
   reset,
 }: {
-  error: Error & { digest?: string }
-  reset: () => void
+  error: Error & { digest?: string };
+  reset: () => void;
 }) {
   useEffect(() => {
-    console.error(error)
-  }, [error])
+    console.error(error);
+  }, [error]);
 
   return (
     <div className="flex h-screen flex-col items-center justify-center">
@@ -21,13 +21,10 @@ export default function LoginError({
         <p className="mb-4 text-muted-foreground">
           An error occurred while trying to load the login page.
         </p>
-        <Button
-          onClick={() => reset()}
-          className="mt-4"
-        >
+        <Button onClick={() => reset()} className="mt-4">
           Try again
         </Button>
       </div>
     </div>
-  )
-} 
+  );
+}

@@ -1,11 +1,11 @@
-"use client"
+"use client";
 
-import * as React from "react"
-import { useRouter } from "next/navigation"
-import { createBrowserClient } from '@supabase/ssr'
+import * as React from "react";
+import { useRouter } from "next/navigation";
+import { createBrowserClient } from "@supabase/ssr";
 
 const ModernStunningSignUp = () => {
-  const router = useRouter()
+  const router = useRouter();
   const [email, setEmail] = React.useState("");
   const [password, setPassword] = React.useState("");
   const [confirmPassword, setConfirmPassword] = React.useState("");
@@ -44,7 +44,7 @@ const ModernStunningSignUp = () => {
       const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
       const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
       if (!supabaseUrl || !supabaseAnonKey) {
-        throw new Error('Missing Supabase environment variables');
+        throw new Error("Missing Supabase environment variables");
       }
       const supabase = createBrowserClient(supabaseUrl, supabaseAnonKey);
       const { error: signUpError } = await supabase.auth.signUp({
@@ -72,11 +72,11 @@ const ModernStunningSignUp = () => {
       const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
       const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
       if (!supabaseUrl || !supabaseAnonKey) {
-        throw new Error('Missing Supabase environment variables');
+        throw new Error("Missing Supabase environment variables");
       }
       const supabase = createBrowserClient(supabaseUrl, supabaseAnonKey);
       const { error } = await supabase.auth.signInWithOAuth({
-        provider: 'google',
+        provider: "google",
         options: {
           redirectTo: `${window.location.origin}/auth/callback`,
         },
@@ -93,17 +93,15 @@ const ModernStunningSignUp = () => {
     <div className="min-h-screen flex flex-col items-center justify-center bg-[#121212] relative overflow-hidden w-full rounded-xl">
       <div className="relative z-10 w-full max-w-sm rounded-3xl bg-gradient-to-r from-[#ffffff10] to-[#121212] backdrop-blur-sm shadow-2xl p-8 flex flex-col items-center">
         <div className="flex items-center justify-center w-24 h-24 rounded-full bg-white/20 mb-6 shadow-lg">
-          <img 
-            src="/logo.svg" 
-            alt="Unified Dental Dashboard Logo" 
-            width="64" 
-            height="64" 
-            className="w-16 h-16" 
+          <img
+            src="/logo.svg"
+            alt="Unified Dental Dashboard Logo"
+            width="64"
+            height="64"
+            className="w-16 h-16"
           />
         </div>
-        <h2 className="text-2xl font-semibold text-white mb-6 text-center">
-          Create Your Account
-        </h2>
+        <h2 className="text-2xl font-semibold text-white mb-6 text-center">Create Your Account</h2>
         <div className="flex flex-col w-full gap-4">
           <div className="w-full flex flex-col gap-3">
             <input
@@ -140,12 +138,17 @@ const ModernStunningSignUp = () => {
                 disabled={isLoading}
               />
               <label htmlFor="terms" className="text-xs text-gray-300">
-                I accept the <a href="/terms" className="text-white hover:underline">Terms of Service</a> and <a href="/privacy" className="text-white hover:underline">Privacy Policy</a>
+                I accept the{" "}
+                <a href="/terms" className="text-white hover:underline">
+                  Terms of Service
+                </a>{" "}
+                and{" "}
+                <a href="/privacy" className="text-white hover:underline">
+                  Privacy Policy
+                </a>
               </label>
             </div>
-            {error && (
-              <div className="text-sm text-red-400 text-left">{error}</div>
-            )}
+            {error && <div className="text-sm text-red-400 text-left">{error}</div>}
           </div>
           <hr className="opacity-10" />
           <div>
@@ -159,7 +162,9 @@ const ModernStunningSignUp = () => {
                 <div className="absolute inset-0 flex items-center justify-center">
                   <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
                 </div>
-              ) : "Sign Up"}
+              ) : (
+                "Sign Up"
+              )}
             </button>
             <button
               type="button"
@@ -177,10 +182,7 @@ const ModernStunningSignUp = () => {
             <div className="w-full text-center mt-2">
               <span className="text-xs text-gray-400">
                 Already have an account?{" "}
-                <a
-                  href="/auth/login"
-                  className="underline text-white/80 hover:text-white"
-                >
+                <a href="/auth/login" className="underline text-white/80 hover:text-white">
                   Sign in
                 </a>
               </span>
@@ -190,8 +192,8 @@ const ModernStunningSignUp = () => {
       </div>
       <div className="relative z-10 mt-12 flex flex-col items-center text-center">
         <p className="text-gray-400 text-sm mb-2">
-          Join <span className="font-medium text-white">thousands</span> of
-          dental practices already using our dashboard.
+          Join <span className="font-medium text-white">thousands</span> of dental practices already
+          using our dashboard.
         </p>
         <div className="flex">
           <img
@@ -220,4 +222,4 @@ const ModernStunningSignUp = () => {
   );
 };
 
-export { ModernStunningSignUp }; 
+export { ModernStunningSignUp };

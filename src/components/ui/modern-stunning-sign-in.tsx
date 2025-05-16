@@ -1,20 +1,20 @@
-"use client" 
+"use client";
 
-import * as React from "react"
-import { useRouter } from "next/navigation"
-import { createBrowserClient } from '@supabase/ssr'
+import * as React from "react";
+import { useRouter } from "next/navigation";
+import { createBrowserClient } from "@supabase/ssr";
 
 const SignIn1 = () => {
-  const router = useRouter()
+  const router = useRouter();
   const [email, setEmail] = React.useState("");
   const [password, setPassword] = React.useState("");
   const [error, setError] = React.useState("");
   const [isLoading, setIsLoading] = React.useState(false);
- 
+
   const validateEmail = (email: string) => {
     return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
   };
- 
+
   const handleSignIn = async () => {
     if (!email || !password) {
       setError("Please enter both email and password.");
@@ -33,7 +33,7 @@ const SignIn1 = () => {
       const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
       if (!supabaseUrl || !supabaseAnonKey) {
-        throw new Error('Missing Supabase environment variables');
+        throw new Error("Missing Supabase environment variables");
       }
 
       const supabase = createBrowserClient(supabaseUrl, supabaseAnonKey);
@@ -62,13 +62,13 @@ const SignIn1 = () => {
       const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
       if (!supabaseUrl || !supabaseAnonKey) {
-        throw new Error('Missing Supabase environment variables');
+        throw new Error("Missing Supabase environment variables");
       }
 
       const supabase = createBrowserClient(supabaseUrl, supabaseAnonKey);
 
       const { error } = await supabase.auth.signInWithOAuth({
-        provider: 'google',
+        provider: "google",
         options: {
           redirectTo: `${window.location.origin}/auth/callback`,
         },
@@ -81,19 +81,19 @@ const SignIn1 = () => {
       setError(err instanceof Error ? err.message : "Failed to sign in with Google");
     }
   };
- 
+
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-[#121212] relative overflow-hidden w-full rounded-xl">
       {/* Centered glass card */}
       <div className="relative z-10 w-full max-w-sm rounded-3xl bg-gradient-to-r from-[#ffffff10] to-[#121212] backdrop-blur-sm  shadow-2xl p-8 flex flex-col items-center">
         {/* Logo */}
         <div className="flex items-center justify-center w-24 h-24 rounded-full bg-white/20 mb-6 shadow-lg">
-          <img 
-            src="/logo.svg" 
-            alt="Unified Dental Dashboard Logo" 
-            width="64" 
-            height="64" 
-            className="w-16 h-16" 
+          <img
+            src="/logo.svg"
+            alt="Unified Dental Dashboard Logo"
+            width="64"
+            height="64"
+            className="w-16 h-16"
           />
         </div>
         {/* Title */}
@@ -119,9 +119,7 @@ const SignIn1 = () => {
               onChange={(e) => setPassword(e.target.value)}
               disabled={isLoading}
             />
-            {error && (
-              <div className="text-sm text-red-400 text-left">{error}</div>
-            )}
+            {error && <div className="text-sm text-red-400 text-left">{error}</div>}
           </div>
           <hr className="opacity-10" />
           <div>
@@ -135,7 +133,9 @@ const SignIn1 = () => {
                 <div className="absolute inset-0 flex items-center justify-center">
                   <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
                 </div>
-              ) : "Sign in"}
+              ) : (
+                "Sign in"
+              )}
             </button>
             {/* Google Sign In */}
             <button
@@ -154,18 +154,12 @@ const SignIn1 = () => {
             <div className="w-full text-center mt-2">
               <span className="text-xs text-gray-400">
                 Don&apos;t have an account?{" "}
-                <a
-                  href="/auth/signup"
-                  className="underline text-white/80 hover:text-white"
-                >
+                <a href="/auth/signup" className="underline text-white/80 hover:text-white">
                   Sign up, it&apos;s free!
                 </a>
               </span>
               <div className="mt-2">
-                <a
-                  href="/auth/reset-password"
-                  className="text-xs text-gray-400 hover:text-white"
-                >
+                <a href="/auth/reset-password" className="text-xs text-gray-400 hover:text-white">
                   Forgot your password?
                 </a>
               </div>
@@ -176,8 +170,8 @@ const SignIn1 = () => {
       {/* User count and avatars */}
       <div className="relative z-10 mt-12 flex flex-col items-center text-center">
         <p className="text-gray-400 text-sm mb-2">
-          Join <span className="font-medium text-white">thousands</span> of
-          dental practices already using our dashboard.
+          Join <span className="font-medium text-white">thousands</span> of dental practices already
+          using our dashboard.
         </p>
         <div className="flex">
           <img
@@ -205,5 +199,5 @@ const SignIn1 = () => {
     </div>
   );
 };
- 
+
 export { SignIn1 };

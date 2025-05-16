@@ -1,4 +1,4 @@
-import { Skeleton } from '@/components/ui/skeleton'
+import { Skeleton } from "@/components/ui/skeleton";
 
 export default function SignupLoading() {
   return (
@@ -13,5 +13,5 @@ export default function SignupLoading() {
         <Skeleton className="h-6 w-1/2 mx-auto" />
       </div>
     </div>
-  )
-} 
+  );
+}
