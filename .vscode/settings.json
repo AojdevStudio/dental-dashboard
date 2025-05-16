@@ -1,0 +1,11 @@
+{
+  "postman.settings.dotenv-detection-notification-visibility": false,
+  "editor.defaultFormatter": "biomejs.biome",
+  "editor.formatOnSave": true,
+  "editor.codeActionsOnSave": {
+    "quickfix.biome": "explicit"
+  },
+  "biome.enabled": true,
+  "biome.enabledLanguages": ["typescript", "typescriptreact"],
+  "biome.enabledRules": ["no-unused-vars"]
+}
