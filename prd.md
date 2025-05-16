@@ -329,7 +329,7 @@ Cons: Requires database management knowledge
 Justification: Robust relational database for complex relationships, specified requirement
 
 
-Authentication: NextAuth.js
+Authentication: Supabase Auth
 
 Pros: Easy integration with Next.js, supports multiple providers
 Cons: Some advanced configurations can be complex
@@ -343,7 +343,7 @@ Cons: Learning curve for advanced patterns
 Justification: Excellent for API data management and UI state
 
 
-Testing Framework: Vite (as specified) & Jest
+Testing Framework: Vite (as specified) & Vitest
 
 Pros: Fast testing, good component testing
 Cons: Configuration can be complex for advanced cases
@@ -381,7 +381,7 @@ Google OAuth implementation and authorization flow
 Basic Google Sheets API integration
 Spreadsheet discovery and selection interface
 Simple data extraction from Google Sheets
-Core API development for metric definitions
+Core API develo$$pment for metric definitions
 
 Phase 2: Data Processing & Storage (3-4 weeks)
 

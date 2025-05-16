@@ -346,8 +346,8 @@ export namespace Prisma {
   export import Exact = $Public.Exact
 
   /**
-   * Prisma Client JS version: 6.7.0
-   * Query Engine version: 3cff47a7f5d65c3ea74883f1d736e41d68ce91ed
+   * Prisma Client JS version: 6.8.0
+   * Query Engine version: 2060c79ba17c6bb9f5823312b6f6b7f4a845738e
    */
   export type PrismaVersion = {
     client: string
@@ -6605,6 +6605,7 @@ export namespace Prisma {
     lastSyncedAt: Date | null
     syncFrequency: string | null
     connectionStatus: string | null
+    appScriptId: string | null
     createdAt: Date | null
     updatedAt: Date | null
   }
@@ -6617,6 +6618,7 @@ export namespace Prisma {
     lastSyncedAt: Date | null
     syncFrequency: string | null
     connectionStatus: string | null
+    appScriptId: string | null
     createdAt: Date | null
     updatedAt: Date | null
   }
@@ -6629,6 +6631,7 @@ export namespace Prisma {
     lastSyncedAt: number
     syncFrequency: number
     connectionStatus: number
+    appScriptId: number
     createdAt: number
     updatedAt: number
     _all: number
@@ -6643,6 +6646,7 @@ export namespace Prisma {
     lastSyncedAt?: true
     syncFrequency?: true
     connectionStatus?: true
+    appScriptId?: true
     createdAt?: true
     updatedAt?: true
   }
@@ -6655,6 +6659,7 @@ export namespace Prisma {
     lastSyncedAt?: true
     syncFrequency?: true
     connectionStatus?: true
+    appScriptId?: true
     createdAt?: true
     updatedAt?: true
   }
@@ -6667,6 +6672,7 @@ export namespace Prisma {
     lastSyncedAt?: true
     syncFrequency?: true
     connectionStatus?: true
+    appScriptId?: true
     createdAt?: true
     updatedAt?: true
     _all?: true
@@ -6752,6 +6758,7 @@ export namespace Prisma {
     lastSyncedAt: Date | null
     syncFrequency: string
     connectionStatus: string
+    appScriptId: string | null
     createdAt: Date
     updatedAt: Date
     _count: DataSourceCountAggregateOutputType | null
@@ -6781,6 +6788,7 @@ export namespace Prisma {
     lastSyncedAt?: boolean
     syncFrequency?: boolean
     connectionStatus?: boolean
+    appScriptId?: boolean
     createdAt?: boolean
     updatedAt?: boolean
     columnMappings?: boolean | DataSource$columnMappingsArgs<ExtArgs>
@@ -6796,6 +6804,7 @@ export namespace Prisma {
     lastSyncedAt?: boolean
     syncFrequency?: boolean
     connectionStatus?: boolean
+    appScriptId?: boolean
     createdAt?: boolean
     updatedAt?: boolean
   }, ExtArgs["result"]["dataSource"]>
@@ -6808,6 +6817,7 @@ export namespace Prisma {
     lastSyncedAt?: boolean
     syncFrequency?: boolean
     connectionStatus?: boolean
+    appScriptId?: boolean
     createdAt?: boolean
     updatedAt?: boolean
   }, ExtArgs["result"]["dataSource"]>
@@ -6820,11 +6830,12 @@ export namespace Prisma {
     lastSyncedAt?: boolean
     syncFrequency?: boolean
     connectionStatus?: boolean
+    appScriptId?: boolean
     createdAt?: boolean
     updatedAt?: boolean
   }
 
-  export type DataSourceOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "name" | "spreadsheetId" | "sheetName" | "lastSyncedAt" | "syncFrequency" | "connectionStatus" | "createdAt" | "updatedAt", ExtArgs["result"]["dataSource"]>
+  export type DataSourceOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "name" | "spreadsheetId" | "sheetName" | "lastSyncedAt" | "syncFrequency" | "connectionStatus" | "appScriptId" | "createdAt" | "updatedAt", ExtArgs["result"]["dataSource"]>
   export type DataSourceInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     columnMappings?: boolean | DataSource$columnMappingsArgs<ExtArgs>
     metrics?: boolean | DataSource$metricsArgs<ExtArgs>
@@ -6847,6 +6858,7 @@ export namespace Prisma {
       lastSyncedAt: Date | null
       syncFrequency: string
       connectionStatus: string
+      appScriptId: string | null
       createdAt: Date
       updatedAt: Date
     }, ExtArgs["result"]["dataSource"]>
@@ -7281,6 +7293,7 @@ export namespace Prisma {
     readonly lastSyncedAt: FieldRef<"DataSource", 'DateTime'>
     readonly syncFrequency: FieldRef<"DataSource", 'String'>
     readonly connectionStatus: FieldRef<"DataSource", 'String'>
+    readonly appScriptId: FieldRef<"DataSource", 'String'>
     readonly createdAt: FieldRef<"DataSource", 'DateTime'>
     readonly updatedAt: FieldRef<"DataSource", 'DateTime'>
   }
@@ -8844,6 +8857,8 @@ export namespace Prisma {
     date: Date | null
     value: string | null
     sourceType: string | null
+    sourceSheet: string | null
+    externalId: string | null
     createdAt: Date | null
     updatedAt: Date | null
     metricDefinitionId: string | null
@@ -8857,6 +8872,8 @@ export namespace Prisma {
     date: Date | null
     value: string | null
     sourceType: string | null
+    sourceSheet: string | null
+    externalId: string | null
     createdAt: Date | null
     updatedAt: Date | null
     metricDefinitionId: string | null
@@ -8870,6 +8887,8 @@ export namespace Prisma {
     date: number
     value: number
     sourceType: number
+    sourceSheet: number
+    externalId: number
     createdAt: number
     updatedAt: number
     metricDefinitionId: number
@@ -8885,6 +8904,8 @@ export namespace Prisma {
     date?: true
     value?: true
     sourceType?: true
+    sourceSheet?: true
+    externalId?: true
     createdAt?: true
     updatedAt?: true
     metricDefinitionId?: true
@@ -8898,6 +8919,8 @@ export namespace Prisma {
     date?: true
     value?: true
     sourceType?: true
+    sourceSheet?: true
+    externalId?: true
     createdAt?: true
     updatedAt?: true
     metricDefinitionId?: true
@@ -8911,6 +8934,8 @@ export namespace Prisma {
     date?: true
     value?: true
     sourceType?: true
+    sourceSheet?: true
+    externalId?: true
     createdAt?: true
     updatedAt?: true
     metricDefinitionId?: true
@@ -8997,6 +9022,8 @@ export namespace Prisma {
     date: Date
     value: string
     sourceType: string
+    sourceSheet: string | null
+    externalId: string | null
     createdAt: Date
     updatedAt: Date
     metricDefinitionId: string
@@ -9027,6 +9054,8 @@ export namespace Prisma {
     date?: boolean
     value?: boolean
     sourceType?: boolean
+    sourceSheet?: boolean
+    externalId?: boolean
     createdAt?: boolean
     updatedAt?: boolean
     metricDefinitionId?: boolean
@@ -9044,6 +9073,8 @@ export namespace Prisma {
     date?: boolean
     value?: boolean
     sourceType?: boolean
+    sourceSheet?: boolean
+    externalId?: boolean
     createdAt?: boolean
     updatedAt?: boolean
     metricDefinitionId?: boolean
@@ -9061,6 +9092,8 @@ export namespace Prisma {
     date?: boolean
     value?: boolean
     sourceType?: boolean
+    sourceSheet?: boolean
+    externalId?: boolean
     createdAt?: boolean
     updatedAt?: boolean
     metricDefinitionId?: boolean
@@ -9078,6 +9111,8 @@ export namespace Prisma {
     date?: boolean
     value?: boolean
     sourceType?: boolean
+    sourceSheet?: boolean
+    externalId?: boolean
     createdAt?: boolean
     updatedAt?: boolean
     metricDefinitionId?: boolean
@@ -9086,7 +9121,7 @@ export namespace Prisma {
     dataSourceId?: boolean
   }
 
-  export type MetricValueOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "date" | "value" | "sourceType" | "createdAt" | "updatedAt" | "metricDefinitionId" | "clinicId" | "providerId" | "dataSourceId", ExtArgs["result"]["metricValue"]>
+  export type MetricValueOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "date" | "value" | "sourceType" | "sourceSheet" | "externalId" | "createdAt" | "updatedAt" | "metricDefinitionId" | "clinicId" | "providerId" | "dataSourceId", ExtArgs["result"]["metricValue"]>
   export type MetricValueInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     metricDefinition?: boolean | MetricDefinitionDefaultArgs<ExtArgs>
     clinic?: boolean | MetricValue$clinicArgs<ExtArgs>
@@ -9119,6 +9154,8 @@ export namespace Prisma {
       date: Date
       value: string
       sourceType: string
+      sourceSheet: string | null
+      externalId: string | null
       createdAt: Date
       updatedAt: Date
       metricDefinitionId: string
@@ -9556,6 +9593,8 @@ export namespace Prisma {
     readonly date: FieldRef<"MetricValue", 'DateTime'>
     readonly value: FieldRef<"MetricValue", 'String'>
     readonly sourceType: FieldRef<"MetricValue", 'String'>
+    readonly sourceSheet: FieldRef<"MetricValue", 'String'>
+    readonly externalId: FieldRef<"MetricValue", 'String'>
     readonly createdAt: FieldRef<"MetricValue", 'DateTime'>
     readonly updatedAt: FieldRef<"MetricValue", 'DateTime'>
     readonly metricDefinitionId: FieldRef<"MetricValue", 'String'>
@@ -13614,6 +13653,7 @@ export namespace Prisma {
     lastSyncedAt: 'lastSyncedAt',
     syncFrequency: 'syncFrequency',
     connectionStatus: 'connectionStatus',
+    appScriptId: 'appScriptId',
     createdAt: 'createdAt',
     updatedAt: 'updatedAt'
   };
@@ -13639,6 +13679,8 @@ export namespace Prisma {
     date: 'date',
     value: 'value',
     sourceType: 'sourceType',
+    sourceSheet: 'sourceSheet',
+    externalId: 'externalId',
     createdAt: 'createdAt',
     updatedAt: 'updatedAt',
     metricDefinitionId: 'metricDefinitionId',
@@ -14131,6 +14173,7 @@ export namespace Prisma {
     lastSyncedAt?: DateTimeNullableFilter<"DataSource"> | Date | string | null
     syncFrequency?: StringFilter<"DataSource"> | string
     connectionStatus?: StringFilter<"DataSource"> | string
+    appScriptId?: StringNullableFilter<"DataSource"> | string | null
     createdAt?: DateTimeFilter<"DataSource"> | Date | string
     updatedAt?: DateTimeFilter<"DataSource"> | Date | string
     columnMappings?: ColumnMappingListRelationFilter
@@ -14145,6 +14188,7 @@ export namespace Prisma {
     lastSyncedAt?: SortOrderInput | SortOrder
     syncFrequency?: SortOrder
     connectionStatus?: SortOrder
+    appScriptId?: SortOrderInput | SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
     columnMappings?: ColumnMappingOrderByRelationAggregateInput
@@ -14162,6 +14206,7 @@ export namespace Prisma {
     lastSyncedAt?: DateTimeNullableFilter<"DataSource"> | Date | string | null
     syncFrequency?: StringFilter<"DataSource"> | string
     connectionStatus?: StringFilter<"DataSource"> | string
+    appScriptId?: StringNullableFilter<"DataSource"> | string | null
     createdAt?: DateTimeFilter<"DataSource"> | Date | string
     updatedAt?: DateTimeFilter<"DataSource"> | Date | string
     columnMappings?: ColumnMappingListRelationFilter
@@ -14176,6 +14221,7 @@ export namespace Prisma {
     lastSyncedAt?: SortOrderInput | SortOrder
     syncFrequency?: SortOrder
     connectionStatus?: SortOrder
+    appScriptId?: SortOrderInput | SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
     _count?: DataSourceCountOrderByAggregateInput
@@ -14194,6 +14240,7 @@ export namespace Prisma {
     lastSyncedAt?: DateTimeNullableWithAggregatesFilter<"DataSource"> | Date | string | null
     syncFrequency?: StringWithAggregatesFilter<"DataSource"> | string
     connectionStatus?: StringWithAggregatesFilter<"DataSource"> | string
+    appScriptId?: StringNullableWithAggregatesFilter<"DataSource"> | string | null
     createdAt?: DateTimeWithAggregatesFilter<"DataSource"> | Date | string
     updatedAt?: DateTimeWithAggregatesFilter<"DataSource"> | Date | string
   }
@@ -14274,6 +14321,8 @@ export namespace Prisma {
     date?: DateTimeFilter<"MetricValue"> | Date | string
     value?: StringFilter<"MetricValue"> | string
     sourceType?: StringFilter<"MetricValue"> | string
+    sourceSheet?: StringNullableFilter<"MetricValue"> | string | null
+    externalId?: StringNullableFilter<"MetricValue"> | string | null
     createdAt?: DateTimeFilter<"MetricValue"> | Date | string
     updatedAt?: DateTimeFilter<"MetricValue"> | Date | string
     metricDefinitionId?: StringFilter<"MetricValue"> | string
@@ -14291,6 +14340,8 @@ export namespace Prisma {
     date?: SortOrder
     value?: SortOrder
     sourceType?: SortOrder
+    sourceSheet?: SortOrderInput | SortOrder
+    externalId?: SortOrderInput | SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
     metricDefinitionId?: SortOrder
@@ -14311,6 +14362,8 @@ export namespace Prisma {
     date?: DateTimeFilter<"MetricValue"> | Date | string
     value?: StringFilter<"MetricValue"> | string
     sourceType?: StringFilter<"MetricValue"> | string
+    sourceSheet?: StringNullableFilter<"MetricValue"> | string | null
+    externalId?: StringNullableFilter<"MetricValue"> | string | null
     createdAt?: DateTimeFilter<"MetricValue"> | Date | string
     updatedAt?: DateTimeFilter<"MetricValue"> | Date | string
     metricDefinitionId?: StringFilter<"MetricValue"> | string
@@ -14328,6 +14381,8 @@ export namespace Prisma {
     date?: SortOrder
     value?: SortOrder
     sourceType?: SortOrder
+    sourceSheet?: SortOrderInput | SortOrder
+    externalId?: SortOrderInput | SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
     metricDefinitionId?: SortOrder
@@ -14347,6 +14402,8 @@ export namespace Prisma {
     date?: DateTimeWithAggregatesFilter<"MetricValue"> | Date | string
     value?: StringWithAggregatesFilter<"MetricValue"> | string
     sourceType?: StringWithAggregatesFilter<"MetricValue"> | string
+    sourceSheet?: StringNullableWithAggregatesFilter<"MetricValue"> | string | null
+    externalId?: StringNullableWithAggregatesFilter<"MetricValue"> | string | null
     createdAt?: DateTimeWithAggregatesFilter<"MetricValue"> | Date | string
     updatedAt?: DateTimeWithAggregatesFilter<"MetricValue"> | Date | string
     metricDefinitionId?: StringWithAggregatesFilter<"MetricValue"> | string
@@ -14948,6 +15005,7 @@ export namespace Prisma {
     lastSyncedAt?: Date | string | null
     syncFrequency: string
     connectionStatus: string
+    appScriptId?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     columnMappings?: ColumnMappingCreateNestedManyWithoutDataSourceInput
@@ -14962,6 +15020,7 @@ export namespace Prisma {
     lastSyncedAt?: Date | string | null
     syncFrequency: string
     connectionStatus: string
+    appScriptId?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     columnMappings?: ColumnMappingUncheckedCreateNestedManyWithoutDataSourceInput
@@ -14976,6 +15035,7 @@ export namespace Prisma {
     lastSyncedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     syncFrequency?: StringFieldUpdateOperationsInput | string
     connectionStatus?: StringFieldUpdateOperationsInput | string
+    appScriptId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     columnMappings?: ColumnMappingUpdateManyWithoutDataSourceNestedInput
@@ -14990,6 +15050,7 @@ export namespace Prisma {
     lastSyncedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     syncFrequency?: StringFieldUpdateOperationsInput | string
     connectionStatus?: StringFieldUpdateOperationsInput | string
+    appScriptId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     columnMappings?: ColumnMappingUncheckedUpdateManyWithoutDataSourceNestedInput
@@ -15004,6 +15065,7 @@ export namespace Prisma {
     lastSyncedAt?: Date | string | null
     syncFrequency: string
     connectionStatus: string
+    appScriptId?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -15016,6 +15078,7 @@ export namespace Prisma {
     lastSyncedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     syncFrequency?: StringFieldUpdateOperationsInput | string
     connectionStatus?: StringFieldUpdateOperationsInput | string
+    appScriptId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -15028,6 +15091,7 @@ export namespace Prisma {
     lastSyncedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     syncFrequency?: StringFieldUpdateOperationsInput | string
     connectionStatus?: StringFieldUpdateOperationsInput | string
+    appScriptId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -15105,6 +15169,8 @@ export namespace Prisma {
     date: Date | string
     value: string
     sourceType: string
+    sourceSheet?: string | null
+    externalId?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     metricDefinition: MetricDefinitionCreateNestedOneWithoutMetricsInput
@@ -15118,6 +15184,8 @@ export namespace Prisma {
     date: Date | string
     value: string
     sourceType: string
+    sourceSheet?: string | null
+    externalId?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     metricDefinitionId: string
@@ -15131,6 +15199,8 @@ export namespace Prisma {
     date?: DateTimeFieldUpdateOperationsInput | Date | string
     value?: StringFieldUpdateOperationsInput | string
     sourceType?: StringFieldUpdateOperationsInput | string
+    sourceSheet?: NullableStringFieldUpdateOperationsInput | string | null
+    externalId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     metricDefinition?: MetricDefinitionUpdateOneRequiredWithoutMetricsNestedInput
@@ -15144,6 +15214,8 @@ export namespace Prisma {
     date?: DateTimeFieldUpdateOperationsInput | Date | string
     value?: StringFieldUpdateOperationsInput | string
     sourceType?: StringFieldUpdateOperationsInput | string
+    sourceSheet?: NullableStringFieldUpdateOperationsInput | string | null
+    externalId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     metricDefinitionId?: StringFieldUpdateOperationsInput | string
@@ -15157,6 +15229,8 @@ export namespace Prisma {
     date: Date | string
     value: string
     sourceType: string
+    sourceSheet?: string | null
+    externalId?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     metricDefinitionId: string
@@ -15170,6 +15244,8 @@ export namespace Prisma {
     date?: DateTimeFieldUpdateOperationsInput | Date | string
     value?: StringFieldUpdateOperationsInput | string
     sourceType?: StringFieldUpdateOperationsInput | string
+    sourceSheet?: NullableStringFieldUpdateOperationsInput | string | null
+    externalId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -15179,6 +15255,8 @@ export namespace Prisma {
     date?: DateTimeFieldUpdateOperationsInput | Date | string
     value?: StringFieldUpdateOperationsInput | string
     sourceType?: StringFieldUpdateOperationsInput | string
+    sourceSheet?: NullableStringFieldUpdateOperationsInput | string | null
+    externalId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     metricDefinitionId?: StringFieldUpdateOperationsInput | string
@@ -15794,6 +15872,7 @@ export namespace Prisma {
     lastSyncedAt?: SortOrder
     syncFrequency?: SortOrder
     connectionStatus?: SortOrder
+    appScriptId?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
   }
@@ -15806,6 +15885,7 @@ export namespace Prisma {
     lastSyncedAt?: SortOrder
     syncFrequency?: SortOrder
     connectionStatus?: SortOrder
+    appScriptId?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
   }
@@ -15818,6 +15898,7 @@ export namespace Prisma {
     lastSyncedAt?: SortOrder
     syncFrequency?: SortOrder
     connectionStatus?: SortOrder
+    appScriptId?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
   }
@@ -15882,6 +15963,8 @@ export namespace Prisma {
     date?: SortOrder
     value?: SortOrder
     sourceType?: SortOrder
+    sourceSheet?: SortOrder
+    externalId?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
     metricDefinitionId?: SortOrder
@@ -15895,6 +15978,8 @@ export namespace Prisma {
     date?: SortOrder
     value?: SortOrder
     sourceType?: SortOrder
+    sourceSheet?: SortOrder
+    externalId?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
     metricDefinitionId?: SortOrder
@@ -15908,6 +15993,8 @@ export namespace Prisma {
     date?: SortOrder
     value?: SortOrder
     sourceType?: SortOrder
+    sourceSheet?: SortOrder
+    externalId?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
     metricDefinitionId?: SortOrder
@@ -17221,6 +17308,8 @@ export namespace Prisma {
     date: Date | string
     value: string
     sourceType: string
+    sourceSheet?: string | null
+    externalId?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     metricDefinition: MetricDefinitionCreateNestedOneWithoutMetricsInput
@@ -17233,6 +17322,8 @@ export namespace Prisma {
     date: Date | string
     value: string
     sourceType: string
+    sourceSheet?: string | null
+    externalId?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     metricDefinitionId: string
@@ -17367,6 +17458,8 @@ export namespace Prisma {
     date?: DateTimeFilter<"MetricValue"> | Date | string
     value?: StringFilter<"MetricValue"> | string
     sourceType?: StringFilter<"MetricValue"> | string
+    sourceSheet?: StringNullableFilter<"MetricValue"> | string | null
+    externalId?: StringNullableFilter<"MetricValue"> | string | null
     createdAt?: DateTimeFilter<"MetricValue"> | Date | string
     updatedAt?: DateTimeFilter<"MetricValue"> | Date | string
     metricDefinitionId?: StringFilter<"MetricValue"> | string
@@ -17564,6 +17657,8 @@ export namespace Prisma {
     date: Date | string
     value: string
     sourceType: string
+    sourceSheet?: string | null
+    externalId?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     metricDefinition: MetricDefinitionCreateNestedOneWithoutMetricsInput
@@ -17576,6 +17671,8 @@ export namespace Prisma {
     date: Date | string
     value: string
     sourceType: string
+    sourceSheet?: string | null
+    externalId?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     metricDefinitionId: string
@@ -17699,6 +17796,8 @@ export namespace Prisma {
     date: Date | string
     value: string
     sourceType: string
+    sourceSheet?: string | null
+    externalId?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     clinic?: ClinicCreateNestedOneWithoutMetricsInput
@@ -17711,6 +17810,8 @@ export namespace Prisma {
     date: Date | string
     value: string
     sourceType: string
+    sourceSheet?: string | null
+    externalId?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     clinicId?: string | null
@@ -17956,6 +18057,8 @@ export namespace Prisma {
     date: Date | string
     value: string
     sourceType: string
+    sourceSheet?: string | null
+    externalId?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     metricDefinition: MetricDefinitionCreateNestedOneWithoutMetricsInput
@@ -17968,6 +18071,8 @@ export namespace Prisma {
     date: Date | string
     value: string
     sourceType: string
+    sourceSheet?: string | null
+    externalId?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     metricDefinitionId: string
@@ -18025,6 +18130,7 @@ export namespace Prisma {
     lastSyncedAt?: Date | string | null
     syncFrequency: string
     connectionStatus: string
+    appScriptId?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     metrics?: MetricValueCreateNestedManyWithoutDataSourceInput
@@ -18038,6 +18144,7 @@ export namespace Prisma {
     lastSyncedAt?: Date | string | null
     syncFrequency: string
     connectionStatus: string
+    appScriptId?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     metrics?: MetricValueUncheckedCreateNestedManyWithoutDataSourceInput
@@ -18102,6 +18209,7 @@ export namespace Prisma {
     lastSyncedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     syncFrequency?: StringFieldUpdateOperationsInput | string
     connectionStatus?: StringFieldUpdateOperationsInput | string
+    appScriptId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     metrics?: MetricValueUpdateManyWithoutDataSourceNestedInput
@@ -18115,6 +18223,7 @@ export namespace Prisma {
     lastSyncedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     syncFrequency?: StringFieldUpdateOperationsInput | string
     connectionStatus?: StringFieldUpdateOperationsInput | string
+    appScriptId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     metrics?: MetricValueUncheckedUpdateManyWithoutDataSourceNestedInput
@@ -18260,6 +18369,7 @@ export namespace Prisma {
     lastSyncedAt?: Date | string | null
     syncFrequency: string
     connectionStatus: string
+    appScriptId?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     columnMappings?: ColumnMappingCreateNestedManyWithoutDataSourceInput
@@ -18273,6 +18383,7 @@ export namespace Prisma {
     lastSyncedAt?: Date | string | null
     syncFrequency: string
     connectionStatus: string
+    appScriptId?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     columnMappings?: ColumnMappingUncheckedCreateNestedManyWithoutDataSourceInput
@@ -18411,6 +18522,7 @@ export namespace Prisma {
     lastSyncedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     syncFrequency?: StringFieldUpdateOperationsInput | string
     connectionStatus?: StringFieldUpdateOperationsInput | string
+    appScriptId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     columnMappings?: ColumnMappingUpdateManyWithoutDataSourceNestedInput
@@ -18424,6 +18536,7 @@ export namespace Prisma {
     lastSyncedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     syncFrequency?: StringFieldUpdateOperationsInput | string
     connectionStatus?: StringFieldUpdateOperationsInput | string
+    appScriptId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     columnMappings?: ColumnMappingUncheckedUpdateManyWithoutDataSourceNestedInput
@@ -18899,6 +19012,8 @@ export namespace Prisma {
     date: Date | string
     value: string
     sourceType: string
+    sourceSheet?: string | null
+    externalId?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     metricDefinitionId: string
@@ -18986,6 +19101,8 @@ export namespace Prisma {
     date?: DateTimeFieldUpdateOperationsInput | Date | string
     value?: StringFieldUpdateOperationsInput | string
     sourceType?: StringFieldUpdateOperationsInput | string
+    sourceSheet?: NullableStringFieldUpdateOperationsInput | string | null
+    externalId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     metricDefinition?: MetricDefinitionUpdateOneRequiredWithoutMetricsNestedInput
@@ -18998,6 +19115,8 @@ export namespace Prisma {
     date?: DateTimeFieldUpdateOperationsInput | Date | string
     value?: StringFieldUpdateOperationsInput | string
     sourceType?: StringFieldUpdateOperationsInput | string
+    sourceSheet?: NullableStringFieldUpdateOperationsInput | string | null
+    externalId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     metricDefinitionId?: StringFieldUpdateOperationsInput | string
@@ -19010,6 +19129,8 @@ export namespace Prisma {
     date?: DateTimeFieldUpdateOperationsInput | Date | string
     value?: StringFieldUpdateOperationsInput | string
     sourceType?: StringFieldUpdateOperationsInput | string
+    sourceSheet?: NullableStringFieldUpdateOperationsInput | string | null
+    externalId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     metricDefinitionId?: StringFieldUpdateOperationsInput | string
@@ -19096,6 +19217,8 @@ export namespace Prisma {
     date: Date | string
     value: string
     sourceType: string
+    sourceSheet?: string | null
+    externalId?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     metricDefinitionId: string
@@ -19120,6 +19243,8 @@ export namespace Prisma {
     date?: DateTimeFieldUpdateOperationsInput | Date | string
     value?: StringFieldUpdateOperationsInput | string
     sourceType?: StringFieldUpdateOperationsInput | string
+    sourceSheet?: NullableStringFieldUpdateOperationsInput | string | null
+    externalId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     metricDefinition?: MetricDefinitionUpdateOneRequiredWithoutMetricsNestedInput
@@ -19132,6 +19257,8 @@ export namespace Prisma {
     date?: DateTimeFieldUpdateOperationsInput | Date | string
     value?: StringFieldUpdateOperationsInput | string
     sourceType?: StringFieldUpdateOperationsInput | string
+    sourceSheet?: NullableStringFieldUpdateOperationsInput | string | null
+    externalId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     metricDefinitionId?: StringFieldUpdateOperationsInput | string
@@ -19144,6 +19271,8 @@ export namespace Prisma {
     date?: DateTimeFieldUpdateOperationsInput | Date | string
     value?: StringFieldUpdateOperationsInput | string
     sourceType?: StringFieldUpdateOperationsInput | string
+    sourceSheet?: NullableStringFieldUpdateOperationsInput | string | null
+    externalId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     metricDefinitionId?: StringFieldUpdateOperationsInput | string
@@ -19192,6 +19321,8 @@ export namespace Prisma {
     date: Date | string
     value: string
     sourceType: string
+    sourceSheet?: string | null
+    externalId?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     clinicId?: string | null
@@ -19239,6 +19370,8 @@ export namespace Prisma {
     date?: DateTimeFieldUpdateOperationsInput | Date | string
     value?: StringFieldUpdateOperationsInput | string
     sourceType?: StringFieldUpdateOperationsInput | string
+    sourceSheet?: NullableStringFieldUpdateOperationsInput | string | null
+    externalId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     clinic?: ClinicUpdateOneWithoutMetricsNestedInput
@@ -19251,6 +19384,8 @@ export namespace Prisma {
     date?: DateTimeFieldUpdateOperationsInput | Date | string
     value?: StringFieldUpdateOperationsInput | string
     sourceType?: StringFieldUpdateOperationsInput | string
+    sourceSheet?: NullableStringFieldUpdateOperationsInput | string | null
+    externalId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     clinicId?: NullableStringFieldUpdateOperationsInput | string | null
@@ -19263,6 +19398,8 @@ export namespace Prisma {
     date?: DateTimeFieldUpdateOperationsInput | Date | string
     value?: StringFieldUpdateOperationsInput | string
     sourceType?: StringFieldUpdateOperationsInput | string
+    sourceSheet?: NullableStringFieldUpdateOperationsInput | string | null
+    externalId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     clinicId?: NullableStringFieldUpdateOperationsInput | string | null
@@ -19389,6 +19526,8 @@ export namespace Prisma {
     date: Date | string
     value: string
     sourceType: string
+    sourceSheet?: string | null
+    externalId?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     metricDefinitionId: string
@@ -19428,6 +19567,8 @@ export namespace Prisma {
     date?: DateTimeFieldUpdateOperationsInput | Date | string
     value?: StringFieldUpdateOperationsInput | string
     sourceType?: StringFieldUpdateOperationsInput | string
+    sourceSheet?: NullableStringFieldUpdateOperationsInput | string | null
+    externalId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     metricDefinition?: MetricDefinitionUpdateOneRequiredWithoutMetricsNestedInput
@@ -19440,6 +19581,8 @@ export namespace Prisma {
     date?: DateTimeFieldUpdateOperationsInput | Date | string
     value?: StringFieldUpdateOperationsInput | string
     sourceType?: StringFieldUpdateOperationsInput | string
+    sourceSheet?: NullableStringFieldUpdateOperationsInput | string | null
+    externalId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     metricDefinitionId?: StringFieldUpdateOperationsInput | string
@@ -19452,6 +19595,8 @@ export namespace Prisma {
     date?: DateTimeFieldUpdateOperationsInput | Date | string
     value?: StringFieldUpdateOperationsInput | string
     sourceType?: StringFieldUpdateOperationsInput | string
+    sourceSheet?: NullableStringFieldUpdateOperationsInput | string | null
+    externalId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     metricDefinitionId?: StringFieldUpdateOperationsInput | string

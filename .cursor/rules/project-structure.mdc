@@ -10,7 +10,7 @@ alwaysApply: false
 - We use Turborepo with pnpm workspaces
 - Main app is in `src/app`
 - Packages are in the `root` folder
-- Server actions are in `apps/web/utils/actions` folder
+- Server actions are in `app/actions` folder
 
 ```tree
 dental-dashboard/
@@ -38,8 +38,6 @@ dental-dashboard/
 ├── src/                    # Application source code
 │   ├── app/                # Next.js app directory (App Router)
 │   │   ├── api/            # API routes
-│   │   │   ├── auth/       # Authentication routes
-│   │   │   │   └── callback/route.ts  # Auth callback handler
 │   │   │   ├── clinics/    # Clinic-related endpoints
 │   │   │   ├── dashboards/ # Dashboard configuration endpoints
 │   │   │   ├── google/     # Google Sheets integration endpoints

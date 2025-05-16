@@ -1,9 +1,6 @@
 // This is your Prisma schema file,
 // learn more about it in the docs: https://pris.ly/d/prisma-schema
 
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
   provider = "prisma-client-js"
   output   = "../src/generated/prisma"
@@ -95,6 +92,7 @@ model DataSource {
   lastSyncedAt     DateTime? @map("last_synced_at")
   syncFrequency    String    @map("sync_frequency")
   connectionStatus String    @map("connection_status")
+  appScriptId      String?   @map("app_script_id")
   createdAt        DateTime  @default(now()) @map("created_at")
   updatedAt        DateTime  @updatedAt @map("updated_at")
 
@@ -123,12 +121,14 @@ model ColumnMapping {
 
 // Metric Values
 model MetricValue {
-  id         String   @id @default(cuid())
-  date       DateTime
-  value      String // Using string to handle various data types
-  sourceType String   @map("source_type") // spreadsheet, form
-  createdAt  DateTime @default(now()) @map("created_at")
-  updatedAt  DateTime @updatedAt @map("updated_at")
+  id          String   @id @default(cuid())
+  date        DateTime
+  value       String // Using string to handle various data types
+  sourceType  String   @map("source_type") // spreadsheet, form
+  sourceSheet String?  @map("source_sheet")
+  externalId  String?  @map("external_id")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
 
   metricDefinitionId String           @map("metric_definition_id")
   metricDefinition   MetricDefinition @relation(fields: [metricDefinitionId], references: [id])

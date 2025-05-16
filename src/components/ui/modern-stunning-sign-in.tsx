@@ -161,6 +161,14 @@ const SignIn1 = () => {
                   Sign up, it&apos;s free!
                 </a>
               </span>
+              <div className="mt-2">
+                <a
+                  href="/auth/reset-password"
+                  className="text-xs text-gray-400 hover:text-white"
+                >
+                  Forgot your password?
+                </a>
+              </div>
             </div>
           </div>
         </div>
