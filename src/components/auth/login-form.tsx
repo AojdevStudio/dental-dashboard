@@ -4,6 +4,7 @@ import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
 import * as z from "zod"
 import { createBrowserClient } from '@supabase/ssr'
+import { toast } from "sonner"
 
 import { Button } from "@/components/ui/button"
 import {
@@ -15,7 +16,6 @@ import {
   FormMessage,
 } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
-import { toast } from "@/components/ui/use-toast"
 import { Icons } from "@/components/ui/icons"
 
 const formSchema = z.object({
@@ -60,11 +60,7 @@ export function LoginForm() {
       router.refresh()
       router.push("/dashboard")
     } catch (error) {
-      toast({
-        title: "Error",
-        description: "Invalid email or password. Please try again.",
-        variant: "destructive",
-      })
+      toast.error("Invalid email or password. Please try again.")
     } finally {
       setIsLoading(false)
     }
