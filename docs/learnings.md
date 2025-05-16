@@ -37,3 +37,7 @@ use-pnpm=true
 auto-install-peers=true
 strict-peer-dependencies=false
 ```
+## Repomix Commands
+
+- pnpm dlx repomix --include "src/**/*.ts,**/*.md"
+- pnpm dlx repomix
