@@ -59,3 +59,7 @@ logs
 
 # Storybook
 storybook-static/
+
+# Repomix
+repomix-output.xml
+
