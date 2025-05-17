@@ -17,7 +17,7 @@
 - **Testing Framework:** Vite & Vitest
 - **Deployment Platform:** Vercel
 - **Additional Libraries:**
-    - Google API Client Library (for Google Sheets integration)
+    - Google API Client Library (for Google Sheets integration) - Successfully utilized for authentication, spreadsheet discovery, and data extraction as per Task 4.
     - date-fns (for date manipulation)
     - Zod (for runtime type validation)
     - Axios (for HTTP requests outside of Next.js)

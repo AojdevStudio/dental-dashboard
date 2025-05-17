@@ -1,6 +1,6 @@
 import { type NextRequest, NextResponse } from "next/server";
-import { getSheetData as getSheetDataService } from "@/services/google/sheets";
-import { prisma } from "@/lib/prisma";
+import { readSheetData as readSheetDataService } from "@/services/google/sheets";
+import { prisma } from "@/lib/db";
 import { createServerClient, type CookieOptions } from "@supabase/ssr";
 import { cookies } from "next/headers";
 
@@ -32,10 +32,7 @@ export type GetSheetDataGeneralResponse = {
   details?: string;
 };
 
-export async function GET(
-  request: NextRequest,
-  { params }: { params: { spreadsheetId: string } }
-): Promise<NextResponse<GetSheetDataGeneralResponse>> {
+export async function GET(request: NextRequest, { params }: { params: { spreadsheetId: string } }) {
   const cookieStore = cookies();
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -46,138 +43,95 @@ export async function GET(
           return cookieStore.get(name)?.value;
         },
         set(name: string, value: string, options: CookieOptions) {
-          cookieStore.set(name, value, options);
+          try {
+            cookieStore.set(name, value, options);
+          } catch (error) {
+            console.warn(`Failed to set cookie '${name}' in GET handler:`, error);
+          }
         },
         remove(name: string, options: CookieOptions) {
-          cookieStore.delete(name, options);
+          try {
+            cookieStore.set(name, "", { ...options, maxAge: 0 });
+          } catch (error) {
+            console.warn(`Failed to remove cookie '${name}' in GET handler:`, error);
+          }
         },
       },
     }
   );
+
   const {
     data: { session },
     error: sessionError,
   } = await supabase.auth.getSession();
 
-  if (sessionError) {
-    console.error("Error fetching session:", sessionError);
-    return NextResponse.json({ error: "Authentication error" }, { status: 500 });
-  }
-  if (!session) {
-    return NextResponse.json({ error: "User not authenticated" }, { status: 401 });
+  if (sessionError || !session) {
+    console.error("Error getting session or no session:", sessionError);
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
   const userId = session.user.id;
 
-  const { spreadsheetId } = params;
+  const spreadsheetId = params.spreadsheetId;
   const { searchParams } = new URL(request.url);
+  const range = searchParams.get("range");
   const dataSourceId = searchParams.get("dataSourceId");
-  const sheetName = searchParams.get("sheetName");
-  const range = searchParams.get("range"); // e.g., "1:1" for headers, or "A2:D100" for data cells
 
-  if (!dataSourceId || !sheetName || !range || !spreadsheetId) {
-    const missingParams = [];
-    if (!dataSourceId) missingParams.push("dataSourceId");
-    if (!sheetName) missingParams.push("sheetName");
-    if (!range) missingParams.push("range");
-    if (!spreadsheetId) missingParams.push("spreadsheetId");
-    return NextResponse.json(
-      { error: `Missing required parameters: ${missingParams.join(", ")}` },
-      { status: 400 }
-    );
+  if (!dataSourceId) {
+    return NextResponse.json({ error: "Data source ID is required" }, { status: 400 });
   }
 
-  // Construct the full range string for the service, e.g., "'Sheet Name'!A1:D100"
-  // Sheet names with spaces or special characters need to be quoted.
-  const fullRange = sheetName.includes(" ") ? `'${sheetName}'!${range}` : `${sheetName}!${range}`;
+  if (!spreadsheetId) {
+    return NextResponse.json({ error: "Spreadsheet ID is required" }, { status: 400 });
+  }
+
+  if (!range) {
+    return NextResponse.json({ error: "Range is required" }, { status: 400 });
+  }
 
   try {
-    const authUser = await prisma.user.findUnique({
-      where: { id: userId },
-      select: { clinicId: true },
+    const dataSource = await prisma.dataSource.findUnique({
+      where: { id: dataSourceId, userId: userId },
+      select: { credentials: true },
     });
 
-    if (!authUser) {
+    if (!dataSource || !dataSource.credentials) {
       return NextResponse.json(
-        { error: "Authenticated user not found in database" },
-        { status: 404 }
-      );
-    }
-    const userClinicId = authUser.clinicId;
-
-    const dataSource = await prisma.dataSource.findFirst({
-      where: {
-        id: dataSourceId,
-        clinicId: userClinicId,
-      },
-    });
-
-    if (!dataSource) {
-      return NextResponse.json(
-        { error: "DataSource not found or access denied for this clinic" },
+        { error: "Data source not found or credentials missing" },
         { status: 404 }
       );
     }
 
-    const result = (await getSheetDataService(
-      dataSourceId,
-      spreadsheetId,
-      fullRange
-    )) as ValueRange;
+    const credentials = dataSource.credentials as unknown as { access_token: string };
+    const accessToken = credentials.access_token;
 
-    if (!result || !("values" in result) || result.values === undefined || result.values === null) {
-      // If result.values is undefined or null, treat as an issue or potentially an empty valid response depending on strictness.
-      // Google API might return an empty ValueRange object {} if sheet itself is empty and a range like A1:Z100 is queried.
-      // It might return { values: [] } if a valid range returns no data.
-      // Explicitly checking for undefined/null for 'values' property.
-      if (
-        result &&
-        "values" in result &&
-        Array.isArray(result.values) &&
-        result.values.length === 0
-      ) {
-        // This is a valid case of an empty range or sheet part returning no data.
-        if (range === "1:1") {
-          return NextResponse.json({ headers: [] });
-        }
-        return NextResponse.json({ values: [] });
-      }
-      console.error(
-        "Invalid or missing values in data received from getSheetData service:",
-        result
-      );
-      return NextResponse.json(
-        { error: "Failed to retrieve valid sheet data or values array is missing" },
-        { status: 500 }
-      );
+    if (!accessToken) {
+      return NextResponse.json({ error: "Access token not found in data source" }, { status: 400 });
     }
 
-    // Ensure result.values is an array before proceeding
-    if (!Array.isArray(result.values)) {
-      console.error("Sheet data values is not an array:", result.values);
-      return NextResponse.json(
-        { error: "Invalid data format received from Google Sheets API" },
-        { status: 500 }
-      );
-    }
+    const sheetData = await readSheetDataService(accessToken, spreadsheetId, range);
 
-    if (range === "1:1") {
-      if (result.values.length > 0 && Array.isArray(result.values[0])) {
-        const headers = result.values[0].map((header) => String(header ?? "")); // Ensure header is string, default to empty if null/undefined
-        return NextResponse.json({ headers });
-      }
-      return NextResponse.json({ headers: [] });
+    if (!sheetData) {
+      return NextResponse.json({ error: "Failed to retrieve sheet data" }, { status: 500 });
     }
-
-    return NextResponse.json({ values: result.values });
+    return NextResponse.json(sheetData);
   } catch (error) {
-    console.error(
-      `Failed to get sheet data for ${spreadsheetId}, sheet ${sheetName}, range ${range}:`,
-      error
-    );
-    const errorMessage = error instanceof Error ? error.message : "Unknown error";
-    return NextResponse.json(
-      { error: "Failed to get sheet data", details: errorMessage },
-      { status: 500 }
-    );
+    console.error("Error getting sheet data:", error);
+    let errorMessage = "Internal server error";
+    let statusCode = 500;
+    if (error instanceof Error) {
+      errorMessage = error.message;
+      if (error.message.includes("Requested entity was not found")) {
+        statusCode = 404;
+        errorMessage = "Spreadsheet or sheet range not found.";
+      } else if (
+        error.message.includes("API key not valid") ||
+        error.message.includes("Invalid Credentials")
+      ) {
+        statusCode = 401;
+        errorMessage =
+          "Google API authentication failed. Please re-authenticate or check credentials.";
+      }
+    }
+    return NextResponse.json({ error: errorMessage }, { status: statusCode });
   }
 }

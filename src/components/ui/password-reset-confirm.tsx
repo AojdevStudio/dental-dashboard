@@ -10,7 +10,7 @@ export function PasswordResetConfirm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const token = searchParams.get("token");
-  
+
   const [password, setPassword] = React.useState("");
   const [confirmPassword, setConfirmPassword] = React.useState("");
   const [error, setError] = React.useState("");
@@ -36,14 +36,14 @@ export function PasswordResetConfirm() {
         }
 
         const supabase = createBrowserClient(supabaseUrl, supabaseAnonKey);
-        
+
         // Verify the token is valid by checking the session
         const { data, error } = await supabase.auth.getSession();
-        
+
         if (error || !data.session) {
           throw new Error("Invalid or expired reset token");
         }
-        
+
         setTokenValid(true);
       } catch (err) {
         setError(err instanceof Error ? err.message : "Invalid reset token");
@@ -128,7 +128,9 @@ export function PasswordResetConfirm() {
               className="w-16 h-16"
             />
           </div>
-          <h2 className="text-2xl font-semibold text-white mb-6 text-center">Validating Reset Link</h2>
+          <h2 className="text-2xl font-semibold text-white mb-6 text-center">
+            Validating Reset Link
+          </h2>
           <div className="flex justify-center items-center p-4">
             <div className="w-8 h-8 border-2 border-white border-t-transparent rounded-full animate-spin" />
           </div>
@@ -153,7 +155,9 @@ export function PasswordResetConfirm() {
           </div>
           <h2 className="text-2xl font-semibold text-white mb-6 text-center">Invalid Reset Link</h2>
           <div className="text-center mb-6">
-            <p className="text-red-400 mb-4">{error || "Your password reset link is invalid or has expired."}</p>
+            <p className="text-red-400 mb-4">
+              {error || "Your password reset link is invalid or has expired."}
+            </p>
             <p className="text-gray-300">Please request a new password reset link.</p>
           </div>
           <Button

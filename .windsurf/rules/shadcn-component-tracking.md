@@ -18,7 +18,7 @@ If installed mark it with a ✅, if not installed yet mark it with a ❌
 
 | Component       | Installed | Command | Notes |
 |-----------------|-----------|---------|-------|
-| accordion       | ❌        | `pnpm dlx shadcn@latest add accordion` | Used for collapsible content |
+| accordion       | ✅        | `pnpm dlx shadcn@latest add accordion` | Used for collapsible content |
 | alert           | ❌        | `pnpm dlx shadcn@latest add alert` | System notifications |
 | button          | ✅        | `pnpm dlx shadcn@latest add button` | Primary interaction element |
 | card            | ✅        | `pnpm dlx shadcn@latest add card` | Content containers |
@@ -28,9 +28,9 @@ If installed mark it with a ✅, if not installed yet mark it with a ❌
 | form            | ✅        | `pnpm dlx shadcn@latest add form` | Form validation and control |
 | input           | ✅        | `pnpm dlx shadcn@latest add input` | Text input fields |
 | label           | ✅        | `pnpm dlx shadcn@latest add label` | Form field labels |
-| popover         | ❌        | `pnpm dlx shadcn@latest add popover` | Contextual tooltips |
+| popover         | ✅        | `pnpm dlx shadcn@latest add "https://21st.dev/r/originui/popover"` | Contextual tooltips |
 | select          | ✅        | `pnpm dlx shadcn@latest add select` | Single-choice selection |
-| separator       | ❌        | `pnpm dlx shadcn@latest add separator` | Visual dividers |
+| separator       | ✅        | `pnpm dlx shadcn@latest add separator` | Visual dividers |
 | skeleton        | ✅        | `pnpm dlx shadcn@latest add skeleton` | Loading placeholders |
 | tabs            | ✅        | `pnpm dlx shadcn@latest add tabs` | Tabbed interfaces |
 | toast           | ❌        | `pnpm dlx shadcn@latest add toast` | System notifications |
@@ -39,8 +39,8 @@ If installed mark it with a ✅, if not installed yet mark it with a ❌
 
 | Component       | Installed | Command | Notes |
 |-----------------|-----------|---------|-------|
-| avatar          | ❌        | `pnpm dlx shadcn@latest add avatar` | User profile photos |
-| badge           | ❌        | `pnpm dlx shadcn@latest add badge` | Status indicators |
+| avatar          | ✅        | `pnpm dlx shadcn@latest add avatar` | User profile photos |
+| badge           | ✅        | `pnpm dlx shadcn@latest add badge` | Status indicators |
 | table           | ✅        | `pnpm dlx shadcn@latest add table` | Data tables |
 | progress        | ❌        | `pnpm dlx shadcn@latest add progress` | Progress indicators |
 | hover-card      | ❌        | `pnpm dlx shadcn@latest add hover-card` | Hover previews |
@@ -49,7 +49,7 @@ If installed mark it with a ✅, if not installed yet mark it with a ❌
 
 | Component       | Installed | Command | Notes |
 |-----------------|-----------|---------|-------|
-| calendar        | ❌        | `pnpm dlx shadcn@latest add calendar` | Date picker |
+| calendar        | ✅        | `pnpm dlx shadcn@latest add "https://21st.dev/r/originui/calendar"` | Date picker |
 | date-picker     | ❌        | `pnpm dlx shadcn@latest add date-picker` | Complete date input |
 
 ## Layout Components
@@ -57,15 +57,16 @@ If installed mark it with a ✅, if not installed yet mark it with a ❌
 | Component       | Installed | Command | Notes |
 |-----------------|-----------|---------|-------|
 | sheet           | ❌        | `pnpm dlx shadcn@latest add sheet` | Slide-out panels |
-| scroll-area     | ❌        | `pnpm dlx shadcn@latest scroll-area` | Custom scrollbars |
+| scroll-area     | ✅        | `pnpm dlx shadcn@latest add scroll-area` | Custom scrollbars |
 | resizable       | ❌        | `pnpm dlx shadcn@latest add resizable` | Resizable panels |
 
 ## Navigation Components
 
 | Component       | Installed | Command | Notes |
 |-----------------|-----------|---------|-------|
+| breadcrumb      | ✅        | `pnpm dlx shadcn@latest add breadcrumb` | Navigation context |
 | navigation-menu | ❌        | `pnpm dlx shadcn@latest add navigation-menu` | Site navigation |
-| command         | ❌        | `pnpm dlx shadcn@latest add command` | Command palette |
+| command         | ✅        | `pnpm dlx shadcn@latest add "https://21st.dev/r/shadcn/command"` | Command palette |
 | pagination      | ❌        | `pnpm dlx shadcn@latest add pagination` | Page navigation |
 
 ## Advanced Form Components

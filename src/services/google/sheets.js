@@ -1,4 +1,4 @@
-import { verifyGoogleAuth } from './authMiddleware';
+import { verifyGoogleAuth } from "./authMiddleware";
 
 /**
  * Service for interacting with Google Sheets API
@@ -13,29 +13,26 @@ import { verifyGoogleAuth } from './authMiddleware';
  */
 export async function getSpreadsheet(dataSourceId, spreadsheetId) {
   const auth = await verifyGoogleAuth(dataSourceId);
-  
+
   if (!auth.isValid) {
     throw new Error(`Authentication error: ${auth.error}`);
   }
-  
+
   try {
-    const response = await fetch(
-      `https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}`,
-      {
-        headers: {
-          Authorization: `Bearer ${auth.accessToken}`,
-        },
-      }
-    );
-    
+    const response = await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}`, {
+      headers: {
+        Authorization: `Bearer ${auth.accessToken}`,
+      },
+    });
+
     if (!response.ok) {
       const error = await response.json();
-      throw new Error(`Google Sheets API error: ${error.error.message || 'Unknown error'}`);
+      throw new Error(`Google Sheets API error: ${error.error.message || "Unknown error"}`);
     }
-    
+
     return await response.json();
   } catch (error) {
-    console.error('Error fetching spreadsheet:', error);
+    console.error("Error fetching spreadsheet:", error);
     throw error;
   }
 }
@@ -49,11 +46,11 @@ export async function getSpreadsheet(dataSourceId, spreadsheetId) {
  */
 export async function getSheetData(dataSourceId, spreadsheetId, range) {
   const auth = await verifyGoogleAuth(dataSourceId);
-  
+
   if (!auth.isValid) {
     throw new Error(`Authentication error: ${auth.error}`);
   }
-  
+
   try {
     const encodedRange = encodeURIComponent(range);
     const response = await fetch(
@@ -64,12 +61,12 @@ export async function getSheetData(dataSourceId, spreadsheetId, range) {
         },
       }
     );
-    
+
     if (!response.ok) {
       const error = await response.json();
-      throw new Error(`Google Sheets API error: ${error.error.message || 'Unknown error'}`);
+      throw new Error(`Google Sheets API error: ${error.error.message || "Unknown error"}`);
     }
-    
+
     return await response.json();
   } catch (error) {
     console.error(`Error fetching sheet data for range ${range}:`, error);
@@ -84,30 +81,30 @@ export async function getSheetData(dataSourceId, spreadsheetId, range) {
  */
 export async function listSpreadsheets(dataSourceId) {
   const auth = await verifyGoogleAuth(dataSourceId);
-  
+
   if (!auth.isValid) {
     throw new Error(`Authentication error: ${auth.error}`);
   }
-  
+
   try {
     const response = await fetch(
-      'https://www.googleapis.com/drive/v3/files?q=mimeType%3D%27application/vnd.google-apps.spreadsheet%27',
+      "https://www.googleapis.com/drive/v3/files?q=mimeType%3D%27application/vnd.google-apps.spreadsheet%27",
       {
         headers: {
           Authorization: `Bearer ${auth.accessToken}`,
         },
       }
     );
-    
+
     if (!response.ok) {
       const error = await response.json();
-      throw new Error(`Google Drive API error: ${error.error.message || 'Unknown error'}`);
+      throw new Error(`Google Drive API error: ${error.error.message || "Unknown error"}`);
     }
-    
+
     const result = await response.json();
     return result.files;
   } catch (error) {
-    console.error('Error listing spreadsheets:', error);
+    console.error("Error listing spreadsheets:", error);
     throw error;
   }
 }

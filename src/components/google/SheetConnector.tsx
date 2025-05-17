@@ -15,8 +15,24 @@ import { Skeleton } from "@/components/ui/skeleton";
 
 // --- Type Definitions ---
 interface Sheet {
-  id: string; // Or number, depending on API
-  name: string;
+  id: string; // Or number, depending on API, API returns number for sheetId
+  title: string;
+}
+
+// Response type from /api/google/sheets/[spreadsheetId]
+interface SheetsApiResponse {
+  spreadsheetId: string;
+  spreadsheetTitle: string;
+  sheets: Sheet[]; // Assuming this structure based on API work
+  error?: string;
+}
+
+// Response type from /api/google/sheets/[spreadsheetId]/data?range=A1:Z1 (for headers)
+interface SheetHeadersApiResponse {
+  values?: string[][]; // Google API returns a 2D array, headers are the first row
+  error?: string;
+  // Headers might also be a specific flat array depending on backend processing
+  // For now, assume values[0] contains headers if values exist.
 }
 
 interface SheetHeader {
@@ -42,37 +58,64 @@ interface SheetConnectorProps {
 }
 
 // --- API Fetcher Functions (Placeholders) ---
-// Placeholder for fetching list of sheets in a spreadsheet
-async function fetchSheets(spreadsheetId: string, clinicId: string): Promise<Sheet[]> {
-  if (!spreadsheetId || !clinicId) return [];
-  // Replace with actual API call: /api/google/sheets/${spreadsheetId}/data?metaOnly=true&clinicId=${clinicId}
-  // or /api/google/sheets/${spreadsheetId}/sheetsList?clinicId=${clinicId}
-  console.log(`Fetching sheets for spreadsheet: ${spreadsheetId}, clinic: ${clinicId}`);
-  await new Promise((resolve) => setTimeout(resolve, 1000)); // Simulate delay
-  // return [{ id: "sheet1", name: "Sheet1" }, { id: "sheet2", name: "Patients Q1" }];
-  // Simulate error:
-  // throw new Error("Failed to fetch sheets list.");
-  // Simulate no sheets:
-  return [];
+// Updated to fetch list of sheets in a spreadsheet
+async function fetchSheets(
+  spreadsheetId: string,
+  dataSourceId: string // Added dataSourceId
+): Promise<Sheet[]> {
+  if (!spreadsheetId || !dataSourceId) return [];
+
+  // Actual API call
+  const response = await fetch(`/api/google/sheets/${spreadsheetId}?dataSourceId=${dataSourceId}`);
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({})); // Catch if response.json() fails
+    throw new Error(
+      `Failed to fetch sheets: ${response.status} ${response.statusText}. ${errorData.error || ""}`.trim()
+    );
+  }
+  const data: SheetsApiResponse = await response.json();
+  if (data.error) {
+    throw new Error(`Failed to fetch sheets: ${data.error}`);
+  }
+  return data.sheets || []; // Return sheets array, or empty if undefined
 }
 
-// Placeholder for fetching headers of a specific sheet
+// Updated to fetch headers of a specific sheet (typically the first row)
 async function fetchSheetHeaders(
   spreadsheetId: string,
-  sheetName: string,
-  clinicId: string
+  sheetName: string, // sheetName is used to construct the range
+  dataSourceId: string // Added dataSourceId
 ): Promise<string[]> {
-  if (!spreadsheetId || !sheetName || !clinicId) return [];
-  // Replace with actual API call: /api/google/sheets/${spreadsheetId}/data?sheetName=${sheetName}&headersOnly=true&clinicId=${clinicId}
-  console.log(
-    `Fetching headers for sheet: ${sheetName}, spreadsheet: ${spreadsheetId}, clinic: ${clinicId}`
+  if (!spreadsheetId || !sheetName || !dataSourceId) return [];
+
+  // Construct range for the first row of the given sheet.
+  // Sheet names with spaces or special chars need to be quoted.
+  const safeSheetName =
+    sheetName.includes(" ") || sheetName.includes("!")
+      ? `'${sheetName.replace(/'/g, "''")}'`
+      : sheetName;
+  const range = `${safeSheetName}!1:1`; // Fetch first row for headers
+
+  const response = await fetch(
+    `/api/google/sheets/${spreadsheetId}/data?range=${encodeURIComponent(range)}&dataSourceId=${dataSourceId}`
   );
-  await new Promise((resolve) => setTimeout(resolve, 1000)); // Simulate delay
-  return ["DateColumn", "PatientName", "ProcedureFee", "PaymentReceived", "Balance"];
-  // Simulate error:
-  // throw new Error("Failed to fetch sheet headers.");
-  // Simulate no headers:
-  // return [];
+
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({}));
+    throw new Error(
+      `Failed to fetch sheet headers: ${response.status} ${response.statusText}. ${errorData.error || ""}`.trim()
+    );
+  }
+  const data: SheetHeadersApiResponse = await response.json();
+  if (data.error) {
+    throw new Error(`Failed to fetch sheet headers: ${data.error}`);
+  }
+
+  // Assuming headers are in the first row of the values array
+  if (data.values && data.values.length > 0 && Array.isArray(data.values[0])) {
+    return data.values[0].map(String); // Convert all header values to string
+  }
+  return []; // Return empty array if no headers found or unexpected format
 }
 
 // --- Component ---
@@ -182,8 +225,8 @@ const SheetConnector: React.FC<SheetConnectorProps> = ({
               </SelectTrigger>
               <SelectContent>
                 {sheets.map((sheet) => (
-                  <SelectItem key={sheet.id} value={sheet.name}>
-                    {sheet.name}
+                  <SelectItem key={sheet.id} value={sheet.title}>
+                    {sheet.title}
                   </SelectItem>
                 ))}
               </SelectContent>

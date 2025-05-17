@@ -41,8 +41,7 @@ export async function middleware(request: NextRequest) {
   // Redirect authenticated users away from auth pages to dashboard
   if (
     user &&
-    (request.nextUrl.pathname.startsWith("/auth") ||
-      request.nextUrl.pathname === "/login")
+    (request.nextUrl.pathname.startsWith("/auth") || request.nextUrl.pathname === "/login")
   ) {
     // Special case: Don't redirect from password reset confirmation if it has a token
     if (
@@ -51,7 +50,7 @@ export async function middleware(request: NextRequest) {
     ) {
       return supabaseResponse;
     }
-    
+
     // Redirect to dashboard if user is already authenticated
     const url = request.nextUrl.clone();
     url.pathname = "/dashboard";
