@@ -38,6 +38,27 @@ export async function middleware(request: NextRequest) {
     data: { user },
   } = await supabase.auth.getUser();
 
+  // Redirect authenticated users away from auth pages to dashboard
+  if (
+    user &&
+    (request.nextUrl.pathname.startsWith("/auth") ||
+      request.nextUrl.pathname === "/login")
+  ) {
+    // Special case: Don't redirect from password reset confirmation if it has a token
+    if (
+      request.nextUrl.pathname === "/auth/reset-password/confirm" &&
+      request.nextUrl.searchParams.has("token")
+    ) {
+      return supabaseResponse;
+    }
+    
+    // Redirect to dashboard if user is already authenticated
+    const url = request.nextUrl.clone();
+    url.pathname = "/dashboard";
+    return NextResponse.redirect(url);
+  }
+
+  // Redirect unauthenticated users to login
   if (
     !user &&
     !request.nextUrl.pathname.startsWith("/login") &&

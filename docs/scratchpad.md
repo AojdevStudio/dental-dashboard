@@ -74,22 +74,22 @@ We need to implement two missing authentication features for our dental dashboar
 ## Implementation Details
 
 **Signup Form Details:**
-- [ ] Email and password inputs with validation
-- [ ] Google OAuth option
-- [ ] Terms acceptance checkbox
-- [ ] Form submission with loading state
-- [ ] Error handling for existing accounts
+- [x] Email and password inputs with validation
+- [x] Google OAuth option
+- [x] Terms acceptance checkbox
+- [x] Form submission with loading state
+- [x] Error handling for existing accounts
 
 **Password Reset Request Details:**
-- [ ] Email input with validation
-- [ ] Success screen with check email message
-- [ ] Error handling for non-existent accounts
+- [x] Email input with validation
+- [x] Success screen with check email message
+- [x] Error handling for non-existent accounts
 
 **Password Reset Confirmation Details:**
-- [ ] New password with confirmation
-- [ ] Password strength requirements
-- [ ] Token validation
-- [ ] Success screen with auto-redirect
+- [x] New password with confirmation
+- [x] Password strength requirements
+- [x] Token validation
+- [x] Success screen with auto-redirect
 
 ## Testing Plan
 
@@ -111,8 +111,15 @@ We need to implement two missing authentication features for our dental dashboar
 ## Issue 1: After signup, the user is not redirected to the dashboard - not created but lets use a placeholder. Result right now is a 404 error.
 ## Issue 2: Using email/password, the user doesn't get a verification email yet. 
 
+## Google OAuth Credentials Utility
 
-
-
-
-
+The authentication utility includes:
+    - Loading of Google OAuth credentials from environment variables
+    - Functions for the complete OAuth flow:
+        - getAuthorizationUrl() - Generates the Google authorization URL
+        - exchangeCodeForTokens() - Exchanges authorization code for tokens
+        - refreshAccessToken() - Refreshes access tokens using refresh tokens
+        - getUserProfile() - Fetches user profile information
+        - revokeToken() - Revokes tokens when needed
+        - validateConfig() - Validates that credentials are properly configured
+    - The utility is designed to work with the Google OAuth credentials you provided in your .env file and follows modern JavaScript practices with proper error handling and documentation.
