@@ -3,39 +3,20 @@ description: "CursorRIPER Framework - State Management"
 globs: 
 alwaysApply: true
 version: "1.0.2"
-date_created: "2025-04-05"
-last_updated: "2025-04-05"
-framework_component: "state"
-priority: "critical"
-scope: "always_load"
+
+*This file automatically tracks the current state of the project. It should never be edited manually.*
+
+   - Reset START_PHASE_STEP to 3
+
 ---
-<!-- Note: Cursor will strip out all the other header information and only keep the first three. -->
-# CursorRIPER Framework - State Management
-# Version 1.0.2
 
-## AI PROCESSING INSTRUCTIONS
-This file defines the current state of the project within the CursorRIPER Framework. As an AI assistant, you MUST:
-- Always load this file after core.mdc but before other components
-- Never modify state values without proper authorization via commands
-- Validate state transitions against allowed paths
-- Update this file when state changes occur
-- Keep all state values consistent with each other
+*This file automatically tracks the current state of the project. It should never be edited manually.*
 
-## CURRENT PROJECT STATE
 
-PROJECT_PHASE: "UNINITIATED"
-# Possible values: "UNINITIATED", "INITIALIZING", "DEVELOPMENT", "MAINTENANCE"
-
-RIPER_CURRENT_MODE: "NONE"
-# Possible values: "NONE", "RESEARCH", "INNOVATE", "PLAN", "EXECUTE", "REVIEW"
-
-START_PHASE_STATUS: "NOT_STARTED"
-# Possible values: "NOT_STARTED", "IN_PROGRESS", "COMPLETED", "ARCHIVED"
-
-START_PHASE_STEP: 0
+START_PHASE_STEP: 3
 # Possible values: 0-6 (0=Not started, 1=Requirements, 2=Technology, 3=Architecture, 4=Scaffolding, 5=Environment, 6=Memory Bank)
 
-LAST_UPDATE: "2025-04-05T00:00:00Z"
+LAST_UPDATE: "2025-05-17T20:00:00Z"
 # ISO 8601 formatted timestamp of last state update
 
 INITIALIZATION_DATE: ""
@@ -174,6 +155,23 @@ If "/start" or "BEGIN START PHASE" is detected when PROJECT_PHASE is not "UNINIT
    - Reset state to PROJECT_PHASE = "INITIALIZING"
    - Reset START_PHASE_STATUS to "IN_PROGRESS"
    - Reset START_PHASE_STEP to 1
+
+---
+
+*This file automatically tracks the current state of the project. It should never be edited manually.*
+
+   - Reset START_PHASE_STEP to 1
+
+---
+
+*This file automatically tracks the current state of the project. It should never be edited manually.*
+
+   - Reset START_PHASE_STEP to 1
+
+---
+
+*This file automatically tracks the current state of the project. It should never be edited manually.*
+
 
 ---
 

@@ -1692,6 +1692,7 @@ export namespace Prisma {
     providers: number
     metrics: number
     goals: number
+    dataSources: number
   }
 
   export type ClinicCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -1699,6 +1700,7 @@ export namespace Prisma {
     providers?: boolean | ClinicCountOutputTypeCountProvidersArgs
     metrics?: boolean | ClinicCountOutputTypeCountMetricsArgs
     goals?: boolean | ClinicCountOutputTypeCountGoalsArgs
+    dataSources?: boolean | ClinicCountOutputTypeCountDataSourcesArgs
   }
 
   // Custom InputTypes
@@ -1738,6 +1740,13 @@ export namespace Prisma {
    */
   export type ClinicCountOutputTypeCountGoalsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     where?: GoalWhereInput
+  }
+
+  /**
+   * ClinicCountOutputType without action
+   */
+  export type ClinicCountOutputTypeCountDataSourcesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: DataSourceWhereInput
   }
 
 
@@ -2121,6 +2130,7 @@ export namespace Prisma {
     providers?: boolean | Clinic$providersArgs<ExtArgs>
     metrics?: boolean | Clinic$metricsArgs<ExtArgs>
     goals?: boolean | Clinic$goalsArgs<ExtArgs>
+    dataSources?: boolean | Clinic$dataSourcesArgs<ExtArgs>
     _count?: boolean | ClinicCountOutputTypeDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["clinic"]>
 
@@ -2157,6 +2167,7 @@ export namespace Prisma {
     providers?: boolean | Clinic$providersArgs<ExtArgs>
     metrics?: boolean | Clinic$metricsArgs<ExtArgs>
     goals?: boolean | Clinic$goalsArgs<ExtArgs>
+    dataSources?: boolean | Clinic$dataSourcesArgs<ExtArgs>
     _count?: boolean | ClinicCountOutputTypeDefaultArgs<ExtArgs>
   }
   export type ClinicIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {}
@@ -2169,6 +2180,7 @@ export namespace Prisma {
       providers: Prisma.$ProviderPayload<ExtArgs>[]
       metrics: Prisma.$MetricValuePayload<ExtArgs>[]
       goals: Prisma.$GoalPayload<ExtArgs>[]
+      dataSources: Prisma.$DataSourcePayload<ExtArgs>[]
     }
     scalars: $Extensions.GetPayloadResult<{
       id: string
@@ -2575,6 +2587,7 @@ export namespace Prisma {
     providers<T extends Clinic$providersArgs<ExtArgs> = {}>(args?: Subset<T, Clinic$providersArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ProviderPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     metrics<T extends Clinic$metricsArgs<ExtArgs> = {}>(args?: Subset<T, Clinic$metricsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$MetricValuePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     goals<T extends Clinic$goalsArgs<ExtArgs> = {}>(args?: Subset<T, Clinic$goalsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$GoalPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    dataSources<T extends Clinic$dataSourcesArgs<ExtArgs> = {}>(args?: Subset<T, Clinic$dataSourcesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$DataSourcePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
      * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -3091,6 +3104,30 @@ export namespace Prisma {
     take?: number
     skip?: number
     distinct?: GoalScalarFieldEnum | GoalScalarFieldEnum[]
+  }
+
+  /**
+   * Clinic.dataSources
+   */
+  export type Clinic$dataSourcesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the DataSource
+     */
+    select?: DataSourceSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the DataSource
+     */
+    omit?: DataSourceOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: DataSourceInclude<ExtArgs> | null
+    where?: DataSourceWhereInput
+    orderBy?: DataSourceOrderByWithRelationInput | DataSourceOrderByWithRelationInput[]
+    cursor?: DataSourceWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: DataSourceScalarFieldEnum | DataSourceScalarFieldEnum[]
   }
 
   /**
@@ -6606,8 +6643,12 @@ export namespace Prisma {
     syncFrequency: string | null
     connectionStatus: string | null
     appScriptId: string | null
+    accessToken: string | null
+    refreshToken: string | null
+    expiryDate: Date | null
     createdAt: Date | null
     updatedAt: Date | null
+    clinicId: string | null
   }
 
   export type DataSourceMaxAggregateOutputType = {
@@ -6619,8 +6660,12 @@ export namespace Prisma {
     syncFrequency: string | null
     connectionStatus: string | null
     appScriptId: string | null
+    accessToken: string | null
+    refreshToken: string | null
+    expiryDate: Date | null
     createdAt: Date | null
     updatedAt: Date | null
+    clinicId: string | null
   }
 
   export type DataSourceCountAggregateOutputType = {
@@ -6632,8 +6677,12 @@ export namespace Prisma {
     syncFrequency: number
     connectionStatus: number
     appScriptId: number
+    accessToken: number
+    refreshToken: number
+    expiryDate: number
     createdAt: number
     updatedAt: number
+    clinicId: number
     _all: number
   }
 
@@ -6647,8 +6696,12 @@ export namespace Prisma {
     syncFrequency?: true
     connectionStatus?: true
     appScriptId?: true
+    accessToken?: true
+    refreshToken?: true
+    expiryDate?: true
     createdAt?: true
     updatedAt?: true
+    clinicId?: true
   }
 
   export type DataSourceMaxAggregateInputType = {
@@ -6660,8 +6713,12 @@ export namespace Prisma {
     syncFrequency?: true
     connectionStatus?: true
     appScriptId?: true
+    accessToken?: true
+    refreshToken?: true
+    expiryDate?: true
     createdAt?: true
     updatedAt?: true
+    clinicId?: true
   }
 
   export type DataSourceCountAggregateInputType = {
@@ -6673,8 +6730,12 @@ export namespace Prisma {
     syncFrequency?: true
     connectionStatus?: true
     appScriptId?: true
+    accessToken?: true
+    refreshToken?: true
+    expiryDate?: true
     createdAt?: true
     updatedAt?: true
+    clinicId?: true
     _all?: true
   }
 
@@ -6759,8 +6820,12 @@ export namespace Prisma {
     syncFrequency: string
     connectionStatus: string
     appScriptId: string | null
+    accessToken: string
+    refreshToken: string | null
+    expiryDate: Date | null
     createdAt: Date
     updatedAt: Date
+    clinicId: string
     _count: DataSourceCountAggregateOutputType | null
     _min: DataSourceMinAggregateOutputType | null
     _max: DataSourceMaxAggregateOutputType | null
@@ -6789,10 +6854,15 @@ export namespace Prisma {
     syncFrequency?: boolean
     connectionStatus?: boolean
     appScriptId?: boolean
+    accessToken?: boolean
+    refreshToken?: boolean
+    expiryDate?: boolean
     createdAt?: boolean
     updatedAt?: boolean
+    clinicId?: boolean
     columnMappings?: boolean | DataSource$columnMappingsArgs<ExtArgs>
     metrics?: boolean | DataSource$metricsArgs<ExtArgs>
+    clinic?: boolean | ClinicDefaultArgs<ExtArgs>
     _count?: boolean | DataSourceCountOutputTypeDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["dataSource"]>
 
@@ -6805,8 +6875,13 @@ export namespace Prisma {
     syncFrequency?: boolean
     connectionStatus?: boolean
     appScriptId?: boolean
+    accessToken?: boolean
+    refreshToken?: boolean
+    expiryDate?: boolean
     createdAt?: boolean
     updatedAt?: boolean
+    clinicId?: boolean
+    clinic?: boolean | ClinicDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["dataSource"]>
 
   export type DataSourceSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
@@ -6818,8 +6893,13 @@ export namespace Prisma {
     syncFrequency?: boolean
     connectionStatus?: boolean
     appScriptId?: boolean
+    accessToken?: boolean
+    refreshToken?: boolean
+    expiryDate?: boolean
     createdAt?: boolean
     updatedAt?: boolean
+    clinicId?: boolean
+    clinic?: boolean | ClinicDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["dataSource"]>
 
   export type DataSourceSelectScalar = {
@@ -6831,24 +6911,34 @@ export namespace Prisma {
     syncFrequency?: boolean
     connectionStatus?: boolean
     appScriptId?: boolean
+    accessToken?: boolean
+    refreshToken?: boolean
+    expiryDate?: boolean
     createdAt?: boolean
     updatedAt?: boolean
+    clinicId?: boolean
   }
 
-  export type DataSourceOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "name" | "spreadsheetId" | "sheetName" | "lastSyncedAt" | "syncFrequency" | "connectionStatus" | "appScriptId" | "createdAt" | "updatedAt", ExtArgs["result"]["dataSource"]>
+  export type DataSourceOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "name" | "spreadsheetId" | "sheetName" | "lastSyncedAt" | "syncFrequency" | "connectionStatus" | "appScriptId" | "accessToken" | "refreshToken" | "expiryDate" | "createdAt" | "updatedAt" | "clinicId", ExtArgs["result"]["dataSource"]>
   export type DataSourceInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     columnMappings?: boolean | DataSource$columnMappingsArgs<ExtArgs>
     metrics?: boolean | DataSource$metricsArgs<ExtArgs>
+    clinic?: boolean | ClinicDefaultArgs<ExtArgs>
     _count?: boolean | DataSourceCountOutputTypeDefaultArgs<ExtArgs>
   }
-  export type DataSourceIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {}
-  export type DataSourceIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {}
+  export type DataSourceIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    clinic?: boolean | ClinicDefaultArgs<ExtArgs>
+  }
+  export type DataSourceIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    clinic?: boolean | ClinicDefaultArgs<ExtArgs>
+  }
 
   export type $DataSourcePayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     name: "DataSource"
     objects: {
       columnMappings: Prisma.$ColumnMappingPayload<ExtArgs>[]
       metrics: Prisma.$MetricValuePayload<ExtArgs>[]
+      clinic: Prisma.$ClinicPayload<ExtArgs>
     }
     scalars: $Extensions.GetPayloadResult<{
       id: string
@@ -6859,8 +6949,12 @@ export namespace Prisma {
       syncFrequency: string
       connectionStatus: string
       appScriptId: string | null
+      accessToken: string
+      refreshToken: string | null
+      expiryDate: Date | null
       createdAt: Date
       updatedAt: Date
+      clinicId: string
     }, ExtArgs["result"]["dataSource"]>
     composites: {}
   }
@@ -7257,6 +7351,7 @@ export namespace Prisma {
     readonly [Symbol.toStringTag]: "PrismaPromise"
     columnMappings<T extends DataSource$columnMappingsArgs<ExtArgs> = {}>(args?: Subset<T, DataSource$columnMappingsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ColumnMappingPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     metrics<T extends DataSource$metricsArgs<ExtArgs> = {}>(args?: Subset<T, DataSource$metricsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$MetricValuePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    clinic<T extends ClinicDefaultArgs<ExtArgs> = {}>(args?: Subset<T, ClinicDefaultArgs<ExtArgs>>): Prisma__ClinicClient<$Result.GetResult<Prisma.$ClinicPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
      * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -7294,8 +7389,12 @@ export namespace Prisma {
     readonly syncFrequency: FieldRef<"DataSource", 'String'>
     readonly connectionStatus: FieldRef<"DataSource", 'String'>
     readonly appScriptId: FieldRef<"DataSource", 'String'>
+    readonly accessToken: FieldRef<"DataSource", 'String'>
+    readonly refreshToken: FieldRef<"DataSource", 'String'>
+    readonly expiryDate: FieldRef<"DataSource", 'DateTime'>
     readonly createdAt: FieldRef<"DataSource", 'DateTime'>
     readonly updatedAt: FieldRef<"DataSource", 'DateTime'>
+    readonly clinicId: FieldRef<"DataSource", 'String'>
   }
     
 
@@ -7545,6 +7644,10 @@ export namespace Prisma {
      */
     data: DataSourceCreateManyInput | DataSourceCreateManyInput[]
     skipDuplicates?: boolean
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: DataSourceIncludeCreateManyAndReturn<ExtArgs> | null
   }
 
   /**
@@ -7615,6 +7718,10 @@ export namespace Prisma {
      * Limit how many DataSources to update.
      */
     limit?: number
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: DataSourceIncludeUpdateManyAndReturn<ExtArgs> | null
   }
 
   /**
@@ -13654,8 +13761,12 @@ export namespace Prisma {
     syncFrequency: 'syncFrequency',
     connectionStatus: 'connectionStatus',
     appScriptId: 'appScriptId',
+    accessToken: 'accessToken',
+    refreshToken: 'refreshToken',
+    expiryDate: 'expiryDate',
     createdAt: 'createdAt',
-    updatedAt: 'updatedAt'
+    updatedAt: 'updatedAt',
+    clinicId: 'clinicId'
   };
 
   export type DataSourceScalarFieldEnum = (typeof DataSourceScalarFieldEnum)[keyof typeof DataSourceScalarFieldEnum]
@@ -13879,6 +13990,7 @@ export namespace Prisma {
     providers?: ProviderListRelationFilter
     metrics?: MetricValueListRelationFilter
     goals?: GoalListRelationFilter
+    dataSources?: DataSourceListRelationFilter
   }
 
   export type ClinicOrderByWithRelationInput = {
@@ -13892,6 +14004,7 @@ export namespace Prisma {
     providers?: ProviderOrderByRelationAggregateInput
     metrics?: MetricValueOrderByRelationAggregateInput
     goals?: GoalOrderByRelationAggregateInput
+    dataSources?: DataSourceOrderByRelationAggregateInput
   }
 
   export type ClinicWhereUniqueInput = Prisma.AtLeast<{
@@ -13908,6 +14021,7 @@ export namespace Prisma {
     providers?: ProviderListRelationFilter
     metrics?: MetricValueListRelationFilter
     goals?: GoalListRelationFilter
+    dataSources?: DataSourceListRelationFilter
   }, "id">
 
   export type ClinicOrderByWithAggregationInput = {
@@ -14174,10 +14288,15 @@ export namespace Prisma {
     syncFrequency?: StringFilter<"DataSource"> | string
     connectionStatus?: StringFilter<"DataSource"> | string
     appScriptId?: StringNullableFilter<"DataSource"> | string | null
+    accessToken?: StringFilter<"DataSource"> | string
+    refreshToken?: StringNullableFilter<"DataSource"> | string | null
+    expiryDate?: DateTimeNullableFilter<"DataSource"> | Date | string | null
     createdAt?: DateTimeFilter<"DataSource"> | Date | string
     updatedAt?: DateTimeFilter<"DataSource"> | Date | string
+    clinicId?: StringFilter<"DataSource"> | string
     columnMappings?: ColumnMappingListRelationFilter
     metrics?: MetricValueListRelationFilter
+    clinic?: XOR<ClinicScalarRelationFilter, ClinicWhereInput>
   }
 
   export type DataSourceOrderByWithRelationInput = {
@@ -14189,10 +14308,15 @@ export namespace Prisma {
     syncFrequency?: SortOrder
     connectionStatus?: SortOrder
     appScriptId?: SortOrderInput | SortOrder
+    accessToken?: SortOrder
+    refreshToken?: SortOrderInput | SortOrder
+    expiryDate?: SortOrderInput | SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
+    clinicId?: SortOrder
     columnMappings?: ColumnMappingOrderByRelationAggregateInput
     metrics?: MetricValueOrderByRelationAggregateInput
+    clinic?: ClinicOrderByWithRelationInput
   }
 
   export type DataSourceWhereUniqueInput = Prisma.AtLeast<{
@@ -14207,10 +14331,15 @@ export namespace Prisma {
     syncFrequency?: StringFilter<"DataSource"> | string
     connectionStatus?: StringFilter<"DataSource"> | string
     appScriptId?: StringNullableFilter<"DataSource"> | string | null
+    accessToken?: StringFilter<"DataSource"> | string
+    refreshToken?: StringNullableFilter<"DataSource"> | string | null
+    expiryDate?: DateTimeNullableFilter<"DataSource"> | Date | string | null
     createdAt?: DateTimeFilter<"DataSource"> | Date | string
     updatedAt?: DateTimeFilter<"DataSource"> | Date | string
+    clinicId?: StringFilter<"DataSource"> | string
     columnMappings?: ColumnMappingListRelationFilter
     metrics?: MetricValueListRelationFilter
+    clinic?: XOR<ClinicScalarRelationFilter, ClinicWhereInput>
   }, "id">
 
   export type DataSourceOrderByWithAggregationInput = {
@@ -14222,8 +14351,12 @@ export namespace Prisma {
     syncFrequency?: SortOrder
     connectionStatus?: SortOrder
     appScriptId?: SortOrderInput | SortOrder
+    accessToken?: SortOrder
+    refreshToken?: SortOrderInput | SortOrder
+    expiryDate?: SortOrderInput | SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
+    clinicId?: SortOrder
     _count?: DataSourceCountOrderByAggregateInput
     _max?: DataSourceMaxOrderByAggregateInput
     _min?: DataSourceMinOrderByAggregateInput
@@ -14241,8 +14374,12 @@ export namespace Prisma {
     syncFrequency?: StringWithAggregatesFilter<"DataSource"> | string
     connectionStatus?: StringWithAggregatesFilter<"DataSource"> | string
     appScriptId?: StringNullableWithAggregatesFilter<"DataSource"> | string | null
+    accessToken?: StringWithAggregatesFilter<"DataSource"> | string
+    refreshToken?: StringNullableWithAggregatesFilter<"DataSource"> | string | null
+    expiryDate?: DateTimeNullableWithAggregatesFilter<"DataSource"> | Date | string | null
     createdAt?: DateTimeWithAggregatesFilter<"DataSource"> | Date | string
     updatedAt?: DateTimeWithAggregatesFilter<"DataSource"> | Date | string
+    clinicId?: StringWithAggregatesFilter<"DataSource"> | string
   }
 
   export type ColumnMappingWhereInput = {
@@ -14672,6 +14809,7 @@ export namespace Prisma {
     providers?: ProviderCreateNestedManyWithoutClinicInput
     metrics?: MetricValueCreateNestedManyWithoutClinicInput
     goals?: GoalCreateNestedManyWithoutClinicInput
+    dataSources?: DataSourceCreateNestedManyWithoutClinicInput
   }
 
   export type ClinicUncheckedCreateInput = {
@@ -14685,6 +14823,7 @@ export namespace Prisma {
     providers?: ProviderUncheckedCreateNestedManyWithoutClinicInput
     metrics?: MetricValueUncheckedCreateNestedManyWithoutClinicInput
     goals?: GoalUncheckedCreateNestedManyWithoutClinicInput
+    dataSources?: DataSourceUncheckedCreateNestedManyWithoutClinicInput
   }
 
   export type ClinicUpdateInput = {
@@ -14698,6 +14837,7 @@ export namespace Prisma {
     providers?: ProviderUpdateManyWithoutClinicNestedInput
     metrics?: MetricValueUpdateManyWithoutClinicNestedInput
     goals?: GoalUpdateManyWithoutClinicNestedInput
+    dataSources?: DataSourceUpdateManyWithoutClinicNestedInput
   }
 
   export type ClinicUncheckedUpdateInput = {
@@ -14711,6 +14851,7 @@ export namespace Prisma {
     providers?: ProviderUncheckedUpdateManyWithoutClinicNestedInput
     metrics?: MetricValueUncheckedUpdateManyWithoutClinicNestedInput
     goals?: GoalUncheckedUpdateManyWithoutClinicNestedInput
+    dataSources?: DataSourceUncheckedUpdateManyWithoutClinicNestedInput
   }
 
   export type ClinicCreateManyInput = {
@@ -15006,10 +15147,14 @@ export namespace Prisma {
     syncFrequency: string
     connectionStatus: string
     appScriptId?: string | null
+    accessToken: string
+    refreshToken?: string | null
+    expiryDate?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     columnMappings?: ColumnMappingCreateNestedManyWithoutDataSourceInput
     metrics?: MetricValueCreateNestedManyWithoutDataSourceInput
+    clinic: ClinicCreateNestedOneWithoutDataSourcesInput
   }
 
   export type DataSourceUncheckedCreateInput = {
@@ -15021,8 +15166,12 @@ export namespace Prisma {
     syncFrequency: string
     connectionStatus: string
     appScriptId?: string | null
+    accessToken: string
+    refreshToken?: string | null
+    expiryDate?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
+    clinicId: string
     columnMappings?: ColumnMappingUncheckedCreateNestedManyWithoutDataSourceInput
     metrics?: MetricValueUncheckedCreateNestedManyWithoutDataSourceInput
   }
@@ -15036,10 +15185,14 @@ export namespace Prisma {
     syncFrequency?: StringFieldUpdateOperationsInput | string
     connectionStatus?: StringFieldUpdateOperationsInput | string
     appScriptId?: NullableStringFieldUpdateOperationsInput | string | null
+    accessToken?: StringFieldUpdateOperationsInput | string
+    refreshToken?: NullableStringFieldUpdateOperationsInput | string | null
+    expiryDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     columnMappings?: ColumnMappingUpdateManyWithoutDataSourceNestedInput
     metrics?: MetricValueUpdateManyWithoutDataSourceNestedInput
+    clinic?: ClinicUpdateOneRequiredWithoutDataSourcesNestedInput
   }
 
   export type DataSourceUncheckedUpdateInput = {
@@ -15051,8 +15204,12 @@ export namespace Prisma {
     syncFrequency?: StringFieldUpdateOperationsInput | string
     connectionStatus?: StringFieldUpdateOperationsInput | string
     appScriptId?: NullableStringFieldUpdateOperationsInput | string | null
+    accessToken?: StringFieldUpdateOperationsInput | string
+    refreshToken?: NullableStringFieldUpdateOperationsInput | string | null
+    expiryDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    clinicId?: StringFieldUpdateOperationsInput | string
     columnMappings?: ColumnMappingUncheckedUpdateManyWithoutDataSourceNestedInput
     metrics?: MetricValueUncheckedUpdateManyWithoutDataSourceNestedInput
   }
@@ -15066,8 +15223,12 @@ export namespace Prisma {
     syncFrequency: string
     connectionStatus: string
     appScriptId?: string | null
+    accessToken: string
+    refreshToken?: string | null
+    expiryDate?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
+    clinicId: string
   }
 
   export type DataSourceUpdateManyMutationInput = {
@@ -15079,6 +15240,9 @@ export namespace Prisma {
     syncFrequency?: StringFieldUpdateOperationsInput | string
     connectionStatus?: StringFieldUpdateOperationsInput | string
     appScriptId?: NullableStringFieldUpdateOperationsInput | string | null
+    accessToken?: StringFieldUpdateOperationsInput | string
+    refreshToken?: NullableStringFieldUpdateOperationsInput | string | null
+    expiryDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -15092,8 +15256,12 @@ export namespace Prisma {
     syncFrequency?: StringFieldUpdateOperationsInput | string
     connectionStatus?: StringFieldUpdateOperationsInput | string
     appScriptId?: NullableStringFieldUpdateOperationsInput | string | null
+    accessToken?: StringFieldUpdateOperationsInput | string
+    refreshToken?: NullableStringFieldUpdateOperationsInput | string | null
+    expiryDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    clinicId?: StringFieldUpdateOperationsInput | string
   }
 
   export type ColumnMappingCreateInput = {
@@ -15579,6 +15747,12 @@ export namespace Prisma {
     none?: GoalWhereInput
   }
 
+  export type DataSourceListRelationFilter = {
+    every?: DataSourceWhereInput
+    some?: DataSourceWhereInput
+    none?: DataSourceWhereInput
+  }
+
   export type UserOrderByRelationAggregateInput = {
     _count?: SortOrder
   }
@@ -15592,6 +15766,10 @@ export namespace Prisma {
   }
 
   export type GoalOrderByRelationAggregateInput = {
+    _count?: SortOrder
+  }
+
+  export type DataSourceOrderByRelationAggregateInput = {
     _count?: SortOrder
   }
 
@@ -15873,8 +16051,12 @@ export namespace Prisma {
     syncFrequency?: SortOrder
     connectionStatus?: SortOrder
     appScriptId?: SortOrder
+    accessToken?: SortOrder
+    refreshToken?: SortOrder
+    expiryDate?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
+    clinicId?: SortOrder
   }
 
   export type DataSourceMaxOrderByAggregateInput = {
@@ -15886,8 +16068,12 @@ export namespace Prisma {
     syncFrequency?: SortOrder
     connectionStatus?: SortOrder
     appScriptId?: SortOrder
+    accessToken?: SortOrder
+    refreshToken?: SortOrder
+    expiryDate?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
+    clinicId?: SortOrder
   }
 
   export type DataSourceMinOrderByAggregateInput = {
@@ -15899,8 +16085,12 @@ export namespace Prisma {
     syncFrequency?: SortOrder
     connectionStatus?: SortOrder
     appScriptId?: SortOrder
+    accessToken?: SortOrder
+    refreshToken?: SortOrder
+    expiryDate?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
+    clinicId?: SortOrder
   }
 
   export type DataSourceScalarRelationFilter = {
@@ -16246,6 +16436,13 @@ export namespace Prisma {
     connect?: GoalWhereUniqueInput | GoalWhereUniqueInput[]
   }
 
+  export type DataSourceCreateNestedManyWithoutClinicInput = {
+    create?: XOR<DataSourceCreateWithoutClinicInput, DataSourceUncheckedCreateWithoutClinicInput> | DataSourceCreateWithoutClinicInput[] | DataSourceUncheckedCreateWithoutClinicInput[]
+    connectOrCreate?: DataSourceCreateOrConnectWithoutClinicInput | DataSourceCreateOrConnectWithoutClinicInput[]
+    createMany?: DataSourceCreateManyClinicInputEnvelope
+    connect?: DataSourceWhereUniqueInput | DataSourceWhereUniqueInput[]
+  }
+
   export type UserUncheckedCreateNestedManyWithoutClinicInput = {
     create?: XOR<UserCreateWithoutClinicInput, UserUncheckedCreateWithoutClinicInput> | UserCreateWithoutClinicInput[] | UserUncheckedCreateWithoutClinicInput[]
     connectOrCreate?: UserCreateOrConnectWithoutClinicInput | UserCreateOrConnectWithoutClinicInput[]
@@ -16272,6 +16469,13 @@ export namespace Prisma {
     connectOrCreate?: GoalCreateOrConnectWithoutClinicInput | GoalCreateOrConnectWithoutClinicInput[]
     createMany?: GoalCreateManyClinicInputEnvelope
     connect?: GoalWhereUniqueInput | GoalWhereUniqueInput[]
+  }
+
+  export type DataSourceUncheckedCreateNestedManyWithoutClinicInput = {
+    create?: XOR<DataSourceCreateWithoutClinicInput, DataSourceUncheckedCreateWithoutClinicInput> | DataSourceCreateWithoutClinicInput[] | DataSourceUncheckedCreateWithoutClinicInput[]
+    connectOrCreate?: DataSourceCreateOrConnectWithoutClinicInput | DataSourceCreateOrConnectWithoutClinicInput[]
+    createMany?: DataSourceCreateManyClinicInputEnvelope
+    connect?: DataSourceWhereUniqueInput | DataSourceWhereUniqueInput[]
   }
 
   export type StringFieldUpdateOperationsInput = {
@@ -16338,6 +16542,20 @@ export namespace Prisma {
     deleteMany?: GoalScalarWhereInput | GoalScalarWhereInput[]
   }
 
+  export type DataSourceUpdateManyWithoutClinicNestedInput = {
+    create?: XOR<DataSourceCreateWithoutClinicInput, DataSourceUncheckedCreateWithoutClinicInput> | DataSourceCreateWithoutClinicInput[] | DataSourceUncheckedCreateWithoutClinicInput[]
+    connectOrCreate?: DataSourceCreateOrConnectWithoutClinicInput | DataSourceCreateOrConnectWithoutClinicInput[]
+    upsert?: DataSourceUpsertWithWhereUniqueWithoutClinicInput | DataSourceUpsertWithWhereUniqueWithoutClinicInput[]
+    createMany?: DataSourceCreateManyClinicInputEnvelope
+    set?: DataSourceWhereUniqueInput | DataSourceWhereUniqueInput[]
+    disconnect?: DataSourceWhereUniqueInput | DataSourceWhereUniqueInput[]
+    delete?: DataSourceWhereUniqueInput | DataSourceWhereUniqueInput[]
+    connect?: DataSourceWhereUniqueInput | DataSourceWhereUniqueInput[]
+    update?: DataSourceUpdateWithWhereUniqueWithoutClinicInput | DataSourceUpdateWithWhereUniqueWithoutClinicInput[]
+    updateMany?: DataSourceUpdateManyWithWhereWithoutClinicInput | DataSourceUpdateManyWithWhereWithoutClinicInput[]
+    deleteMany?: DataSourceScalarWhereInput | DataSourceScalarWhereInput[]
+  }
+
   export type UserUncheckedUpdateManyWithoutClinicNestedInput = {
     create?: XOR<UserCreateWithoutClinicInput, UserUncheckedCreateWithoutClinicInput> | UserCreateWithoutClinicInput[] | UserUncheckedCreateWithoutClinicInput[]
     connectOrCreate?: UserCreateOrConnectWithoutClinicInput | UserCreateOrConnectWithoutClinicInput[]
@@ -16392,6 +16610,20 @@ export namespace Prisma {
     update?: GoalUpdateWithWhereUniqueWithoutClinicInput | GoalUpdateWithWhereUniqueWithoutClinicInput[]
     updateMany?: GoalUpdateManyWithWhereWithoutClinicInput | GoalUpdateManyWithWhereWithoutClinicInput[]
     deleteMany?: GoalScalarWhereInput | GoalScalarWhereInput[]
+  }
+
+  export type DataSourceUncheckedUpdateManyWithoutClinicNestedInput = {
+    create?: XOR<DataSourceCreateWithoutClinicInput, DataSourceUncheckedCreateWithoutClinicInput> | DataSourceCreateWithoutClinicInput[] | DataSourceUncheckedCreateWithoutClinicInput[]
+    connectOrCreate?: DataSourceCreateOrConnectWithoutClinicInput | DataSourceCreateOrConnectWithoutClinicInput[]
+    upsert?: DataSourceUpsertWithWhereUniqueWithoutClinicInput | DataSourceUpsertWithWhereUniqueWithoutClinicInput[]
+    createMany?: DataSourceCreateManyClinicInputEnvelope
+    set?: DataSourceWhereUniqueInput | DataSourceWhereUniqueInput[]
+    disconnect?: DataSourceWhereUniqueInput | DataSourceWhereUniqueInput[]
+    delete?: DataSourceWhereUniqueInput | DataSourceWhereUniqueInput[]
+    connect?: DataSourceWhereUniqueInput | DataSourceWhereUniqueInput[]
+    update?: DataSourceUpdateWithWhereUniqueWithoutClinicInput | DataSourceUpdateWithWhereUniqueWithoutClinicInput[]
+    updateMany?: DataSourceUpdateManyWithWhereWithoutClinicInput | DataSourceUpdateManyWithWhereWithoutClinicInput[]
+    deleteMany?: DataSourceScalarWhereInput | DataSourceScalarWhereInput[]
   }
 
   export type ClinicCreateNestedOneWithoutUsersInput = {
@@ -16742,6 +16974,12 @@ export namespace Prisma {
     connect?: MetricValueWhereUniqueInput | MetricValueWhereUniqueInput[]
   }
 
+  export type ClinicCreateNestedOneWithoutDataSourcesInput = {
+    create?: XOR<ClinicCreateWithoutDataSourcesInput, ClinicUncheckedCreateWithoutDataSourcesInput>
+    connectOrCreate?: ClinicCreateOrConnectWithoutDataSourcesInput
+    connect?: ClinicWhereUniqueInput
+  }
+
   export type ColumnMappingUncheckedCreateNestedManyWithoutDataSourceInput = {
     create?: XOR<ColumnMappingCreateWithoutDataSourceInput, ColumnMappingUncheckedCreateWithoutDataSourceInput> | ColumnMappingCreateWithoutDataSourceInput[] | ColumnMappingUncheckedCreateWithoutDataSourceInput[]
     connectOrCreate?: ColumnMappingCreateOrConnectWithoutDataSourceInput | ColumnMappingCreateOrConnectWithoutDataSourceInput[]
@@ -16782,6 +17020,14 @@ export namespace Prisma {
     update?: MetricValueUpdateWithWhereUniqueWithoutDataSourceInput | MetricValueUpdateWithWhereUniqueWithoutDataSourceInput[]
     updateMany?: MetricValueUpdateManyWithWhereWithoutDataSourceInput | MetricValueUpdateManyWithWhereWithoutDataSourceInput[]
     deleteMany?: MetricValueScalarWhereInput | MetricValueScalarWhereInput[]
+  }
+
+  export type ClinicUpdateOneRequiredWithoutDataSourcesNestedInput = {
+    create?: XOR<ClinicCreateWithoutDataSourcesInput, ClinicUncheckedCreateWithoutDataSourcesInput>
+    connectOrCreate?: ClinicCreateOrConnectWithoutDataSourcesInput
+    upsert?: ClinicUpsertWithoutDataSourcesInput
+    connect?: ClinicWhereUniqueInput
+    update?: XOR<XOR<ClinicUpdateToOneWithWhereWithoutDataSourcesInput, ClinicUpdateWithoutDataSourcesInput>, ClinicUncheckedUpdateWithoutDataSourcesInput>
   }
 
   export type ColumnMappingUncheckedUpdateManyWithoutDataSourceNestedInput = {
@@ -17375,6 +17621,52 @@ export namespace Prisma {
     skipDuplicates?: boolean
   }
 
+  export type DataSourceCreateWithoutClinicInput = {
+    id?: string
+    name: string
+    spreadsheetId: string
+    sheetName: string
+    lastSyncedAt?: Date | string | null
+    syncFrequency: string
+    connectionStatus: string
+    appScriptId?: string | null
+    accessToken: string
+    refreshToken?: string | null
+    expiryDate?: Date | string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    columnMappings?: ColumnMappingCreateNestedManyWithoutDataSourceInput
+    metrics?: MetricValueCreateNestedManyWithoutDataSourceInput
+  }
+
+  export type DataSourceUncheckedCreateWithoutClinicInput = {
+    id?: string
+    name: string
+    spreadsheetId: string
+    sheetName: string
+    lastSyncedAt?: Date | string | null
+    syncFrequency: string
+    connectionStatus: string
+    appScriptId?: string | null
+    accessToken: string
+    refreshToken?: string | null
+    expiryDate?: Date | string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    columnMappings?: ColumnMappingUncheckedCreateNestedManyWithoutDataSourceInput
+    metrics?: MetricValueUncheckedCreateNestedManyWithoutDataSourceInput
+  }
+
+  export type DataSourceCreateOrConnectWithoutClinicInput = {
+    where: DataSourceWhereUniqueInput
+    create: XOR<DataSourceCreateWithoutClinicInput, DataSourceUncheckedCreateWithoutClinicInput>
+  }
+
+  export type DataSourceCreateManyClinicInputEnvelope = {
+    data: DataSourceCreateManyClinicInput | DataSourceCreateManyClinicInput[]
+    skipDuplicates?: boolean
+  }
+
   export type UserUpsertWithWhereUniqueWithoutClinicInput = {
     where: UserWhereUniqueInput
     update: XOR<UserUpdateWithoutClinicInput, UserUncheckedUpdateWithoutClinicInput>
@@ -17500,6 +17792,42 @@ export namespace Prisma {
     providerId?: StringNullableFilter<"Goal"> | string | null
   }
 
+  export type DataSourceUpsertWithWhereUniqueWithoutClinicInput = {
+    where: DataSourceWhereUniqueInput
+    update: XOR<DataSourceUpdateWithoutClinicInput, DataSourceUncheckedUpdateWithoutClinicInput>
+    create: XOR<DataSourceCreateWithoutClinicInput, DataSourceUncheckedCreateWithoutClinicInput>
+  }
+
+  export type DataSourceUpdateWithWhereUniqueWithoutClinicInput = {
+    where: DataSourceWhereUniqueInput
+    data: XOR<DataSourceUpdateWithoutClinicInput, DataSourceUncheckedUpdateWithoutClinicInput>
+  }
+
+  export type DataSourceUpdateManyWithWhereWithoutClinicInput = {
+    where: DataSourceScalarWhereInput
+    data: XOR<DataSourceUpdateManyMutationInput, DataSourceUncheckedUpdateManyWithoutClinicInput>
+  }
+
+  export type DataSourceScalarWhereInput = {
+    AND?: DataSourceScalarWhereInput | DataSourceScalarWhereInput[]
+    OR?: DataSourceScalarWhereInput[]
+    NOT?: DataSourceScalarWhereInput | DataSourceScalarWhereInput[]
+    id?: StringFilter<"DataSource"> | string
+    name?: StringFilter<"DataSource"> | string
+    spreadsheetId?: StringFilter<"DataSource"> | string
+    sheetName?: StringFilter<"DataSource"> | string
+    lastSyncedAt?: DateTimeNullableFilter<"DataSource"> | Date | string | null
+    syncFrequency?: StringFilter<"DataSource"> | string
+    connectionStatus?: StringFilter<"DataSource"> | string
+    appScriptId?: StringNullableFilter<"DataSource"> | string | null
+    accessToken?: StringFilter<"DataSource"> | string
+    refreshToken?: StringNullableFilter<"DataSource"> | string | null
+    expiryDate?: DateTimeNullableFilter<"DataSource"> | Date | string | null
+    createdAt?: DateTimeFilter<"DataSource"> | Date | string
+    updatedAt?: DateTimeFilter<"DataSource"> | Date | string
+    clinicId?: StringFilter<"DataSource"> | string
+  }
+
   export type ClinicCreateWithoutUsersInput = {
     id?: string
     name: string
@@ -17510,6 +17838,7 @@ export namespace Prisma {
     providers?: ProviderCreateNestedManyWithoutClinicInput
     metrics?: MetricValueCreateNestedManyWithoutClinicInput
     goals?: GoalCreateNestedManyWithoutClinicInput
+    dataSources?: DataSourceCreateNestedManyWithoutClinicInput
   }
 
   export type ClinicUncheckedCreateWithoutUsersInput = {
@@ -17522,6 +17851,7 @@ export namespace Prisma {
     providers?: ProviderUncheckedCreateNestedManyWithoutClinicInput
     metrics?: MetricValueUncheckedCreateNestedManyWithoutClinicInput
     goals?: GoalUncheckedCreateNestedManyWithoutClinicInput
+    dataSources?: DataSourceUncheckedCreateNestedManyWithoutClinicInput
   }
 
   export type ClinicCreateOrConnectWithoutUsersInput = {
@@ -17580,6 +17910,7 @@ export namespace Prisma {
     providers?: ProviderUpdateManyWithoutClinicNestedInput
     metrics?: MetricValueUpdateManyWithoutClinicNestedInput
     goals?: GoalUpdateManyWithoutClinicNestedInput
+    dataSources?: DataSourceUpdateManyWithoutClinicNestedInput
   }
 
   export type ClinicUncheckedUpdateWithoutUsersInput = {
@@ -17592,6 +17923,7 @@ export namespace Prisma {
     providers?: ProviderUncheckedUpdateManyWithoutClinicNestedInput
     metrics?: MetricValueUncheckedUpdateManyWithoutClinicNestedInput
     goals?: GoalUncheckedUpdateManyWithoutClinicNestedInput
+    dataSources?: DataSourceUncheckedUpdateManyWithoutClinicNestedInput
   }
 
   export type DashboardUpsertWithWhereUniqueWithoutUserInput = {
@@ -17633,6 +17965,7 @@ export namespace Prisma {
     users?: UserCreateNestedManyWithoutClinicInput
     metrics?: MetricValueCreateNestedManyWithoutClinicInput
     goals?: GoalCreateNestedManyWithoutClinicInput
+    dataSources?: DataSourceCreateNestedManyWithoutClinicInput
   }
 
   export type ClinicUncheckedCreateWithoutProvidersInput = {
@@ -17645,6 +17978,7 @@ export namespace Prisma {
     users?: UserUncheckedCreateNestedManyWithoutClinicInput
     metrics?: MetricValueUncheckedCreateNestedManyWithoutClinicInput
     goals?: GoalUncheckedCreateNestedManyWithoutClinicInput
+    dataSources?: DataSourceUncheckedCreateNestedManyWithoutClinicInput
   }
 
   export type ClinicCreateOrConnectWithoutProvidersInput = {
@@ -17745,6 +18079,7 @@ export namespace Prisma {
     users?: UserUpdateManyWithoutClinicNestedInput
     metrics?: MetricValueUpdateManyWithoutClinicNestedInput
     goals?: GoalUpdateManyWithoutClinicNestedInput
+    dataSources?: DataSourceUpdateManyWithoutClinicNestedInput
   }
 
   export type ClinicUncheckedUpdateWithoutProvidersInput = {
@@ -17757,6 +18092,7 @@ export namespace Prisma {
     users?: UserUncheckedUpdateManyWithoutClinicNestedInput
     metrics?: MetricValueUncheckedUpdateManyWithoutClinicNestedInput
     goals?: GoalUncheckedUpdateManyWithoutClinicNestedInput
+    dataSources?: DataSourceUncheckedUpdateManyWithoutClinicNestedInput
   }
 
   export type MetricValueUpsertWithWhereUniqueWithoutProviderInput = {
@@ -18090,6 +18426,37 @@ export namespace Prisma {
     skipDuplicates?: boolean
   }
 
+  export type ClinicCreateWithoutDataSourcesInput = {
+    id?: string
+    name: string
+    location: string
+    status: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    users?: UserCreateNestedManyWithoutClinicInput
+    providers?: ProviderCreateNestedManyWithoutClinicInput
+    metrics?: MetricValueCreateNestedManyWithoutClinicInput
+    goals?: GoalCreateNestedManyWithoutClinicInput
+  }
+
+  export type ClinicUncheckedCreateWithoutDataSourcesInput = {
+    id?: string
+    name: string
+    location: string
+    status: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    users?: UserUncheckedCreateNestedManyWithoutClinicInput
+    providers?: ProviderUncheckedCreateNestedManyWithoutClinicInput
+    metrics?: MetricValueUncheckedCreateNestedManyWithoutClinicInput
+    goals?: GoalUncheckedCreateNestedManyWithoutClinicInput
+  }
+
+  export type ClinicCreateOrConnectWithoutDataSourcesInput = {
+    where: ClinicWhereUniqueInput
+    create: XOR<ClinicCreateWithoutDataSourcesInput, ClinicUncheckedCreateWithoutDataSourcesInput>
+  }
+
   export type ColumnMappingUpsertWithWhereUniqueWithoutDataSourceInput = {
     where: ColumnMappingWhereUniqueInput
     update: XOR<ColumnMappingUpdateWithoutDataSourceInput, ColumnMappingUncheckedUpdateWithoutDataSourceInput>
@@ -18122,6 +18489,43 @@ export namespace Prisma {
     data: XOR<MetricValueUpdateManyMutationInput, MetricValueUncheckedUpdateManyWithoutDataSourceInput>
   }
 
+  export type ClinicUpsertWithoutDataSourcesInput = {
+    update: XOR<ClinicUpdateWithoutDataSourcesInput, ClinicUncheckedUpdateWithoutDataSourcesInput>
+    create: XOR<ClinicCreateWithoutDataSourcesInput, ClinicUncheckedCreateWithoutDataSourcesInput>
+    where?: ClinicWhereInput
+  }
+
+  export type ClinicUpdateToOneWithWhereWithoutDataSourcesInput = {
+    where?: ClinicWhereInput
+    data: XOR<ClinicUpdateWithoutDataSourcesInput, ClinicUncheckedUpdateWithoutDataSourcesInput>
+  }
+
+  export type ClinicUpdateWithoutDataSourcesInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    location?: StringFieldUpdateOperationsInput | string
+    status?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    users?: UserUpdateManyWithoutClinicNestedInput
+    providers?: ProviderUpdateManyWithoutClinicNestedInput
+    metrics?: MetricValueUpdateManyWithoutClinicNestedInput
+    goals?: GoalUpdateManyWithoutClinicNestedInput
+  }
+
+  export type ClinicUncheckedUpdateWithoutDataSourcesInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    location?: StringFieldUpdateOperationsInput | string
+    status?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    users?: UserUncheckedUpdateManyWithoutClinicNestedInput
+    providers?: ProviderUncheckedUpdateManyWithoutClinicNestedInput
+    metrics?: MetricValueUncheckedUpdateManyWithoutClinicNestedInput
+    goals?: GoalUncheckedUpdateManyWithoutClinicNestedInput
+  }
+
   export type DataSourceCreateWithoutColumnMappingsInput = {
     id?: string
     name: string
@@ -18131,9 +18535,13 @@ export namespace Prisma {
     syncFrequency: string
     connectionStatus: string
     appScriptId?: string | null
+    accessToken: string
+    refreshToken?: string | null
+    expiryDate?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     metrics?: MetricValueCreateNestedManyWithoutDataSourceInput
+    clinic: ClinicCreateNestedOneWithoutDataSourcesInput
   }
 
   export type DataSourceUncheckedCreateWithoutColumnMappingsInput = {
@@ -18145,8 +18553,12 @@ export namespace Prisma {
     syncFrequency: string
     connectionStatus: string
     appScriptId?: string | null
+    accessToken: string
+    refreshToken?: string | null
+    expiryDate?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
+    clinicId: string
     metrics?: MetricValueUncheckedCreateNestedManyWithoutDataSourceInput
   }
 
@@ -18210,9 +18622,13 @@ export namespace Prisma {
     syncFrequency?: StringFieldUpdateOperationsInput | string
     connectionStatus?: StringFieldUpdateOperationsInput | string
     appScriptId?: NullableStringFieldUpdateOperationsInput | string | null
+    accessToken?: StringFieldUpdateOperationsInput | string
+    refreshToken?: NullableStringFieldUpdateOperationsInput | string | null
+    expiryDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     metrics?: MetricValueUpdateManyWithoutDataSourceNestedInput
+    clinic?: ClinicUpdateOneRequiredWithoutDataSourcesNestedInput
   }
 
   export type DataSourceUncheckedUpdateWithoutColumnMappingsInput = {
@@ -18224,8 +18640,12 @@ export namespace Prisma {
     syncFrequency?: StringFieldUpdateOperationsInput | string
     connectionStatus?: StringFieldUpdateOperationsInput | string
     appScriptId?: NullableStringFieldUpdateOperationsInput | string | null
+    accessToken?: StringFieldUpdateOperationsInput | string
+    refreshToken?: NullableStringFieldUpdateOperationsInput | string | null
+    expiryDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    clinicId?: StringFieldUpdateOperationsInput | string
     metrics?: MetricValueUncheckedUpdateManyWithoutDataSourceNestedInput
   }
 
@@ -18315,6 +18735,7 @@ export namespace Prisma {
     users?: UserCreateNestedManyWithoutClinicInput
     providers?: ProviderCreateNestedManyWithoutClinicInput
     goals?: GoalCreateNestedManyWithoutClinicInput
+    dataSources?: DataSourceCreateNestedManyWithoutClinicInput
   }
 
   export type ClinicUncheckedCreateWithoutMetricsInput = {
@@ -18327,6 +18748,7 @@ export namespace Prisma {
     users?: UserUncheckedCreateNestedManyWithoutClinicInput
     providers?: ProviderUncheckedCreateNestedManyWithoutClinicInput
     goals?: GoalUncheckedCreateNestedManyWithoutClinicInput
+    dataSources?: DataSourceUncheckedCreateNestedManyWithoutClinicInput
   }
 
   export type ClinicCreateOrConnectWithoutMetricsInput = {
@@ -18370,9 +18792,13 @@ export namespace Prisma {
     syncFrequency: string
     connectionStatus: string
     appScriptId?: string | null
+    accessToken: string
+    refreshToken?: string | null
+    expiryDate?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     columnMappings?: ColumnMappingCreateNestedManyWithoutDataSourceInput
+    clinic: ClinicCreateNestedOneWithoutDataSourcesInput
   }
 
   export type DataSourceUncheckedCreateWithoutMetricsInput = {
@@ -18384,8 +18810,12 @@ export namespace Prisma {
     syncFrequency: string
     connectionStatus: string
     appScriptId?: string | null
+    accessToken: string
+    refreshToken?: string | null
+    expiryDate?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
+    clinicId: string
     columnMappings?: ColumnMappingUncheckedCreateNestedManyWithoutDataSourceInput
   }
 
@@ -18456,6 +18886,7 @@ export namespace Prisma {
     users?: UserUpdateManyWithoutClinicNestedInput
     providers?: ProviderUpdateManyWithoutClinicNestedInput
     goals?: GoalUpdateManyWithoutClinicNestedInput
+    dataSources?: DataSourceUpdateManyWithoutClinicNestedInput
   }
 
   export type ClinicUncheckedUpdateWithoutMetricsInput = {
@@ -18468,6 +18899,7 @@ export namespace Prisma {
     users?: UserUncheckedUpdateManyWithoutClinicNestedInput
     providers?: ProviderUncheckedUpdateManyWithoutClinicNestedInput
     goals?: GoalUncheckedUpdateManyWithoutClinicNestedInput
+    dataSources?: DataSourceUncheckedUpdateManyWithoutClinicNestedInput
   }
 
   export type ProviderUpsertWithoutMetricsInput = {
@@ -18523,9 +18955,13 @@ export namespace Prisma {
     syncFrequency?: StringFieldUpdateOperationsInput | string
     connectionStatus?: StringFieldUpdateOperationsInput | string
     appScriptId?: NullableStringFieldUpdateOperationsInput | string | null
+    accessToken?: StringFieldUpdateOperationsInput | string
+    refreshToken?: NullableStringFieldUpdateOperationsInput | string | null
+    expiryDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     columnMappings?: ColumnMappingUpdateManyWithoutDataSourceNestedInput
+    clinic?: ClinicUpdateOneRequiredWithoutDataSourcesNestedInput
   }
 
   export type DataSourceUncheckedUpdateWithoutMetricsInput = {
@@ -18537,8 +18973,12 @@ export namespace Prisma {
     syncFrequency?: StringFieldUpdateOperationsInput | string
     connectionStatus?: StringFieldUpdateOperationsInput | string
     appScriptId?: NullableStringFieldUpdateOperationsInput | string | null
+    accessToken?: StringFieldUpdateOperationsInput | string
+    refreshToken?: NullableStringFieldUpdateOperationsInput | string | null
+    expiryDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    clinicId?: StringFieldUpdateOperationsInput | string
     columnMappings?: ColumnMappingUncheckedUpdateManyWithoutDataSourceNestedInput
   }
 
@@ -18587,6 +19027,7 @@ export namespace Prisma {
     users?: UserCreateNestedManyWithoutClinicInput
     providers?: ProviderCreateNestedManyWithoutClinicInput
     metrics?: MetricValueCreateNestedManyWithoutClinicInput
+    dataSources?: DataSourceCreateNestedManyWithoutClinicInput
   }
 
   export type ClinicUncheckedCreateWithoutGoalsInput = {
@@ -18599,6 +19040,7 @@ export namespace Prisma {
     users?: UserUncheckedCreateNestedManyWithoutClinicInput
     providers?: ProviderUncheckedCreateNestedManyWithoutClinicInput
     metrics?: MetricValueUncheckedCreateNestedManyWithoutClinicInput
+    dataSources?: DataSourceUncheckedCreateNestedManyWithoutClinicInput
   }
 
   export type ClinicCreateOrConnectWithoutGoalsInput = {
@@ -18695,6 +19137,7 @@ export namespace Prisma {
     users?: UserUpdateManyWithoutClinicNestedInput
     providers?: ProviderUpdateManyWithoutClinicNestedInput
     metrics?: MetricValueUpdateManyWithoutClinicNestedInput
+    dataSources?: DataSourceUpdateManyWithoutClinicNestedInput
   }
 
   export type ClinicUncheckedUpdateWithoutGoalsInput = {
@@ -18707,6 +19150,7 @@ export namespace Prisma {
     users?: UserUncheckedUpdateManyWithoutClinicNestedInput
     providers?: ProviderUncheckedUpdateManyWithoutClinicNestedInput
     metrics?: MetricValueUncheckedUpdateManyWithoutClinicNestedInput
+    dataSources?: DataSourceUncheckedUpdateManyWithoutClinicNestedInput
   }
 
   export type ProviderUpsertWithoutGoalsInput = {
@@ -19033,6 +19477,22 @@ export namespace Prisma {
     providerId?: string | null
   }
 
+  export type DataSourceCreateManyClinicInput = {
+    id?: string
+    name: string
+    spreadsheetId: string
+    sheetName: string
+    lastSyncedAt?: Date | string | null
+    syncFrequency: string
+    connectionStatus: string
+    appScriptId?: string | null
+    accessToken: string
+    refreshToken?: string | null
+    expiryDate?: Date | string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
   export type UserUpdateWithoutClinicInput = {
     id?: StringFieldUpdateOperationsInput | string
     email?: StringFieldUpdateOperationsInput | string
@@ -19172,6 +19632,58 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     metricDefinitionId?: StringFieldUpdateOperationsInput | string
     providerId?: NullableStringFieldUpdateOperationsInput | string | null
+  }
+
+  export type DataSourceUpdateWithoutClinicInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    spreadsheetId?: StringFieldUpdateOperationsInput | string
+    sheetName?: StringFieldUpdateOperationsInput | string
+    lastSyncedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    syncFrequency?: StringFieldUpdateOperationsInput | string
+    connectionStatus?: StringFieldUpdateOperationsInput | string
+    appScriptId?: NullableStringFieldUpdateOperationsInput | string | null
+    accessToken?: StringFieldUpdateOperationsInput | string
+    refreshToken?: NullableStringFieldUpdateOperationsInput | string | null
+    expiryDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    columnMappings?: ColumnMappingUpdateManyWithoutDataSourceNestedInput
+    metrics?: MetricValueUpdateManyWithoutDataSourceNestedInput
+  }
+
+  export type DataSourceUncheckedUpdateWithoutClinicInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    spreadsheetId?: StringFieldUpdateOperationsInput | string
+    sheetName?: StringFieldUpdateOperationsInput | string
+    lastSyncedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    syncFrequency?: StringFieldUpdateOperationsInput | string
+    connectionStatus?: StringFieldUpdateOperationsInput | string
+    appScriptId?: NullableStringFieldUpdateOperationsInput | string | null
+    accessToken?: StringFieldUpdateOperationsInput | string
+    refreshToken?: NullableStringFieldUpdateOperationsInput | string | null
+    expiryDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    columnMappings?: ColumnMappingUncheckedUpdateManyWithoutDataSourceNestedInput
+    metrics?: MetricValueUncheckedUpdateManyWithoutDataSourceNestedInput
+  }
+
+  export type DataSourceUncheckedUpdateManyWithoutClinicInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    spreadsheetId?: StringFieldUpdateOperationsInput | string
+    sheetName?: StringFieldUpdateOperationsInput | string
+    lastSyncedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    syncFrequency?: StringFieldUpdateOperationsInput | string
+    connectionStatus?: StringFieldUpdateOperationsInput | string
+    appScriptId?: NullableStringFieldUpdateOperationsInput | string | null
+    accessToken?: StringFieldUpdateOperationsInput | string
+    refreshToken?: NullableStringFieldUpdateOperationsInput | string | null
+    expiryDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
   export type DashboardCreateManyUserInput = {

@@ -21,10 +21,11 @@ model Clinic {
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
-  users     User[]
-  providers Provider[]
-  metrics   MetricValue[]
-  goals     Goal[]
+  users       User[]
+  providers   Provider[]
+  metrics     MetricValue[]
+  goals       Goal[]
+  dataSources DataSource[]
 
   @@map("clinics")
 }
@@ -93,11 +94,19 @@ model DataSource {
   syncFrequency    String    @map("sync_frequency")
   connectionStatus String    @map("connection_status")
   appScriptId      String?   @map("app_script_id")
-  createdAt        DateTime  @default(now()) @map("created_at")
-  updatedAt        DateTime  @updatedAt @map("updated_at")
+
+  accessToken  String    @map("access_token")
+  refreshToken String?   @map("refresh_token")
+  expiryDate   DateTime? @map("expiry_date")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
 
   columnMappings ColumnMapping[]
   metrics        MetricValue[]
+
+  clinicId String @map("clinic_id")
+  clinic   Clinic @relation(fields: [clinicId], references: [id])
 
   @@map("data_sources")
 }

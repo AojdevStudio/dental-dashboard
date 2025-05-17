@@ -171,8 +171,12 @@ exports.Prisma.DataSourceScalarFieldEnum = {
   syncFrequency: 'syncFrequency',
   connectionStatus: 'connectionStatus',
   appScriptId: 'appScriptId',
+  accessToken: 'accessToken',
+  refreshToken: 'refreshToken',
+  expiryDate: 'expiryDate',
   createdAt: 'createdAt',
-  updatedAt: 'updatedAt'
+  updatedAt: 'updatedAt',
+  clinicId: 'clinicId'
 };
 
 exports.Prisma.ColumnMappingScalarFieldEnum = {
