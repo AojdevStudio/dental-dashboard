@@ -1,11 +1,12 @@
-export default function DashboardLayout({
+export default function MetricsLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
   return (
     <div>
-      {/* Dashboard layout structure goes here */}
+      <h1>Metrics</h1>
+      <p>Metrics content goes here</p>
       {children}
     </div>
   );
