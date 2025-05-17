@@ -21,13 +21,13 @@ If installed mark it with a ✅, if not installed yet mark it with a ❌
 | accordion       | ❌        | `pnpm dlx shadcn@latest add accordion` | Used for collapsible content |
 | alert           | ❌        | `pnpm dlx shadcn@latest add alert` | System notifications |
 | button          | ✅        | `pnpm dlx shadcn@latest add button` | Primary interaction element |
-| card            | ❌        | `pnpm dlx shadcn@latest add card` | Content containers |
+| card            | ✅        | `pnpm dlx shadcn@latest add card` | Content containers |
 | checkbox        | ❌        | `pnpm dlx shadcn@latest add checkbox` | Boolean input |
 | dialog          | ❌        | `pnpm dlx shadcn@latest add dialog` | Modal dialogs |
 | dropdown-menu   | ✅        | `pnpm dlx shadcn@latest add dropdown-menu` | Contextual actions |
 | form            | ✅        | `pnpm dlx shadcn@latest add form` | Form validation and control |
 | input           | ✅        | `pnpm dlx shadcn@latest add input` | Text input fields |
-| label           | ❌        | `pnpm dlx shadcn@latest add label` | Form field labels |
+| label           | ✅        | `pnpm dlx shadcn@latest add label` | Form field labels |
 | popover         | ❌        | `pnpm dlx shadcn@latest add popover` | Contextual tooltips |
 | select          | ✅        | `pnpm dlx shadcn@latest add select` | Single-choice selection |
 | separator       | ❌        | `pnpm dlx shadcn@latest add separator` | Visual dividers |

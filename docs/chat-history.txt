@@ -1,0 +1,80 @@
+[MODE: EXECUTE]
+Ah, I see the confusion. The file you've pointed to, `src/vitest-setup.ts`, is the one we just created. This file *tells* Vitest *what* to set up (in this case, the jest-dom matchers).
+
+We still need to find the main Vitest *configuration* file. This is the file that *tells* Vitest *to use* `src/vitest-setup.ts`.
+
+Common names for this Vitest configuration file are:
+*   `vitest.config.ts` (or `.js`, `.mjs`)
+*   `vite.config.ts` (or `.js`, `.mjs`) - Vitest can be configured within a Vite config file if you're using Vite as your build tool.
+
+These files are usually located in the root directory of your project, alongside `package.json` and `tsconfig.json`.
+
+Could you please check your project root for a file named like `vitest.config.ts` or `vite.config.ts`?
+
+If you don't have one, Vitest might also be configured directly in your `package.json` file, under a script or a dedicated `vitest` key, though a separate config file is more common for specifying options like `setupFiles`.
+
+Let's try searching for those specific filenames again.
+
+Ran tool
+Okay, looking at the root directory listing, I don't see an obvious `vitest.config.ts` or `vite.config.ts`.
+
+However, a Next.js project (`next.config.ts` is present) sometimes integrates Vitest configuration differently.
+
+Let's check `package.json` to see if Vitest is configured or run via a script that might point us to the config.
+
+
+Read file: package.json
+Okay, I've reviewed your `package.json`.
+The test scripts are:
+*   `"test": "vitest"`
+*   `"test:watch": "vitest watch"`
+*   `"test:coverage": "vitest run --coverage"`
+
+This confirms you are using Vitest directly. Since there's no explicit configuration file mentioned in the scripts (like `vitest -c vitest.config.ts`), Vitest will look for a default configuration file.
+
+The default configuration files Vitest looks for are (in order of precedence):
+1.  `vitest.config.ts`
+2.  `vitest.config.js`
+3.  `vitest.config.mjs`
+4.  `vite.config.ts` (if Vitest is part of a Vite project)
+5.  `vite.config.js`
+6.  `vite.config.mjs`
+
+Since we didn't find any of these in the root directory, it's possible:
+*   You don't have a custom Vitest configuration file, and it's running with defaults.
+*   The configuration file is located somewhere non-standard or has a different name, which Vitest isn't picking up by default.
+
+**If you don't have a custom Vitest config file (`vitest.config.ts` or similar), we should create one.** This is the standard way to provide options like `setupFiles`.
+
+Would you like me to create a basic `vitest.config.ts` in your project root and add the necessary `setupFiles` configuration to it? This new file would then be automatically picked up by Vitest when you run `pnpm test`.
+
+
+Okay, I've created the `vitest.config.ts` file in your project root with the following content:
+
+```typescript
+import { defineConfig } from 'vitest/config';
+
+export default defineConfig({
+  test: {
+    globals: true,
+    environment: 'jsdom',
+    setupFiles: ['./src/vitest-setup.ts'],
+  },
+});
+```
+
+This file configures Vitest to:
+*   Use globals (like `vi`, `describe`, `it`, `expect`) so you don't have to import them in every test file.
+*   Use the `jsdom` environment to simulate a browser environment for your tests.
+*   Run the `src/vitest-setup.ts` file before your tests, which will make the Jest DOM matchers (like `.toBeInTheDocument()`) available.
+
+**With these changes:**
+1.  `@testing-library/jest-dom` is installed.
+2.  `src/vitest-setup.ts` is created and imports the matchers.
+3.  `vitest.config.ts` is created and tells Vitest to use the setup file and other common defaults.
+4.  `tsconfig.json` is updated to help TypeScript recognize the types.
+
+Now, the linter errors in `src/components/google/__tests__/SpreadsheetSelector.test.tsx` should be resolved. You might need to restart your editor or TypeScript language server for all changes to be recognized.
+
+Please check if the linter errors are gone from that test file. If they are, we can consider this setup complete and move on.
+

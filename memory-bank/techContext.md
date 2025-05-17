@@ -32,8 +32,10 @@
 - Install Recharts for data visualization.
 - Implement React Query for server state management and Zustand for UI state.
 - Configure Vite and Vitest for testing.
-- Use ESLint and Prettier for code quality (as per PRD Next Steps).
+- Use Biome for code linting and formatting.
 - Store sensitive keys (Google API, Supabase) in `.env` and use `.env.example` for templates.
+- Node.js version: (Assumed LTS, specify if a particular version is enforced).
+- Version Control: Git. Multiple branches are currently in use (main, development, feature branches as needed). A formal named strategy (e.g., GitFlow) is not strictly enforced at this initial stage.
 
 ## Dependencies
 (Key dependencies based on technology stack - specific versions to be determined during project setup)
@@ -66,7 +68,7 @@
 ## Build and Deployment
 - **Build Process:** Utilized Next.js build process (`next build`), managed via pnpm scripts and Turborepo if multiple packages/apps are involved in the monorepo.
 - **Deployment Procedure:** Deployment via Vercel, connected to the Git repository.
-- **CI/CD:** Vercel provides CI/CD capabilities. Further pipeline configurations (e.g., automated testing, linting checks) to be set up.
+- **CI/CD:** Vercel provides default CI/CD capabilities. Advanced pipeline configurations (e.g., automated running of Vitest tests on PRs) are a future consideration post-MVP.
 
 ## Testing Approach
 - **Unit Testing:** Vitest for testing individual functions, components, and services.

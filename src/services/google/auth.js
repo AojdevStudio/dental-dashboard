@@ -1,6 +1,6 @@
 /**
  * Google OAuth Authentication Utility
- * 
+ *
  * This module provides utility functions for Google OAuth authentication.
  * It loads credentials from environment variables and provides methods for
  * OAuth flow management.
@@ -15,26 +15,30 @@ const GOOGLE_REDIRECT_URI = process.env.GOOGLE_REDIRECT_URI;
  * Generates a Google OAuth authorization URL with the specified scopes
  * @param {string[]} scopes - Array of OAuth scopes to request
  * @param {string} [state] - Optional state parameter for security validation
- * @param {boolean} [accessType=online] - Whether to request offline access (for refresh tokens)
+ * @param {string} [accessType='online'] - Whether to request offline access (e.g., 'offline' for refresh tokens, or 'online')
  * @returns {string} The authorization URL
  */
-export function getAuthorizationUrl(scopes = ['profile', 'email'], state = '', accessType = 'online') {
+export function getAuthorizationUrl(
+  scopes = ["profile", "email"],
+  state = "",
+  accessType = "online"
+) {
   if (!GOOGLE_CLIENT_ID || !GOOGLE_REDIRECT_URI) {
-    throw new Error('Google OAuth credentials are not properly configured');
+    throw new Error("Google OAuth credentials are not properly configured");
   }
 
-  const url = new URL('https://accounts.google.com/o/oauth2/v2/auth');
-  
-  url.searchParams.append('client_id', GOOGLE_CLIENT_ID);
-  url.searchParams.append('redirect_uri', GOOGLE_REDIRECT_URI);
-  url.searchParams.append('response_type', 'code');
-  url.searchParams.append('scope', scopes.join(' '));
-  url.searchParams.append('access_type', accessType);
-  
+  const url = new URL("https://accounts.google.com/o/oauth2/v2/auth");
+
+  url.searchParams.append("client_id", GOOGLE_CLIENT_ID);
+  url.searchParams.append("redirect_uri", GOOGLE_REDIRECT_URI);
+  url.searchParams.append("response_type", "code");
+  url.searchParams.append("scope", scopes.join(" "));
+  url.searchParams.append("access_type", accessType);
+
   if (state) {
-    url.searchParams.append('state', state);
+    url.searchParams.append("state", state);
   }
-  
+
   return url.toString();
 }
 
@@ -45,35 +49,37 @@ export function getAuthorizationUrl(scopes = ['profile', 'email'], state = '', a
  */
 export async function exchangeCodeForTokens(code) {
   if (!GOOGLE_CLIENT_ID || !GOOGLE_CLIENT_SECRET || !GOOGLE_REDIRECT_URI) {
-    throw new Error('Google OAuth credentials are not properly configured');
+    throw new Error("Google OAuth credentials are not properly configured");
   }
 
-  const tokenUrl = 'https://oauth2.googleapis.com/token';
+  const tokenUrl = "https://oauth2.googleapis.com/token";
   const params = new URLSearchParams();
-  
-  params.append('client_id', GOOGLE_CLIENT_ID);
-  params.append('client_secret', GOOGLE_CLIENT_SECRET);
-  params.append('code', code);
-  params.append('grant_type', 'authorization_code');
-  params.append('redirect_uri', GOOGLE_REDIRECT_URI);
+
+  params.append("client_id", GOOGLE_CLIENT_ID);
+  params.append("client_secret", GOOGLE_CLIENT_SECRET);
+  params.append("code", code);
+  params.append("grant_type", "authorization_code");
+  params.append("redirect_uri", GOOGLE_REDIRECT_URI);
 
   try {
     const response = await fetch(tokenUrl, {
-      method: 'POST',
+      method: "POST",
       headers: {
-        'Content-Type': 'application/x-www-form-urlencoded',
+        "Content-Type": "application/x-www-form-urlencoded",
       },
       body: params.toString(),
     });
 
     if (!response.ok) {
       const errorData = await response.json();
-      throw new Error(`Token exchange failed: ${errorData.error_description || errorData.error || 'Unknown error'}`);
+      throw new Error(
+        `Token exchange failed: ${errorData.error_description || errorData.error || "Unknown error"}`
+      );
     }
 
     return await response.json();
   } catch (error) {
-    console.error('Error exchanging code for tokens:', error);
+    console.error("Error exchanging code for tokens:", error);
     throw error;
   }
 }
@@ -85,34 +91,36 @@ export async function exchangeCodeForTokens(code) {
  */
 export async function refreshAccessToken(refreshToken) {
   if (!GOOGLE_CLIENT_ID || !GOOGLE_CLIENT_SECRET) {
-    throw new Error('Google OAuth credentials are not properly configured');
+    throw new Error("Google OAuth credentials are not properly configured");
   }
 
-  const tokenUrl = 'https://oauth2.googleapis.com/token';
+  const tokenUrl = "https://oauth2.googleapis.com/token";
   const params = new URLSearchParams();
-  
-  params.append('client_id', GOOGLE_CLIENT_ID);
-  params.append('client_secret', GOOGLE_CLIENT_SECRET);
-  params.append('refresh_token', refreshToken);
-  params.append('grant_type', 'refresh_token');
+
+  params.append("client_id", GOOGLE_CLIENT_ID);
+  params.append("client_secret", GOOGLE_CLIENT_SECRET);
+  params.append("refresh_token", refreshToken);
+  params.append("grant_type", "refresh_token");
 
   try {
     const response = await fetch(tokenUrl, {
-      method: 'POST',
+      method: "POST",
       headers: {
-        'Content-Type': 'application/x-www-form-urlencoded',
+        "Content-Type": "application/x-www-form-urlencoded",
       },
       body: params.toString(),
     });
 
     if (!response.ok) {
       const errorData = await response.json();
-      throw new Error(`Token refresh failed: ${errorData.error_description || errorData.error || 'Unknown error'}`);
+      throw new Error(
+        `Token refresh failed: ${errorData.error_description || errorData.error || "Unknown error"}`
+      );
     }
 
     return await response.json();
   } catch (error) {
-    console.error('Error refreshing access token:', error);
+    console.error("Error refreshing access token:", error);
     throw error;
   }
 }
@@ -124,7 +132,7 @@ export async function refreshAccessToken(refreshToken) {
  */
 export async function getUserProfile(accessToken) {
   try {
-    const response = await fetch('https://www.googleapis.com/oauth2/v3/userinfo', {
+    const response = await fetch("https://www.googleapis.com/oauth2/v3/userinfo", {
       headers: {
         Authorization: `Bearer ${accessToken}`,
       },
@@ -132,12 +140,14 @@ export async function getUserProfile(accessToken) {
 
     if (!response.ok) {
       const errorData = await response.json();
-      throw new Error(`Failed to fetch user profile: ${errorData.error_description || errorData.error || 'Unknown error'}`);
+      throw new Error(
+        `Failed to fetch user profile: ${errorData.error_description || errorData.error || "Unknown error"}`
+      );
     }
 
     return await response.json();
   } catch (error) {
-    console.error('Error fetching user profile:', error);
+    console.error("Error fetching user profile:", error);
     throw error;
   }
 }
@@ -150,15 +160,15 @@ export async function getUserProfile(accessToken) {
 export async function revokeToken(token) {
   try {
     const response = await fetch(`https://oauth2.googleapis.com/revoke?token=${token}`, {
-      method: 'POST',
+      method: "POST",
       headers: {
-        'Content-Type': 'application/x-www-form-urlencoded',
+        "Content-Type": "application/x-www-form-urlencoded",
       },
     });
 
     return response.ok;
   } catch (error) {
-    console.error('Error revoking token:', error);
+    console.error("Error revoking token:", error);
     return false;
   }
 }
