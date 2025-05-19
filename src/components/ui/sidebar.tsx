@@ -264,7 +264,7 @@ export function SessionNavBar() {
                     >
                       <Activity className="h-4 w-4" />{" "}
                       <motion.li variants={variants}>
-                        {!isCollapsed && <p className="ml-2 text-sm font-medium">Call Tracking</p>}
+                        {!isCollapsed && <p className="ml-2 text-sm font-medium">Call Reporting</p>}
                       </motion.li>
                     </Link>
 

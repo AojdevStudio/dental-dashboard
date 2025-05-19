@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { Filter, RotateCcw, X } from "lucide-react";
+import { Filter, RotateCcw, X, ChevronUp, ChevronDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Accordion,
@@ -12,12 +12,14 @@ import {
 } from "@/components/ui/accordion";
 import { Card, CardContent } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
+import { Badge } from "@/components/ui/badge";
 import { TimePeriodFilter } from "./TimePeriodFilter";
 import { ClinicFilter } from "./ClinicFilter";
 import { ProviderFilter } from "./ProviderFilter";
-import { useFilterStore } from "@/hooks/useFilterStore";
+import { useFilterStore, filterDependentQueries, createFilterUrlParams, parseFilterUrlParams } from "@/hooks/useFilterStore";
 import { useQueryClient } from "@tanstack/react-query";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
+import { AnimatePresence, motion } from "framer-motion";
 
 export function FilterBar() {
   const queryClient = useQueryClient();
@@ -25,6 +27,8 @@ export function FilterBar() {
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const [isExpanded, setIsExpanded] = useState(false);
+  const [activeAccordion, setActiveAccordion] = useState<string | null>("time-period");
+  const filterBarRef = useRef<HTMLDivElement>(null);
 
   const {
     timePeriod,
@@ -40,115 +44,126 @@ export function FilterBar() {
     resetToDefaults,
   } = useFilterStore();
 
-  // Function to update URL params based on filter state
-  const updateUrlParams = () => {
-    const params = new URLSearchParams(searchParams);
-
-    // Update time period params
-    params.set("timePeriod", timePeriod);
-    params.set("startDate", startDate.toISOString());
-    params.set("endDate", endDate.toISOString());
-
-    // Update clinic params
-    if (selectedClinics.length > 0) {
-      params.set("clinics", selectedClinics.join(","));
-    } else {
-      params.delete("clinics");
-    }
-
-    // Update provider params
-    if (selectedProviders.length > 0) {
-      params.set("providers", selectedProviders.join(","));
-    } else {
-      params.delete("providers");
-    }
-
+  // Function to update URL params based on filter state - memoized to avoid dependency issues
+  const updateUrlParams = useCallback(() => {
+    const params = createFilterUrlParams();
     // Update URL without refreshing the page
     router.replace(`${pathname}?${params.toString()}`);
-  };
+  }, [router, pathname]);
 
   // Parse URL params on component mount
   useEffect(() => {
-    const loadFiltersFromUrl = () => {
-      // Parse time period
-      const urlTimePeriod = searchParams.get("timePeriod");
-      if (urlTimePeriod) {
-        setTimePeriod(urlTimePeriod as any);
-      }
+    parseFilterUrlParams(searchParams);
+  }, [searchParams]);
 
-      // Parse date range if custom period
-      const urlStartDate = searchParams.get("startDate");
-      const urlEndDate = searchParams.get("endDate");
-      if (urlStartDate && urlEndDate) {
-        setDateRange(new Date(urlStartDate), new Date(urlEndDate));
-      }
+  // We use a ref to track filter changes without creating effect dependencies
+  const filtersRef = useRef({ timePeriod, startDate, endDate, selectedClinics, selectedProviders });
+  
+  // Update URL and invalidate queries when filter state changes
+  useEffect(() => {
+    // Check if filters have actually changed
+    const prevFilters = filtersRef.current;
+    const filtersChanged = 
+      prevFilters.timePeriod !== timePeriod ||
+      prevFilters.startDate !== startDate ||
+      prevFilters.endDate !== endDate ||
+      prevFilters.selectedClinics !== selectedClinics ||
+      prevFilters.selectedProviders !== selectedProviders;
+      
+    // Update ref
+    filtersRef.current = { timePeriod, startDate, endDate, selectedClinics, selectedProviders };
+    
+    // Only update URL and invalidate queries if filters have changed
+    if (filtersChanged) {
+      // Don't update URL on initial render
+      const timeoutId = setTimeout(() => {
+        updateUrlParams();
 
-      // Parse clinics
-      const urlClinics = searchParams.get("clinics");
-      if (urlClinics) {
-        setSelectedClinics(urlClinics.split(","));
-      }
+        // Invalidate and refetch queries when filters change
+        queryClient.invalidateQueries({
+          predicate: (query) => {
+            // Invalidate queries that depend on our filters
+            return query.queryKey.some(
+              (key) => typeof key === "string" && filterDependentQueries.includes(key)
+            );
+          },
+        });
+      }, 100); // Small delay to batch frequent changes
 
-      // Parse providers
-      const urlProviders = searchParams.get("providers");
-      if (urlProviders) {
-        setSelectedProviders(urlProviders.split(","));
+      return () => clearTimeout(timeoutId);
+    }
+    
+    return undefined;
+  }, [queryClient, updateUrlParams, timePeriod, startDate, endDate, selectedClinics, selectedProviders]);
+  
+  // Handle clicks outside the filter bar to collapse it when expanded
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (filterBarRef.current && !filterBarRef.current.contains(event.target as Node) && isExpanded) {
+        setIsExpanded(false);
       }
     };
 
-    loadFiltersFromUrl();
-  }, [searchParams, setTimePeriod, setDateRange, setSelectedClinics, setSelectedProviders]);
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [isExpanded]);
 
-  // Update URL when filter state changes
-  useEffect(() => {
-    updateUrlParams();
-
-    // Invalidate and refetch queries when filters change
-    queryClient.invalidateQueries({
-      predicate: (query) => {
-        // Invalidate queries that might depend on our filters
-        // You can be more specific here if needed
-        return query.queryKey.some(
-          (key) =>
-            typeof key === "string" && ["metrics", "kpis", "appointments", "patients"].includes(key)
-        );
-      },
-    });
-  }, [timePeriod, startDate, endDate, selectedClinics, selectedProviders, queryClient]);
-
+  // Count active filters
+  const activeFilterCount = [
+    timePeriod !== "monthly", // Assuming monthly is default
+    selectedClinics.length > 0,
+    selectedProviders.length > 0
+  ].filter(Boolean).length;
+  
   // Check if any filter is active
-  const hasActiveFilters =
-    selectedClinics.length > 0 || selectedProviders.length > 0 || timePeriod !== "monthly"; // Assuming monthly is default
+  const hasActiveFilters = activeFilterCount > 0;
 
   // Handle clearing all filters
   const handleClearFilters = () => {
     clearFilters();
-    setIsExpanded(false);
+    // Keep the filter panel open
   };
 
   // Handle resetting to defaults
   const handleResetFilters = () => {
     resetToDefaults();
+    // Keep the filter panel open
+  };
+  
+  // Handle applying filters and closing the panel
+  const handleApplyFilters = () => {
     setIsExpanded(false);
+    // Trigger a specific refetch if needed
+    for (const queryKey of filterDependentQueries) {
+      queryClient.invalidateQueries({ queryKey: [queryKey] });
+    }
   };
 
   return (
-    <Card className="w-full mb-6">
+    <Card className="w-full mb-6 shadow-sm" ref={filterBarRef}>
       <div className="flex items-center justify-between p-4">
         <Button
           variant="outline"
           size="sm"
           onClick={() => setIsExpanded(!isExpanded)}
           className="flex items-center gap-2"
+          aria-expanded={isExpanded}
+          aria-controls="filter-panel"
+          aria-label={isExpanded ? "Collapse filter panel" : "Expand filter panel"}
         >
           <Filter className="h-4 w-4" />
-          Filters
+          <span>Filters</span>
           {hasActiveFilters && (
-            <span className="inline-flex items-center justify-center rounded-full bg-primary text-primary-foreground w-5 h-5 text-xs">
-              {(selectedClinics.length > 0 ? 1 : 0) +
-                (selectedProviders.length > 0 ? 1 : 0) +
-                (timePeriod !== "monthly" ? 1 : 0)}
-            </span>
+            <Badge variant="secondary" className="ml-1 px-2">
+              {activeFilterCount}
+            </Badge>
+          )}
+          {isExpanded ? (
+            <ChevronUp className="h-3 w-3 ml-1" />
+          ) : (
+            <ChevronDown className="h-3 w-3 ml-1" />
           )}
         </Button>
         <div className="flex items-center gap-2">
@@ -158,8 +173,9 @@ export function FilterBar() {
               size="sm"
               onClick={handleClearFilters}
               className="flex items-center gap-1"
+              aria-label="Clear all filters"
             >
-              <X className="h-3 w-3" /> Clear
+              <X className="h-3 w-3" /> <span>Clear</span>
             </Button>
           )}
           <Button
@@ -167,49 +183,97 @@ export function FilterBar() {
             size="sm"
             onClick={handleResetFilters}
             className="flex items-center gap-1"
+            aria-label="Reset filters to defaults"
           >
-            <RotateCcw className="h-3 w-3" /> Reset
+            <RotateCcw className="h-3 w-3" /> <span>Reset</span>
           </Button>
         </div>
       </div>
 
-      {isExpanded && (
-        <CardContent className="pb-4">
-          <Accordion type="single" collapsible defaultValue="time-period" className="w-full">
-            <AccordionItem value="time-period">
-              <AccordionTrigger className="text-sm font-medium">Time Period</AccordionTrigger>
-              <AccordionContent>
-                <TimePeriodFilter />
-              </AccordionContent>
-            </AccordionItem>
+      <AnimatePresence>
+        {isExpanded && (
+          <motion.div
+            id="filter-panel"
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: "auto", opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={{ duration: 0.2 }}
+          >
+            <CardContent className="pb-4">
+              <Accordion 
+                type="single" 
+                collapsible 
+                value={activeAccordion || undefined}
+                onValueChange={setActiveAccordion}
+                className="w-full"
+              >
+                <AccordionItem value="time-period">
+                  <AccordionTrigger className="text-sm font-medium">
+                    Time Period
+                    {timePeriod !== "monthly" && (
+                      <Badge variant="outline" className="ml-2">
+                        {timePeriod.charAt(0).toUpperCase() + timePeriod.slice(1)}
+                      </Badge>
+                    )}
+                  </AccordionTrigger>
+                  <AccordionContent>
+                    <TimePeriodFilter />
+                  </AccordionContent>
+                </AccordionItem>
 
-            <AccordionItem value="clinics">
-              <AccordionTrigger className="text-sm font-medium">Clinics</AccordionTrigger>
-              <AccordionContent>
-                <ClinicFilter />
-              </AccordionContent>
-            </AccordionItem>
+                <AccordionItem value="clinics">
+                  <AccordionTrigger className="text-sm font-medium">
+                    Clinics
+                    {selectedClinics.length > 0 && (
+                      <Badge variant="outline" className="ml-2">
+                        {selectedClinics.length}
+                      </Badge>
+                    )}
+                  </AccordionTrigger>
+                  <AccordionContent>
+                    <ClinicFilter />
+                  </AccordionContent>
+                </AccordionItem>
 
-            <AccordionItem value="providers">
-              <AccordionTrigger className="text-sm font-medium">Providers</AccordionTrigger>
-              <AccordionContent>
-                <ProviderFilter />
-              </AccordionContent>
-            </AccordionItem>
-          </Accordion>
+                <AccordionItem value="providers">
+                  <AccordionTrigger className="text-sm font-medium">
+                    Providers
+                    {selectedProviders.length > 0 && (
+                      <Badge variant="outline" className="ml-2">
+                        {selectedProviders.length}
+                      </Badge>
+                    )}
+                  </AccordionTrigger>
+                  <AccordionContent>
+                    <ProviderFilter />
+                  </AccordionContent>
+                </AccordionItem>
+              </Accordion>
 
-          <Separator className="my-4" />
+              <Separator className="my-4" />
 
-          <div className="flex justify-end gap-2">
-            <Button variant="outline" size="sm" onClick={() => setIsExpanded(false)}>
-              Close
-            </Button>
-            <Button variant="default" size="sm" onClick={() => setIsExpanded(false)}>
-              Apply Filters
-            </Button>
-          </div>
-        </CardContent>
-      )}
+              <div className="flex justify-end gap-2">
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  onClick={() => setIsExpanded(false)}
+                  aria-label="Close filter panel"
+                >
+                  Cancel
+                </Button>
+                <Button 
+                  variant="default" 
+                  size="sm" 
+                  onClick={handleApplyFilters}
+                  aria-label="Apply filters and close panel"
+                >
+                  Apply Filters
+                </Button>
+              </div>
+            </CardContent>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </Card>
   );
 }

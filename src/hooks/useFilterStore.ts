@@ -12,6 +12,7 @@ import {
   endOfQuarter,
   startOfYear,
   endOfYear,
+  subMonths,
 } from "date-fns";
 
 // Define time period options
@@ -82,6 +83,17 @@ const getDateRangeForPeriod = (period: TimePeriod): { start: Date; end: Date } =
 const defaultTimePeriod: TimePeriod = "monthly";
 const defaultDateRange = getDateRangeForPeriod(defaultTimePeriod);
 
+// Define the queries that should be invalidated when filters change
+export const filterDependentQueries = [
+  "metrics",
+  "kpis",
+  "appointments",
+  "patients",
+  "revenue",
+  "performance",
+  "dashboard",
+];
+
 // Create and export the filter store
 export const useFilterStore = create<FilterState>()(
   persist(
@@ -140,12 +152,76 @@ export const useFilterStore = create<FilterState>()(
 
 // Hook to get filter params for React Query
 export const useFilterParams = () => {
-  const { startDate, endDate, selectedClinics, selectedProviders } = useFilterStore();
+  const { startDate, endDate, selectedClinics, selectedProviders, timePeriod } = useFilterStore();
 
   return {
     startDate: startDate.toISOString(),
     endDate: endDate.toISOString(),
     clinicIds: selectedClinics.length > 0 ? selectedClinics.join(",") : undefined,
     providerIds: selectedProviders.length > 0 ? selectedProviders.join(",") : undefined,
+    timePeriod,
   };
+};
+
+// Helper to create URL search params from filter state
+export const createFilterUrlParams = () => {
+  const { timePeriod, startDate, endDate, selectedClinics, selectedProviders } = useFilterStore.getState();
+  const params = new URLSearchParams();
+
+  // Add time period params
+  params.set("timePeriod", timePeriod);
+  params.set("startDate", startDate.toISOString());
+  params.set("endDate", endDate.toISOString());
+
+  // Add clinic params
+  if (selectedClinics.length > 0) {
+    params.set("clinics", selectedClinics.join(","));
+  }
+
+  // Add provider params
+  if (selectedProviders.length > 0) {
+    params.set("providers", selectedProviders.join(","));
+  }
+
+  return params;
+};
+
+// Helper to parse URL params into filter state
+export const parseFilterUrlParams = (searchParams: URLSearchParams) => {
+  const { setTimePeriod, setDateRange, setSelectedClinics, setSelectedProviders } = useFilterStore.getState();
+  
+  // Parse time period
+  const urlTimePeriod = searchParams.get("timePeriod");
+  if (urlTimePeriod && ["daily", "weekly", "monthly", "quarterly", "annual", "custom"].includes(urlTimePeriod)) {
+    setTimePeriod(urlTimePeriod as TimePeriod);
+  }
+
+  // Parse date range
+  const urlStartDate = searchParams.get("startDate");
+  const urlEndDate = searchParams.get("endDate");
+  if (urlStartDate && urlEndDate) {
+    try {
+      const startDate = new Date(urlStartDate);
+      const endDate = new Date(urlEndDate);
+      
+      // Validate dates
+      if (!Number.isNaN(startDate.getTime()) && !Number.isNaN(endDate.getTime())) {
+        setDateRange(startDate, endDate);
+      }
+    } catch (error) {
+      console.error("Error parsing date params:", error);
+    }
+  }
+
+  // Parse clinics
+  const urlClinics = searchParams.get("clinics");
+  if (urlClinics) {
+    setSelectedClinics(urlClinics.split(","));
+  }
+
+  // Parse providers
+  const urlProviders = searchParams.get("providers");
+  if (urlProviders) {
+    setSelectedProviders(urlProviders.split(","));
+  }
 };
