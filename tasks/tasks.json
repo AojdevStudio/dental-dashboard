@@ -1,0 +1,197 @@
+{
+  "tasks": [
+    {
+      "id": 1,
+      "title": "Setup Project Infrastructure",
+      "description": "Initialize the Next.js project with TypeScript, configure pnpm workspaces, and set up the recommended technology stack including Tailwind CSS, shadcn/ui, and Prisma.",
+      "status": "done",
+      "dependencies": [],
+      "priority": "high",
+      "details": "Create a new Next.js project with TypeScript using `pnpm create next-app`. Configure pnpm workspaces in pnpm-workspace.yaml. Set up Tailwind CSS and shadcn/ui following their documentation. Initialize Prisma with `pnpm add prisma @prisma/client` and `npx prisma init`. Configure ESLint and Prettier. Set up the project structure according to the recommended architecture with proper separation of concerns. Create the basic folder structure for components, lib, services, utils, and other directories.",
+      "testStrategy": "Verify project builds successfully with `pnpm build`. Ensure all dependencies are correctly installed. Test that the development server runs without errors using `pnpm dev`. Validate the project structure against the recommended architecture."
+    },
+    {
+      "id": 2,
+      "title": "Implement Database Schema with Prisma",
+      "description": "Define the Prisma schema based on the specified database design and set up the connection to Supabase PostgreSQL.",
+      "status": "done",
+      "dependencies": [1],
+      "priority": "high",
+      "details": "Create the Prisma schema in prisma/schema.prisma following the database schema defined in the PRD, including all tables (Clinics, Users, Providers, MetricDefinitions, DataSources, ColumnMappings, MetricValues, Goals, Dashboards, Widgets). Configure the Prisma connection to Supabase PostgreSQL. Create initial migrations with `npx prisma migrate dev`. Set up environment variables for database connection in .env file. Implement repository pattern for data access in src/repositories/ directory.",
+      "testStrategy": "Run `npx prisma db push` to verify schema is valid. Create unit tests for repository functions. Test database connections and basic CRUD operations for each model. Verify relationships between tables work as expected."
+    },
+    {
+      "id": 3,
+      "title": "Implement Authentication with Supabase Auth",
+      "description": "Set up authentication using Supabase Auth with support for Google OAuth for the Google Sheets API integration.",
+      "status": "done",
+      "dependencies": [1, 2],
+      "priority": "high",
+      "details": "Configure Supabase Auth in the project. Create authentication components in src/components/auth/. Implement sign-in, sign-up, and sign-out functionality. Set up Google OAuth provider for Google Sheets API access. Create authentication hooks in src/hooks/useAuth.ts. Implement protected routes for dashboard pages. Set up middleware for session management in middleware.ts. Create user profile management functionality.",
+      "testStrategy": "Test user registration and login flows. Verify Google OAuth connection works correctly. Test protected routes to ensure they require authentication. Verify session persistence works as expected. Test user role-based access control."
+    },
+    {
+      "id": 4,
+      "title": "Develop Google Sheets Integration",
+      "description": "Implement the Google Sheets API integration for connecting to and extracting data from dental practice spreadsheets.",
+      "status": "done",
+      "dependencies": [3],
+      "priority": "high",
+      "details": "Register application in Google Cloud Console and enable necessary APIs. Create OAuth credentials for Google Sheets API. Implement secure token storage and refresh mechanism. Create services for spreadsheet discovery and selection in src/services/google/. Develop API endpoints for Google Sheets operations in src/app/api/google/. Build UI components for connecting to Google Sheets in src/components/google/. Implement error handling for API failures.",
+      "testStrategy": "Test OAuth flow with Google. Verify spreadsheet discovery and selection works. Test API endpoints with mock spreadsheet data. Verify error handling for various failure scenarios. Test token refresh mechanism.",
+      "subtasks": [
+        {
+          "id": 1,
+          "title": "Set up Google Cloud Project and OAuth Configuration",
+          "description": "Register the application in Google Cloud Console, enable the Google Sheets API, and create OAuth credentials for authentication.",
+          "dependencies": [],
+          "details": "1. Create a new project in Google Cloud Console (https://console.cloud.google.com/)\n2. Enable the Google Sheets API for the project\n3. Configure the OAuth consent screen with app name and developer contact information\n4. Create OAuth 2.0 credentials (client ID and client secret) with appropriate redirect URIs\n5. Store credentials securely in environment variables or a secure configuration file\n6. Create a basic authentication utility in src/services/google/auth.js that loads these credentials\n7. Test the configuration by verifying credentials load correctly\n8. Document the setup process for other developers",
+          "status": "done",
+          "parentTaskId": 4
+        },
+        {
+          "id": 2,
+          "title": "Implement Google Sheets Authentication and Token Management",
+          "description": "Create authentication flow for Google Sheets API access and implement secure token storage and refresh mechanism.",
+          "dependencies": [1],
+          "details": "1. Create src/services/google/auth.js to handle OAuth flow\n2. Implement functions to generate authorization URL for user consent\n3. Create callback handler to process OAuth response and obtain access tokens\n4. Implement secure token storage mechanism (database or encrypted storage)\n5. Build token refresh logic to handle expired tokens automatically\n6. Create middleware to verify authentication status before API calls\n7. Implement logout/disconnect functionality\n8. Add API endpoints in src/app/api/google/auth/route.js for login, callback, and logout\n9. Test the complete authentication flow including token refresh\n10. Add error handling for authentication failures",
+          "status": "done",
+          "parentTaskId": 4
+        },
+        {
+          "id": 3,
+          "title": "Develop Spreadsheet Discovery and Data Extraction Services",
+          "description": "Create services for discovering, selecting, and extracting data from Google Sheets, along with corresponding API endpoints and UI components.",
+          "dependencies": [2],
+          "details": "1. Create src/services/google/sheets.js with functions to:\n   - List available spreadsheets\n   - Get spreadsheet metadata (sheets, columns)\n   - Read data from specific sheets and ranges\n2. Implement API endpoints in src/app/api/google/sheets/route.js for these operations\n3. Build UI components in src/components/google/:\n   - SpreadsheetSelector.jsx for browsing and selecting spreadsheets\n   - SheetConnector.jsx for the connection workflow\n   - DataPreview.jsx for displaying extracted data\n4. Add error handling for API failures with appropriate user feedback\n5. Implement data validation to ensure extracted data meets expected format\n6. Add caching mechanism for frequently accessed spreadsheet data\n7. Test with various spreadsheet formats and sizes\n8. Document the API endpoints and component usage",
+          "status": "done",
+          "parentTaskId": 4
+        }
+      ]
+    },
+    {
+      "id": 5,
+      "title": "Create Column Mapping Interface",
+      "description": "Build the interface for mapping Google Sheets columns to system metrics and implement the data transformation pipeline.",
+      "status": "pending",
+      "dependencies": [4],
+      "priority": "medium",
+      "details": "Create UI components for column mapping in src/components/google/mapping/. Implement drag-and-drop functionality for mapping columns. Build services for storing and retrieving column mappings in src/services/google/. Develop data transformation pipeline in src/services/calculations/ to convert raw spreadsheet data into standardized metrics. Implement validation for column mappings. Create API endpoints for saving and updating mappings in src/app/api/google/mapping/.",
+      "testStrategy": "Test column mapping UI with sample spreadsheet data. Verify mappings are correctly saved to the database. Test data transformation with various input formats. Validate transformed data against expected output. Test error handling for invalid mappings.",
+      "subtasks": [
+        {
+          "id": 1,
+          "title": "Build Column Mapping UI Components with Drag-and-Drop",
+          "description": "Create the React components for the column mapping interface with drag-and-drop functionality that allows users to visually map Google Sheets columns to system metrics.",
+          "dependencies": [],
+          "details": "1. Create base components in src/components/google/mapping/:\n   - ColumnMappingContainer.jsx: Main container component\n   - SourceColumnList.jsx: Component to display available Google Sheets columns\n   - DestinationFieldList.jsx: Component to display system metric fields\n   - MappingItem.jsx: Individual mapping item component\n\n2. Implement drag-and-drop functionality using react-dnd or react-beautiful-dnd:\n   - Set up DnD context providers\n   - Create drag sources for source columns\n   - Create drop targets for destination fields\n   - Implement visual feedback during dragging\n\n3. Add auto-mapping functionality based on column name similarity:\n   - Implement string similarity algorithm (Levenshtein distance)\n   - Create a button to trigger auto-mapping\n   - Display suggested mappings with visual indicators\n\n4. Add validation feedback:\n   - Highlight required fields that haven't been mapped\n   - Show type mismatch warnings\n   - Implement validation status indicators\n\nTesting approach:\n- Unit tests for individual components\n- Integration tests for drag-and-drop functionality\n- Test auto-mapping with various column name patterns\n- Test validation with valid and invalid mappings",
+          "status": "pending",
+          "parentTaskId": 5
+        },
+        {
+          "id": 2,
+          "title": "Implement Mapping Storage and API Endpoints",
+          "description": "Create services and API endpoints for storing, retrieving, and managing column mappings between Google Sheets and system metrics.",
+          "dependencies": [1],
+          "details": "1. Create mapping data models in src/models/:\n   - Define ColumnMapping schema with fields for mapping configuration, source type, and metadata\n   - Implement versioning support for mapping configurations\n   - Add support for mapping templates\n\n2. Implement mapping services in src/services/google/:\n   - MappingService.js: Core service for CRUD operations on mappings\n   - TemplateService.js: Service for managing reusable mapping templates\n   - ValidationService.js: Service for validating mapping configurations\n\n3. Create API endpoints in src/app/api/google/mapping/:\n   - route.js: Define API routes\n   - GET /api/google/mapping/:id - Retrieve a specific mapping\n   - POST /api/google/mapping - Create a new mapping\n   - PUT /api/google/mapping/:id - Update an existing mapping\n   - GET /api/google/mapping/templates - List available templates\n   - POST /api/google/mapping/validate - Validate a mapping configuration\n\n4. Implement error handling and logging:\n   - Add comprehensive error handling for all API endpoints\n   - Implement request validation using middleware\n   - Set up logging for mapping operations\n\nTesting approach:\n- Unit tests for mapping services\n- API endpoint tests with mock requests\n- Integration tests for the complete mapping storage flow\n- Performance tests for large mapping configurations",
+          "status": "pending",
+          "parentTaskId": 5
+        },
+        {
+          "id": 3,
+          "title": "Develop Data Transformation Pipeline",
+          "description": "Build a robust data transformation pipeline that converts raw Google Sheets data into standardized system metrics based on user-defined column mappings.",
+          "dependencies": [1, 2],
+          "details": "1. Create transformation services in src/services/calculations/:\n   - TransformationPipeline.js: Main pipeline orchestrator\n   - DataTypeConverters.js: Utilities for type conversion\n   - ValidationRules.js: Rules for validating transformed data\n   - TransformationFunctions.js: Library of data transformation functions\n\n2. Implement core transformation logic:\n   - Create a factory pattern for generating transformers based on mapping configurations\n   - Support basic transformations (type conversion, formatting)\n   - Implement advanced transformations (conditional logic, formulas)\n   - Add support for custom transformation functions\n\n3. Add performance optimizations:\n   - Implement chunked processing for large datasets\n   - Add caching for frequently used transformations\n   - Support incremental updates for changed rows only\n   - Implement background processing for large transformations\n\n4. Create integration with Google Sheets API:\n   - Implement functions to fetch sheet data based on mapping\n   - Add support for pagination when fetching large sheets\n   - Implement error handling for API rate limits and timeouts\n   - Add retry logic for failed API requests\n\nTesting approach:\n- Unit tests for individual transformation functions\n- Integration tests with sample Google Sheets data\n- Performance tests with large datasets\n- End-to-end tests for the complete transformation pipeline\n- Error handling tests with invalid data and API failures",
+          "status": "pending",
+          "parentTaskId": 5
+        }
+      ]
+    },
+    {
+      "id": 6,
+      "title": "Implement Data Synchronization",
+      "description": "Develop the automated data synchronization system with configurable frequency and support for historical data import.",
+      "status": "pending",
+      "dependencies": [5],
+      "priority": "medium",
+      "details": "Create a synchronization service in src/services/google/ for fetching data from Google Sheets. Implement incremental update logic to avoid duplicating data. Build scheduling mechanism for automated synchronization with configurable frequency. Develop historical data import functionality. Create UI for managing synchronization settings in src/components/settings/. Implement logging and error handling for synchronization processes. Add notifications for successful/failed synchronizations.",
+      "testStrategy": "Test synchronization with various spreadsheet formats. Verify incremental updates work correctly. Test historical data import with large datasets. Verify scheduling works at different frequencies. Test error recovery mechanisms. Validate data integrity after synchronization."
+    },
+    {
+      "id": 7,
+      "title": "Develop Core Dashboard Layout",
+      "description": "Create the main dashboard layout with navigation, filtering capabilities, and user-configurable widgets.",
+      "status": "pending",
+      "dependencies": [3],
+      "priority": "high",
+      "details": "Build the main dashboard layout in src/app/(dashboard)/layout.tsx using shadcn/ui components. Implement responsive design with Tailwind CSS. Create navigation components for different dashboard sections. Develop time-period filtering (daily, weekly, monthly, quarterly, annual). Implement clinic and provider filtering. Create user-configurable dashboard with draggable widgets. Build dashboard state management using React Query and Zustand. Implement dashboard settings and saved views functionality.",
+      "testStrategy": "Test responsive layout on different screen sizes. Verify navigation works correctly between sections. Test filtering functionality with sample data. Verify widget customization and layout persistence. Test dashboard state management with various user interactions.",
+      "subtasks": [
+        {
+          "id": 1,
+          "title": "Implement Base Dashboard Layout with Navigation",
+          "description": "Create the foundational dashboard layout structure with responsive design and navigation components using shadcn/ui and Tailwind CSS.",
+          "dependencies": [],
+          "details": "1. Set up the base layout in src/app/(dashboard)/layout.tsx with a responsive container using Tailwind CSS grid/flex.\n2. Implement a sidebar navigation pattern with links to different dashboard sections (overview, analytics, reports, settings).\n3. Create a responsive header with user profile, notifications, and global actions.\n4. Ensure the layout adapts to different screen sizes using Tailwind's responsive classes.\n5. Add a breadcrumb component for navigation context.\n6. Implement collapsible sidebar functionality for mobile views.\n7. Test the layout across different viewport sizes to ensure proper responsiveness.\n8. Create placeholder content areas that will later house the widgets and filtering components.",
+          "status": "pending",
+          "parentTaskId": 7
+        },
+        {
+          "id": 2,
+          "title": "Develop Dashboard Filtering System",
+          "description": "Build comprehensive filtering capabilities including time-period, clinic, and provider filters with state management using React Query and Zustand.",
+          "dependencies": [1],
+          "details": "1. Create a FilterContext using Zustand to manage filter state across components.\n2. Implement time-period filtering component with options for daily, weekly, monthly, quarterly, and annual views.\n3. Develop clinic filter component with multi-select capabilities.\n4. Build provider filter component with search and selection functionality.\n5. Create a FilterBar component to house all filters in an accessible, collapsible interface.\n6. Implement URL-based filtering to allow sharing specific dashboard views by encoding filter states in URL parameters.\n7. Add filter persistence using localStorage to remember user's last-used filters.\n8. Connect filters to React Query's queryClient to invalidate and refetch data when filters change.\n9. Test filter combinations to ensure they work correctly together.\n10. Add clear filters and reset to default functionality.",
+          "status": "pending",
+          "parentTaskId": 7
+        },
+        {
+          "id": 3,
+          "title": "Create User-Configurable Widget System",
+          "description": "Develop a flexible widget framework that allows users to customize their dashboard with draggable, resizable widgets and saved views.",
+          "dependencies": [1, 2],
+          "details": "1. Implement a grid-based widget layout using React Grid Layout library.\n2. Create a base Widget component that handles common widget functionality (dragging, resizing, settings).\n3. Develop widget state management using Zustand to track widget positions, sizes, and configurations.\n4. Implement widget types for different data visualizations (charts, tables, metrics).\n5. Add widget communication pattern using an event bus to allow widgets to interact with each other.\n6. Create widget settings modal for customizing individual widget appearance and data sources.\n7. Implement dashboard settings panel for global configuration options.\n8. Build saved views functionality to allow users to save and load different dashboard configurations.\n9. Add widget persistence using localStorage or backend API.\n10. Implement widget drag-and-drop from a widget library/palette.\n11. Test widget interactions, ensuring they respond correctly to filter changes and maintain state during dashboard reconfiguration.",
+          "status": "pending",
+          "parentTaskId": 7
+        }
+      ]
+    },
+    {
+      "id": 8,
+      "title": "Implement KPI Visualization Components",
+      "description": "Develop the chart components for visualizing different types of KPIs using Recharts.",
+      "status": "pending",
+      "dependencies": [6, 7],
+      "priority": "medium",
+      "details": "Create reusable chart components in src/components/charts/ using Recharts. Implement different chart types as specified in the PRD (line charts, bar charts, pie charts, gauge charts, etc.). Build KPI-specific visualization components in src/components/metrics/. Implement interactive features like tooltips, zooming, and drill-down. Create responsive charts that adapt to different screen sizes. Develop goal visualization with target lines/values. Implement chart export functionality for PDF/CSV.",
+      "testStrategy": "Test each chart type with sample data. Verify interactive features work as expected. Test responsiveness on different screen sizes. Verify goal visualization works correctly. Test export functionality for different formats. Validate chart appearance against design specifications."
+    },
+    {
+      "id": 9,
+      "title": "Develop KPI Calculation Services",
+      "description": "Implement the business logic for calculating and aggregating KPIs from the raw data.",
+      "status": "pending",
+      "dependencies": [6],
+      "priority": "high",
+      "details": "Create KPI calculation services in src/services/KPIs/ for different metric categories (financial, patient, appointment, provider, treatment). Implement business rules for metric calculations. Develop aggregation logic for different time periods. Create goal tracking and variance reporting functionality. Implement trend analysis with historical comparisons. Build API endpoints for retrieving calculated KPIs in src/app/api/KPIs/. Optimize performance for complex calculations.",
+      "testStrategy": "Create unit tests for each KPI calculation. Verify calculations match expected results with test data. Test aggregation logic for different time periods. Verify goal tracking and variance calculations. Test performance with large datasets. Validate API endpoints return correct data."
+    },
+    {
+      "id": 10,
+      "title": "Implement Role-Based Dashboards",
+      "description": "Create role-specific dashboard templates for different user types (Office Managers, Dentists/Providers, Front Desk Staff).",
+      "status": "pending",
+      "dependencies": [7, 8, 9],
+      "priority": "low",
+      "details": "Design and implement dashboard templates for each user role in src/components/dashboards/. Create default widget configurations for different roles. Implement role-based access control for metrics and visualizations. Build template selection interface for new users. Develop user preference storage for dashboard customizations. Create API endpoints for managing dashboard templates in src/app/api/dashboards/. Implement dashboard sharing functionality between users.",
+      "testStrategy": "Test dashboard templates for each user role. Verify role-based access control works correctly. Test template selection and customization. Verify user preferences are correctly saved and loaded. Test dashboard sharing between users. Validate that each role sees appropriate metrics and visualizations."
+    }
+  ],
+  "metadata": {
+    "projectName": "Dental Practice Analytics Dashboard",
+    "totalTasks": 10,
+    "sourceFile": "prd.txt",
+    "generatedAt": "2023-11-14"
+  }
+}

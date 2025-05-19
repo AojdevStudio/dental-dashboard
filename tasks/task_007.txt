@@ -1,0 +1,57 @@
+# Task ID: 7
+# Title: Develop Core Dashboard Layout
+# Status: pending
+# Dependencies: 3
+# Priority: high
+# Description: Create the main dashboard layout with navigation, filtering capabilities, and user-configurable widgets.
+# Details:
+Build the main dashboard layout in src/app/(dashboard)/layout.tsx using shadcn/ui components. Implement responsive design with Tailwind CSS. Create navigation components for different dashboard sections. Develop time-period filtering (daily, weekly, monthly, quarterly, annual). Implement clinic and provider filtering. Create user-configurable dashboard with draggable widgets. Build dashboard state management using React Query and Zustand. Implement dashboard settings and saved views functionality.
+
+# Test Strategy:
+Test responsive layout on different screen sizes. Verify navigation works correctly between sections. Test filtering functionality with sample data. Verify widget customization and layout persistence. Test dashboard state management with various user interactions.
+
+# Subtasks:
+## 1. Implement Base Dashboard Layout with Navigation [pending]
+### Dependencies: None
+### Description: Create the foundational dashboard layout structure with responsive design and navigation components using shadcn/ui and Tailwind CSS.
+### Details:
+1. Set up the base layout in src/app/(dashboard)/layout.tsx with a responsive container using Tailwind CSS grid/flex.
+2. Implement a sidebar navigation pattern with links to different dashboard sections (overview, analytics, reports, settings).
+3. Create a responsive header with user profile, notifications, and global actions.
+4. Ensure the layout adapts to different screen sizes using Tailwind's responsive classes.
+5. Add a breadcrumb component for navigation context.
+6. Implement collapsible sidebar functionality for mobile views.
+7. Test the layout across different viewport sizes to ensure proper responsiveness.
+8. Create placeholder content areas that will later house the widgets and filtering components.
+
+## 2. Develop Dashboard Filtering System [pending]
+### Dependencies: 7.1
+### Description: Build comprehensive filtering capabilities including time-period, clinic, and provider filters with state management using React Query and Zustand.
+### Details:
+1. Create a FilterContext using Zustand to manage filter state across components.
+2. Implement time-period filtering component with options for daily, weekly, monthly, quarterly, and annual views.
+3. Develop clinic filter component with multi-select capabilities.
+4. Build provider filter component with search and selection functionality.
+5. Create a FilterBar component to house all filters in an accessible, collapsible interface.
+6. Implement URL-based filtering to allow sharing specific dashboard views by encoding filter states in URL parameters.
+7. Add filter persistence using localStorage to remember user's last-used filters.
+8. Connect filters to React Query's queryClient to invalidate and refetch data when filters change.
+9. Test filter combinations to ensure they work correctly together.
+10. Add clear filters and reset to default functionality.
+
+## 3. Create User-Configurable Widget System [pending]
+### Dependencies: 7.1, 7.2
+### Description: Develop a flexible widget framework that allows users to customize their dashboard with draggable, resizable widgets and saved views.
+### Details:
+1. Implement a grid-based widget layout using React Grid Layout library.
+2. Create a base Widget component that handles common widget functionality (dragging, resizing, settings).
+3. Develop widget state management using Zustand to track widget positions, sizes, and configurations.
+4. Implement widget types for different data visualizations (charts, tables, metrics).
+5. Add widget communication pattern using an event bus to allow widgets to interact with each other.
+6. Create widget settings modal for customizing individual widget appearance and data sources.
+7. Implement dashboard settings panel for global configuration options.
+8. Build saved views functionality to allow users to save and load different dashboard configurations.
+9. Add widget persistence using localStorage or backend API.
+10. Implement widget drag-and-drop from a widget library/palette.
+11. Test widget interactions, ensuring they respond correctly to filter changes and maintain state during dashboard reconfiguration.
+

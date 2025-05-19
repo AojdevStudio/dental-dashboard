@@ -1,0 +1,11 @@
+# Task ID: 2
+# Title: Implement Database Schema with Prisma
+# Status: done
+# Dependencies: 1
+# Priority: high
+# Description: Define the Prisma schema based on the specified database design and set up the connection to Supabase PostgreSQL.
+# Details:
+Create the Prisma schema in prisma/schema.prisma following the database schema defined in the PRD, including all tables (Clinics, Users, Providers, MetricDefinitions, DataSources, ColumnMappings, MetricValues, Goals, Dashboards, Widgets). Configure the Prisma connection to Supabase PostgreSQL. Create initial migrations with `npx prisma migrate dev`. Set up environment variables for database connection in .env file. Implement repository pattern for data access in src/repositories/ directory.
+
+# Test Strategy:
+Run `npx prisma db push` to verify schema is valid. Create unit tests for repository functions. Test database connections and basic CRUD operations for each model. Verify relationships between tables work as expected.
