@@ -642,7 +642,7 @@ dental-dashboard/
 ├── package.json            # Root package configuration
 ├── .env                    # Environment variables (includes NEXT_PUBLIC_SUPABASE_URL, NEXT_PUBLIC_SUPABASE_ANON_KEY)
 ├── .env.example            # Example environment variables
-├── .eslintrc.js            # ESLint configuration
+├── biome.json              # Biome configuration
 ├── next.config.js          # Next.js configuration
 ├── middleware.ts           # Supabase auth session middleware
 ├── prisma/                 # Prisma database schemas and migrations
@@ -660,16 +660,16 @@ dental-dashboard/
 ├── src/                    # Application source code
 │   ├── app/                # Next.js app directory (App Router)
 │   │   ├── api/            # API routes
-│   │   │   ├── auth/       # Authentication routes
-│   │   │   │   └── callback/route.ts  # Auth callback handler
 │   │   │   ├── clinics/    # Clinic-related endpoints
 │   │   │   ├── dashboards/ # Dashboard configuration endpoints
 │   │   │   ├── google/     # Google Sheets integration endpoints
 │   │   │   ├── KPIs/       # Metrics and KPI endpoints
 │   │   │   └── users/      # User management endpoints
 │   │   ├── auth/           # Authentication-related pages
-│   │   │   ├── signin/     # Sign in page
+│   │   │   ├── login/     # Sign in page
 │   │   │   ├── signup/     # Sign up page
+│   │   │   ├── reset-password/ # Reset password page
+│   │   │   ├── auth-error/ # Auth error page
 │   │   │   └── callback/route.ts # Auth callback handler
 │   │   ├── (dashboard)/    # Dashboard pages (protected routes)
 │   │   │   ├── page.tsx    # Main dashboard page

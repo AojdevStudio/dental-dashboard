@@ -44,8 +44,10 @@ dental-dashboard/
 │   │   │   ├── KPIs/       # Metrics and KPI endpoints
 │   │   │   └── users/      # User management endpoints
 │   │   ├── auth/           # Authentication-related pages
-│   │   │   ├── signin/     # Sign in page
+│   │   │   ├── login/     # Sign in page
 │   │   │   ├── signup/     # Sign up page
+│   │   │   ├── reset-password/ # Reset password page
+│   │   │   ├── auth-error/ # Auth error page
 │   │   │   └── callback/route.ts # Auth callback handler
 │   │   ├── (dashboard)/    # Dashboard pages (protected routes)
 │   │   │   ├── page.tsx    # Main dashboard page

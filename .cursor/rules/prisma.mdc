@@ -3,7 +3,6 @@ description: Prisma usage guidelines for data access
 globs: 
 alwaysApply: false
 ---
-
 # Prisma Usage
 
 ## Data Access Policy
@@ -25,6 +24,32 @@ import prisma from "@/utils/prisma";
 
 The Prisma schema is located at: `dental-dashboard/prisma/schema.prisma`.
 
+## Schema Updates
+
+### Fast Development Updates
+
+For faster development workflows, use the shortcut command:
+
+```bash
+pnpm prisma:push
+```
+
+This custom script runs `prisma db push` and offers these benefits:
+- It's significantly faster for iterative development
+- Requires less typing than the full command
+- Avoids creating migration history files when you're just iterating on schema changes
+- Immediately syncs your database with schema changes
+
+### Production/Versioned Updates
+
+For tracked schema changes (recommended for production or when changes need to be versioned):
+
+```bash
+pnpm prisma migrate dev --name your_descriptive_name
+```
+
+This creates proper migration files that can be tracked in version control and safely applied in production environments.
+
 ## Best Practices
 
 - Use Prisma's type-safe queries to ensure data integrity
@@ -36,6 +61,7 @@ The Prisma schema is located at: `dental-dashboard/prisma/schema.prisma`.
 ## Examples
 
 ### Reading Data with Relations
+
 ```typescript
 // In a service file
 export async function getClinicWithProviders(id: string) {

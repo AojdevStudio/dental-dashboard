@@ -1,22 +1,68 @@
 "use client";
 
 import * as React from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { createBrowserClient } from "@supabase/ssr";
 import { Button } from "./button";
 import { Input } from "./input";
 
 export function PasswordResetConfirm() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const token = searchParams.get("token");
+
   const [password, setPassword] = React.useState("");
   const [confirmPassword, setConfirmPassword] = React.useState("");
   const [error, setError] = React.useState("");
   const [success, setSuccess] = React.useState("");
   const [isLoading, setIsLoading] = React.useState(false);
+  const [tokenValid, setTokenValid] = React.useState(false);
+  const [validating, setValidating] = React.useState(true);
+
+  // Validate token on component mount
+  React.useEffect(() => {
+    const validateToken = async () => {
+      if (!token) {
+        setValidating(false);
+        return;
+      }
+
+      try {
+        const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+        const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+
+        if (!supabaseUrl || !supabaseAnonKey) {
+          throw new Error("Missing Supabase environment variables");
+        }
+
+        const supabase = createBrowserClient(supabaseUrl, supabaseAnonKey);
+
+        // Verify the token is valid by checking the session
+        const { data, error } = await supabase.auth.getSession();
+
+        if (error || !data.session) {
+          throw new Error("Invalid or expired reset token");
+        }
+
+        setTokenValid(true);
+      } catch (err) {
+        setError(err instanceof Error ? err.message : "Invalid reset token");
+      } finally {
+        setValidating(false);
+      }
+    };
+
+    validateToken();
+  }, [token]);
 
   const handleResetPassword = async () => {
     setError("");
     setSuccess("");
+
+    if (!token || !tokenValid) {
+      setError("Invalid or missing reset token. Please request a new password reset link.");
+      return;
+    }
 
     if (!password || !confirmPassword) {
       setError("Please fill in all fields.");
@@ -68,6 +114,65 @@ export function PasswordResetConfirm() {
     }
   };
 
+  // Render loading state while validating token
+  if (validating) {
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center bg-[#121212] relative overflow-hidden w-full rounded-xl">
+        <div className="relative z-10 w-full max-w-sm rounded-3xl bg-gradient-to-r from-[#ffffff10] to-[#121212] backdrop-blur-sm shadow-2xl p-8 flex flex-col items-center">
+          <div className="flex items-center justify-center w-24 h-24 rounded-full bg-white/20 mb-6 shadow-lg">
+            <img
+              src="/logo.svg"
+              alt="Unified Dental Dashboard Logo"
+              width="64"
+              height="64"
+              className="w-16 h-16"
+            />
+          </div>
+          <h2 className="text-2xl font-semibold text-white mb-6 text-center">
+            Validating Reset Link
+          </h2>
+          <div className="flex justify-center items-center p-4">
+            <div className="w-8 h-8 border-2 border-white border-t-transparent rounded-full animate-spin" />
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Render error state if token is invalid or missing
+  if (!validating && (!token || !tokenValid)) {
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center bg-[#121212] relative overflow-hidden w-full rounded-xl">
+        <div className="relative z-10 w-full max-w-sm rounded-3xl bg-gradient-to-r from-[#ffffff10] to-[#121212] backdrop-blur-sm shadow-2xl p-8 flex flex-col items-center">
+          <div className="flex items-center justify-center w-24 h-24 rounded-full bg-white/20 mb-6 shadow-lg">
+            <img
+              src="/logo.svg"
+              alt="Unified Dental Dashboard Logo"
+              width="64"
+              height="64"
+              className="w-16 h-16"
+            />
+          </div>
+          <h2 className="text-2xl font-semibold text-white mb-6 text-center">Invalid Reset Link</h2>
+          <div className="text-center mb-6">
+            <p className="text-red-400 mb-4">
+              {error || "Your password reset link is invalid or has expired."}
+            </p>
+            <p className="text-gray-300">Please request a new password reset link.</p>
+          </div>
+          <Button
+            type="button"
+            onClick={() => router.push("/auth/reset-password")}
+            className="w-full bg-white/10 text-white font-medium px-5 py-3 rounded-full shadow hover:bg-white/20 transition mb-3 text-sm"
+          >
+            Request New Reset Link
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
+  // Render password reset form if token is valid
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-[#121212] relative overflow-hidden w-full rounded-xl">
       {/* Centered glass card */}
