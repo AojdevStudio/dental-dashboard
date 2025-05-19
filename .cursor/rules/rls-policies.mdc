@@ -3,11 +3,6 @@ description: Guidelines for writing Postgres Row Level Security policies
 globs: 
 alwaysApply: false
 ---
----
-# Specify the following for Cursor rules
-description: Guidelines for writing Postgres Row Level Security policies
-alwaysApply: false
----
 
 # Database: Create RLS policies
 
