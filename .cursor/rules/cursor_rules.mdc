@@ -3,7 +3,6 @@ description: Guidelines for creating and maintaining Cursor rules to ensure cons
 globs: .cursor/rules/*.mdc
 alwaysApply: true
 ---
-
 - **Required Rule Structure:**
   ```markdown
   ---
@@ -16,6 +15,11 @@ alwaysApply: true
     - Sub-points with details
     - Examples and explanations
   ```
+
+- **Rule Organization:**
+  - Rules are stored in the `.cursor/rules` directory.
+  - To maintain clarity, rules are further organized into subdirectories based on their category (e.g., `.agent`, `.stack`, `.structure`, `.ui`, `riper`).
+  - General rules or those that don't fit a specific category can reside directly in `.cursor/rules`.
 
 - **File References:**
   - Use `[filename](mdc:path/to/file)` ([filename](mdc:filename)) to reference files

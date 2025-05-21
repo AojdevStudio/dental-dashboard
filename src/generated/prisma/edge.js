@@ -264,7 +264,7 @@ const config = {
       "value": "prisma-client-js"
     },
     "output": {
-      "value": "/Users/aojdevstudio/unified-dental-projects/dashboardV4/dental-dashboard/src/generated/prisma",
+      "value": "/Users/ossieirondi/Projects/kamdental/dental-dashboard/src/generated/prisma",
       "fromEnvVar": null
     },
     "config": {
@@ -278,7 +278,7 @@ const config = {
       }
     ],
     "previewFeatures": [],
-    "sourceFilePath": "/Users/aojdevstudio/unified-dental-projects/dashboardV4/dental-dashboard/prisma/schema.prisma",
+    "sourceFilePath": "/Users/ossieirondi/Projects/kamdental/dental-dashboard/prisma/schema.prisma",
     "isCustomOutput": true
   },
   "relativeEnvPaths": {

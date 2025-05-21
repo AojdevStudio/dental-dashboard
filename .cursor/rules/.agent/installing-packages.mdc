@@ -1,7 +1,7 @@
 ---
-description: How to install packages
+description: 
 globs: 
-alwaysApply: false
+alwaysApply: true
 ---
 ---
 description: How to install packages
