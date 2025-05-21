@@ -16,7 +16,12 @@ import { Badge } from "@/components/ui/badge";
 import { TimePeriodFilter } from "./TimePeriodFilter";
 import { ClinicFilter } from "./ClinicFilter";
 import { ProviderFilter } from "./ProviderFilter";
-import { useFilterStore, filterDependentQueries, createFilterUrlParams, parseFilterUrlParams } from "@/hooks/useFilterStore";
+import {
+  useFilterStore,
+  filterDependentQueries,
+  createFilterUrlParams,
+  parseFilterUrlParams,
+} from "@/hooks/useFilterStore";
 import { useQueryClient } from "@tanstack/react-query";
 import { useState, useEffect, useRef, useCallback } from "react";
 import { AnimatePresence, motion } from "framer-motion";
@@ -58,21 +63,21 @@ export function FilterBar() {
 
   // We use a ref to track filter changes without creating effect dependencies
   const filtersRef = useRef({ timePeriod, startDate, endDate, selectedClinics, selectedProviders });
-  
+
   // Update URL and invalidate queries when filter state changes
   useEffect(() => {
     // Check if filters have actually changed
     const prevFilters = filtersRef.current;
-    const filtersChanged = 
+    const filtersChanged =
       prevFilters.timePeriod !== timePeriod ||
       prevFilters.startDate !== startDate ||
       prevFilters.endDate !== endDate ||
       prevFilters.selectedClinics !== selectedClinics ||
       prevFilters.selectedProviders !== selectedProviders;
-      
+
     // Update ref
     filtersRef.current = { timePeriod, startDate, endDate, selectedClinics, selectedProviders };
-    
+
     // Only update URL and invalidate queries if filters have changed
     if (filtersChanged) {
       // Don't update URL on initial render
@@ -92,21 +97,33 @@ export function FilterBar() {
 
       return () => clearTimeout(timeoutId);
     }
-    
+
     return undefined;
-  }, [queryClient, updateUrlParams, timePeriod, startDate, endDate, selectedClinics, selectedProviders]);
-  
+  }, [
+    queryClient,
+    updateUrlParams,
+    timePeriod,
+    startDate,
+    endDate,
+    selectedClinics,
+    selectedProviders,
+  ]);
+
   // Handle clicks outside the filter bar to collapse it when expanded
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (filterBarRef.current && !filterBarRef.current.contains(event.target as Node) && isExpanded) {
+      if (
+        filterBarRef.current &&
+        !filterBarRef.current.contains(event.target as Node) &&
+        isExpanded
+      ) {
         setIsExpanded(false);
       }
     };
 
-    document.addEventListener('mousedown', handleClickOutside);
+    document.addEventListener("mousedown", handleClickOutside);
     return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener("mousedown", handleClickOutside);
     };
   }, [isExpanded]);
 
@@ -114,9 +131,9 @@ export function FilterBar() {
   const activeFilterCount = [
     timePeriod !== "monthly", // Assuming monthly is default
     selectedClinics.length > 0,
-    selectedProviders.length > 0
+    selectedProviders.length > 0,
   ].filter(Boolean).length;
-  
+
   // Check if any filter is active
   const hasActiveFilters = activeFilterCount > 0;
 
@@ -131,7 +148,7 @@ export function FilterBar() {
     resetToDefaults();
     // Keep the filter panel open
   };
-  
+
   // Handle applying filters and closing the panel
   const handleApplyFilters = () => {
     setIsExpanded(false);
@@ -200,9 +217,9 @@ export function FilterBar() {
             transition={{ duration: 0.2 }}
           >
             <CardContent className="pb-4">
-              <Accordion 
-                type="single" 
-                collapsible 
+              <Accordion
+                type="single"
+                collapsible
                 value={activeAccordion || undefined}
                 onValueChange={setActiveAccordion}
                 className="w-full"
@@ -253,17 +270,17 @@ export function FilterBar() {
               <Separator className="my-4" />
 
               <div className="flex justify-end gap-2">
-                <Button 
-                  variant="outline" 
-                  size="sm" 
+                <Button
+                  variant="outline"
+                  size="sm"
                   onClick={() => setIsExpanded(false)}
                   aria-label="Close filter panel"
                 >
                   Cancel
                 </Button>
-                <Button 
-                  variant="default" 
-                  size="sm" 
+                <Button
+                  variant="default"
+                  size="sm"
                   onClick={handleApplyFilters}
                   aria-label="Apply filters and close panel"
                 >

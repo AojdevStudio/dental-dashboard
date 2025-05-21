@@ -165,7 +165,8 @@ export const useFilterParams = () => {
 
 // Helper to create URL search params from filter state
 export const createFilterUrlParams = () => {
-  const { timePeriod, startDate, endDate, selectedClinics, selectedProviders } = useFilterStore.getState();
+  const { timePeriod, startDate, endDate, selectedClinics, selectedProviders } =
+    useFilterStore.getState();
   const params = new URLSearchParams();
 
   // Add time period params
@@ -188,11 +189,15 @@ export const createFilterUrlParams = () => {
 
 // Helper to parse URL params into filter state
 export const parseFilterUrlParams = (searchParams: URLSearchParams) => {
-  const { setTimePeriod, setDateRange, setSelectedClinics, setSelectedProviders } = useFilterStore.getState();
-  
+  const { setTimePeriod, setDateRange, setSelectedClinics, setSelectedProviders } =
+    useFilterStore.getState();
+
   // Parse time period
   const urlTimePeriod = searchParams.get("timePeriod");
-  if (urlTimePeriod && ["daily", "weekly", "monthly", "quarterly", "annual", "custom"].includes(urlTimePeriod)) {
+  if (
+    urlTimePeriod &&
+    ["daily", "weekly", "monthly", "quarterly", "annual", "custom"].includes(urlTimePeriod)
+  ) {
     setTimePeriod(urlTimePeriod as TimePeriod);
   }
 
@@ -203,7 +208,7 @@ export const parseFilterUrlParams = (searchParams: URLSearchParams) => {
     try {
       const startDate = new Date(urlStartDate);
       const endDate = new Date(urlEndDate);
-      
+
       // Validate dates
       if (!Number.isNaN(startDate.getTime()) && !Number.isNaN(endDate.getTime())) {
         setDateRange(startDate, endDate);
