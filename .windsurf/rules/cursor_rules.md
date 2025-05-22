@@ -1,7 +1,7 @@
 ---
+trigger: always_on
 description: Guidelines for creating and maintaining Cursor rules to ensure consistency and effectiveness.
 globs: .cursor/rules/*.mdc
-alwaysApply: true
 ---
 - **Required Rule Structure:**
   ```markdown

@@ -1,7 +1,7 @@
 ---
-description: This rule explains how to create and update an analytics.md file to track how often .mdc rules is being used.
-globs: *
-alwaysApply: false
+trigger: always_on
+description: 
+globs: 
 ---
 
 # Cursor Rules Analytics

@@ -1,7 +1,7 @@
 ---
-description: How to install packages
+trigger: always_on
+description: 
 globs: 
-alwaysApply: false
 ---
 ---
 description: How to install packages

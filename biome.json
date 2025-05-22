@@ -33,6 +33,13 @@
   },
   "files": {
     "maxSize": 2000000,
-    "ignore": [".next/**", "node_modules/**", "public/**", "**/generated/**", "turbo.json"]
+    "ignore": [
+      ".next/**",
+      "node_modules/**",
+      "public/**",
+      "**/generated/**",
+      "turbo.json",
+      "**/*.md"
+    ]
   }
 }
