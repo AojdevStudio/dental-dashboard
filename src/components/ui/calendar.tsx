@@ -9,6 +9,16 @@ import { buttonVariants } from "@/components/ui/button";
 
 export type CalendarProps = React.ComponentProps<typeof DayPicker>;
 
+/**
+ * Props type for the Chevron component used in the calendar
+ */
+type ChevronProps = {
+  orientation?: "left" | "right" | "up" | "down";
+  className?: string;
+  size?: number;
+  disabled?: boolean;
+} & React.SVGProps<SVGSVGElement>;
+
 function Calendar({
   className,
   classNames,
@@ -44,21 +54,27 @@ function Calendar({
     week_number: "size-9 p-0 text-xs font-medium text-muted-foreground/80",
   };
 
-  const mergedClassNames: typeof defaultClassNames = Object.keys(defaultClassNames).reduce(
-    (acc, key) => ({
-      ...acc,
-      [key]: classNames?.[key as keyof typeof classNames]
-        ? cn(
-            defaultClassNames[key as keyof typeof defaultClassNames],
-            classNames[key as keyof typeof classNames]
-          )
-        : defaultClassNames[key as keyof typeof defaultClassNames],
-    }),
+  /**
+   * Merges default class names with user-provided class names
+   * Optimized implementation to avoid accumulator spread for better performance
+   */
+  const mergedClassNames: typeof defaultClassNames = Object.keys(defaultClassNames).reduce<
+    typeof defaultClassNames
+  >(
+    (acc, key) => {
+      const k = key as keyof typeof defaultClassNames;
+      acc[k] = classNames?.[k] ? cn(defaultClassNames[k], classNames[k]) : defaultClassNames[k];
+      return acc;
+    },
     {} as typeof defaultClassNames
   );
 
+  /**
+   * Default components used in the calendar
+   * Using proper type definition instead of any
+   */
   const defaultComponents = {
-    Chevron: (props: any) => {
+    Chevron: (props: ChevronProps) => {
       if (props.orientation === "left") {
         return <ChevronLeft size={16} strokeWidth={2} {...props} aria-hidden="true" />;
       }

@@ -1,3 +1,18 @@
+/**
+ * Dashboard Layout Component
+ * 
+ * This client-side component provides the main layout structure for all dashboard pages.
+ * It implements a responsive design with the following features:
+ * - A collapsible sidebar navigation menu (SessionNavBar)
+ * - Dynamic breadcrumb navigation that updates based on the current route
+ * - Mobile-friendly header with menu toggle, search, and notification buttons
+ * - Responsive grid layout for dashboard content
+ * 
+ * The layout maintains consistent UI elements across all dashboard pages while allowing
+ * child components to be rendered in the main content area. It handles responsive behavior
+ * for different screen sizes, ensuring a good user experience on both mobile and desktop devices.
+ */
+
 "use client";
 
 import { SessionNavBar } from "@/components/ui/sidebar";
@@ -14,6 +29,16 @@ import { Button } from "@/components/ui/button";
 import { useState, useEffect } from "react";
 import { usePathname } from "next/navigation";
 
+/**
+ * Dashboard Layout Component
+ * 
+ * Provides the main layout structure for all dashboard pages, including navigation,
+ * header controls, and a responsive grid for content.
+ * 
+ * @param {Object} props - Component props
+ * @param {React.ReactNode} props.children - The child components to render in the main content area
+ * @returns {JSX.Element} The rendered dashboard layout with the provided children
+ */
 export default function DashboardLayout({
   children,
 }: Readonly<{
@@ -23,7 +48,10 @@ export default function DashboardLayout({
   const [breadcrumbItems, setBreadcrumbItems] = useState<string[]>([]);
   const pathname = usePathname();
 
-  // Generate breadcrumb items based on pathname
+  /**
+   * Generates breadcrumb navigation items based on the current URL path
+   * Splits the pathname into segments and updates the breadcrumbItems state
+   */
   useEffect(() => {
     if (pathname) {
       const pathSegments = pathname.split("/").filter(Boolean);

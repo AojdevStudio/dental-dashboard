@@ -1,10 +1,37 @@
+/**
+ * Authentication Error Page
+ * 
+ * This page is displayed when an authentication error occurs during the sign-in,
+ * sign-up, or password reset process. It provides users with information about
+ * possible causes of the error and options to navigate back to the login or
+ * signup pages.
+ * 
+ * This page is typically reached when:
+ * - An authentication link has expired
+ * - A link has already been used
+ * - There's an invalid token or other authentication parameters
+ * - The OAuth provider returns an error
+ */
+
 import type { Metadata } from "next";
 
+/**
+ * Metadata for the Authentication Error page
+ * Defines the page title and description for SEO and browser tabs
+ */
 export const metadata: Metadata = {
   title: "Authentication Error",
   description: "Something went wrong during authentication",
 };
 
+/**
+ * Authentication Error Page Component
+ * 
+ * Displays a user-friendly error message explaining potential causes of the
+ * authentication failure and provides navigation options to retry the process.
+ * 
+ * @returns {JSX.Element} The rendered Authentication Error page
+ */
 export default function AuthErrorPage() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-[#121212]">

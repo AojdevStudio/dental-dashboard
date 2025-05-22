@@ -1,12 +1,40 @@
+/**
+ * Google Authentication Logout API Route
+ * 
+ * This API route handles disconnecting a Google Sheets data source from the application.
+ * It revokes the access token with Google's authentication server and updates the
+ * data source record in the database to reflect the disconnected state. This endpoint
+ * is typically called when a user wants to remove Google Sheets integration from their account.
+ */
+
 import { NextResponse } from "next/server";
 import { revokeToken } from "@/services/google/auth";
 import { PrismaClient } from "@prisma/client";
 
+/**
+ * Prisma client instance for database operations
+ * @type {PrismaClient}
+ */
 const prisma = new PrismaClient();
 
 /**
- * Handles disconnecting a Google Sheets data source
- * Revokes token and updates database records
+ * Handles POST requests to disconnect a Google Sheets data source.
+ * Revokes the access token with Google and updates the database record.
+ * 
+ * The function performs the following steps:
+ * 1. Validates the dataSourceId from the request body
+ * 2. Retrieves the data source record from the database
+ * 3. Revokes the access token with Google's authentication server
+ * 4. Updates the data source record to reflect the disconnected state
+ *
+ * @param {Request} request - The incoming request object
+ *   - request.body.dataSourceId: ID of the data source to disconnect
+ * @returns {Promise<NextResponse>} JSON response indicating success or failure
+ *   - 200: Success with {success: true}
+ *   - 400: Bad request if dataSourceId is missing
+ *   - 404: Not found if the data source doesn't exist
+ *   - 500: Server error if token revocation or database update fails
+ * @throws {Error} If token revocation fails or database operations fail
  */
 export async function POST(request) {
   try {

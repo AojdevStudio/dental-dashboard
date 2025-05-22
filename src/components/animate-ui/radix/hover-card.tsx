@@ -1,3 +1,18 @@
+/**
+ * Animated Hover Card Component
+ *
+ * This component enhances the Radix UI HoverCard with smooth animations and transitions.
+ * It provides a card that appears when the user hovers over a trigger element, with
+ * configurable animation effects for entry and exit.
+ *
+ * Features:
+ * - Spring physics-based animations for natural movement
+ * - Direction-aware animations (content slides in from the appropriate side)
+ * - Compound component pattern for flexible composition
+ * - Context-based state sharing between components
+ * - Fully accessible and customizable
+ */
+
 "use client";
 
 import * as React from "react";
@@ -6,12 +21,26 @@ import { AnimatePresence, motion, type HTMLMotionProps, type Transition } from "
 
 import { cn } from "@/lib/utils";
 
+/**
+ * Type definition for the HoverCard context
+ * @typedef {Object} HoverCardContextType
+ * @property {boolean} isOpen - Whether the hover card is currently open
+ */
 type HoverCardContextType = {
   isOpen: boolean;
 };
 
+/**
+ * React context for sharing hover card state between components
+ */
 const HoverCardContext = React.createContext<HoverCardContextType | undefined>(undefined);
 
+/**
+ * Hook to access the current hover card state from context
+ *
+ * @returns {HoverCardContextType} The current hover card context value
+ * @throws {Error} If used outside of a HoverCard component
+ */
 const useHoverCard = (): HoverCardContextType => {
   const context = React.useContext(HoverCardContext);
   if (!context) {
@@ -20,8 +49,17 @@ const useHoverCard = (): HoverCardContextType => {
   return context;
 };
 
+/**
+ * Possible sides for the hover card to appear relative to the trigger
+ */
 type Side = "top" | "bottom" | "left" | "right";
 
+/**
+ * Determines the initial animation position based on which side the card appears
+ *
+ * @param {Side} side - The side where the hover card will be positioned
+ * @returns {Object} The initial offset position for the animation
+ */
 const getInitialPosition = (side: Side) => {
   switch (side) {
     case "top":
@@ -35,21 +73,37 @@ const getInitialPosition = (side: Side) => {
   }
 };
 
+/**
+ * Props for the HoverCard component
+ * Extends the props from the Radix UI HoverCard
+ */
 type HoverCardProps = React.ComponentProps<typeof HoverCardPrimitive.Root>;
 
+/**
+ * Root HoverCard component
+ *
+ * Provides context for child components and manages the open state of the hover card.
+ *
+ * @param {HoverCardProps} props - Component props
+ * @param {React.ReactNode} props.children - Child components (typically Trigger and Content)
+ * @returns {JSX.Element} The HoverCard component
+ */
 function HoverCard({ children, ...props }: HoverCardProps) {
   const [isOpen, setIsOpen] = React.useState(props?.open ?? props?.defaultOpen ?? false);
 
+  // Sync with controlled open state if provided
+  const { open } = props;
   React.useEffect(() => {
-    if (props?.open !== undefined) setIsOpen(props.open);
-  }, [props?.open]);
+    if (open !== undefined) setIsOpen(open);
+  }, [open]);
 
+  // Handle open state changes and call the provided callback
   const handleOpenChange = React.useCallback(
     (open: boolean) => {
       setIsOpen(open);
       props.onOpenChange?.(open);
     },
-    [props]
+    [props.onOpenChange] // Only depend on the onOpenChange callback, not the entire props object
   );
 
   return (
@@ -61,17 +115,48 @@ function HoverCard({ children, ...props }: HoverCardProps) {
   );
 }
 
+/**
+ * Props for the HoverCardTrigger component
+ */
 type HoverCardTriggerProps = React.ComponentProps<typeof HoverCardPrimitive.Trigger>;
 
+/**
+ * HoverCard Trigger component
+ *
+ * Renders the element that triggers the hover card to appear when hovered.
+ *
+ * @param {HoverCardTriggerProps} props - Component props
+ * @returns {JSX.Element} The hover card trigger element
+ */
 function HoverCardTrigger(props: HoverCardTriggerProps) {
   return <HoverCardPrimitive.Trigger data-slot="hover-card-trigger" {...props} />;
 }
 
+/**
+ * Props for the HoverCardContent component
+ * Extends the base content props with animation properties
+ */
 type HoverCardContentProps = React.ComponentProps<typeof HoverCardPrimitive.Content> &
   HTMLMotionProps<"div"> & {
     transition?: Transition;
   };
 
+/**
+ * HoverCard Content component with animations
+ *
+ * Renders the content of the hover card with entrance and exit animations.
+ * Uses spring physics for smooth, natural-feeling animations that adapt based on
+ * which side of the trigger the content appears.
+ *
+ * @param {HoverCardContentProps} props - Component props
+ * @param {string} [props.className] - Additional CSS classes
+ * @param {"center" | "start" | "end"} [props.align="center"] - Alignment relative to the trigger
+ * @param {Side} [props.side="bottom"] - Side of the trigger where the content appears
+ * @param {number} [props.sideOffset=4] - Offset from the trigger in pixels
+ * @param {Transition} [props.transition] - Motion transition configuration
+ * @param {React.ReactNode} props.children - Child components to render inside the content
+ * @returns {JSX.Element} The animated hover card content
+ */
 function HoverCardContent({
   className,
   align = "center",

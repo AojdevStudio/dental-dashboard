@@ -1,0 +1,30 @@
+-- =========================================================================
+-- SUPABASE ROW LEVEL SECURITY (RLS) POLICIES
+-- =========================================================================
+--
+-- This file is intended to contain SQL statements for configuring Row Level
+-- Security policies in Supabase, including:
+--
+-- 1. Table-specific RLS policy definitions
+-- 2. Security-enforcing functions
+-- 3. Role-based access control policies
+-- 4. Data visibility and modification permissions
+-- 5. Multi-tenant data isolation rules
+--
+-- USAGE INSTRUCTIONS:
+-- Add SQL statements to define RLS policies when deploying to Supabase.
+-- This file is executed during the Supabase deployment process.
+--
+-- EXAMPLE POLICY (for reference):
+--
+-- ALTER TABLE "public"."profiles" ENABLE ROW LEVEL SECURITY;
+-- 
+-- CREATE POLICY "Users can view their own profile"
+--   ON "public"."profiles"
+--   FOR SELECT
+--   USING (auth.uid() = user_id);
+--
+-- NOTE: Currently empty as RLS policies are either managed through the Supabase
+-- dashboard or not yet implemented. Add SQL statements here when custom
+-- RLS policies are needed for data security.
+-- =========================================================================

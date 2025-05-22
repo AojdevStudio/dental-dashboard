@@ -1,7 +1,20 @@
+/**
+ * @fileoverview Table Component
+ * 
+ * Accessible table components for displaying structured data
+ * with consistent styling and responsive behavior.
+ */
+
 import * as React from "react";
 
 import { cn } from "@/lib/utils";
 
+/**
+ * Main table container with overflow handling
+ * 
+ * @param {React.HTMLAttributes<HTMLTableElement>} props - Table element props
+ * @returns {JSX.Element} The table container
+ */
 const Table = React.forwardRef<HTMLTableElement, React.HTMLAttributes<HTMLTableElement>>(
   ({ className, ...props }, ref) => (
     <div className="relative w-full overflow-auto">
@@ -11,12 +24,24 @@ const Table = React.forwardRef<HTMLTableElement, React.HTMLAttributes<HTMLTableE
 );
 Table.displayName = "Table";
 
+/**
+ * Table header container for column headings
+ * 
+ * @param {React.HTMLAttributes<HTMLTableSectionElement>} props - Table header props
+ * @returns {JSX.Element} The table header element
+ */
 const TableHeader = React.forwardRef<
   HTMLTableSectionElement,
   React.HTMLAttributes<HTMLTableSectionElement>
 >(({ className, ...props }, ref) => <thead ref={ref} className={cn(className)} {...props} />);
 TableHeader.displayName = "TableHeader";
 
+/**
+ * Table body container for data rows
+ * 
+ * @param {React.HTMLAttributes<HTMLTableSectionElement>} props - Table body props
+ * @returns {JSX.Element} The table body element
+ */
 const TableBody = React.forwardRef<
   HTMLTableSectionElement,
   React.HTMLAttributes<HTMLTableSectionElement>
@@ -25,6 +50,12 @@ const TableBody = React.forwardRef<
 ));
 TableBody.displayName = "TableBody";
 
+/**
+ * Table footer for summary rows or actions
+ * 
+ * @param {React.HTMLAttributes<HTMLTableSectionElement>} props - Table footer props
+ * @returns {JSX.Element} The table footer element
+ */
 const TableFooter = React.forwardRef<
   HTMLTableSectionElement,
   React.HTMLAttributes<HTMLTableSectionElement>
@@ -40,6 +71,12 @@ const TableFooter = React.forwardRef<
 ));
 TableFooter.displayName = "TableFooter";
 
+/**
+ * Table row with hover and selection states
+ * 
+ * @param {React.HTMLAttributes<HTMLTableRowElement>} props - Table row props
+ * @returns {JSX.Element} The table row element
+ */
 const TableRow = React.forwardRef<HTMLTableRowElement, React.HTMLAttributes<HTMLTableRowElement>>(
   ({ className, ...props }, ref) => (
     <tr
@@ -54,6 +91,12 @@ const TableRow = React.forwardRef<HTMLTableRowElement, React.HTMLAttributes<HTML
 );
 TableRow.displayName = "TableRow";
 
+/**
+ * Table heading cell with styling for column headers
+ * 
+ * @param {React.ThHTMLAttributes<HTMLTableCellElement>} props - Table heading props
+ * @returns {JSX.Element} The table heading cell
+ */
 const TableHead = React.forwardRef<
   HTMLTableCellElement,
   React.ThHTMLAttributes<HTMLTableCellElement>
@@ -69,6 +112,12 @@ const TableHead = React.forwardRef<
 ));
 TableHead.displayName = "TableHead";
 
+/**
+ * Table data cell for row content
+ * 
+ * @param {React.TdHTMLAttributes<HTMLTableCellElement>} props - Table cell props
+ * @returns {JSX.Element} The table data cell
+ */
 const TableCell = React.forwardRef<
   HTMLTableCellElement,
   React.TdHTMLAttributes<HTMLTableCellElement>
@@ -84,6 +133,12 @@ const TableCell = React.forwardRef<
 ));
 TableCell.displayName = "TableCell";
 
+/**
+ * Table caption for accessible table descriptions
+ * 
+ * @param {React.HTMLAttributes<HTMLTableCaptionElement>} props - Table caption props
+ * @returns {JSX.Element} The table caption element
+ */
 const TableCaption = React.forwardRef<
   HTMLTableCaptionElement,
   React.HTMLAttributes<HTMLTableCaptionElement>
@@ -92,4 +147,7 @@ const TableCaption = React.forwardRef<
 ));
 TableCaption.displayName = "TableCaption";
 
+/**
+ * Export table components for structured data display
+ */
 export { Table, TableBody, TableCaption, TableCell, TableFooter, TableHead, TableHeader, TableRow };

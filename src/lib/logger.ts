@@ -1,11 +1,41 @@
+/**
+ * @fileoverview Application Logging System
+ * 
+ * This file implements a centralized logging system for the dental dashboard application
+ * using Winston. It provides consistent, configurable logging across different environments
+ * with appropriate log levels, formatting, and storage options.
+ * 
+ * The logger supports multiple transports (console and file-based) with environment-specific
+ * configurations and handles uncaught exceptions and unhandled promise rejections.
+ * 
+ * Log levels used:
+ * - error: Critical errors that prevent normal operation (level 0)
+ * - warn: Potential issues or unexpected situations that don't halt operation (level 1)
+ * - info: General operational messages highlighting application progress (level 2)
+ * - debug: Detailed information for development and troubleshooting (level 3)
+ */
+
 import winston from "winston";
 import { format } from "winston";
 import path from "node:path";
 
-// Determine environment
+/**
+ * Determines the current execution environment
+ * Defaults to "development" if NODE_ENV is not set
+ * 
+ * @type {string}
+ */
 const environment = process.env.NODE_ENV || "development";
 
-// Set log level based on environment
+/**
+ * Determines the appropriate log level based on the current environment
+ * 
+ * - Production: Only warnings and errors (less verbose)
+ * - Test: Information level and above
+ * - Development: All logs including debug (most verbose)
+ * 
+ * @returns {string} The appropriate log level for the current environment
+ */
 const getLogLevel = () => {
   switch (environment) {
     case "production":
@@ -17,7 +47,14 @@ const getLogLevel = () => {
   }
 };
 
-// Define custom format for human-readable logs
+/**
+ * Custom formatter for human-readable log output
+ * 
+ * Creates a readable log format with timestamp, level, message, and structured metadata.
+ * Special handling is provided for error objects and stack traces to improve readability.
+ * 
+ * @type {winston.Logform.Format}
+ */
 const humanReadableFormat = format.printf(({ level, message, timestamp, ...metadata }) => {
   // Convert metadata to a readable string, but only if it exists
   let metadataStr = "";
@@ -42,7 +79,16 @@ const humanReadableFormat = format.printf(({ level, message, timestamp, ...metad
   return `${timestamp} [${level.toUpperCase()}] ${message}${metadataStr}`;
 });
 
-// Create custom format with colors
+/**
+ * Combined log format with timestamps and colors
+ * 
+ * Combines multiple Winston formatters to create a comprehensive log format:
+ * - Timestamp in YYYY-MM-DD HH:mm:ss format
+ * - Color-coded log levels for better visual distinction
+ * - Human-readable message and metadata formatting
+ * 
+ * @type {winston.Logform.Format}
+ */
 const customFormat = format.combine(
   format.timestamp({ format: "YYYY-MM-DD HH:mm:ss" }),
   format.colorize({
@@ -56,7 +102,18 @@ const customFormat = format.combine(
   humanReadableFormat
 );
 
-// Define transports based on environment
+/**
+ * Configure Winston transport mechanisms based on environment
+ * 
+ * In all environments, logs are output to the console.
+ * In production, logs are additionally written to files with rotation policies:
+ * - error.log: Contains only error-level logs
+ * - combined.log: Contains all logs at the configured level
+ * 
+ * File logs are limited to 5MB per file with a maximum of 5 files for rotation.
+ * 
+ * @type {winston.transport[]}
+ */
 const transports = [];
 
 // Always add console transport
@@ -87,16 +144,28 @@ if (environment === "production") {
   );
 }
 
-// Create Winston logger instance
-// Note: We're using a custom 4-level system instead of Winston's default 7 levels
-// This simplifies logging categories for our application needs
+/**
+ * Create and configure the Winston logger instance
+ * 
+ * Creates a logger with:
+ * - Custom 4-level logging system (error, warn, info, debug)
+ * - Environment-appropriate log level
+ * - Custom formatting with timestamps and colors
+ * - Multiple transports based on environment
+ * - Exception handling with appropriate storage
+ * 
+ * The logger is configured to not exit on uncaught exceptions, allowing the
+ * application to potentially recover or perform cleanup operations.
+ * 
+ * @type {winston.Logger}
+ */
 const logger = winston.createLogger({
   level: getLogLevel(),
   levels: {
-    error: 0,
-    warn: 1,
-    info: 2,
-    debug: 3,
+    error: 0, // Critical errors that prevent normal operation
+    warn: 1,  // Potential issues or unexpected situations
+    info: 2,  // General operational messages
+    debug: 3, // Detailed information for development
   },
   format: customFormat,
   transports,
@@ -115,7 +184,15 @@ const logger = winston.createLogger({
   exitOnError: false,
 });
 
-// Configure unhandled promise rejection handling
+/**
+ * Configure handling for unhandled promise rejections
+ * 
+ * In production, unhandled promise rejections are logged to a dedicated file.
+ * In development and test environments, they are logged to the console.
+ * 
+ * This ensures that promise-related issues are always captured even if they're
+ * not properly caught in the application code.
+ */
 if (environment === "production") {
   logger.rejections.handle(
     new winston.transports.File({
@@ -128,4 +205,26 @@ if (environment === "production") {
   logger.rejections.handle(new winston.transports.Console());
 }
 
+/**
+ * Export the configured logger instance for use throughout the application
+ * 
+ * Usage examples:
+ * ```typescript
+ * // Basic usage
+ * logger.info("User logged in", { userId: "123" });
+ * 
+ * // Error logging with error object
+ * try {
+ *   // Some operation that might fail
+ * } catch (error) {
+ *   logger.error("Operation failed", { error, operationName: "dataSync" });
+ * }
+ * 
+ * // Different log levels
+ * logger.debug("Detailed debug information", { data: someObject });
+ * logger.warn("Configuration issue detected", { configKey: "apiUrl" });
+ * ```
+ * 
+ * @default
+ */
 export default logger;
