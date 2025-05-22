@@ -1,9 +1,34 @@
+/**
+ * @fileoverview Modern Stunning Sign Up Component
+ * 
+ * This file implements a visually enhanced sign-up component with a modern UI design.
+ * It provides email/password registration and Google OAuth sign-up options using Supabase Auth.
+ * The component includes client-side form validation, terms acceptance, loading states, and error handling.
+ */
+
 "use client";
 
 import * as React from "react";
 import { useRouter } from "next/navigation";
 import { createBrowserClient } from "@supabase/ssr";
 
+/**
+ * Modern Stunning Sign Up Component
+ * 
+ * A visually enhanced registration component that provides:
+ * - Email/password account creation
+ * - Google OAuth sign-up
+ * - Password confirmation validation
+ * - Terms and conditions acceptance
+ * - Client-side form validation
+ * - Loading states during registration
+ * - Error handling and user feedback
+ * 
+ * The component uses a dark theme with glass-morphism effects and gradient backgrounds
+ * to create a modern, visually appealing registration experience.
+ * 
+ * @returns {JSX.Element} The rendered sign-up component
+ */
 const ModernStunningSignUp = () => {
   const router = useRouter();
   const [email, setEmail] = React.useState("");
@@ -13,10 +38,34 @@ const ModernStunningSignUp = () => {
   const [error, setError] = React.useState("");
   const [isLoading, setIsLoading] = React.useState(false);
 
+  /**
+   * Validates email format using regex
+   * 
+   * Checks if the provided string matches a basic email format pattern.
+   * 
+   * @param {string} email - The email address to validate
+   * @returns {boolean} True if the email format is valid, false otherwise
+   */
   const validateEmail = (email: string) => {
     return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
   };
 
+  /**
+   * Handles email/password sign-up
+   * 
+   * Validates form inputs, then attempts to register the user with Supabase Auth.
+   * Validation includes:
+   * - All fields are filled
+   * - Email format is valid
+   * - Password meets minimum length requirement
+   * - Passwords match
+   * - Terms and conditions are accepted
+   * 
+   * On success, redirects to the login page with a success message.
+   * On failure, displays an error message.
+   * 
+   * @returns {Promise<void>} A promise that resolves when the registration process completes
+   */
   const handleSignUp = async () => {
     setError("");
     if (!email || !password || !confirmPassword) {
@@ -66,32 +115,78 @@ const ModernStunningSignUp = () => {
     }
   };
 
+  /**
+   * Handles Google OAuth sign-up
+   * 
+   * Initiates the OAuth flow with Google as the provider using Supabase Auth.
+   * On success, the user will be redirected to the callback URL and then to the dashboard.
+   * On failure, displays an error message.
+   * 
+   * This method doesn't require email/password validation or terms acceptance as
+   * these are handled within the Google OAuth flow.
+   * 
+   * @returns {Promise<void>} A promise that resolves when the OAuth process initiates
+   */
   const handleGoogleSignUp = async () => {
+    // Clear any previous errors
     setError("");
     try {
+      // Get Supabase credentials from environment variables
       const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
       const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+      
+      // Validate environment variables are present
       if (!supabaseUrl || !supabaseAnonKey) {
         throw new Error("Missing Supabase environment variables");
       }
+      
+      // Initialize Supabase client
       const supabase = createBrowserClient(supabaseUrl, supabaseAnonKey);
+      
+      // Initiate OAuth sign-up with Google
       const { error } = await supabase.auth.signInWithOAuth({
         provider: "google",
         options: {
           redirectTo: `${window.location.origin}/auth/callback`,
         },
       });
+      
       if (error) {
         throw error;
       }
+      // Note: No redirect here as OAuth flow handles the redirect automatically
     } catch (err) {
+      // Display user-friendly error message
       setError(err instanceof Error ? err.message : "Failed to sign up with Google");
     }
   };
 
+  /**
+   * Render the sign-up UI with glass-morphism design
+   * 
+   * The UI consists of:
+   * - A main container with dark background
+   * - A centered glass card with gradient background
+   * - Logo and title section
+   * - Form inputs for email, password, and password confirmation
+   * - Terms and conditions checkbox
+   * - Sign-up button with loading state
+   * - Google OAuth sign-up button
+   * - Link to sign in page
+   * - User testimonial section with avatars
+   * 
+   * The design uses modern UI principles including:
+   * - Glass-morphism effects (transparency and blur)
+   * - Gradient backgrounds
+   * - Rounded corners and subtle shadows
+   * - Loading animations
+   * - Hover effects for interactive elements
+   */
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-[#121212] relative overflow-hidden w-full rounded-xl">
+      {/* Centered glass card with gradient background and blur effect */}
       <div className="relative z-10 w-full max-w-sm rounded-3xl bg-gradient-to-r from-[#ffffff10] to-[#121212] backdrop-blur-sm shadow-2xl p-8 flex flex-col items-center">
+        {/* Logo in circular container */}
         <div className="flex items-center justify-center w-24 h-24 rounded-full bg-white/20 mb-6 shadow-lg">
           <img
             src="/logo.svg"
@@ -101,9 +196,12 @@ const ModernStunningSignUp = () => {
             className="w-16 h-16"
           />
         </div>
+        {/* Application title */}
         <h2 className="text-2xl font-semibold text-white mb-6 text-center">Create Your Account</h2>
+        {/* Registration form */}
         <div className="flex flex-col w-full gap-4">
           <div className="w-full flex flex-col gap-3">
+            {/* Email input field */}
             <input
               placeholder="Email"
               type="email"
@@ -112,6 +210,7 @@ const ModernStunningSignUp = () => {
               onChange={(e) => setEmail(e.target.value)}
               disabled={isLoading}
             />
+            {/* Password input field */}
             <input
               placeholder="Password"
               type="password"
@@ -120,6 +219,7 @@ const ModernStunningSignUp = () => {
               onChange={(e) => setPassword(e.target.value)}
               disabled={isLoading}
             />
+            {/* Password confirmation field */}
             <input
               placeholder="Confirm Password"
               type="password"
@@ -128,6 +228,7 @@ const ModernStunningSignUp = () => {
               onChange={(e) => setConfirmPassword(e.target.value)}
               disabled={isLoading}
             />
+            {/* Terms and conditions acceptance checkbox */}
             <div className="flex items-center gap-2 mt-1">
               <input
                 type="checkbox"
@@ -148,10 +249,12 @@ const ModernStunningSignUp = () => {
                 </a>
               </label>
             </div>
+            {/* Error message display */}
             {error && <div className="text-sm text-red-400 text-left">{error}</div>}
           </div>
           <hr className="opacity-10" />
           <div>
+            {/* Email/Password sign-up button with loading indicator */}
             <button
               type="button"
               onClick={handleSignUp}
@@ -166,6 +269,7 @@ const ModernStunningSignUp = () => {
                 "Sign Up"
               )}
             </button>
+            {/* Google OAuth sign-up button */}
             <button
               type="button"
               onClick={handleGoogleSignUp}
@@ -179,6 +283,7 @@ const ModernStunningSignUp = () => {
               />
               Continue with Google
             </button>
+            {/* Sign in link for existing users */}
             <div className="w-full text-center mt-2">
               <span className="text-xs text-gray-400">
                 Already have an account?{" "}
@@ -190,11 +295,13 @@ const ModernStunningSignUp = () => {
           </div>
         </div>
       </div>
+      {/* User testimonial section with avatars */}
       <div className="relative z-10 mt-12 flex flex-col items-center text-center">
         <p className="text-gray-400 text-sm mb-2">
           Join <span className="font-medium text-white">thousands</span> of dental practices already
           using our dashboard.
         </p>
+        {/* User avatars to create social proof */}
         <div className="flex">
           <img
             src="https://randomuser.me/api/portraits/men/32.jpg"

@@ -1,7 +1,7 @@
 ---
 id: 4
 title: "Make breadcrumb link focusable in breadcrumb.tsx"
-status: pending
+status: completed
 priority: medium
 feature: Accessibility
 created_at: 2025-05-21T20:19:05Z

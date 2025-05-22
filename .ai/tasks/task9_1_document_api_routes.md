@@ -1,10 +1,11 @@
 ---
 id: 9.1
 title: "Document API routes"
-status: pending
+status: done
 priority: high
 feature: Documentation
 created_at: 2025-05-21T21:15:10Z
+updated_at: 2025-05-21T22:16:11Z
 ---
 
 ## Description

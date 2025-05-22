@@ -1,7 +1,25 @@
+/**
+ * @fileoverview Tests for the SpreadsheetSelector component
+ * 
+ * This file contains unit tests for the SpreadsheetSelector component, which allows
+ * users to select Google Spreadsheets. The tests verify the component's behavior in
+ * various states including loading, error handling, empty results, and successful selection.
+ * 
+ * The tests use Vitest as the test runner and React Testing Library for component rendering
+ * and assertions. TanStack Query (React Query) is mocked to simulate data fetching scenarios.
+ */
+
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import SpreadsheetSelector, { type Spreadsheet } from "../SpreadsheetSelector";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+
+/**
+ * Mock setup for tests
+ * - Mock Next.js router to prevent navigation during tests
+ * - Mock global fetch to control API responses
+ * - Create sample spreadsheet data for testing
+ */
 
 // Mock the API fetch calls
 vi.mock("next/navigation", () => ({
@@ -12,12 +30,23 @@ vi.mock("next/navigation", () => ({
 
 global.fetch = vi.fn();
 
+/**
+ * Sample spreadsheet data for testing
+ * Represents the expected structure of spreadsheets returned from the API
+ */
 const mockSpreadsheets: Spreadsheet[] = [
   { id: "spreadsheet1", name: "Dental Practice Data" },
   { id: "spreadsheet2", name: "Patient Metrics Q1" },
   { id: "spreadsheet3", name: "Financials 2023" },
 ];
 
+/**
+ * Creates a configured QueryClient instance for testing
+ * - Disables retries to prevent hanging tests
+ * - Prevents garbage collection to maintain query cache during tests
+ * 
+ * @returns {QueryClient} A configured QueryClient for testing
+ */
 const createTestQueryClient = () =>
   new QueryClient({
     defaultOptions: {
@@ -28,19 +57,40 @@ const createTestQueryClient = () =>
     },
   });
 
+/**
+ * Renders a component with a QueryClient provider for testing
+ * This helper ensures that components using React Query hooks have the necessary context
+ * 
+ * @param {React.ReactElement} ui - The component to render
+ * @param {QueryClient} [client] - Optional custom QueryClient instance
+ * @returns {Object} The rendered component with testing utilities
+ */
 const renderWithClient = (ui: React.ReactElement, client?: QueryClient) => {
   const queryClient = client || createTestQueryClient();
   return render(<QueryClientProvider client={queryClient}>{ui}</QueryClientProvider>);
 };
 
+/**
+ * Test suite for the SpreadsheetSelector component
+ * Tests various states and behaviors of the component
+ */
 describe("SpreadsheetSelector Component", () => {
   let queryClient: QueryClient;
 
+  /**
+   * Setup before each test
+   * - Reset all mocks to ensure clean test environment
+   * - Create a fresh QueryClient instance
+   */
   beforeEach(() => {
     vi.resetAllMocks(); // Use resetAllMocks to clear mock history and implementations
     queryClient = createTestQueryClient();
   });
 
+  /**
+   * Test case: Component should display a message when no clinic is selected
+   * Verifies that the component shows an appropriate message when clinicId is null
+   */
   it("should display 'Please select a clinic' if no clinicId is provided", () => {
     renderWithClient(
       <SpreadsheetSelector clinicId={null} onSpreadsheetSelected={vi.fn()} />,

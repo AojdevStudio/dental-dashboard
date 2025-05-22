@@ -1,30 +1,70 @@
+/**
+ * Google Sheets Data API Route
+ * 
+ * This API route provides access to data within a specific Google Spreadsheet.
+ * It allows authenticated users to retrieve data from a specified range within a spreadsheet.
+ * The route requires authentication via Supabase and verifies that the user has access to the
+ * requested data source containing Google API credentials.
+ */
+
 import { type NextRequest, NextResponse } from "next/server";
 import { readSheetData as readSheetDataService } from "@/services/google/sheets";
 import { prisma } from "@/lib/db";
 import { createServerClient, type CookieOptions } from "@supabase/ssr";
 import { cookies } from "next/headers";
 
-// Define expected structure from getSheetDataService (Google Sheets API ValueRange)
+/**
+ * Interface representing the response structure from Google Sheets API.
+ * Based on the ValueRange object from Google Sheets API v4.
+ * 
+ * @typedef {Object} ValueRange
+ * @property {string} [range] - The range that was read from the spreadsheet
+ * @property {string} [majorDimension] - The dimension of the data ("ROWS" or "COLUMNS")
+ * @property {unknown[][]} [values] - The data values as a 2D array
+ */
 interface ValueRange {
   range?: string;
   majorDimension?: string;
   values?: unknown[][]; // Cells can be string, number, boolean, or empty
 }
 
-// Define API response structures
+/**
+ * Type definition for the response when requesting only headers from a sheet.
+ * 
+ * @typedef {Object} GetSheetHeadersResponse
+ * @property {string[]} [headers] - Array of header values from the first row
+ * @property {string} [error] - Error message if the request failed
+ * @property {string} [details] - Additional error details if available
+ */
 export type GetSheetHeadersResponse = {
   headers?: string[];
   error?: string;
   details?: string;
 };
 
+/**
+ * Type definition for the response when requesting data values from a sheet.
+ * 
+ * @typedef {Object} GetSheetValuesResponse
+ * @property {unknown[][]} [values] - 2D array of cell values
+ * @property {string} [error] - Error message if the request failed
+ * @property {string} [details] - Additional error details if available
+ */
 export type GetSheetValuesResponse = {
   values?: unknown[][];
   error?: string;
   details?: string;
 };
 
-// Combined type for flexibility, or use a type guard on the GET handler return
+/**
+ * Combined type for general sheet data responses that may include both headers and values.
+ * 
+ * @typedef {Object} GetSheetDataGeneralResponse
+ * @property {string[]} [headers] - Array of header values from the first row
+ * @property {unknown[][]} [values] - 2D array of cell values
+ * @property {string} [error] - Error message if the request failed
+ * @property {string} [details] - Additional error details if available
+ */
 export type GetSheetDataGeneralResponse = {
   headers?: string[];
   values?: unknown[][];
@@ -32,6 +72,30 @@ export type GetSheetDataGeneralResponse = {
   details?: string;
 };
 
+/**
+ * Handles GET requests to retrieve data from a specific Google Spreadsheet.
+ * This endpoint requires authentication via Supabase and access to a valid Google API data source.
+ * 
+ * The function performs the following steps:
+ * 1. Authenticates the user using Supabase session cookies
+ * 2. Validates the requested data source belongs to the authenticated user
+ * 3. Retrieves Google API credentials from the data source
+ * 4. Calls the Google Sheets API to read data from the specified range
+ * 5. Returns the formatted sheet data to the client
+ *
+ * @param {NextRequest} request - The incoming request object
+ *   - request.searchParams.range: The A1 notation range to read from the spreadsheet
+ *   - request.searchParams.dataSourceId: ID of the data source containing Google API credentials
+ * @param {Object} params - Route parameters from the dynamic route
+ * @param {string} params.spreadsheetId - The ID of the Google Spreadsheet to read from
+ * @returns {Promise<NextResponse>} JSON response with spreadsheet data or error
+ *   - 200: Success with sheet data (headers and/or values)
+ *   - 400: Bad request if required parameters are missing
+ *   - 401: Unauthorized if user is not authenticated or has invalid Google credentials
+ *   - 404: Not found if the data source or spreadsheet doesn't exist
+ *   - 500: Server error for unexpected errors
+ * @throws {Error} If there's an unexpected error during execution
+ */
 export async function GET(request: NextRequest, { params }: { params: { spreadsheetId: string } }) {
   const cookieStore = cookies();
   const supabase = createServerClient(

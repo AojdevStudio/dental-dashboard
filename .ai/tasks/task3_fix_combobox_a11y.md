@@ -1,7 +1,7 @@
 ---
 id: 3
 title: "Fix accessibility issues in MultiSelectCombobox.tsx"
-status: pending
+status: completed
 priority: high
 feature: Accessibility
 created_at: 2025-05-21T20:19:05Z

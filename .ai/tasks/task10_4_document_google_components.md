@@ -1,10 +1,11 @@
 ---
 id: 10.4
 title: "Document Google components"
-status: pending
+status: in-progress
 priority: high
 feature: Documentation
 created_at: 2025-05-21T21:15:10Z
+updated_at: 2025-05-22T01:17:28Z
 ---
 
 ## Description

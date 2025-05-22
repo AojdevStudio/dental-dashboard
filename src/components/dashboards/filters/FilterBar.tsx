@@ -1,3 +1,12 @@
+/**
+ * @fileoverview Filter Bar Component
+ * 
+ * This file implements the main filter bar component used in the dashboard interface.
+ * It provides a unified interface for all dashboard filters, including clinic selection,
+ * provider selection, and time period filtering. The component handles filter state
+ * management, URL synchronization, and query invalidation when filters change.
+ */
+
 "use client";
 
 import * as React from "react";
@@ -26,6 +35,23 @@ import { useQueryClient } from "@tanstack/react-query";
 import { useState, useEffect, useRef, useCallback } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 
+/**
+ * Filter Bar Component
+ * 
+ * A collapsible filter panel that provides a unified interface for all dashboard filters.
+ * Features include:
+ * - Expandable/collapsible filter panel with animation
+ * - Accordion sections for different filter types
+ * - URL synchronization to maintain filter state between page loads
+ * - Query invalidation to refresh data when filters change
+ * - Filter count badges to show active filters
+ * - Clear and reset filter options
+ * 
+ * The component integrates with the global filter store and automatically updates
+ * the URL parameters when filters change, allowing for shareable filtered views.
+ * 
+ * @returns {JSX.Element} The rendered filter bar component
+ */
 export function FilterBar() {
   const queryClient = useQueryClient();
   const router = useRouter();
@@ -49,24 +75,58 @@ export function FilterBar() {
     resetToDefaults,
   } = useFilterStore();
 
-  // Function to update URL params based on filter state - memoized to avoid dependency issues
+  /**
+   * Updates URL parameters based on the current filter state
+   * 
+   * This function is memoized to avoid dependency issues and excessive re-renders.
+   * It creates URL parameters from the current filter state and updates the browser URL
+   * without triggering a page refresh, enabling shareable filtered dashboard views.
+   * 
+   * @returns {void}
+   */
   const updateUrlParams = useCallback(() => {
+    // Generate URL parameters from current filter state
     const params = createFilterUrlParams();
     // Update URL without refreshing the page
     router.replace(`${pathname}?${params.toString()}`);
   }, [router, pathname]);
 
-  // Parse URL params on component mount
+  /**
+   * Parses URL parameters and updates filter state on component mount and URL changes
+   * 
+   * This effect runs when the component mounts and whenever the URL search parameters change.
+   * It ensures that the filter state is synchronized with the URL, allowing for bookmarking
+   * and sharing specific filter configurations.
+   * 
+   * @returns {void}
+   */
   useEffect(() => {
     parseFilterUrlParams(searchParams);
   }, [searchParams]);
 
-  // We use a ref to track filter changes without creating effect dependencies
+  /**
+   * Reference to track filter changes without creating effect dependencies
+   * 
+   * Using a ref allows us to compare previous and current filter values without
+   * adding them as dependencies to the effect, which would cause infinite loops.
+   */
   const filtersRef = useRef({ timePeriod, startDate, endDate, selectedClinics, selectedProviders });
 
-  // Update URL and invalidate queries when filter state changes
+  /**
+   * Updates URL and invalidates queries when filter state changes
+   * 
+   * This effect is responsible for:
+   * 1. Detecting when any filter value has changed
+   * 2. Updating the URL to reflect the new filter state
+   * 3. Invalidating and refetching any queries that depend on the filter values
+   * 
+   * It includes debouncing (via setTimeout) to prevent excessive URL updates and
+   * query invalidations when multiple filters change in quick succession.
+   * 
+   * @returns {void | (() => void)} Cleanup function to clear the timeout if component unmounts during the delay
+   */
   useEffect(() => {
-    // Check if filters have actually changed
+    // Check if filters have actually changed by comparing with previous values
     const prevFilters = filtersRef.current;
     const filtersChanged =
       prevFilters.timePeriod !== timePeriod ||
@@ -75,19 +135,20 @@ export function FilterBar() {
       prevFilters.selectedClinics !== selectedClinics ||
       prevFilters.selectedProviders !== selectedProviders;
 
-    // Update ref
+    // Update reference with current filter values
     filtersRef.current = { timePeriod, startDate, endDate, selectedClinics, selectedProviders };
 
-    // Only update URL and invalidate queries if filters have changed
+    // Only update URL and invalidate queries if filters have actually changed
     if (filtersChanged) {
-      // Don't update URL on initial render
+      // Use timeout to debounce frequent changes
       const timeoutId = setTimeout(() => {
+        // Update URL parameters
         updateUrlParams();
 
-        // Invalidate and refetch queries when filters change
+        // Invalidate and refetch queries that depend on our filters
         queryClient.invalidateQueries({
           predicate: (query) => {
-            // Invalidate queries that depend on our filters
+            // Only invalidate queries that have keys matching our filter-dependent query list
             return query.queryKey.some(
               (key) => typeof key === "string" && filterDependentQueries.includes(key)
             );
@@ -95,6 +156,7 @@ export function FilterBar() {
         });
       }, 100); // Small delay to batch frequent changes
 
+      // Return cleanup function to clear timeout if component unmounts during delay
       return () => clearTimeout(timeoutId);
     }
 
@@ -109,8 +171,22 @@ export function FilterBar() {
     selectedProviders,
   ]);
 
-  // Handle clicks outside the filter bar to collapse it when expanded
+  /**
+   * Handles clicks outside the filter bar to automatically collapse it when expanded
+   * 
+   * This effect adds a global click event listener that checks if the click occurred
+   * outside the filter bar component. If the filter panel is expanded and the user
+   * clicks outside of it, the panel will automatically collapse, improving the UX
+   * by allowing users to easily dismiss the filter panel.
+   * 
+   * @returns {void}
+   */
   useEffect(() => {
+    /**
+     * Event handler for clicks outside the filter bar
+     * 
+     * @param {MouseEvent} event - The mouse click event
+     */
     const handleClickOutside = (event: MouseEvent) => {
       if (
         filterBarRef.current &&
@@ -121,38 +197,90 @@ export function FilterBar() {
       }
     };
 
+    // Add event listener when component mounts or isExpanded changes
     document.addEventListener("mousedown", handleClickOutside);
+    
+    // Clean up event listener when component unmounts or isExpanded changes
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
     };
   }, [isExpanded]);
 
-  // Count active filters
+  /**
+   * Calculates the number of active filters for display in the filter badge
+   * 
+   * This counts each filter category that has a non-default value:
+   * - Time period (if not set to the default 'monthly')
+   * - Clinics (if any are selected)
+   * - Providers (if any are selected)
+   * 
+   * @type {number}
+   */
   const activeFilterCount = [
     timePeriod !== "monthly", // Assuming monthly is default
     selectedClinics.length > 0,
     selectedProviders.length > 0,
   ].filter(Boolean).length;
 
-  // Check if any filter is active
+  /**
+   * Boolean flag indicating if any filters are currently active
+   * Used to conditionally show the clear filters button
+   * 
+   * @type {boolean}
+   */
   const hasActiveFilters = activeFilterCount > 0;
 
-  // Handle clearing all filters
+  /**
+   * Clears all filters to their empty state
+   * 
+   * This resets all filters to empty values (not default values):
+   * - Time period: empty
+   * - Date range: empty
+   * - Selected clinics: empty array
+   * - Selected providers: empty array
+   * 
+   * The filter panel remains open after clearing to allow the user to select new filters.
+   * 
+   * @returns {void}
+   */
   const handleClearFilters = () => {
     clearFilters();
-    // Keep the filter panel open
+    // Keep the filter panel open for user convenience
   };
 
-  // Handle resetting to defaults
+  /**
+   * Resets all filters to their default values
+   * 
+   * This sets all filters back to their system defaults:
+   * - Time period: 'monthly'
+   * - Date range: current month
+   * - Selected clinics: empty array
+   * - Selected providers: empty array
+   * 
+   * The filter panel remains open after resetting to allow the user to make adjustments.
+   * 
+   * @returns {void}
+   */
   const handleResetFilters = () => {
     resetToDefaults();
-    // Keep the filter panel open
+    // Keep the filter panel open for user convenience
   };
 
-  // Handle applying filters and closing the panel
+  /**
+   * Applies the current filters and closes the filter panel
+   * 
+   * This function:
+   * 1. Collapses the filter panel
+   * 2. Triggers a refetch of all filter-dependent queries to update the dashboard data
+   * 
+   * Each query in the filterDependentQueries list is individually invalidated to ensure
+   * all data components are updated with the new filter values.
+   * 
+   * @returns {void}
+   */
   const handleApplyFilters = () => {
     setIsExpanded(false);
-    // Trigger a specific refetch if needed
+    // Trigger a specific refetch for each filter-dependent query
     for (const queryKey of filterDependentQueries) {
       queryClient.invalidateQueries({ queryKey: [queryKey] });
     }

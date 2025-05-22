@@ -1,9 +1,33 @@
+/**
+ * @fileoverview Modern Stunning Sign In Component
+ * 
+ * This file implements a visually enhanced sign-in component with a modern UI design.
+ * It provides email/password authentication and Google OAuth sign-in options using Supabase Auth.
+ * The component includes client-side form validation, loading states, and error handling.
+ */
+
 "use client";
 
 import * as React from "react";
 import { useRouter } from "next/navigation";
 import { createBrowserClient } from "@supabase/ssr";
 
+/**
+ * Modern Stunning Sign In Component
+ * 
+ * A visually enhanced authentication component that provides:
+ * - Email/password authentication
+ * - Google OAuth sign-in
+ * - Client-side form validation
+ * - Loading states during authentication
+ * - Error handling and user feedback
+ * - Links to sign up and password reset
+ * 
+ * The component uses a dark theme with glass-morphism effects and gradient backgrounds
+ * to create a modern, visually appealing authentication experience.
+ * 
+ * @returns {JSX.Element} The rendered sign-in component
+ */
 const SignIn1 = () => {
   const router = useRouter();
   const [email, setEmail] = React.useState("");
@@ -11,10 +35,26 @@ const SignIn1 = () => {
   const [error, setError] = React.useState("");
   const [isLoading, setIsLoading] = React.useState(false);
 
+  /**
+   * Validates email format using regex
+   * 
+   * Checks if the provided string matches a basic email format pattern.
+   * 
+   * @param {string} email - The email address to validate
+   * @returns {boolean} True if the email format is valid, false otherwise
+   */
   const validateEmail = (email: string) => {
     return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
   };
 
+  /**
+   * Handles email/password sign-in
+   * 
+   * Validates form inputs, then attempts to authenticate the user with Supabase Auth.
+   * On success, redirects to the dashboard. On failure, displays an error message.
+   * 
+   * @returns {Promise<void>} A promise that resolves when the authentication process completes
+   */
   const handleSignIn = async () => {
     if (!email || !password) {
       setError("Please enter both email and password.");
@@ -56,17 +96,30 @@ const SignIn1 = () => {
     }
   };
 
+  /**
+   * Handles Google OAuth sign-in
+   * 
+   * Initiates the OAuth flow with Google as the provider using Supabase Auth.
+   * On success, the user will be redirected to the callback URL and then to the dashboard.
+   * On failure, displays an error message.
+   * 
+   * @returns {Promise<void>} A promise that resolves when the OAuth process initiates
+   */
   const handleGoogleSignIn = async () => {
     try {
+      // Get Supabase credentials from environment variables
       const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
       const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
+      // Validate environment variables are present
       if (!supabaseUrl || !supabaseAnonKey) {
         throw new Error("Missing Supabase environment variables");
       }
 
+      // Initialize Supabase client
       const supabase = createBrowserClient(supabaseUrl, supabaseAnonKey);
 
+      // Initiate OAuth sign-in with Google
       const { error } = await supabase.auth.signInWithOAuth({
         provider: "google",
         options: {
@@ -77,16 +130,38 @@ const SignIn1 = () => {
       if (error) {
         throw error;
       }
+      // Note: No redirect here as OAuth flow handles the redirect automatically
     } catch (err) {
+      // Display user-friendly error message
       setError(err instanceof Error ? err.message : "Failed to sign in with Google");
     }
   };
 
+  /**
+   * Render the sign-in UI with glass-morphism design
+   * 
+   * The UI consists of:
+   * - A main container with dark background
+   * - A centered glass card with gradient background
+   * - Logo and title section
+   * - Form inputs for email and password
+   * - Sign-in button with loading state
+   * - Google OAuth sign-in button
+   * - Links to sign up and password reset
+   * - User testimonial section with avatars
+   * 
+   * The design uses modern UI principles including:
+   * - Glass-morphism effects (transparency and blur)
+   * - Gradient backgrounds
+   * - Rounded corners and subtle shadows
+   * - Loading animations
+   * - Hover effects for interactive elements
+   */
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-[#121212] relative overflow-hidden w-full rounded-xl">
-      {/* Centered glass card */}
+      {/* Centered glass card with gradient background and blur effect */}
       <div className="relative z-10 w-full max-w-sm rounded-3xl bg-gradient-to-r from-[#ffffff10] to-[#121212] backdrop-blur-sm  shadow-2xl p-8 flex flex-col items-center">
-        {/* Logo */}
+        {/* Logo in circular container */}
         <div className="flex items-center justify-center w-24 h-24 rounded-full bg-white/20 mb-6 shadow-lg">
           <img
             src="/logo.svg"
@@ -96,13 +171,14 @@ const SignIn1 = () => {
             className="w-16 h-16"
           />
         </div>
-        {/* Title */}
+        {/* Application title */}
         <h2 className="text-2xl font-semibold text-white mb-6 text-center">
           Unified Dental Dashboard
         </h2>
-        {/* Form */}
+        {/* Authentication form */}
         <div className="flex flex-col w-full gap-4">
           <div className="w-full flex flex-col gap-3">
+            {/* Email input field */}
             <input
               placeholder="Email"
               type="email"
@@ -111,6 +187,7 @@ const SignIn1 = () => {
               onChange={(e) => setEmail(e.target.value)}
               disabled={isLoading}
             />
+            {/* Password input field */}
             <input
               placeholder="Password"
               type="password"
@@ -119,10 +196,12 @@ const SignIn1 = () => {
               onChange={(e) => setPassword(e.target.value)}
               disabled={isLoading}
             />
+            {/* Error message display */}
             {error && <div className="text-sm text-red-400 text-left">{error}</div>}
           </div>
           <hr className="opacity-10" />
           <div>
+            {/* Email/Password sign-in button with loading indicator */}
             <button
               type="button"
               onClick={handleSignIn}
@@ -137,7 +216,7 @@ const SignIn1 = () => {
                 "Sign in"
               )}
             </button>
-            {/* Google Sign In */}
+            {/* Google OAuth sign-in button */}
             <button
               type="button"
               onClick={handleGoogleSignIn}
@@ -151,6 +230,7 @@ const SignIn1 = () => {
               />
               Continue with Google
             </button>
+            {/* Sign up and password reset links */}
             <div className="w-full text-center mt-2">
               <span className="text-xs text-gray-400">
                 Don&apos;t have an account?{" "}
@@ -167,12 +247,13 @@ const SignIn1 = () => {
           </div>
         </div>
       </div>
-      {/* User count and avatars */}
+      {/* User testimonial section with avatars */}
       <div className="relative z-10 mt-12 flex flex-col items-center text-center">
         <p className="text-gray-400 text-sm mb-2">
           Join <span className="font-medium text-white">thousands</span> of dental practices already
           using our dashboard.
         </p>
+        {/* User avatars to create social proof */}
         <div className="flex">
           <img
             src="https://randomuser.me/api/portraits/men/32.jpg"

@@ -1,10 +1,11 @@
 ---
 id: 10.3
 title: "Document dashboard components"
-status: pending
+status: done
 priority: high
 feature: Documentation
 created_at: 2025-05-21T21:15:10Z
+updated_at: 2025-05-21T23:46:23Z
 ---
 
 ## Description

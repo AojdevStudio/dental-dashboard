@@ -1,10 +1,12 @@
 ---
 id: 10.1
 title: "Document animate-ui components"
-status: pending
+status: done
 priority: medium
 feature: Documentation
 created_at: 2025-05-21T21:15:10Z
+updated_at: 2025-05-21T23:11:31Z
+completed_at: 2025-05-21T23:11:31Z
 ---
 
 ## Description

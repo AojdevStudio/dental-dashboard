@@ -1,7 +1,7 @@
 ---
 id: 6
 title: "Fix TypeScript and performance issues in calendar.tsx"
-status: pending
+status: completed
 priority: high
 feature: Code Quality
 created_at: 2025-05-21T20:19:05Z

@@ -1,10 +1,11 @@
 ---
 id: 9.3
 title: "Document dashboard pages"
-status: pending
+status: done
 priority: high
 feature: Documentation
 created_at: 2025-05-21T21:15:10Z
+updated_at: 2025-05-21T22:44:46Z
 ---
 
 ## Description

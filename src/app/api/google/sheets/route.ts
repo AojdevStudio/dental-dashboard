@@ -1,3 +1,12 @@
+/**
+ * Google Sheets API Route
+ * 
+ * This API route provides access to Google Sheets functionality through the Google Drive API.
+ * It allows authenticated users to list their available spreadsheets from Google Drive.
+ * The route requires authentication via Supabase and verifies that the user has access to the
+ * requested data source containing Google API credentials.
+ */
+
 import { type NextRequest, NextResponse } from "next/server";
 import { listSpreadsheets } from "@/services/google/sheets";
 import { prisma } from "@/lib/db";
@@ -6,19 +15,41 @@ import { cookies } from "next/headers";
 // import { withAuth } from '@/utils/middleware'; // If you have a withAuth wrapper
 // import { getRequestAuthData } from '@/utils/authHelpers'; // If you have a helper for user session
 
-// Define a local interface for what we expect from listSpreadsheets
+/**
+ * Interface representing a Google Drive file as returned by the Google Drive API.
+ * Contains minimal information needed for spreadsheet listing functionality.
+ * 
+ * @typedef {Object} GoogleDriveFile
+ * @property {string|null|undefined} id - The unique identifier of the file in Google Drive
+ * @property {string|null|undefined} name - The display name of the file
+ */
 interface GoogleDriveFile {
   id: string | null | undefined;
   name: string | null | undefined;
   // Add other properties if they are used or expected from listSpreadsheets
 }
 
-// Define the expected structure for the API response
+/**
+ * Interface representing spreadsheet information for the API response.
+ * Simplified version of GoogleDriveFile with only the essential properties.
+ * 
+ * @typedef {Object} SpreadsheetInfo
+ * @property {string|null|undefined} id - The unique identifier of the spreadsheet
+ * @property {string|null|undefined} name - The display name of the spreadsheet
+ */
 interface SpreadsheetInfo {
   id: string | null | undefined;
   name: string | null | undefined;
 }
 
+/**
+ * Type definition for the response from the list spreadsheets endpoint.
+ * 
+ * @typedef {Object} ListSpreadsheetsResponse
+ * @property {SpreadsheetInfo[]} [spreadsheets] - Array of spreadsheet information objects if successful
+ * @property {string} [error] - Error message if the request failed
+ * @property {string} [details] - Additional error details if available
+ */
 export type ListSpreadsheetsResponse = {
   spreadsheets?: SpreadsheetInfo[];
   error?: string;
@@ -35,6 +66,29 @@ export type ListSpreadsheetsResponse = {
 // type CookieStoreType = ReturnType<typeof cookies>; // This would be Promise<ReadonlyRequestCookies>
 // type ActualCookieStoreType = Awaited<CookieStoreType>; // This would be ReadonlyRequestCookies
 
+/**
+ * Handles GET requests to retrieve a list of Google Spreadsheets available to the user.
+ * This endpoint requires authentication via Supabase and access to a valid Google API data source.
+ * 
+ * The function performs the following steps:
+ * 1. Authenticates the user using Supabase session cookies
+ * 2. Validates the requested data source belongs to the authenticated user
+ * 3. Retrieves Google API credentials from the data source
+ * 4. Calls the Google Drive API to list available spreadsheets
+ * 5. Returns a formatted list of spreadsheets to the client
+ *
+ * @param {NextRequest} request - The incoming request object
+ *   - request.searchParams.dataSourceId: ID of the data source containing Google API credentials
+ * @returns {Promise<NextResponse>} JSON response with spreadsheet list or error
+ *   - 200: Success with {spreadsheets: SpreadsheetInfo[]}
+ *   - 400: Bad request if dataSourceId is missing or invalid
+ *   - 401: Unauthorized if user is not authenticated or has invalid Google credentials
+ *   - 404: Not found if the data source doesn't exist
+ *   - 500: Server error for unexpected errors
+ *   - 502: Bad gateway if Google API returns null
+ *   - 503: Service unavailable if Google Drive API is unreachable
+ * @throws {Error} If there's an unexpected error during execution
+ */
 export async function GET(request: NextRequest) {
   const cookieStore = cookies(); // cookies() returns the store directly
   const supabase = createServerClient(

@@ -56,6 +56,17 @@ function BreadcrumbPage({ className, ...props }: React.ComponentProps<"span">) {
       role="link"
       aria-disabled="true"
       aria-current="page"
+      tabIndex={0}
+      onKeyDown={(e) => {
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          // Trigger click action if onClick is provided
+          if (props.onClick) {
+            // Cast to unknown first to safely convert between event types
+            props.onClick(e as unknown as React.MouseEvent<HTMLSpanElement>);
+          }
+        }
+      }}
       className={cn("text-foreground font-normal", className)}
       {...props}
     />

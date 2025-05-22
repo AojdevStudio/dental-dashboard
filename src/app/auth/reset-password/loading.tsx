@@ -1,5 +1,30 @@
+/**
+ * Reset Password Loading Component
+ * 
+ * This component is automatically rendered by Next.js during the loading state
+ * of the reset password page. It provides a skeleton UI that mimics the structure
+ * of the reset password form, giving users visual feedback while the actual page
+ * is loading.
+ * 
+ * This component is part of Next.js' loading UI system and is displayed when:
+ * - The reset password page is being server-side rendered
+ * - Data is being fetched for the reset password page
+ * - The page is being hydrated on the client
+ * 
+ * The skeleton UI maintains the same layout and approximate dimensions as the
+ * actual reset password form, creating a smooth visual transition when the real content loads.
+ */
+
 import { Skeleton } from "@/components/ui/skeleton";
 
+/**
+ * Reset Password Loading Component
+ * 
+ * Renders a skeleton UI that mimics the structure of the reset password page,
+ * providing a visual placeholder while the actual content is loading.
+ * 
+ * @returns {JSX.Element} The rendered loading skeleton for the reset password page
+ */
 export default function ResetPasswordLoading() {
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-[#121212] relative overflow-hidden w-full rounded-xl">

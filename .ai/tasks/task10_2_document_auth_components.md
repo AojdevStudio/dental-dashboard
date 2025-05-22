@@ -1,10 +1,12 @@
 ---
 id: 10.2
 title: "Document auth components"
-status: pending
+status: done
 priority: high
 feature: Documentation
 created_at: 2025-05-21T21:15:10Z
+updated_at: 2025-05-21T23:18:08Z
+completed_at: 2025-05-21T23:31:47Z
 ---
 
 ## Description

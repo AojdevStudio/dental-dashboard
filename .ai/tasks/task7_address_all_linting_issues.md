@@ -1,7 +1,7 @@
 ---
 id: 7
 title: "Address all linting issues"
-status: in_progress
+status: completed
 priority: high
 feature: Code Quality
 created_at: 2025-05-21T20:19:05Z
@@ -13,12 +13,12 @@ This is a parent task that tracks all linting issues in the codebase. Each sub-t
 
 ## Sub-Tasks
 
-- [ ] ID 7.1: Complete ID 1 - Fix linting issues in providers.tsx
-- [ ] ID 7.2: Complete ID 2 - Fix useExhaustiveDependencies warning in hover-card.tsx
-- [ ] ID 7.3: Complete ID 3 - Fix accessibility issues in MultiSelectCombobox.tsx
-- [ ] ID 7.4: Complete ID 4 - Make breadcrumb link focusable in breadcrumb.tsx
-- [ ] ID 7.5: Complete ID 5 - Convert string concatenation to template literals in counting-number.tsx
-- [ ] ID 7.6: Complete ID 6 - Fix TypeScript and performance issues in calendar.tsx
+- [x] ID 7.1: Complete ID 1 - Fix linting issues in providers.tsx
+- [x] ID 7.2: Complete ID 2 - Fix useExhaustiveDependencies warning in hover-card.tsx
+- [x] ID 7.3: Complete ID 3 - Fix accessibility issues in MultiSelectCombobox.tsx
+- [x] ID 7.4: Complete ID 4 - Make breadcrumb link focusable in breadcrumb.tsx
+- [x] ID 7.5: Complete ID 5 - Convert string concatenation to template literals in counting-number.tsx
+- [x] ID 7.6: Complete ID 6 - Fix TypeScript and performance issues in calendar.tsx
 
 ## Implementation Plan
 
