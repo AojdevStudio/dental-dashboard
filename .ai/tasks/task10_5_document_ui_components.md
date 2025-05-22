@@ -1,10 +1,11 @@
 ---
 id: 10.5
 title: "Document UI components"
-status: pending
+status: done
 priority: high
 feature: Documentation
 created_at: 2025-05-21T21:15:10Z
+updated_at: 2025-05-22T02:21:42Z
 ---
 
 ## Description

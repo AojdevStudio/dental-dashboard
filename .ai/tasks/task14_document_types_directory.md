@@ -1,10 +1,11 @@
 ---
 id: 14
 title: "Document types directory"
-status: pending
+status: done
 priority: medium
 feature: Documentation
 created_at: 2025-05-21T21:15:10Z
+updated_at: 2025-05-22T02:10:38Z
 ---
 
 ## Description

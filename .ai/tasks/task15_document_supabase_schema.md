@@ -1,10 +1,11 @@
 ---
 id: 15
 title: "Document Supabase schema files"
-status: pending
+status: done
 priority: high
 feature: Documentation
 created_at: 2025-05-21T21:15:10Z
+updated_at: 2025-05-22T02:08:02Z
 ---
 
 ## Description

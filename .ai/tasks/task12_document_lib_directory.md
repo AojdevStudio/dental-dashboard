@@ -1,10 +1,11 @@
 ---
 id: 12
 title: "Document lib directory"
-status: pending
+status: done
 priority: high
 feature: Documentation
 created_at: 2025-05-21T21:15:10Z
+updated_at: 2025-05-22T02:01:54Z
 ---
 
 ## Description

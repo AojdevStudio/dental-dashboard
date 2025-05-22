@@ -1,3 +1,14 @@
+/**
+ * Google Authentication Middleware
+ *
+ * Provides authentication middleware for Google API requests, handling token validation,
+ * automatic token refresh, and database integration with Prisma. This module ensures
+ * that API requests are always made with valid authentication tokens, refreshing
+ * expired tokens when possible and providing clear error messages when authentication fails.
+ *
+ * The middleware integrates with the application's data source model, which stores
+ * Google OAuth tokens and their expiry information.
+ */
 import { refreshAccessToken } from "./auth";
 import { PrismaClient } from "@prisma/client";
 

@@ -101,6 +101,11 @@ describe("SpreadsheetSelector Component", () => {
     ).toBeInTheDocument();
   });
 
+  /**
+   * Test case: Component should show loading state when fetching spreadsheets
+   * Verifies that loading indicators appear while data is being fetched
+   * Uses an indefinitely pending promise to simulate ongoing network request
+   */
   it("should render loading skeletons when fetching spreadsheets", () => {
     (global.fetch as vi.Mock).mockImplementationOnce(() => new Promise(() => {})); // Indefinite pending state
 
@@ -113,6 +118,11 @@ describe("SpreadsheetSelector Component", () => {
     expect(screen.getByText("Loading...")).toBeInTheDocument();
   });
 
+  /**
+   * Test case: Component should display spreadsheets after successful data fetching
+   * Verifies that spreadsheet names appear in the dropdown after data loads
+   * Mocks a successful API response with sample spreadsheet data
+   */
   it("should display spreadsheets after successful loading", async () => {
     (global.fetch as vi.Mock).mockResolvedValueOnce({
       ok: true,
@@ -133,6 +143,11 @@ describe("SpreadsheetSelector Component", () => {
     expect(screen.getByText("Select a spreadsheet")).toBeInTheDocument();
   });
 
+  /**
+   * Test case: Component should trigger callback when a spreadsheet is selected
+   * Verifies that the onSpreadsheetSelected callback is called with the correct spreadsheet object
+   * Tests the complete interaction flow: load data → open dropdown → select item → trigger callback
+   */
   it("should call onSpreadsheetSelected with the correct spreadsheet object when an item is clicked", async () => {
     const mockOnSpreadsheetSelected = vi.fn();
     (global.fetch as vi.Mock).mockResolvedValueOnce({
@@ -162,6 +177,11 @@ describe("SpreadsheetSelector Component", () => {
     expect(mockOnSpreadsheetSelected).toHaveBeenCalledWith(mockSpreadsheets[1]); // { id: "spreadsheet2", name: "Patient Metrics Q1" }
   });
 
+  /**
+   * Test case: Component should display empty state message when no spreadsheets are found
+   * Verifies that an appropriate message is shown when the API returns an empty list
+   * Tests the component's handling of valid but empty responses
+   */
   it("should display 'No spreadsheets found' message if API returns empty list", async () => {
     (global.fetch as vi.Mock).mockResolvedValueOnce({
       ok: true,
@@ -178,6 +198,11 @@ describe("SpreadsheetSelector Component", () => {
     });
   });
 
+  /**
+   * Test case: Component should display error message when fetch request fails
+   * Verifies that network errors are properly caught and displayed to the user
+   * Tests the component's error handling for rejected promises
+   */
   it("should display error message if fetching spreadsheets fails", async () => {
     const errorMessage = "Network Error: Failed to fetch data.";
     (global.fetch as vi.Mock).mockRejectedValueOnce(new Error(errorMessage));
@@ -192,6 +217,11 @@ describe("SpreadsheetSelector Component", () => {
     });
   });
 
+  /**
+   * Test case: Component should display error message from API error responses
+   * Verifies that HTTP error responses (non-200 status codes) are properly handled
+   * Tests the component's error handling for successful requests with error status codes
+   */
   it("should display error message from API response if fetching spreadsheets returns !ok", async () => {
     const errorMessage = "Unauthorized access to spreadsheets.";
     (global.fetch as vi.Mock).mockResolvedValueOnce({

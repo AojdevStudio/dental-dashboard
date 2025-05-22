@@ -1,8 +1,24 @@
+/**
+ * @fileoverview Sonner Toast Component with theme integration
+ * 
+ * Provides toast notifications with automatic theme synchronization
+ * for consistent styling across the application.
+ */
+
 "use client";
 
+import type * as React from "react";
 import { useTheme } from "next-themes";
 import { Toaster as Sonner, type ToasterProps } from "sonner";
 
+/**
+ * Themed wrapper for Sonner's toast notification system
+ * 
+ * @param {ToasterProps} props - Sonner Toaster component props
+ * @returns {JSX.Element} The themed toast container
+ * @example
+ * <Toaster position="bottom-right" />
+ */
 const Toaster = ({ ...props }: ToasterProps) => {
   const { theme = "system" } = useTheme();
 
@@ -22,4 +38,7 @@ const Toaster = ({ ...props }: ToasterProps) => {
   );
 };
 
+/**
+ * Export the Toaster component for use throughout the application
+ */
 export { Toaster };

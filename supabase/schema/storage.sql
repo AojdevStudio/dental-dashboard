@@ -1,0 +1,31 @@
+-- =========================================================================
+-- SUPABASE STORAGE CONFIGURATION
+-- =========================================================================
+--
+-- This file is intended to contain SQL statements for configuring Supabase
+-- Storage, including:
+--
+-- 1. Storage bucket definitions and configurations
+-- 2. Storage-specific RLS policies
+-- 3. File type restrictions and validations
+-- 4. Custom storage event triggers
+-- 5. Storage quota and size limit configurations
+--
+-- USAGE INSTRUCTIONS:
+-- Add SQL statements to configure storage when deploying to Supabase.
+-- This file is executed during the Supabase deployment process.
+--
+-- EXAMPLE BUCKET CREATION (for reference):
+--
+-- INSERT INTO storage.buckets (id, name, public)
+-- VALUES ('avatars', 'avatars', true);
+--
+-- CREATE POLICY "Public read access for avatars"
+--   ON storage.objects
+--   FOR SELECT
+--   USING (bucket_id = 'avatars');
+--
+-- NOTE: Currently empty as storage configuration is managed through the
+-- Supabase dashboard or default settings are being used. Add SQL statements
+-- here when custom storage configuration is needed.
+-- =========================================================================

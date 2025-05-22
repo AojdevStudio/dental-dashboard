@@ -1,10 +1,12 @@
 ---
 id: 11
 title: "Document hooks directory"
-status: pending
+status: completed
 priority: high
 feature: Documentation
 created_at: 2025-05-21T21:15:10Z
+started_at: "2023-06-12T10:45:26Z"
+completed_at: "2025-05-22T01:42:22Z"
 ---
 
 ## Description
