@@ -1,6 +1,6 @@
 /**
  * @fileoverview Spreadsheet Selector Component
- * 
+ *
  * This file implements a component for selecting Google Sheets spreadsheets
  * for integration with the dental dashboard. It allows users to browse and select
  * spreadsheets from their connected Google account.
@@ -8,7 +8,8 @@
 
 "use client";
 
-import * as React from "react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import {
   Select,
   SelectContent,
@@ -16,14 +17,13 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Search, RefreshCw } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
+import { RefreshCw, Search } from "lucide-react";
+import * as React from "react";
 
 /**
  * Interface for a Google Spreadsheet object
- * 
+ *
  * @property {string} id - Unique identifier for the spreadsheet
  * @property {string} name - Display name of the spreadsheet
  * @property {string} url - URL to access the spreadsheet
@@ -40,7 +40,7 @@ interface GoogleSpreadsheet {
 
 /**
  * Interface for SpreadsheetSelector component properties
- * 
+ *
  * @property {GoogleSpreadsheet[]} [spreadsheets] - List of available spreadsheets
  * @property {string} [selectedId] - ID of the currently selected spreadsheet
  * @property {(id: string) => void} [onSelect] - Callback for spreadsheet selection
@@ -84,14 +84,14 @@ const sampleSpreadsheets: GoogleSpreadsheet[] = [
 
 /**
  * Spreadsheet Selector Component
- * 
+ *
  * A component for selecting Google Sheets spreadsheets for integration.
  * Features include:
  * - Dropdown for selecting from available spreadsheets
  * - Search functionality to filter spreadsheets by name
  * - Refresh button to update the list of available spreadsheets
  * - Loading and refreshing states
- * 
+ *
  * @param {SpreadsheetSelectorProps} props - Component properties
  * @returns {JSX.Element} The rendered spreadsheet selector component
  */
@@ -104,30 +104,30 @@ export function SpreadsheetSelector({
   isRefreshing = false,
 }: SpreadsheetSelectorProps) {
   const [searchQuery, setSearchQuery] = React.useState("");
-  
+
   // Filter spreadsheets based on search query
   const filteredSpreadsheets = React.useMemo(() => {
     if (!searchQuery.trim()) return spreadsheets;
-    
+
     return spreadsheets.filter((sheet) =>
       sheet.name.toLowerCase().includes(searchQuery.toLowerCase())
     );
   }, [spreadsheets, searchQuery]);
-  
+
   // Handle spreadsheet selection
   const handleSelect = (id: string) => {
     if (onSelect) {
       onSelect(id);
     }
   };
-  
+
   // Handle refresh button click
   const handleRefresh = () => {
     if (onRefresh) {
       onRefresh();
     }
   };
-  
+
   // Only show loading state if isLoading is true
   if (isLoading) {
     return (
@@ -155,22 +155,14 @@ export function SpreadsheetSelector({
             onChange={(e) => setSearchQuery(e.target.value)}
           />
         </div>
-        
-        <Button
-          variant="outline"
-          size="icon"
-          onClick={handleRefresh}
-          disabled={isRefreshing}
-        >
-          <RefreshCw className={`h-4 w-4 ${isRefreshing ? 'animate-spin' : ''}`} />
+
+        <Button variant="outline" size="icon" onClick={handleRefresh} disabled={isRefreshing}>
+          <RefreshCw className={`h-4 w-4 ${isRefreshing ? "animate-spin" : ""}`} />
         </Button>
       </div>
-      
+
       {/* Spreadsheet selection dropdown */}
-      <Select
-        value={selectedId}
-        onValueChange={handleSelect}
-      >
+      <Select value={selectedId} onValueChange={handleSelect}>
         <SelectTrigger>
           <SelectValue placeholder="Select a spreadsheet" />
         </SelectTrigger>
@@ -197,11 +189,11 @@ export function SpreadsheetSelector({
           )}
         </SelectContent>
       </Select>
-      
+
       {/* Show selected spreadsheet URL if available */}
       {selectedId && (
         <div className="text-sm text-muted-foreground">
-          Selected: {spreadsheets.find(s => s.id === selectedId)?.name}
+          Selected: {spreadsheets.find((s) => s.id === selectedId)?.name}
         </div>
       )}
     </div>

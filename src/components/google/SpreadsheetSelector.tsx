@@ -1,6 +1,6 @@
 /**
  * @fileoverview Spreadsheet Selector Component
- * 
+ *
  * This file implements a component for selecting Google Spreadsheets within the dental dashboard.
  * It fetches available spreadsheets from the Google Sheets API via a server endpoint,
  * and provides a dropdown interface for users to select a spreadsheet for data import
@@ -10,9 +10,10 @@
 
 "use client";
 
-import * as React from "react";
 import { useQuery } from "@tanstack/react-query";
+import * as React from "react";
 
+import { Label } from "@/components/ui/label";
 import {
   Select,
   SelectContent,
@@ -21,12 +22,11 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Label } from "@/components/ui/label";
 // import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"; // If needed for wrapping
 
 /**
  * Represents a Google Spreadsheet
- * 
+ *
  * @typedef {Object} Spreadsheet
  * @property {string} id - The unique identifier for the spreadsheet in Google's system
  * @property {string} name - The display name of the spreadsheet
@@ -38,7 +38,7 @@ interface Spreadsheet {
 
 /**
  * Expected response structure from the Google Sheets API endpoint
- * 
+ *
  * @typedef {Object} ListSpreadsheetsResponse
  * @property {Spreadsheet[]} [spreadsheets] - Array of spreadsheets when request is successful
  * @property {string} [error] - Error message when request fails
@@ -52,7 +52,7 @@ interface ListSpreadsheetsResponse {
 
 /**
  * Props for the SpreadsheetSelector component
- * 
+ *
  * @typedef {Object} SpreadsheetSelectorProps
  * @property {string} clinicId - Identifier for the current clinic to scope spreadsheet access
  * @property {function} onSpreadsheetSelected - Callback function triggered when a spreadsheet is selected
@@ -65,11 +65,11 @@ interface SpreadsheetSelectorProps {
 
 /**
  * Fetches available Google Spreadsheets from the API
- * 
+ *
  * This function makes a request to the server-side API endpoint that interfaces with
  * Google Sheets API. It handles error responses by parsing the error details and
  * throwing an appropriate error with a descriptive message.
- * 
+ *
  * @param {string} clinicId - The ID of the clinic to fetch spreadsheets for
  * @returns {Promise<Spreadsheet[]>} Promise resolving to an array of available spreadsheets
  * @throws {Error} If the API request fails, with details from the response when available
@@ -88,32 +88,32 @@ const fetchSpreadsheets = async (clinicId: string): Promise<Spreadsheet[]> => {
 
 /**
  * Spreadsheet Selector Component
- * 
+ *
  * Provides a dropdown interface for users to select a Google Spreadsheet.
  * The component fetches available spreadsheets using React Query and handles
  * various states including loading, error, and empty results.
- * 
+ *
  * Features:
  * - Fetches spreadsheets scoped to the current clinic
  * - Caches results with React Query for performance
  * - Shows appropriate loading states with skeletons
  * - Displays helpful error messages when fetching fails
  * - Provides empty state guidance when no spreadsheets are available
- * 
+ *
  * @param {SpreadsheetSelectorProps} props - The component props
  * @returns {JSX.Element} The rendered spreadsheet selector component
  */
 export function SpreadsheetSelector({ clinicId, onSpreadsheetSelected }: SpreadsheetSelectorProps) {
   /**
    * Fetch spreadsheets data using React Query
-   * 
+   *
    * This query fetches the list of available Google Spreadsheets for the specified clinic.
    * It includes configuration for:
    * - Caching: Data is considered fresh for 5 minutes (staleTime)
    * - Garbage collection: Unused data is kept in cache for 10 minutes (gcTime)
    * - Retry behavior: Failed requests are retried once
    * - Conditional execution: Query only runs when clinicId is available
-   * 
+   *
    * @type {UseQueryResult<Spreadsheet[], Error>}
    */
   const {
@@ -131,11 +131,11 @@ export function SpreadsheetSelector({ clinicId, onSpreadsheetSelected }: Spreads
 
   /**
    * Handles selection of a spreadsheet from the dropdown
-   * 
+   *
    * When a user selects a spreadsheet from the dropdown, this function finds the
    * corresponding spreadsheet object by ID and passes it to the onSpreadsheetSelected
    * callback provided by the parent component.
-   * 
+   *
    * @param {string} spreadsheetId - The ID of the selected spreadsheet
    * @returns {void}
    */
@@ -149,11 +149,11 @@ export function SpreadsheetSelector({ clinicId, onSpreadsheetSelected }: Spreads
 
   /**
    * Render loading state while spreadsheets are being fetched
-   * 
+   *
    * Displays a skeleton UI with a loading message to indicate that spreadsheets
    * are being fetched from the Google Sheets API. This provides visual feedback
    * to the user during the loading process.
-   * 
+   *
    * @returns {JSX.Element} Skeleton UI with loading message
    */
   if (isLoading) {
@@ -168,10 +168,10 @@ export function SpreadsheetSelector({ clinicId, onSpreadsheetSelected }: Spreads
 
   /**
    * Render error state when spreadsheet fetching fails
-   * 
+   *
    * Displays an error message with details about why the spreadsheet fetching failed.
    * This helps users understand what went wrong and potentially how to fix it.
-   * 
+   *
    * @returns {JSX.Element} Error message UI
    */
   if (error) {
@@ -191,11 +191,11 @@ export function SpreadsheetSelector({ clinicId, onSpreadsheetSelected }: Spreads
 
   /**
    * Render empty state when no spreadsheets are available
-   * 
+   *
    * Displays a message indicating that no spreadsheets were found and provides
    * guidance on how to resolve this issue. This helps users understand what
    * steps they need to take to connect their Google account or gain access to spreadsheets.
-   * 
+   *
    * @returns {JSX.Element} Empty state UI with guidance
    */
   if (!spreadsheets || spreadsheets.length === 0) {
@@ -217,11 +217,11 @@ export function SpreadsheetSelector({ clinicId, onSpreadsheetSelected }: Spreads
 
   /**
    * Render the spreadsheet selector dropdown
-   * 
+   *
    * Displays a dropdown menu containing all available spreadsheets for the user to select.
    * When a spreadsheet is selected, the handleValueChange function is called to notify
    * the parent component via the onSpreadsheetSelected callback.
-   * 
+   *
    * @returns {JSX.Element} Spreadsheet selector dropdown UI
    */
   return (

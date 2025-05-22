@@ -1,3 +1,17 @@
+import {
+  addDays,
+  endOfDay,
+  endOfMonth,
+  endOfQuarter,
+  endOfWeek,
+  endOfYear,
+  startOfDay,
+  startOfMonth,
+  startOfQuarter,
+  startOfWeek,
+  startOfYear,
+  subMonths,
+} from "date-fns";
 /**
  * Dashboard filtering functionality using Zustand for global state management with localStorage persistence
  *
@@ -11,20 +25,6 @@
  */
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
-import {
-  addDays,
-  startOfDay,
-  endOfDay,
-  startOfWeek,
-  endOfWeek,
-  startOfMonth,
-  endOfMonth,
-  startOfQuarter,
-  endOfQuarter,
-  startOfYear,
-  endOfYear,
-  subMonths,
-} from "date-fns";
 
 /**
  * Available time period options for filtering dashboard data

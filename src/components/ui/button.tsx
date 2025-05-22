@@ -1,26 +1,26 @@
 /**
  * @fileoverview Button Component
- * 
+ *
  * This file implements a flexible button component with various styles and sizes.
  * It uses class-variance-authority (CVA) for style variants and supports rendering
  * as different elements through the asChild prop.
- * 
+ *
  * The button component is fully accessible and follows WAI-ARIA button patterns,
  * with proper focus states and keyboard interaction support.
  */
 
-import type * as React from "react";
 import { Slot } from "@radix-ui/react-slot";
-import { cva, type VariantProps } from "class-variance-authority";
+import { type VariantProps, cva } from "class-variance-authority";
+import type * as React from "react";
 
 import { cn } from "@/lib/utils";
 
 /**
  * Button style variants using class-variance-authority
- * 
+ *
  * Defines the available style variations for the Button component,
  * including different visual styles and sizes.
- * 
+ *
  * @type {Function}
  * @property {Object} variants - Available style variations
  * @property {Object} variants.variant - Visual style variations
@@ -67,11 +67,11 @@ const buttonVariants = cva(
 
 /**
  * Button component with multiple style variants
- * 
+ *
  * A flexible button component that supports different visual styles and sizes.
  * Can be rendered as a different element using the asChild prop, which is useful
  * for creating link buttons or other interactive elements that should have button styling.
- * 
+ *
  * @component
  * @param {Object} props - Component props
  * @param {string} [props.className] - Additional CSS class names
@@ -80,15 +80,15 @@ const buttonVariants = cva(
  * @param {boolean} [props.asChild=false] - When true, button will render as its child element with button props
  * @param {React.ButtonHTMLAttributes<HTMLButtonElement>} props.props - All standard button attributes
  * @returns {JSX.Element} The button element
- * 
+ *
  * @example
  * // Default primary button
  * <Button>Click me</Button>
- * 
+ *
  * @example
  * // Small destructive button
  * <Button variant="destructive" size="sm">Delete</Button>
- * 
+ *
  * @example
  * // Link styled as a button
  * <Button asChild variant="outline">
@@ -118,7 +118,7 @@ function Button({
 
 /**
  * Export the Button component and its style variants
- * 
+ *
  * buttonVariants is exported to allow for consistent styling in custom implementations
  * or when button styles need to be applied to other elements.
  */

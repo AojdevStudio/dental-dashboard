@@ -1,18 +1,18 @@
 /**
  * @fileoverview Tests for the SpreadsheetSelector component
- * 
+ *
  * This file contains unit tests for the SpreadsheetSelector component, which allows
  * users to select Google Spreadsheets. The tests verify the component's behavior in
  * various states including loading, error handling, empty results, and successful selection.
- * 
+ *
  * The tests use Vitest as the test runner and React Testing Library for component rendering
  * and assertions. TanStack Query (React Query) is mocked to simulate data fetching scenarios.
  */
 
-import { describe, it, expect, vi, beforeEach } from "vitest";
-import { render, screen, fireEvent, waitFor } from "@testing-library/react";
-import SpreadsheetSelector, { type Spreadsheet } from "../SpreadsheetSelector";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { beforeEach, describe, expect, it, vi } from "vitest";
+import SpreadsheetSelector, { type Spreadsheet } from "../SpreadsheetSelector";
 
 /**
  * Mock setup for tests
@@ -44,7 +44,7 @@ const mockSpreadsheets: Spreadsheet[] = [
  * Creates a configured QueryClient instance for testing
  * - Disables retries to prevent hanging tests
  * - Prevents garbage collection to maintain query cache during tests
- * 
+ *
  * @returns {QueryClient} A configured QueryClient for testing
  */
 const createTestQueryClient = () =>
@@ -60,7 +60,7 @@ const createTestQueryClient = () =>
 /**
  * Renders a component with a QueryClient provider for testing
  * This helper ensures that components using React Query hooks have the necessary context
- * 
+ *
  * @param {React.ReactElement} ui - The component to render
  * @param {QueryClient} [client] - Optional custom QueryClient instance
  * @returns {Object} The rendered component with testing utilities

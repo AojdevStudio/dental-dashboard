@@ -1,6 +1,6 @@
 /**
  * @fileoverview Sidebar Navigation Component
- * 
+ *
  * This file implements the sidebar navigation component used in the dashboard layout.
  * It provides the main navigation structure for the application, with links to
  * different sections and features of the dental dashboard.
@@ -8,22 +8,15 @@
 
 "use client";
 
-import * as React from "react";
+import { cn } from "@/lib/utils";
+import { BarChart3, FileSpreadsheet, FileText, Home, Settings, Target } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { cn } from "@/lib/utils";
-import {
-  BarChart3,
-  FileSpreadsheet,
-  Settings,
-  Target,
-  FileText,
-  Home,
-} from "lucide-react";
+import type * as React from "react";
 
 /**
  * Interface for navigation item properties
- * 
+ *
  * @property {string} title - Display text for the navigation item
  * @property {string} href - URL path for the navigation item
  * @property {React.ReactNode} icon - Icon component to display
@@ -36,12 +29,12 @@ interface NavItem {
 
 /**
  * Navigation items for the sidebar
- * 
+ *
  * Each item consists of:
  * - title: The text displayed in the navigation
  * - href: The URL path the item links to
  * - icon: The Lucide icon component to display
- * 
+ *
  * @type {NavItem[]}
  */
 const navItems: NavItem[] = [
@@ -74,13 +67,13 @@ const navItems: NavItem[] = [
 
 /**
  * Sidebar Navigation Component
- * 
+ *
  * Provides the main navigation sidebar for the dashboard interface.
  * Features include:
  * - Icon and text links to main application sections
  * - Visual indication of the current active section
  * - Responsive design that adapts to different screen sizes
- * 
+ *
  * @returns {JSX.Element} The rendered sidebar navigation component
  */
 export function Sidebar() {
@@ -105,7 +98,7 @@ export function Sidebar() {
           >
             {/* Item icon */}
             <span className="mr-3">{item.icon}</span>
-            
+
             {/* Item title */}
             <span>{item.title}</span>
           </Link>

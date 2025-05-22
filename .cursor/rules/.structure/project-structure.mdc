@@ -1,7 +1,7 @@
 ---
-description: Project structure and file organization guidelines
+description: 
 globs: 
-alwaysApply: false
+alwaysApply: true
 ---
 # Project Structure Guidelines
 
@@ -18,7 +18,7 @@ These guidelines define our target file structure as we refactor our codebase. T
 
 ### Frontend Repository Structure
 ```
-dental-analytics-dashboard/
+dental-analytics-dashboard/src
 ├── app/
 │   ├── (auth)/
 │   │   ├── login/
@@ -59,7 +59,7 @@ dental-analytics-dashboard/
 │   │   │   │       └── page.tsx
 │   │   │   └── providers/
 │   │   │       ├── page.tsx
-│   │   │       └── [providerId]/
+│   │   │       └── [providerId]/ -- note that this is currently missing**
 │   │   │           └── page.tsx
 │   │   └── layout.tsx
 │   ├── api/

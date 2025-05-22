@@ -2,7 +2,7 @@
 
 ### Frontend Repository Structure
 ```
-dental-analytics-dashboard/
+dental-analytics-dashboard/src
 ├── app/
 │   ├── (auth)/
 │   │   ├── login/

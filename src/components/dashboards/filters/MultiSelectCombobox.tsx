@@ -1,6 +1,6 @@
 /**
  * @fileoverview Multi-Select Combobox Component
- * 
+ *
  * This file implements a reusable multi-select combobox component used in the dashboard filters.
  * It provides a searchable dropdown interface that allows users to select multiple items
  * from a list. The component includes features like search filtering, selection badges,
@@ -9,8 +9,6 @@
 
 "use client";
 
-import * as React from "react";
-import { Check, ChevronsUpDown, X } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -23,10 +21,12 @@ import {
 } from "@/components/ui/command";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
+import { Check, ChevronsUpDown, X } from "lucide-react";
+import * as React from "react";
 
 /**
  * Represents an item in the multi-select combobox
- * 
+ *
  * @typedef {Object} ComboboxItem
  * @property {string} value - The unique identifier for the item
  * @property {string} label - The display text shown to the user
@@ -38,7 +38,7 @@ export type ComboboxItem = {
 
 /**
  * Props for the MultiSelectCombobox component
- * 
+ *
  * @interface MultiSelectComboboxProps
  * @property {ComboboxItem[]} items - Array of items to display in the dropdown
  * @property {string[]} selectedValues - Array of currently selected item values
@@ -62,7 +62,7 @@ interface MultiSelectComboboxProps {
 
 /**
  * Multi-Select Combobox Component
- * 
+ *
  * A reusable component that provides a searchable, multi-select dropdown interface.
  * It allows users to select multiple items from a list, with features including:
  * - Search filtering to quickly find items
@@ -70,10 +70,10 @@ interface MultiSelectComboboxProps {
  * - Keyboard navigation support
  * - Clear all functionality
  * - Disabled state support
- * 
+ *
  * This component is built using Radix UI primitives (via shadcn/ui) and is fully
  * accessible, supporting keyboard navigation, screen readers, and proper ARIA attributes.
- * 
+ *
  * @param {MultiSelectComboboxProps} props - The component props
  * @returns {JSX.Element} The rendered multi-select combobox component
  */
@@ -89,18 +89,18 @@ export function MultiSelectCombobox({
 }: MultiSelectComboboxProps) {
   /**
    * State to track whether the dropdown is open
-   * 
+   *
    * @type {[boolean, React.Dispatch<React.SetStateAction<boolean>>]}
    */
   const [open, setOpen] = React.useState(false);
 
   /**
    * Handles selection/deselection of an item
-   * 
+   *
    * When an item is clicked in the dropdown:
    * - If already selected: Removes it from the selection
    * - If not selected: Adds it to the selection
-   * 
+   *
    * @param {string} value - The value of the item to toggle
    * @returns {void}
    */
@@ -114,7 +114,7 @@ export function MultiSelectCombobox({
 
   /**
    * Handles removal of an item via the badge's remove button
-   * 
+   *
    * @param {string} value - The value of the item to remove
    * @returns {void}
    */
@@ -124,7 +124,7 @@ export function MultiSelectCombobox({
 
   /**
    * Clears all selected items
-   * 
+   *
    * @returns {void}
    */
   const handleClear = () => {
@@ -133,11 +133,11 @@ export function MultiSelectCombobox({
 
   /**
    * Render the multi-select combobox interface
-   * 
+   *
    * The component consists of two main parts:
    * 1. A button that displays the selected items as badges and opens the dropdown
    * 2. A dropdown with search input and selectable items
-   * 
+   *
    * @returns {JSX.Element} The rendered multi-select combobox
    */
   return (

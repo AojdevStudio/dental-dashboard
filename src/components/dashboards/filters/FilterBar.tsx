@@ -1,6 +1,6 @@
 /**
  * @fileoverview Filter Bar Component
- * 
+ *
  * This file implements the main filter bar component used in the dashboard interface.
  * It provides a unified interface for all dashboard filters, including clinic selection,
  * provider selection, and time period filtering. The component handles filter state
@@ -9,35 +9,35 @@
 
 "use client";
 
-import * as React from "react";
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { Filter, RotateCcw, X, ChevronUp, ChevronDown } from "lucide-react";
-import { Button } from "@/components/ui/button";
 import {
   Accordion,
   AccordionContent,
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
-import { Badge } from "@/components/ui/badge";
-import { TimePeriodFilter } from "./TimePeriodFilter";
-import { ClinicFilter } from "./ClinicFilter";
-import { ProviderFilter } from "./ProviderFilter";
 import {
-  useFilterStore,
-  filterDependentQueries,
   createFilterUrlParams,
+  filterDependentQueries,
   parseFilterUrlParams,
+  useFilterStore,
 } from "@/hooks/useFilterStore";
 import { useQueryClient } from "@tanstack/react-query";
-import { useState, useEffect, useRef, useCallback } from "react";
 import { AnimatePresence, motion } from "framer-motion";
+import { ChevronDown, ChevronUp, Filter, RotateCcw, X } from "lucide-react";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import * as React from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { ClinicFilter } from "./ClinicFilter";
+import { ProviderFilter } from "./ProviderFilter";
+import { TimePeriodFilter } from "./TimePeriodFilter";
 
 /**
  * Filter Bar Component
- * 
+ *
  * A collapsible filter panel that provides a unified interface for all dashboard filters.
  * Features include:
  * - Expandable/collapsible filter panel with animation
@@ -46,10 +46,10 @@ import { AnimatePresence, motion } from "framer-motion";
  * - Query invalidation to refresh data when filters change
  * - Filter count badges to show active filters
  * - Clear and reset filter options
- * 
+ *
  * The component integrates with the global filter store and automatically updates
  * the URL parameters when filters change, allowing for shareable filtered views.
- * 
+ *
  * @returns {JSX.Element} The rendered filter bar component
  */
 export function FilterBar() {
@@ -77,11 +77,11 @@ export function FilterBar() {
 
   /**
    * Updates URL parameters based on the current filter state
-   * 
+   *
    * This function is memoized to avoid dependency issues and excessive re-renders.
    * It creates URL parameters from the current filter state and updates the browser URL
    * without triggering a page refresh, enabling shareable filtered dashboard views.
-   * 
+   *
    * @returns {void}
    */
   const updateUrlParams = useCallback(() => {
@@ -93,11 +93,11 @@ export function FilterBar() {
 
   /**
    * Parses URL parameters and updates filter state on component mount and URL changes
-   * 
+   *
    * This effect runs when the component mounts and whenever the URL search parameters change.
    * It ensures that the filter state is synchronized with the URL, allowing for bookmarking
    * and sharing specific filter configurations.
-   * 
+   *
    * @returns {void}
    */
   useEffect(() => {
@@ -106,7 +106,7 @@ export function FilterBar() {
 
   /**
    * Reference to track filter changes without creating effect dependencies
-   * 
+   *
    * Using a ref allows us to compare previous and current filter values without
    * adding them as dependencies to the effect, which would cause infinite loops.
    */
@@ -114,15 +114,15 @@ export function FilterBar() {
 
   /**
    * Updates URL and invalidates queries when filter state changes
-   * 
+   *
    * This effect is responsible for:
    * 1. Detecting when any filter value has changed
    * 2. Updating the URL to reflect the new filter state
    * 3. Invalidating and refetching any queries that depend on the filter values
-   * 
+   *
    * It includes debouncing (via setTimeout) to prevent excessive URL updates and
    * query invalidations when multiple filters change in quick succession.
-   * 
+   *
    * @returns {void | (() => void)} Cleanup function to clear the timeout if component unmounts during the delay
    */
   useEffect(() => {
@@ -173,18 +173,18 @@ export function FilterBar() {
 
   /**
    * Handles clicks outside the filter bar to automatically collapse it when expanded
-   * 
+   *
    * This effect adds a global click event listener that checks if the click occurred
    * outside the filter bar component. If the filter panel is expanded and the user
    * clicks outside of it, the panel will automatically collapse, improving the UX
    * by allowing users to easily dismiss the filter panel.
-   * 
+   *
    * @returns {void}
    */
   useEffect(() => {
     /**
      * Event handler for clicks outside the filter bar
-     * 
+     *
      * @param {MouseEvent} event - The mouse click event
      */
     const handleClickOutside = (event: MouseEvent) => {
@@ -199,7 +199,7 @@ export function FilterBar() {
 
     // Add event listener when component mounts or isExpanded changes
     document.addEventListener("mousedown", handleClickOutside);
-    
+
     // Clean up event listener when component unmounts or isExpanded changes
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
@@ -208,12 +208,12 @@ export function FilterBar() {
 
   /**
    * Calculates the number of active filters for display in the filter badge
-   * 
+   *
    * This counts each filter category that has a non-default value:
    * - Time period (if not set to the default 'monthly')
    * - Clinics (if any are selected)
    * - Providers (if any are selected)
-   * 
+   *
    * @type {number}
    */
   const activeFilterCount = [
@@ -225,22 +225,22 @@ export function FilterBar() {
   /**
    * Boolean flag indicating if any filters are currently active
    * Used to conditionally show the clear filters button
-   * 
+   *
    * @type {boolean}
    */
   const hasActiveFilters = activeFilterCount > 0;
 
   /**
    * Clears all filters to their empty state
-   * 
+   *
    * This resets all filters to empty values (not default values):
    * - Time period: empty
    * - Date range: empty
    * - Selected clinics: empty array
    * - Selected providers: empty array
-   * 
+   *
    * The filter panel remains open after clearing to allow the user to select new filters.
-   * 
+   *
    * @returns {void}
    */
   const handleClearFilters = () => {
@@ -250,15 +250,15 @@ export function FilterBar() {
 
   /**
    * Resets all filters to their default values
-   * 
+   *
    * This sets all filters back to their system defaults:
    * - Time period: 'monthly'
    * - Date range: current month
    * - Selected clinics: empty array
    * - Selected providers: empty array
-   * 
+   *
    * The filter panel remains open after resetting to allow the user to make adjustments.
-   * 
+   *
    * @returns {void}
    */
   const handleResetFilters = () => {
@@ -268,14 +268,14 @@ export function FilterBar() {
 
   /**
    * Applies the current filters and closes the filter panel
-   * 
+   *
    * This function:
    * 1. Collapses the filter panel
    * 2. Triggers a refetch of all filter-dependent queries to update the dashboard data
-   * 
+   *
    * Each query in the filterDependentQueries list is individually invalidated to ensure
    * all data components are updated with the new filter values.
-   * 
+   *
    * @returns {void}
    */
   const handleApplyFilters = () => {

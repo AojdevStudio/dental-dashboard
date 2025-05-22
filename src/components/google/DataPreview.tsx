@@ -1,6 +1,6 @@
 /**
  * @fileoverview Data Preview Component
- * 
+ *
  * This file implements a component for displaying tabular data from Google Sheets
  * within the dental dashboard. It renders a responsive table with support for
  * headers, loading states, error handling, and empty states. The component is designed
@@ -13,7 +13,7 @@ import type React from "react";
 
 /**
  * Props for the DataPreview component
- * 
+ *
  * @typedef {Object} DataPreviewProps
  * @property {unknown[][] | null} data - 2D array of cell values from a spreadsheet or null if no data
  * @property {string[] | null} [headers] - Optional array of column headers
@@ -29,17 +29,17 @@ interface DataPreviewProps {
 
 /**
  * Data Preview Component
- * 
+ *
  * Renders a responsive table to display tabular data from Google Sheets.
  * The component handles various states including:
  * - Loading state with appropriate visual feedback
  * - Error state with error message display
  * - Empty state when no data is available
  * - Normal state with properly formatted tabular data
- * 
+ *
  * The component automatically generates column headers if none are provided,
  * and handles cases where rows may have different numbers of cells.
- * 
+ *
  * @param {DataPreviewProps} props - The component props
  * @returns {JSX.Element} The rendered data preview component
  */
@@ -51,10 +51,10 @@ const DataPreview: React.FC<DataPreviewProps> = ({
 }) => {
   /**
    * Render loading state while data is being fetched
-   * 
+   *
    * Displays a loading message to indicate that spreadsheet data is being fetched.
    * This provides visual feedback to the user during the loading process.
-   * 
+   *
    * @returns {JSX.Element} Loading state UI
    */
   if (isLoading) {
@@ -68,10 +68,10 @@ const DataPreview: React.FC<DataPreviewProps> = ({
 
   /**
    * Render error state when data fetching fails
-   * 
+   *
    * Displays an error message with details about why the data fetching failed.
    * This helps users understand what went wrong and potentially how to fix it.
-   * 
+   *
    * @returns {JSX.Element} Error message UI
    */
   if (error) {
@@ -84,10 +84,10 @@ const DataPreview: React.FC<DataPreviewProps> = ({
 
   /**
    * Render empty state when no data is available
-   * 
+   *
    * Displays a message indicating that no data is available to display.
    * This helps users understand that the spreadsheet exists but contains no data.
-   * 
+   *
    * @returns {JSX.Element} Empty state UI
    */
   if (!data || data.length === 0) {
@@ -100,7 +100,7 @@ const DataPreview: React.FC<DataPreviewProps> = ({
 
   /**
    * Process and prepare data for display
-   * 
+   *
    * This logic handles several scenarios:
    * 1. If headers are provided, use them directly
    * 2. If no headers are provided but data exists, use the first row as headers or generate column numbers
@@ -118,16 +118,16 @@ const DataPreview: React.FC<DataPreviewProps> = ({
 
   /**
    * Render the data preview table
-   * 
+   *
    * Displays a responsive table with the spreadsheet data. The table includes:
    * - A header row with column names
    * - Data rows with cell values
    * - Proper handling of empty cells
    * - Responsive design for different screen sizes
    * - Accessibility features like proper scope attributes
-   * 
+   *
    * If no columns are available, a message is displayed instead of an empty table.
-   * 
+   *
    * @returns {JSX.Element} Data preview table UI
    */
   return (

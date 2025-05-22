@@ -15,9 +15,9 @@
 
 "use client";
 
-import * as React from "react";
+import { AnimatePresence, type HTMLMotionProps, type Transition, motion } from "motion/react";
 import { HoverCard as HoverCardPrimitive } from "radix-ui";
-import { AnimatePresence, motion, type HTMLMotionProps, type Transition } from "motion/react";
+import * as React from "react";
 
 import { cn } from "@/lib/utils";
 

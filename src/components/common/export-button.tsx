@@ -1,14 +1,12 @@
 /**
  * @fileoverview Export Button Component
- * 
+ *
  * This file implements a reusable export button component that provides
  * functionality for exporting dashboard data in various formats (PDF, CSV).
  */
 
 "use client";
 
-import * as React from "react";
-import { FileDown, Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -16,10 +14,12 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { Check, FileDown } from "lucide-react";
+import * as React from "react";
 
 /**
  * Interface for ExportButton component properties
- * 
+ *
  * @property {() => Promise<void>} [onExportPdf] - Callback for PDF export
  * @property {() => Promise<void>} [onExportCsv] - Callback for CSV export
  * @property {boolean} [disabled] - Whether the export button is disabled
@@ -34,14 +34,14 @@ interface ExportButtonProps {
 
 /**
  * Export Button Component
- * 
+ *
  * A dropdown button component for exporting dashboard data in different formats.
  * Features include:
  * - PDF export option
  * - CSV export option
  * - Loading state during export
  * - Success feedback after export completes
- * 
+ *
  * @param {ExportButtonProps} props - Component properties
  * @returns {JSX.Element} The rendered export button component
  */
@@ -57,7 +57,7 @@ export function ExportButton({
 
   /**
    * Handles the export action for the selected format
-   * 
+   *
    * @param {string} format - The export format ('pdf' or 'csv')
    * @returns {Promise<void>}
    */
@@ -67,14 +67,14 @@ export function ExportButton({
       setExportFormat(format);
       setExportSuccess(false);
 
-      if (format === 'pdf' && onExportPdf) {
+      if (format === "pdf" && onExportPdf) {
         await onExportPdf();
-      } else if (format === 'csv' && onExportCsv) {
+      } else if (format === "csv" && onExportCsv) {
         await onExportCsv();
       }
 
       setExportSuccess(true);
-      
+
       // Reset success indicator after 2 seconds
       setTimeout(() => {
         setExportSuccess(false);
@@ -93,9 +93,7 @@ export function ExportButton({
           <FileDown className="mr-2 h-4 w-4" />
           {children || "Export"}
           {isExporting && (
-            <span className="ml-2 animate-pulse">
-              Exporting {exportFormat?.toUpperCase()}...
-            </span>
+            <span className="ml-2 animate-pulse">Exporting {exportFormat?.toUpperCase()}...</span>
           )}
           {exportSuccess && !isExporting && (
             <span className="ml-2 text-green-500 flex items-center">
@@ -106,14 +104,14 @@ export function ExportButton({
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent>
-        <DropdownMenuItem 
-          onClick={() => handleExport('pdf')}
+        <DropdownMenuItem
+          onClick={() => handleExport("pdf")}
           disabled={isExporting || !onExportPdf}
         >
           Export as PDF
         </DropdownMenuItem>
-        <DropdownMenuItem 
-          onClick={() => handleExport('csv')}
+        <DropdownMenuItem
+          onClick={() => handleExport("csv")}
           disabled={isExporting || !onExportCsv}
         >
           Export as CSV

@@ -1,6 +1,6 @@
 /**
  * @fileoverview Dashboard Example Component
- * 
+ *
  * This file implements an example dashboard component that demonstrates the structure
  * and layout of a dental practice dashboard. It shows how to integrate the filter bar
  * and display metrics based on the selected filters. In a production environment,
@@ -9,24 +9,24 @@
 
 "use client";
 
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Separator } from "@/components/ui/separator";
+import { useFilterParams } from "@/hooks/useFilterStore";
 import React from "react";
 import { FilterBar } from "./filters";
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
-import { useFilterParams } from "@/hooks/useFilterStore";
-import { Separator } from "@/components/ui/separator";
 
 /**
  * Dashboard Example Component
- * 
+ *
  * A demonstration dashboard that showcases the structure and layout of a dental practice
  * dashboard interface. It includes:
  * - A filter bar for selecting clinics, providers, and time periods
  * - A display of the current filter parameters
  * - Example metric cards that would show filtered data in a real application
- * 
+ *
  * This component serves as a template and reference implementation for building
  * actual dashboard views with real data integration.
- * 
+ *
  * @returns {JSX.Element} The rendered dashboard example component
  */
 export function DashboardExample() {
@@ -39,18 +39,18 @@ export function DashboardExample() {
 
   /**
    * Render the dashboard interface
-   * 
+   *
    * The dashboard layout consists of:
    * 1. A header with the dashboard title
    * 2. A filter bar for selecting data parameters
    * 3. A debug card showing the current filter state
    * 4. A grid of metric cards that would display actual data in production
-   * 
+   *
    * The responsive grid layout adjusts based on screen size:
    * - 1 column on mobile (default)
    * - 2 columns on medium screens (md breakpoint)
    * - 3 columns on large screens (lg breakpoint)
-   * 
+   *
    * @returns {JSX.Element} The rendered dashboard UI
    */
   return (

@@ -1,166 +1,310 @@
----
-trigger: model_decision
-description: Project structure and file organization guidelines
-globs: 
----
- Project Structure
+# Project Structure Guidelines
+
+## Target Structure
+
+These guidelines define our target file structure as we refactor our codebase. This structure exactly matches the one defined in `.dev/file-system.md`. Refer to this structure when making any changes to the application.
 
 ## Main Structure
 
-- We use Turborepo with pnpm workspaces
-- Main app is in `src/app`
-- Packages are in the `root` folder
-- Server actions are in `app/actions` folder
+- Next.js App Router structure with `app/` at the root (no `src/` directory)
+- Server Components by default, with explicit Client Components when needed
+- API routes within `app/api/`
+- No `actions/` or `services/` directories (logic moved to API routes and lib utilities)
 
-```tree
-dental-dashboard/
-├── .npmrc                  # pnpm configuration (strict-peer-dependencies=true)
-├── pnpm-lock.yaml          # pnpm lockfile (must be committed)
-├── pnpm-workspace.yaml     # Workspace configuration
-├── package.json            # Root package configuration
-├── .env                    # Environment variables (includes NEXT_PUBLIC_SUPABASE_URL, NEXT_PUBLIC_SUPABASE_ANON_KEY)
-├── .env.example            # Example environment variables
-├── .eslintrc.js            # ESLint configuration
-├── next.config.js          # Next.js configuration
-├── middleware.ts           # Supabase auth session middleware
-├── prisma/                 # Prisma database schemas and migrations
-│   ├── schema.prisma       # Prisma schema definition
-│   └── migrations/         # Database migrations
-├── supabase/               # Supabase specific configuration
-│   ├── schema/             # SQL schema definitions for Supabase
-│   │   ├── auth.sql        # Auth related schema
-│   │   ├── storage.sql     # Storage related schema
-│   │   └── rls.sql         # Row Level Security policies
-│   ├── functions/          # Edge functions
-│   ├── migrations/         # Supabase migrations
-│   └── seed-data/          # Seed data for development
-├── public/                 # Static assets
-├── src/                    # Application source code
-│   ├── app/                # Next.js app directory (App Router)
-│   │   ├── api/            # API routes
-│   │   │   ├── clinics/    # Clinic-related endpoints
-│   │   │   ├── dashboards/ # Dashboard configuration endpoints
-│   │   │   ├── google/     # Google Sheets integration endpoints
-│   │   │   ├── KPIs/       # Metrics and KPI endpoints
-│   │   │   └── users/      # User management endpoints
-│   │   ├── auth/           # Authentication-related pages
-│   │   │   ├── login/     # Sign in page
-│   │   │   ├── signup/     # Sign up page
-│   │   │   ├── reset-password/ # Reset password page
-│   │   │   ├── auth-error/ # Auth error page
-│   │   │   └── callback/route.ts # Auth callback handler
-│   │   ├── (dashboard)/    # Dashboard pages (protected routes)
-│   │   │   ├── page.tsx    # Main dashboard page
-│   │   │   ├── layout.tsx  # Dashboard layout
-│   │   │   ├── clinics/    # Clinic-specific views
-│   │   │   ├── providers/  # Provider-specific views
-│   │   │   ├── metrics/    # Metrics detail pages
-│   │   │   └── settings/   # Dashboard settings
-│   │   ├── google/         # Google integration pages
-│   │   │   ├── connect/    # Connection setup
-│   │   │   └── mapping/    # Column mapping interface
-│   │   └── layout.tsx      # Root layout
-│   ├── components/         # Reusable components
-│   │   ├── ui/             # shadcn/ui components
-│   │   ├── charts/         # Chart components
-│   │   ├── dashboards/     # Dashboard-specific components
-│   │   ├── forms/          # Form components
-│   │   ├── layout/         # Layout components
-│   │   ├── auth/           # Authentication components
-│   │   └── metrics/        # Metric-specific components
-│   ├── lib/                # Domain-specific libraries and clients
-│   │   ├── api/            # API client configuration
-│   │   ├── db/             # Database connection and helpers
-│   │   ├── google/         # Google API integration
-│   │   └── supabase/       # Supabase client configuration
-│   │       ├── client.ts   # Browser client
-│   │       ├── server.ts   # Server client
-│   │       └── middleware.ts # Middleware client
-│   ├── repositories/       # Data querying and caching
-│   ├── utils/              # Pure utility functions
-│   │   ├── date/           # Date formatting and manipulation
-│   │   ├── string/         # String operations and formatting
-│   │   ├── number/         # Number formatting and calculations
-│   │   └── format/         # General formatting utilities
-│   ├── actions/            # Server actions (Next.js)
-│   │   ├── auth/           # Authentication actions (moved from lib)
-│   │   ├── clinics/        # Clinic-related mutations
-│   │   ├── metrics/        # Metrics-related mutations
-│   │   └── users/          # User-related mutations
-│   ├── hooks/              # Custom React hooks
-│   │   ├── useSupabase.ts  # Supabase client hook
-│   │   └── useAuth.ts      # Authentication hook
-│   ├── types/              # TypeScript type definitions
-│   │   ├── supabase.ts     # Supabase generated types
-│   │   └── database.ts     # Database types
-│   ├── services/           # Business logic services
-│   │   ├── calculations/   # Complex calculations and transformations
-│   │   ├── clinics/        # Clinic-related services
-│   │   ├── google/         # Google integration services
-│   │   ├── KPIs/           # Dedicated metrics service that centralizes all KPI calculations
-│   │   └── users/          # User-related services
-│   └── styles/             # Global and modular styles
-│       ├── globals.css     # Global CSS
-│       ├── themes/         # Theme configurations
-│       └── components/     # Component-specific styles
-├── tests/                  # Test files
-│   ├── unit/               # Unit tests
-│   ├── integration/        # Integration tests
-│   └── e2e/                # End-to-end tests
-├── turbo.json               # Turborepo pipeline configuration (build, dev, lint, test scripts)
-└── README.md               # Project documentation
+### Frontend Repository Structure
+```
+dental-analytics-dashboard/src
+├── app/
+│   ├── (auth)/
+│   │   ├── login/
+│   │   │   └── page.tsx
+│   │   ├── register/
+│   │   │   └── page.tsx
+│   │   └── layout.tsx
+│   ├── (dashboard)/
+│   │   ├── dashboard/
+│   │   │   ├── page.tsx
+│   │   │   ├── loading.tsx
+│   │   │   └── error.tsx
+│   │   ├── integrations/
+│   │   │   ├── google-sheets/
+│   │   │   │   ├── page.tsx
+│   │   │   │   ├── connect/
+│   │   │   │   │   └── page.tsx
+│   │   │   │   └── mapping/
+│   │   │   │       └── page.tsx
+│   │   │   └── page.tsx
+│   │   ├── goals/
+│   │   │   ├── page.tsx
+│   │   │   ├── create/
+│   │   │   │   └── page.tsx
+│   │   │   └── [goalId]/
+│   │   │       └── page.tsx
+│   │   ├── reports/
+│   │   │   ├── page.tsx
+│   │   │   └── export/
+│   │   │       └── page.tsx
+│   │   ├── settings/
+│   │   │   ├── page.tsx
+│   │   │   ├── clinic/
+│   │   │   │   └── page.tsx
+│   │   │   ├── users/
+│   │   │   │   ├── page.tsx
+│   │   │   │   └── [userId]/
+│   │   │   │       └── page.tsx
+│   │   │   └── providers/
+│   │   │       ├── page.tsx
+│   │   │       └── [providerId]/
+│   │   │           └── page.tsx
+│   │   └── layout.tsx
+│   ├── api/
+│   │   ├── auth/
+│   │   │   ├── google/
+│   │   │   │   ├── connect/
+│   │   │   │   │   └── route.ts
+│   │   │   │   └── callback/
+│   │   │   │       └── route.ts
+│   │   │   └── session/
+│   │   │       └── route.ts
+│   │   ├── google-sheets/
+│   │   │   ├── discover/
+│   │   │   │   └── route.ts
+│   │   │   ├── sync/
+│   │   │   │   └── route.ts
+│   │   │   ├── mapping/
+│   │   │   │   └── route.ts
+│   │   │   └── validate/
+│   │   │       └── route.ts
+│   │   ├── metrics/
+│   │   │   ├── financial/
+│   │   │   │   └── route.ts
+│   │   │   ├── patients/
+│   │   │   │   └── route.ts
+│   │   │   ├── appointments/
+│   │   │   │   └── route.ts
+│   │   │   ├── providers/
+│   │   │   │   └── route.ts
+│   │   │   └── calls/
+│   │   │       └── route.ts
+│   │   ├── goals/
+│   │   │   ├── route.ts
+│   │   │   └── [goalId]/
+│   │   │       └── route.ts
+│   │   ├── users/
+│   │   │   ├── route.ts
+│   │   │   ├── invite/
+│   │   │   │   └── route.ts
+│   │   │   └── [userId]/
+│   │   │       └── route.ts
+│   │   ├── clinics/
+│   │   │   ├── route.ts
+│   │   │   └── [clinicId]/
+│   │   │       ├── route.ts
+│   │   │       └── providers/
+│   │   │           └── route.ts
+│   │   └── export/
+│   │       ├── pdf/
+│   │       │   └── route.ts
+│   │       └── csv/
+│   │           └── route.ts
+│   ├── globals.css
+│   ├── layout.tsx
+│   └── page.tsx
+├── components/
+│   ├── ui/
+│   │   ├── button.tsx
+│   │   ├── input.tsx
+│   │   ├── select.tsx
+│   │   ├── card.tsx
+│   │   ├── table.tsx
+│   │   ├── badge.tsx
+│   │   ├── progress.tsx
+│   │   ├── dialog.tsx
+│   │   ├── form.tsx
+│   │   ├── toast.tsx
+│   │   └── loading-spinner.tsx
+│   ├── dashboard/
+│   │   ├── metric-card.tsx
+│   │   ├── kpi-chart.tsx
+│   │   ├── provider-performance.tsx
+│   │   ├── financial-overview.tsx
+│   │   ├── patient-metrics.tsx
+│   │   ├── appointment-analytics.tsx
+│   │   ├── call-tracking.tsx
+│   │   └── dashboard-layout.tsx
+│   ├── google-sheets/
+│   │   ├── connection-status.tsx
+│   │   ├── spreadsheet-selector.tsx
+│   │   ├── column-mapper.tsx
+│   │   ├── sync-status.tsx
+│   │   └── mapping-preview.tsx
+│   ├── goals/
+│   │   ├── goal-card.tsx
+│   │   ├── goal-progress.tsx
+│   │   ├── goal-form.tsx
+│   │   └── variance-indicator.tsx
+│   ├── users/
+│   │   ├── user-table.tsx
+│   │   ├── role-selector.tsx
+│   │   ├── invite-form.tsx
+│   │   └── provider-assignment.tsx
+│   ├── auth/
+│   │   ├── login-form.tsx
+│   │   ├── register-form.tsx
+│   │   └── auth-guard.tsx
+│   └── common/
+│       ├── navigation.tsx
+│       ├── sidebar.tsx
+│       ├── header.tsx
+│       ├── filters.tsx
+│       ├── date-picker.tsx
+│       └── export-button.tsx
+├── lib/
+│   ├── auth/
+│   │   ├── config.ts
+│   │   ├── session.ts
+│   │   └── middleware.ts
+│   ├── database/
+│   │   ├── prisma.ts
+│   │   ├── queries/
+│   │   │   ├── metrics.ts
+│   │   │   ├── users.ts
+│   │   │   ├── clinics.ts
+│   │   │   ├── goals.ts
+│   │   │   └── google-sheets.ts
+│   │   └── schemas/
+│   │       ├── user.ts
+│   │       ├── clinic.ts
+│   │       ├── metric.ts
+│   │       ├── goal.ts
+│   │       └── google-sheet.ts
+│   ├── google-sheets/
+│   │   ├── client.ts
+│   │   ├── auth.ts
+│   │   ├── sync.ts
+│   │   ├── mapping.ts
+│   │   └── validation.ts
+│   ├── metrics/
+│   │   ├── calculations.ts
+│   │   ├── transformations.ts
+│   │   ├── aggregations.ts
+│   │   └── types.ts
+│   ├── utils/
+│   │   ├── validation.ts
+│   │   ├── formatting.ts
+│   │   ├── date-helpers.ts
+│   │   ├── export.ts
+│   │   └── logger.ts
+│   └── types/
+│       ├── auth.ts
+│       ├── dashboard.ts
+│       ├── metrics.ts
+│       ├── goals.ts
+│       └── api.ts
+├── hooks/
+│   ├── use-auth.ts
+│   ├── use-metrics.ts
+│   ├── use-google-sheets.ts
+│   ├── use-goals.ts
+│   ├── use-users.ts
+│   └── use-filters.ts
+├── middleware.ts
+├── next.config.js
+├── tailwind.config.js
+├── package.json
+└── prisma/
+    ├── schema.prisma
+    ├── migrations/
+    └── seed.ts
+```
 
-## Key Directory Organization
-### Libraries and Utils
+### Backend Repository Structure (Supabase Functions)
+```
+supabase/
+├── functions/
+│   ├── google-sheets-sync/
+│   │   ├── index.ts
+│   │   ├── handlers/
+│   │   │   ├── discovery.ts
+│   │   │   ├── extraction.ts
+│   │   │   ├── transformation.ts
+│   │   │   └── validation.ts
+│   │   └── types.ts
+│   ├── metrics-calculation/
+│   │   ├── index.ts
+│   │   ├── calculators/
+│   │   │   ├── financial.ts
+│   │   │   ├── patients.ts
+│   │   │   ├── appointments.ts
+│   │   │   ├── providers.ts
+│   │   │   └── calls.ts
+│   │   └── aggregators/
+│   │       ├── daily.ts
+│   │       ├── weekly.ts
+│   │       ├── monthly.ts
+│   │       └── quarterly.ts
+│   ├── goal-tracking/
+│   │   ├── index.ts
+│   │   ├── progress-calculator.ts
+│   │   ├── variance-analyzer.ts
+│   │   └── alert-generator.ts
+│   ├── data-export/
+│   │   ├── index.ts
+│   │   ├── pdf-generator.ts
+│   │   ├── csv-generator.ts
+│   │   └── formatters.ts
+│   ├── scheduled-sync/
+│   │   ├── index.ts
+│   │   ├── cron-handler.ts
+│   │   └── retry-logic.ts
+│   └── audit-logging/
+│       ├── index.ts
+│       ├── user-actions.ts
+│       └── data-access.ts
+├── migrations/
+│   ├── 20240101000000_initial_schema.sql
+│   ├── 20240101000001_user_management.sql
+│   ├── 20240101000002_google_sheets_integration.sql
+│   ├── 20240101000003_metrics_tables.sql
+│   └── 20240101000004_goals_tracking.sql
+└── config.toml
+```
 
-- src/lib/: Domain-specific libraries and API clients. Houses core integrations (Supabase, Google, etc.)
-- src/utils/: Pure utility functions organized by type (date, string, number, format). No side effects or app state.
-- src/actions/: All server-side mutations using Next.js server actions, organized by domain (auth, clinics, etc.)
+## Key Architecture Changes
 
-### Styles and UI
+Notable differences from the previous structure:
+- No `src/` directory - all files at the root level
+- No separate `actions/` or `services/` directories - logic moved to API routes or lib utilities
+- Domain-based organization in `components/` directory
+- Database queries consolidated in `lib/database/queries/` rather than separate repositories
+- Types organized in domain-specific files in `lib/types/` and `lib/database/schemas/`
 
-- src/styles/: All styling concerns including global CSS, themes, and component styles
-- src/components/: Reusable React components, organized by domain and function
+## File Naming Conventions
 
-### Business Logic
+- React Components: PascalCase (e.g., `MetricCard.tsx`)
+- Utility Functions: camelCase (e.g., `formatDate.ts`)
+- Pages & Layouts: lowercase (e.g., `page.tsx`, `layout.tsx`)
+- Route Handlers: lowercase (e.g., `route.ts`)
+- Test Files: Same name as the file being tested with `.test.ts` suffix
 
-- src/services/: Core business logic and data transformation services
-- src/hooks/: React hooks for state management and shared behaviors
+## Import Conventions
 
-### Configuration
-
-- turbo.json: Turborepo pipeline configuration for build, test, and development tasks
-
-### File Naming Conventions
-
-- React Components: PascalCase (e.g., MetricsCard.tsx)
-- Utility Functions: camelCase (e.g., formatDate.ts)
-- Pages & Layouts: lowercase (e.g., page.tsx, layout.tsx)
-- Route Handlers: lowercase (e.g., route.ts)
-- Test Files: Same name as the file being tested with .test.ts suffix
-
-### Import Conventions
-
-- Always use absolute imports with @/ prefix
+- Use absolute imports for clean import paths
 - Group imports in the following order:
-
-- React and Next.js imports
-- Third-party library imports
-- Local absolute imports (components, utils, etc.)
-- Local relative imports
-- Type imports
-
-
+  1. React and Next.js imports
+  2. Third-party library imports
+  3. Local absolute imports (components, lib, etc.)
+  4. Local relative imports
+  5. Type imports
 
 ### Example:
 
 ```tsx
-tsximport { useState, useEffect } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { format } from 'date-fns'
 import { Card } from '@/components/ui/card'
-import { formatCurrency } from '@/utils/format/currency'
-import { MetricsService } from '@/services/metrics'
+import { formatCurrency } from '@/lib/utils/formatting'
 import styles from './styles.module.css'
-import type { Metric } from '@/types/metrics'
-This structure follows Next.js App Router conventions while implementing clean code architecture with proper separation of concerns.
+import type { Metric } from '@/lib/types/metrics'
+```

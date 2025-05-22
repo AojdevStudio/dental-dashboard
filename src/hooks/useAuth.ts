@@ -1,3 +1,11 @@
+import {
+  type AuthChangeEvent,
+  type Session,
+  SupabaseClient,
+  type User,
+  createClient,
+} from "@supabase/supabase-js";
+import { usePathname, useRouter } from "next/navigation";
 /**
  * Authentication hook for managing user authentication state
  *
@@ -5,14 +13,6 @@
  * This hook wraps around Supabase Auth and provides a simpler API for common authentication operations.
  */
 import { useEffect, useState } from "react";
-import { useRouter, usePathname } from "next/navigation";
-import {
-  type User,
-  type Session,
-  type AuthChangeEvent,
-  createClient,
-  SupabaseClient,
-} from "@supabase/supabase-js";
 
 /**
  * Interface for authentication state and methods

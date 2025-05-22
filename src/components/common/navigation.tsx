@@ -1,6 +1,6 @@
 /**
  * @fileoverview Main Navigation Component
- * 
+ *
  * This file implements the main navigation component that combines the sidebar
  * and header into a complete navigation system for the dashboard interface.
  */
@@ -13,10 +13,10 @@ import { Sidebar } from "./sidebar";
 
 /**
  * Navigation Component
- * 
+ *
  * A wrapper component that combines the header and sidebar navigation
  * into a unified navigation system for the dashboard interface.
- * 
+ *
  * @returns {JSX.Element} The rendered navigation component
  */
 export function Navigation() {

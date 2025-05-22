@@ -1,5 +1,5 @@
 // src/services/google/sheets.ts
-import { google, drive_v3, sheets_v4, type Auth } from "googleapis";
+import { type Auth, drive_v3, google, sheets_v4 } from "googleapis";
 
 // Placeholder for Google Sheets API client initialization if needed
 // import { google } from 'googleapis';

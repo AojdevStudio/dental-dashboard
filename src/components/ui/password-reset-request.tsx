@@ -1,6 +1,6 @@
 /**
  * @fileoverview Password Reset Request Component
- * 
+ *
  * This file implements the password reset request form component used in the authentication flow.
  * It allows users to request a password reset email by providing their email address.
  * The component handles email validation, form submission to Supabase Auth, and user feedback.
@@ -8,15 +8,15 @@
 
 "use client";
 
-import * as React from "react";
-import { useRouter } from "next/navigation";
 import { createBrowserClient } from "@supabase/ssr";
+import { useRouter } from "next/navigation";
+import * as React from "react";
 import { Button } from "./button";
 import { Input } from "./input";
 
 /**
  * Password Reset Request Component
- * 
+ *
  * A form component that allows users to request a password reset email.
  * Features include:
  * - Email validation
@@ -24,10 +24,10 @@ import { Input } from "./input";
  * - Loading state during submission
  * - Error and success message display
  * - Link back to sign-in page
- * 
+ *
  * The component uses the same visual styling as other authentication components
  * to maintain design consistency across the authentication flow.
- * 
+ *
  * @returns {JSX.Element} The rendered password reset request form
  */
 export function PasswordResetRequest() {
@@ -39,9 +39,9 @@ export function PasswordResetRequest() {
 
   /**
    * Validates email format using regex
-   * 
+   *
    * Checks if the provided string matches a basic email format pattern.
-   * 
+   *
    * @param {string} email - The email address to validate
    * @returns {boolean} True if the email format is valid, false otherwise
    */
@@ -51,10 +51,10 @@ export function PasswordResetRequest() {
 
   /**
    * Handles password reset request submission
-   * 
+   *
    * Validates the email, then sends a password reset request to Supabase Auth.
    * On success, displays a success message. On failure, displays an error message.
-   * 
+   *
    * @returns {Promise<void>} A promise that resolves when the reset request process completes
    */
   const handleResetRequest = async () => {
@@ -115,7 +115,7 @@ export function PasswordResetRequest() {
 
   /**
    * Render the password reset request UI with glass-morphism design
-   * 
+   *
    * The UI consists of:
    * - A main container with dark background
    * - A centered glass card with gradient background
@@ -124,7 +124,7 @@ export function PasswordResetRequest() {
    * - Error and success message display areas
    * - Submit button with loading state
    * - Link back to sign-in page
-   * 
+   *
    * The design matches other authentication components to maintain
    * visual consistency throughout the authentication flow.
    */

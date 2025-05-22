@@ -1,10 +1,10 @@
 /**
  * @fileoverview Card Component
- * 
+ *
  * This file implements a flexible card component system with various subcomponents
  * for structured content presentation. Cards are used throughout the application
  * to group related information and actions with consistent styling.
- * 
+ *
  * The implementation includes the main Card component along with subcomponents
  * for header, footer, title, description, content, and action areas, allowing
  * for consistent and structured card layouts.
@@ -16,16 +16,16 @@ import { cn } from "@/lib/utils";
 
 /**
  * Main Card container component
- * 
+ *
  * A container component that provides the base card styling and structure.
  * It serves as the parent component for all other card subcomponents.
- * 
+ *
  * @component
  * @param {Object} props - Component props
  * @param {string} [props.className] - Additional CSS class names
  * @param {React.HTMLAttributes<HTMLDivElement>} props.props - All standard div attributes
  * @returns {JSX.Element} The card container element
- * 
+ *
  * @example
  * <Card>
  *   <CardHeader>
@@ -51,17 +51,17 @@ function Card({ className, ...props }: React.ComponentProps<"div">) {
 
 /**
  * Card header component
- * 
+ *
  * Contains the card's title, description, and optional action elements.
  * Uses CSS grid layout to position elements appropriately, with special handling
  * for action elements that should be positioned at the top-right.
- * 
+ *
  * @component
  * @param {Object} props - Component props
  * @param {string} [props.className] - Additional CSS class names
  * @param {React.HTMLAttributes<HTMLDivElement>} props.props - All standard div attributes
  * @returns {JSX.Element} The card header element
- * 
+ *
  * @example
  * <CardHeader>
  *   <CardTitle>Dashboard</CardTitle>
@@ -86,16 +86,16 @@ function CardHeader({ className, ...props }: React.ComponentProps<"div">) {
 
 /**
  * Card title component
- * 
+ *
  * Displays the main heading for the card with appropriate typography styling.
  * Typically used within CardHeader.
- * 
+ *
  * @component
  * @param {Object} props - Component props
  * @param {string} [props.className] - Additional CSS class names
  * @param {React.HTMLAttributes<HTMLDivElement>} props.props - All standard div attributes
  * @returns {JSX.Element} The card title element
- * 
+ *
  * @example
  * <CardTitle>Analytics Overview</CardTitle>
  */
@@ -111,16 +111,16 @@ function CardTitle({ className, ...props }: React.ComponentProps<"div">) {
 
 /**
  * Card description component
- * 
+ *
  * Displays secondary text below the card title with muted styling.
  * Typically used within CardHeader to provide additional context.
- * 
+ *
  * @component
  * @param {Object} props - Component props
  * @param {string} [props.className] - Additional CSS class names
  * @param {React.HTMLAttributes<HTMLDivElement>} props.props - All standard div attributes
  * @returns {JSX.Element} The card description element
- * 
+ *
  * @example
  * <CardDescription>Summary of your account activity for the past 30 days</CardDescription>
  */
@@ -136,17 +136,17 @@ function CardDescription({ className, ...props }: React.ComponentProps<"div">) {
 
 /**
  * Card action component
- * 
+ *
  * Container for action elements like buttons that should be positioned
  * at the top-right of the card header. Uses grid positioning to ensure
  * proper placement regardless of title and description height.
- * 
+ *
  * @component
  * @param {Object} props - Component props
  * @param {string} [props.className] - Additional CSS class names
  * @param {React.HTMLAttributes<HTMLDivElement>} props.props - All standard div attributes
  * @returns {JSX.Element} The card action element
- * 
+ *
  * @example
  * <CardAction>
  *   <Button size="sm" variant="outline">Edit</Button>
@@ -164,16 +164,16 @@ function CardAction({ className, ...props }: React.ComponentProps<"div">) {
 
 /**
  * Card content component
- * 
+ *
  * Container for the main content of the card. Provides appropriate padding
  * and styling for the content area between the header and footer.
- * 
+ *
  * @component
  * @param {Object} props - Component props
  * @param {string} [props.className] - Additional CSS class names
  * @param {React.HTMLAttributes<HTMLDivElement>} props.props - All standard div attributes
  * @returns {JSX.Element} The card content element
- * 
+ *
  * @example
  * <CardContent>
  *   <p>This is the main content of the card.</p>
@@ -186,16 +186,16 @@ function CardContent({ className, ...props }: React.ComponentProps<"div">) {
 
 /**
  * Card footer component
- * 
+ *
  * Container for content at the bottom of the card. Typically used for
  * actions, summary information, or navigation related to the card content.
- * 
+ *
  * @component
  * @param {Object} props - Component props
  * @param {string} [props.className] - Additional CSS class names
  * @param {React.HTMLAttributes<HTMLDivElement>} props.props - All standard div attributes
  * @returns {JSX.Element} The card footer element
- * 
+ *
  * @example
  * <CardFooter>
  *   <Button variant="outline">Cancel</Button>
@@ -214,7 +214,7 @@ function CardFooter({ className, ...props }: React.ComponentProps<"div">) {
 
 /**
  * Export all card components for use throughout the application
- * 
+ *
  * Typical usage:
  * ```tsx
  * <Card>

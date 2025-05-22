@@ -1,24 +1,28 @@
 /**
  * @fileoverview Dashboard Filters Component
- * 
+ *
  * This file implements all filter components used in the dashboard interface.
  * It provides a unified interface for filtering dashboard data by:
  * - Time period (daily, weekly, monthly, quarterly, annual, or custom date range)
  * - Clinics (multiple selection of dental clinics)
  * - Providers (multiple selection of dental providers/doctors)
- * 
+ *
  * These components are designed to work together with the global filter store
  * to maintain consistent filter state across the application.
  */
 
 "use client";
 
-import * as React from "react";
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { Filter, RotateCcw, X, ChevronUp, ChevronDown, CalendarIcon } from "lucide-react";
-import { format } from "date-fns";
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
+import { Card, CardContent } from "@/components/ui/card";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import {
   Select,
@@ -27,34 +31,30 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from "@/components/ui/accordion";
-import { Card, CardContent } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
-import { Badge } from "@/components/ui/badge";
-import { cn } from "@/lib/utils";
 import {
-  useFilterStore,
-  filterDependentQueries,
+  type TimePeriod,
   createFilterUrlParams,
+  filterDependentQueries,
   parseFilterUrlParams,
-  type TimePeriod
+  useFilterStore,
 } from "@/hooks/useFilterStore";
+import { cn } from "@/lib/utils";
 import { useQueryClient } from "@tanstack/react-query";
-import { useState, useEffect, useRef, useCallback } from "react";
-import { AnimatePresence, motion } from "framer-motion";
 import { useSuspenseQuery } from "@tanstack/react-query";
+import { format } from "date-fns";
+import { AnimatePresence, motion } from "framer-motion";
+import { CalendarIcon, ChevronDown, ChevronUp, Filter, RotateCcw, X } from "lucide-react";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import * as React from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 /**
  * Available time period options for the filter
- * 
+ *
  * Each option has a value (used internally) and a label (displayed to the user).
  * The 'custom' option enables the date range picker for selecting specific date ranges.
- * 
+ *
  * @type {Array<{value: string, label: string}>}
  */
 const timePeriodOptions = [
@@ -68,11 +68,11 @@ const timePeriodOptions = [
 
 /**
  * Fetches the list of available clinics
- * 
+ *
  * In this example implementation, it returns mock data with a simulated delay.
  * In a production environment, this would be replaced with an actual API call
  * to fetch clinics from the backend.
- * 
+ *
  * @returns {Promise<Array<{id: string, name: string}>>} Promise resolving to an array of clinic objects
  */
 const fetchClinics = async () => {
@@ -90,11 +90,11 @@ const fetchClinics = async () => {
 
 /**
  * Fetches the list of available providers
- * 
+ *
  * In this example implementation, it returns mock data with a simulated delay.
  * In a production environment, this would be replaced with an actual API call
  * to fetch providers from the backend.
- * 
+ *
  * @returns {Promise<Array<{id: string, name: string}>>} Promise resolving to an array of provider objects
  */
 const fetchProviders = async () => {
@@ -112,14 +112,14 @@ const fetchProviders = async () => {
 
 /**
  * MultiSelectCombobox Component
- * 
+ *
  * A reusable component for multi-select dropdown with search functionality.
  * Features include:
  * - Dropdown menu with search input
  * - Multi-selection with checkboxes
  * - Keyboard navigation
  * - Custom placeholder text and messages
- * 
+ *
  * @param {Object} props - Component properties
  * @param {Array<{value: string, label: string}>} props.items - Available items for selection
  * @param {string[]} props.selectedValues - Currently selected item values
@@ -149,7 +149,7 @@ export function MultiSelectCombobox({
 }) {
   // State for the search input value
   const [search, setSearch] = useState("");
-  
+
   // Filter items based on search input
   const filteredItems = items.filter((item) =>
     item.label.toLowerCase().includes(search.toLowerCase())
@@ -166,10 +166,7 @@ export function MultiSelectCombobox({
         <Button
           variant="outline"
           role="combobox"
-          className={cn(
-            "w-full justify-between",
-            disabled && "opacity-50 cursor-not-allowed"
-          )}
+          className={cn("w-full justify-between", disabled && "opacity-50 cursor-not-allowed")}
           disabled={disabled}
         >
           {selectedValues.length > 0 ? (
@@ -237,13 +234,13 @@ export function MultiSelectCombobox({
 
 /**
  * Time Period Filter Component
- * 
+ *
  * Provides a UI for selecting time periods for dashboard data filtering.
  * Features include:
  * - Dropdown for selecting predefined time periods (daily, weekly, monthly, etc.)
  * - Calendar interface for selecting custom date ranges when 'custom' is selected
  * - Integration with the global filter store to maintain state across components
- * 
+ *
  * @returns {JSX.Element} The rendered time period filter component
  */
 export function TimePeriodFilter() {
@@ -341,13 +338,13 @@ export function TimePeriodFilter() {
 
 /**
  * Clinic Filter Component
- * 
+ *
  * Provides a UI for selecting one or more clinics to filter dashboard data.
  * Features include:
  * - Multi-select combobox interface with search functionality
  * - Integration with React Query for data fetching with caching and suspense
  * - Synchronization with the global filter store
- * 
+ *
  * @returns {JSX.Element} The rendered clinic filter component
  */
 export function ClinicFilter() {
@@ -379,13 +376,13 @@ export function ClinicFilter() {
 
 /**
  * Provider Filter Component
- * 
+ *
  * Provides a UI for selecting one or more providers to filter dashboard data.
  * Features include:
  * - Multi-select combobox interface with search functionality
  * - Integration with React Query for data fetching with caching and suspense
  * - Synchronization with the global filter store
- * 
+ *
  * @returns {JSX.Element} The rendered provider filter component
  */
 export function ProviderFilter() {
@@ -417,7 +414,7 @@ export function ProviderFilter() {
 
 /**
  * Filter Bar Component
- * 
+ *
  * A collapsible filter panel that provides a unified interface for all dashboard filters.
  * Features include:
  * - Expandable/collapsible filter panel with animation
@@ -426,7 +423,7 @@ export function ProviderFilter() {
  * - Query invalidation to refresh data when filters change
  * - Filter count badges to show active filters
  * - Clear and reset filter options
- * 
+ *
  * @returns {JSX.Element} The rendered filter bar component
  */
 export function FilterBar() {
@@ -488,7 +485,15 @@ export function FilterBar() {
 
       return () => clearTimeout(timeoutId);
     }
-  }, [timePeriod, startDate, endDate, selectedClinics, selectedProviders, queryClient, updateUrlParams]);
+  }, [
+    timePeriod,
+    startDate,
+    endDate,
+    selectedClinics,
+    selectedProviders,
+    queryClient,
+    updateUrlParams,
+  ]);
 
   // Calculate the count of active filters
   const activeFilterCount =
@@ -513,11 +518,7 @@ export function FilterBar() {
               {activeFilterCount}
             </Badge>
           )}
-          {isExpanded ? (
-            <ChevronUp className="h-4 w-4" />
-          ) : (
-            <ChevronDown className="h-4 w-4" />
-          )}
+          {isExpanded ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
         </Button>
 
         {/* Reset and clear buttons - only shown when filters are active */}

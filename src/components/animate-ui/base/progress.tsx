@@ -1,11 +1,11 @@
 /**
  * Animated Progress Component
- * 
+ *
  * This component provides an animated progress bar with counting number display.
  * It extends the base Progress component from @base-ui-components with animation
  * capabilities using the motion library. The component is designed as a compound
  * component with multiple parts that can be composed together.
- * 
+ *
  * Features:
  * - Smooth spring animations for progress indicator
  * - Animated counting number for progress value
@@ -16,15 +16,15 @@
 
 "use client";
 
-import * as React from "react";
 import { Progress as ProgressPrimitives } from "@base-ui-components/react/progress";
-import { motion, type Transition } from "motion/react";
+import { type Transition, motion } from "motion/react";
+import * as React from "react";
 
-import { cn } from "@/lib/utils";
 import {
   CountingNumber,
   type CountingNumberProps,
 } from "@/components/animate-ui/text/counting-number";
+import { cn } from "@/lib/utils";
 
 /**
  * Type definition for the Progress context
@@ -42,7 +42,7 @@ const ProgressContext = React.createContext<ProgressContextType | undefined>(und
 
 /**
  * Hook to access the current progress value from context
- * 
+ *
  * @returns {ProgressContextType} The current progress context value
  * @throws {Error} If used outside of a Progress component
  */
@@ -62,9 +62,9 @@ type ProgressProps = React.ComponentProps<typeof ProgressPrimitives.Root>;
 
 /**
  * Root Progress component
- * 
+ *
  * Provides context for child components and renders the base progress container.
- * 
+ *
  * @param {ProgressProps} props - Component props
  * @param {number|null} props.value - The current progress value (0-100)
  * @returns {JSX.Element} The Progress component
@@ -94,10 +94,10 @@ type ProgressTrackProps = React.ComponentProps<typeof ProgressPrimitives.Track> 
 
 /**
  * Progress Track component with animated indicator
- * 
+ *
  * Renders the track (background) and animated indicator (foreground) of the progress bar.
  * Uses spring physics for smooth, natural-feeling animations.
- * 
+ *
  * @param {ProgressTrackProps} props - Component props
  * @param {string} [props.className] - Additional CSS classes
  * @param {Transition} [props.transition] - Motion transition configuration
@@ -133,9 +133,9 @@ type ProgressLabelProps = React.ComponentProps<typeof ProgressPrimitives.Label>;
 
 /**
  * Progress Label component
- * 
+ *
  * Renders a label for the progress bar, typically used to describe what the progress represents.
- * 
+ *
  * @param {ProgressLabelProps} props - Component props
  * @returns {JSX.Element} The progress label
  */
@@ -153,10 +153,10 @@ type ProgressValueProps = Omit<React.ComponentProps<typeof ProgressPrimitives.Va
 
 /**
  * Progress Value component with animated counting number
- * 
+ *
  * Displays the current progress value as an animated counting number.
  * Uses spring physics for smooth number transitions.
- * 
+ *
  * @param {ProgressValueProps} props - Component props
  * @param {CountingNumberProps} [props.countingNumberProps] - Props for the CountingNumber component
  * @returns {JSX.Element} The animated progress value

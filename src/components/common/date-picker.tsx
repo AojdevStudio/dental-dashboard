@@ -1,6 +1,6 @@
 /**
  * @fileoverview Date Picker Component
- * 
+ *
  * This file implements a reusable date picker component that can be used
  * throughout the application for selecting dates. It provides a calendar
  * interface with range selection capabilities.
@@ -8,17 +8,17 @@
 
 "use client";
 
-import * as React from "react";
-import { format } from "date-fns";
-import { Calendar as CalendarIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
+import { format } from "date-fns";
+import { Calendar as CalendarIcon } from "lucide-react";
+import * as React from "react";
 
 /**
  * Interface for DatePicker component properties
- * 
+ *
  * @property {Date} [date] - The currently selected date
  * @property {(date: Date) => void} [onDateChange] - Callback for date selection
  * @property {string} [placeholder] - Placeholder text when no date is selected
@@ -33,14 +33,14 @@ interface DatePickerProps {
 
 /**
  * Date Picker Component
- * 
+ *
  * A reusable component for selecting dates with a calendar interface.
  * Features include:
  * - Popover calendar for date selection
  * - Formatted display of the selected date
  * - Customizable placeholder text
  * - Disabled state
- * 
+ *
  * @param {DatePickerProps} props - Component properties
  * @returns {JSX.Element} The rendered date picker component
  */
@@ -84,14 +84,14 @@ export function DatePicker({
 
 /**
  * Date Range Picker Component
- * 
+ *
  * A variant of the date picker that allows selecting a range of dates.
  * Features include:
  * - Popover calendar for date range selection
  * - Formatted display of the selected date range
  * - Customizable placeholder text
  * - Disabled state
- * 
+ *
  * @param {Object} props - Component properties
  * @param {Date} [props.from] - Start date of the selected range
  * @param {Date} [props.to] - End date of the selected range

@@ -1,33 +1,7 @@
 "use client";
 
-import { cn } from "@/lib/utils";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { motion } from "framer-motion";
-import { Badge } from "@/components/ui/badge";
-import {
-  Blocks,
-  ChevronsUpDown,
-  PieChart,
-  Calendar,
-  Layout,
-  LayoutDashboard,
-  LogOut,
-  BarChart3,
-  Users,
-  Settings,
-  UserCircle,
-  UserCog,
-  FileSpreadsheet,
-  LineChart,
-  ClipboardList,
-  Activity,
-  Plus,
-} from "lucide-react";
-import Image from "next/image";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import Link from "next/link";
-import { usePathname } from "next/navigation";
-import { useState } from "react";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -36,8 +10,34 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
+import { cn } from "@/lib/utils";
+import { motion } from "framer-motion";
+import {
+  Activity,
+  BarChart3,
+  Blocks,
+  Calendar,
+  ChevronsUpDown,
+  ClipboardList,
+  FileSpreadsheet,
+  Layout,
+  LayoutDashboard,
+  LineChart,
+  LogOut,
+  PieChart,
+  Plus,
+  Settings,
+  UserCircle,
+  UserCog,
+  Users,
+} from "lucide-react";
+import Image from "next/image";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import { useState } from "react";
 
 const sidebarVariants = {
   open: {

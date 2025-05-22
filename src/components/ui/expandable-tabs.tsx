@@ -1,10 +1,10 @@
 "use client";
 
-import * as React from "react";
-import { AnimatePresence, motion } from "framer-motion";
-import { useOnClickOutside } from "usehooks-ts";
 import { cn } from "@/lib/utils";
+import { AnimatePresence, motion } from "framer-motion";
 import type { LucideIcon } from "lucide-react";
+import * as React from "react";
+import { useOnClickOutside } from "usehooks-ts";
 
 interface Tab {
   title: string;

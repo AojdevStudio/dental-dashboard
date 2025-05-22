@@ -1,24 +1,23 @@
 /**
  * Animated Counting Number Component
- * 
+ *
  * This component provides a smooth, animated transition when displaying changing numbers.
  * It uses spring physics to create natural-feeling animations when a number changes,
  * giving the appearance of counting up or down to the new value.
- * 
+ *
  * Features:
  * - Spring physics-based animations for natural counting effect
  * - Intersection Observer integration for triggering animations when in view
  * - Configurable decimal places and separators
  * - Zero-padding support for consistent width
  * - Customizable animation parameters
- * 
+ *
  * This component is particularly useful for metrics, statistics, and other numerical
  * data that changes and should draw the user's attention through animation.
  */
 
 "use client";
 
-import * as React from "react";
 import {
   type SpringOptions,
   type UseInViewOptions,
@@ -26,10 +25,11 @@ import {
   useMotionValue,
   useSpring,
 } from "motion/react";
+import * as React from "react";
 
 /**
  * Props for the CountingNumber component
- * 
+ *
  * @typedef {Object} CountingNumberProps
  * @property {number} number - The target number to animate to
  * @property {number} [fromNumber=0] - The starting number for the animation
@@ -55,11 +55,11 @@ type CountingNumberProps = React.ComponentProps<"span"> & {
 
 /**
  * CountingNumber Component
- * 
+ *
  * Renders a number that animates when it changes, creating a counting effect.
  * Uses spring physics for smooth, natural-feeling animations and supports
  * viewport-based animation triggering.
- * 
+ *
  * @param {CountingNumberProps} props - Component props
  * @param {React.Ref<HTMLSpanElement>} props.ref - Ref to access the DOM element
  * @param {number} props.number - The target number to animate to
@@ -104,7 +104,7 @@ function CountingNumber({
   // Set up motion values and spring animation
   const motionVal = useMotionValue(fromNumber);
   const springVal = useSpring(motionVal, transition);
-  
+
   // Set up intersection observer to trigger animation when element is in view
   const inViewResult = useInView(localRef, {
     once: inViewOnce,
@@ -145,8 +145,8 @@ function CountingNumber({
   // Calculate the initial text to display before animation starts
   const finalIntLength = Math.floor(Math.abs(number)).toString().length;
   const initialText = padStart
-    ? `${'0'.padStart(finalIntLength, '0')}${decimals > 0 ? `${decimalSeparator}${'0'.repeat(decimals)}` : ''}`
-    : `0${decimals > 0 ? `${decimalSeparator}${'0'.repeat(decimals)}` : ''}`;
+    ? `${"0".padStart(finalIntLength, "0")}${decimals > 0 ? `${decimalSeparator}${"0".repeat(decimals)}` : ""}`
+    : `0${decimals > 0 ? `${decimalSeparator}${"0".repeat(decimals)}` : ""}`;
 
   return (
     <span ref={localRef} data-slot="counting-number" className={className} {...props}>

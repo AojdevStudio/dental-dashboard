@@ -1,20 +1,19 @@
 /**
  * @fileoverview Sheet Connector Component
- * 
+ *
  * This file implements a component for connecting Google Sheets to the dental dashboard.
  * It allows users to select a specific sheet (tab) from a spreadsheet and map columns
  * to required data fields (date, production, collection). The component handles
  * fetching sheet metadata, loading headers, and validating column mappings before
  * establishing the connection.
- * 
+ *
  * The component integrates with the Google Sheets API via server endpoints and uses
  * React Query for data fetching, caching, and state management.
  */
 
 "use client";
 
-import { useState, useEffect } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import {
   Select,
@@ -23,12 +22,13 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useQuery } from "@tanstack/react-query";
+import { useEffect, useState } from "react";
 
 /**
  * Represents a sheet (tab) within a Google Spreadsheet
- * 
+ *
  * @typedef {Object} Sheet
  * @property {string} id - The unique identifier for the sheet within the spreadsheet
  * @property {string} title - The display name of the sheet (tab name)
@@ -40,7 +40,7 @@ interface Sheet {
 
 /**
  * Response structure from the sheets API endpoint
- * 
+ *
  * @typedef {Object} SheetsApiResponse
  * @property {string} spreadsheetId - The ID of the spreadsheet
  * @property {string} spreadsheetTitle - The title of the spreadsheet
@@ -56,7 +56,7 @@ interface SheetsApiResponse {
 
 /**
  * Response structure from the sheet headers API endpoint
- * 
+ *
  * @typedef {Object} SheetHeadersApiResponse
  * @property {string[][]} [values] - 2D array of cell values, headers are in the first row
  * @property {string} [error] - Error message if request fails
@@ -70,7 +70,7 @@ interface SheetHeadersApiResponse {
 
 /**
  * Represents a column header in a spreadsheet
- * 
+ *
  * @typedef {Object} SheetHeader
  * @property {string} key - Unique identifier for the header
  * @property {string} label - Display text of the header
@@ -82,7 +82,7 @@ interface SheetHeader {
 
 /**
  * Mapping of required data fields to spreadsheet column headers
- * 
+ *
  * @typedef {Object} ColumnMapping
  * @property {string|null} date - Header of the column containing date data
  * @property {string|null} production - Header of the column containing production data
@@ -96,7 +96,7 @@ interface ColumnMapping {
 
 /**
  * Props for the SheetConnector component
- * 
+ *
  * @typedef {Object} SheetConnectorProps
  * @property {string} clinicId - ID of the current clinic to scope data access
  * @property {string|null} spreadsheetId - ID of the selected Google Spreadsheet
@@ -116,7 +116,7 @@ interface SheetConnectorProps {
     sheetName: string,
     columnMapping: ColumnMapping
   ) => void;
-  
+
   /**
    * Callback function when the user cancels the sheet connection process
    * @returns {void}
@@ -126,7 +126,7 @@ interface SheetConnectorProps {
 
 /**
  * Fetches the list of sheets (tabs) in a Google Spreadsheet
- * 
+ *
  * Makes an API call to the server endpoint that interfaces with Google Sheets API
  * to retrieve metadata about all sheets in the specified spreadsheet.
  *
@@ -158,7 +158,7 @@ async function fetchSheets(
 
 /**
  * Fetches the column headers from the first row of a specific sheet
- * 
+ *
  * Makes an API call to retrieve the first row of the specified sheet, which contains
  * the column headers. Handles special characters in sheet names and properly encodes
  * the range parameter for the API request.
@@ -208,7 +208,7 @@ async function fetchSheetHeaders(
 
 /**
  * SheetConnector Component
- * 
+ *
  * Allows users to connect a Google Sheet to the dental dashboard by selecting
  * a specific sheet (tab) and mapping its columns to required data fields.
  * The component handles fetching available sheets, loading column headers,
@@ -231,7 +231,7 @@ const SheetConnector: React.FC<SheetConnectorProps> = ({
    * State for the currently selected sheet name
    */
   const [selectedSheetName, setSelectedSheetName] = useState<string | null>(null);
-  
+
   /**
    * State for the column mapping configuration
    * Maps required data fields (date, production, collection) to sheet column headers
@@ -278,11 +278,11 @@ const SheetConnector: React.FC<SheetConnectorProps> = ({
   /**
    * Event Handlers
    */
-  
+
   /**
    * Handles selection of a sheet (tab) from the dropdown
    * Resets column mapping when sheet changes to ensure consistent mapping
-   * 
+   *
    * @param {string} sheetName - The name of the selected sheet
    */
   const handleSheetSelect = (sheetName: string) => {
@@ -293,7 +293,7 @@ const SheetConnector: React.FC<SheetConnectorProps> = ({
 
   /**
    * Updates the column mapping when a user selects a header for a specific data field
-   * 
+   *
    * @param {keyof ColumnMapping} type - The data field to map (date, production, or collection)
    * @param {string|null} header - The selected column header from the sheet
    */

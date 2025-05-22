@@ -8,7 +8,7 @@ import { createClient } from "@/lib/supabase/server";
  * The user will be redirected to the confirmation page after clicking the link in the email.
  *
  * @param {string} email - The email address associated with the user account
- * @returns {Promise<{success?: boolean, message?: string, error?: string}>} 
+ * @returns {Promise<{success?: boolean, message?: string, error?: string}>}
  *   Object containing success status, message, or error if the operation fails
  */
 export async function resetPassword(email: string) {
@@ -31,7 +31,7 @@ export async function resetPassword(email: string) {
  * and entered a new password on the confirmation page.
  *
  * @param {string} password - The new password to set for the user account
- * @returns {Promise<{success?: boolean, message?: string, error?: string}>} 
+ * @returns {Promise<{success?: boolean, message?: string, error?: string}>}
  *   Object containing success status, message, or error if the operation fails
  */
 export async function updatePassword(password: string) {

@@ -1,6 +1,6 @@
 /**
  * @fileoverview Password Reset Confirmation Component
- * 
+ *
  * This file implements the password reset confirmation component used in the authentication flow.
  * It allows users to set a new password after clicking a reset link from their email.
  * The component handles token validation, password validation, and the password update process.
@@ -8,15 +8,15 @@
 
 "use client";
 
-import * as React from "react";
-import { useRouter, useSearchParams } from "next/navigation";
 import { createBrowserClient } from "@supabase/ssr";
+import { useRouter, useSearchParams } from "next/navigation";
+import * as React from "react";
 import { Button } from "./button";
 import { Input } from "./input";
 
 /**
  * Password Reset Confirmation Component
- * 
+ *
  * A form component that allows users to set a new password after requesting a reset.
  * Features include:
  * - Token validation from URL query parameters
@@ -24,12 +24,12 @@ import { Input } from "./input";
  * - Integration with Supabase Auth for password update
  * - Multiple UI states (loading, error, form)
  * - Success feedback and automatic redirect
- * 
+ *
  * The component handles three main states:
  * 1. Validating - When checking if the reset token is valid
  * 2. Error - When the token is invalid or expired
  * 3. Form - When the token is valid and user can set a new password
- * 
+ *
  * @returns {JSX.Element} The rendered password reset confirmation form
  */
 export function PasswordResetConfirm() {
@@ -47,7 +47,7 @@ export function PasswordResetConfirm() {
 
   /**
    * Validate token on component mount
-   * 
+   *
    * This effect runs once when the component mounts to verify that the reset token
    * in the URL is valid by checking the Supabase session. If valid, the form is shown.
    * If invalid, an error message is displayed with an option to request a new link.
@@ -55,16 +55,16 @@ export function PasswordResetConfirm() {
   React.useEffect(() => {
     /**
      * Validates the reset token from the URL
-     * 
+     *
      * This function checks if the reset token is valid by:
      * 1. Verifying the token is present in the URL
      * 2. Creating a Supabase client
      * 3. Checking if there's a valid session associated with the token
      * 4. Setting the tokenValid state based on the result
-     * 
+     *
      * If the token is valid, the password reset form will be displayed.
      * If invalid, an error message will be shown with an option to request a new link.
-     * 
+     *
      * @returns {Promise<void>} A promise that resolves when token validation completes
      */
     const validateToken = async () => {
@@ -111,21 +111,21 @@ export function PasswordResetConfirm() {
 
   /**
    * Handles password reset submission
-   * 
+   *
    * This function processes the password reset form by:
    * 1. Validating the token is still valid
    * 2. Validating the password fields (presence, length, match)
    * 3. Updating the user's password via Supabase Auth
    * 4. Showing success message and redirecting to login
-   * 
+   *
    * Validation checks include:
    * - Token validity
    * - Required fields
    * - Password minimum length (8 characters)
    * - Password and confirmation match
-   * 
+   *
    * On success, the user is automatically redirected to the login page after a brief delay.
-   * 
+   *
    * @returns {Promise<void>} A promise that resolves when the password reset process completes
    */
   const handleResetPassword = async () => {
@@ -203,12 +203,12 @@ export function PasswordResetConfirm() {
 
   /**
    * Render loading state while validating token
-   * 
+   *
    * This UI is shown while the component is validating the reset token.
    * It displays a loading spinner and a message indicating that validation
    * is in progress. This prevents users from attempting to reset their
    * password before we know if their token is valid.
-   * 
+   *
    * @returns {JSX.Element} Loading state UI
    */
   if (validating) {
@@ -240,15 +240,15 @@ export function PasswordResetConfirm() {
 
   /**
    * Render error state if token is invalid or missing
-   * 
+   *
    * This UI is shown when the reset token is invalid, expired, or missing.
    * It displays an error message explaining the issue and provides a button
    * to request a new password reset link, directing the user back to the
    * password reset request page.
-   * 
+   *
    * This state helps users understand what went wrong and provides a clear
    * path to resolve the issue without requiring technical knowledge.
-   * 
+   *
    * @returns {JSX.Element} Error state UI
    */
   if (!validating && (!token || !tokenValid)) {
@@ -289,7 +289,7 @@ export function PasswordResetConfirm() {
 
   /**
    * Render password reset form if token is valid
-   * 
+   *
    * This is the main UI of the component, shown when the reset token is valid.
    * It displays a form allowing the user to enter and confirm a new password.
    * The form includes:
@@ -298,10 +298,10 @@ export function PasswordResetConfirm() {
    * - Error message display
    * - Success message display
    * - Submit button with loading state
-   * 
+   *
    * After successful password reset, a success message is shown and the user
    * is automatically redirected to the login page after a brief delay.
-   * 
+   *
    * @returns {JSX.Element} Password reset form UI
    */
   return (

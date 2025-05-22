@@ -1,6 +1,6 @@
 /**
  * @fileoverview Application Header Component
- * 
+ *
  * This file implements the main application header component, which appears at the top
  * of the dashboard interface. It includes the site logo, navigation elements, and user
  * menu, providing consistent navigation and branding across the application.
@@ -8,21 +8,21 @@
 
 "use client";
 
-import * as React from "react";
 import Link from "next/link";
+import * as React from "react";
 import { UserNav } from "./user-nav";
 
 /**
  * Header Component
- * 
+ *
  * The main application header that appears at the top of the dashboard interface.
  * Features include:
  * - Logo and branding
  * - Navigation links
  * - User dropdown menu
- * 
+ *
  * The header is responsive and adjusts its layout based on screen size.
- * 
+ *
  * @returns {JSX.Element} The rendered header component
  */
 export function Header() {

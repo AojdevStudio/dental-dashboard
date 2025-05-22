@@ -1,6 +1,6 @@
 /**
  * @fileoverview Time Period Filter Component
- * 
+ *
  * This file implements a filter component for selecting time periods in the dashboard.
  * It allows users to choose from predefined time periods (daily, weekly, monthly, etc.)
  * or select a custom date range using a calendar interface. The component integrates
@@ -9,9 +9,6 @@
 
 "use client";
 
-import * as React from "react";
-import { CalendarIcon } from "lucide-react";
-import { format } from "date-fns";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
@@ -22,15 +19,18 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { type TimePeriod, useFilterStore } from "@/hooks/useFilterStore";
 import { cn } from "@/lib/utils";
-import { useFilterStore, type TimePeriod } from "@/hooks/useFilterStore";
+import { format } from "date-fns";
+import { CalendarIcon } from "lucide-react";
+import * as React from "react";
 
 /**
  * Available time period options for the filter
- * 
+ *
  * Each option has a value (used internally) and a label (displayed to the user).
  * The 'custom' option enables the date range picker for selecting specific date ranges.
- * 
+ *
  * @type {Array<{value: string, label: string}>}
  */
 const timePeriodOptions = [
@@ -44,20 +44,20 @@ const timePeriodOptions = [
 
 /**
  * Time Period Filter Component
- * 
+ *
  * Provides a UI for selecting time periods for dashboard data filtering.
  * Features include:
  * - Dropdown for selecting predefined time periods (daily, weekly, monthly, etc.)
  * - Calendar interface for selecting custom date ranges when 'custom' is selected
  * - Integration with the global filter store to maintain state across components
  * - Automatic synchronization between the UI state and the filter store
- * 
+ *
  * @returns {JSX.Element} The rendered time period filter component
  */
 export function TimePeriodFilter() {
   /**
    * Extract time period filter state and setters from the global filter store
-   * 
+   *
    * This includes:
    * - timePeriod: The currently selected time period (daily, weekly, monthly, etc.)
    * - startDate/endDate: The selected date range (used when timePeriod is 'custom')
@@ -68,21 +68,21 @@ export function TimePeriodFilter() {
 
   /**
    * State to track whether the date picker popover is open
-   * 
+   *
    * This is used to control the visibility of the calendar popover when
    * selecting a custom date range.
-   * 
+   *
    * @type {[boolean, React.Dispatch<React.SetStateAction<boolean>>]}
    */
   const [isDatePickerOpen, setIsDatePickerOpen] = React.useState(false);
 
   /**
    * Local state for the selected date range
-   * 
+   *
    * This state is used to track the date selection within the calendar component
    * before it's committed to the global filter store. It's initialized with the
    * values from the filter store.
-   * 
+   *
    * @type {[{from: Date, to?: Date}, React.Dispatch<React.SetStateAction<{from: Date, to?: Date}>>]}
    */
   const [date, setDate] = React.useState<{
@@ -95,10 +95,10 @@ export function TimePeriodFilter() {
 
   /**
    * Effect to update the global filter store when the local date range changes
-   * 
+   *
    * This synchronizes the local component state with the global filter store
    * when the user selects a complete date range (both from and to dates).
-   * 
+   *
    * @returns {void}
    */
   React.useEffect(() => {
@@ -109,10 +109,10 @@ export function TimePeriodFilter() {
 
   /**
    * Effect to update the local date state when the global filter store changes
-   * 
+   *
    * This ensures that the local component state stays in sync with the global
    * filter store, which might be updated by other components or URL parameters.
-   * 
+   *
    * @returns {void}
    */
   React.useEffect(() => {
@@ -124,15 +124,15 @@ export function TimePeriodFilter() {
 
   /**
    * Render the time period filter interface
-   * 
+   *
    * The component renders differently based on the selected time period:
    * - For all time periods: A dropdown to select the time period type
    * - For 'custom' time period only: A date range picker with calendar interface
-   * 
+   *
    * The layout is responsive:
    * - On mobile: Components stack vertically
    * - On desktop: Components align horizontally
-   * 
+   *
    * @returns {JSX.Element} The rendered filter interface
    */
   return (

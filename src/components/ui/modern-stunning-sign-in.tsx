@@ -1,6 +1,6 @@
 /**
  * @fileoverview Modern Stunning Sign In Component
- * 
+ *
  * This file implements a visually enhanced sign-in component with a modern UI design.
  * It provides email/password authentication and Google OAuth sign-in options using Supabase Auth.
  * The component includes client-side form validation, loading states, and error handling.
@@ -8,13 +8,13 @@
 
 "use client";
 
-import * as React from "react";
-import { useRouter } from "next/navigation";
 import { createBrowserClient } from "@supabase/ssr";
+import { useRouter } from "next/navigation";
+import * as React from "react";
 
 /**
  * Modern Stunning Sign In Component
- * 
+ *
  * A visually enhanced authentication component that provides:
  * - Email/password authentication
  * - Google OAuth sign-in
@@ -22,10 +22,10 @@ import { createBrowserClient } from "@supabase/ssr";
  * - Loading states during authentication
  * - Error handling and user feedback
  * - Links to sign up and password reset
- * 
+ *
  * The component uses a dark theme with glass-morphism effects and gradient backgrounds
  * to create a modern, visually appealing authentication experience.
- * 
+ *
  * @returns {JSX.Element} The rendered sign-in component
  */
 const SignIn1 = () => {
@@ -37,9 +37,9 @@ const SignIn1 = () => {
 
   /**
    * Validates email format using regex
-   * 
+   *
    * Checks if the provided string matches a basic email format pattern.
-   * 
+   *
    * @param {string} email - The email address to validate
    * @returns {boolean} True if the email format is valid, false otherwise
    */
@@ -49,10 +49,10 @@ const SignIn1 = () => {
 
   /**
    * Handles email/password sign-in
-   * 
+   *
    * Validates form inputs, then attempts to authenticate the user with Supabase Auth.
    * On success, redirects to the dashboard. On failure, displays an error message.
-   * 
+   *
    * @returns {Promise<void>} A promise that resolves when the authentication process completes
    */
   const handleSignIn = async () => {
@@ -98,11 +98,11 @@ const SignIn1 = () => {
 
   /**
    * Handles Google OAuth sign-in
-   * 
+   *
    * Initiates the OAuth flow with Google as the provider using Supabase Auth.
    * On success, the user will be redirected to the callback URL and then to the dashboard.
    * On failure, displays an error message.
-   * 
+   *
    * @returns {Promise<void>} A promise that resolves when the OAuth process initiates
    */
   const handleGoogleSignIn = async () => {
@@ -139,7 +139,7 @@ const SignIn1 = () => {
 
   /**
    * Render the sign-in UI with glass-morphism design
-   * 
+   *
    * The UI consists of:
    * - A main container with dark background
    * - A centered glass card with gradient background
@@ -149,7 +149,7 @@ const SignIn1 = () => {
    * - Google OAuth sign-in button
    * - Links to sign up and password reset
    * - User testimonial section with avatars
-   * 
+   *
    * The design uses modern UI principles including:
    * - Glass-morphism effects (transparency and blur)
    * - Gradient backgrounds

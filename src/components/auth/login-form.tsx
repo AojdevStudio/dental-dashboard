@@ -1,18 +1,18 @@
 /**
  * @fileoverview Login Form Component
- * 
+ *
  * This file implements the main login form component used in the authentication flow.
  * It handles user authentication via email and password using Supabase Auth,
  * form validation with Zod, and provides appropriate feedback to users.
  */
 
-import * as React from "react";
-import { useRouter } from "next/navigation";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm } from "react-hook-form";
-import * as z from "zod";
 import { createBrowserClient } from "@supabase/ssr";
+import { useRouter } from "next/navigation";
+import * as React from "react";
+import { useForm } from "react-hook-form";
 import { toast } from "sonner";
+import * as z from "zod";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -23,16 +23,16 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
 import { Icons } from "@/components/ui/icons";
+import { Input } from "@/components/ui/input";
 
 /**
  * Zod schema for login form validation
- * 
+ *
  * Defines validation rules for the login form fields:
  * - email: Must be a valid email format
  * - password: Must be at least 8 characters long
- * 
+ *
  * @type {z.ZodObject}
  */
 const formSchema = z.object({
@@ -46,11 +46,11 @@ const formSchema = z.object({
 
 /**
  * Login Form Component
- * 
+ *
  * Renders a form for user authentication with email and password.
  * Handles form validation, submission to Supabase Auth, and error display.
  * On successful login, redirects the user to the dashboard.
- * 
+ *
  * @returns {JSX.Element} The rendered login form component
  */
 export function LoginForm() {
@@ -68,14 +68,14 @@ export function LoginForm() {
 
   /**
    * Form submission handler
-   * 
+   *
    * Processes the login form submission by:
    * 1. Creating a Supabase browser client
    * 2. Attempting to sign in with the provided credentials
    * 3. Redirecting to dashboard on success
    * 4. Displaying error toast on failure
    * 5. Managing loading state throughout the process
-   * 
+   *
    * @param {z.infer<typeof formSchema>} values - The validated form values containing email and password
    * @returns {Promise<void>} A promise that resolves when the authentication process completes
    * @throws Will be caught internally and displayed as a user-friendly error message
@@ -114,13 +114,13 @@ export function LoginForm() {
 
   /**
    * Render the login form with email and password fields
-   * 
+   *
    * The form includes:
    * - Email input field with validation
    * - Password input field with validation
    * - Submit button with loading indicator
    * - Error messages displayed below each field when validation fails
-   * 
+   *
    * Form fields are disabled during submission to prevent multiple submissions
    */
   return (

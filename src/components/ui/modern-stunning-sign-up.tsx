@@ -1,6 +1,6 @@
 /**
  * @fileoverview Modern Stunning Sign Up Component
- * 
+ *
  * This file implements a visually enhanced sign-up component with a modern UI design.
  * It provides email/password registration and Google OAuth sign-up options using Supabase Auth.
  * The component includes client-side form validation, terms acceptance, loading states, and error handling.
@@ -8,13 +8,13 @@
 
 "use client";
 
-import * as React from "react";
-import { useRouter } from "next/navigation";
 import { createBrowserClient } from "@supabase/ssr";
+import { useRouter } from "next/navigation";
+import * as React from "react";
 
 /**
  * Modern Stunning Sign Up Component
- * 
+ *
  * A visually enhanced registration component that provides:
  * - Email/password account creation
  * - Google OAuth sign-up
@@ -23,10 +23,10 @@ import { createBrowserClient } from "@supabase/ssr";
  * - Client-side form validation
  * - Loading states during registration
  * - Error handling and user feedback
- * 
+ *
  * The component uses a dark theme with glass-morphism effects and gradient backgrounds
  * to create a modern, visually appealing registration experience.
- * 
+ *
  * @returns {JSX.Element} The rendered sign-up component
  */
 const ModernStunningSignUp = () => {
@@ -40,9 +40,9 @@ const ModernStunningSignUp = () => {
 
   /**
    * Validates email format using regex
-   * 
+   *
    * Checks if the provided string matches a basic email format pattern.
-   * 
+   *
    * @param {string} email - The email address to validate
    * @returns {boolean} True if the email format is valid, false otherwise
    */
@@ -52,7 +52,7 @@ const ModernStunningSignUp = () => {
 
   /**
    * Handles email/password sign-up
-   * 
+   *
    * Validates form inputs, then attempts to register the user with Supabase Auth.
    * Validation includes:
    * - All fields are filled
@@ -60,10 +60,10 @@ const ModernStunningSignUp = () => {
    * - Password meets minimum length requirement
    * - Passwords match
    * - Terms and conditions are accepted
-   * 
+   *
    * On success, redirects to the login page with a success message.
    * On failure, displays an error message.
-   * 
+   *
    * @returns {Promise<void>} A promise that resolves when the registration process completes
    */
   const handleSignUp = async () => {
@@ -117,14 +117,14 @@ const ModernStunningSignUp = () => {
 
   /**
    * Handles Google OAuth sign-up
-   * 
+   *
    * Initiates the OAuth flow with Google as the provider using Supabase Auth.
    * On success, the user will be redirected to the callback URL and then to the dashboard.
    * On failure, displays an error message.
-   * 
+   *
    * This method doesn't require email/password validation or terms acceptance as
    * these are handled within the Google OAuth flow.
-   * 
+   *
    * @returns {Promise<void>} A promise that resolves when the OAuth process initiates
    */
   const handleGoogleSignUp = async () => {
@@ -134,15 +134,15 @@ const ModernStunningSignUp = () => {
       // Get Supabase credentials from environment variables
       const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
       const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
-      
+
       // Validate environment variables are present
       if (!supabaseUrl || !supabaseAnonKey) {
         throw new Error("Missing Supabase environment variables");
       }
-      
+
       // Initialize Supabase client
       const supabase = createBrowserClient(supabaseUrl, supabaseAnonKey);
-      
+
       // Initiate OAuth sign-up with Google
       const { error } = await supabase.auth.signInWithOAuth({
         provider: "google",
@@ -150,7 +150,7 @@ const ModernStunningSignUp = () => {
           redirectTo: `${window.location.origin}/auth/callback`,
         },
       });
-      
+
       if (error) {
         throw error;
       }
@@ -163,7 +163,7 @@ const ModernStunningSignUp = () => {
 
   /**
    * Render the sign-up UI with glass-morphism design
-   * 
+   *
    * The UI consists of:
    * - A main container with dark background
    * - A centered glass card with gradient background
@@ -174,7 +174,7 @@ const ModernStunningSignUp = () => {
    * - Google OAuth sign-up button
    * - Link to sign in page
    * - User testimonial section with avatars
-   * 
+   *
    * The design uses modern UI principles including:
    * - Glass-morphism effects (transparency and blur)
    * - Gradient backgrounds
