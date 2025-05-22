@@ -10,12 +10,22 @@
  * - Application-wide providers for state management and theming
  * - Basic HTML structure with proper language attribute
  * - Metadata for SEO and browser tabs
+ * - Stagewise toolbar for AI-powered UI editing in development mode
  */
 
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "@/styles/globals.css";
-import Providers from "./providers";
+import { Providers } from "./(dashboard)/providers";
+import { StagewiseToolbar } from "@stagewise/toolbar-next";
+
+/**
+ * Stagewise toolbar configuration
+ * Only used in development mode
+ */
+const stagewiseConfig = {
+  plugins: [],
+};
 
 /**
  * Geist Sans font configuration
@@ -68,6 +78,7 @@ export default function RootLayout({
     <html lang="en">
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
         <Providers>{children}</Providers>
+        {process.env.NODE_ENV === "development" && <StagewiseToolbar config={stagewiseConfig} />}
       </body>
     </html>
   );
