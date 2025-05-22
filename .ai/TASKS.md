@@ -7,7 +7,6 @@ Individual task details are in the `.ai/tasks/` directory.
 
 ### Phase 1: Refactoring Setup & Prerequisites
 
-- [ ] **task001_branching_strategy_setup.md**: Setup Refactoring Branching Strategy
 - [ ] **task002_prerequisites_verification.md**: Verify Refactoring Pre-requisites
 - [ ] **task003_refactor_src_app_directory.md**: Step 3.1: Refactor src/app/ Directory
 - [ ] **task004_refactor_src_components_directory.md**: Step 3.2: Refactor src/components/ Directory
@@ -26,7 +25,7 @@ Individual task details are in the `.ai/tasks/` directory.
 
 ## Completed Tasks
 
-_Moved from the main list upon completion._
+- [x] **task001_branching_strategy_setup.md**: Setup Refactoring Branching Strategy
 
 ## Pending Tasks
 
