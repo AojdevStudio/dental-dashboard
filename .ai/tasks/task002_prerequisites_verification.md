@@ -1,7 +1,7 @@
 ---
 id: 002
 title: Verify Refactoring Pre-requisites
-status: todo
+status: completed
 priority: high
 area: refactoring
 assignee:
@@ -18,9 +18,9 @@ related_files:
   - .dev/database-schema-design.md
   - .dev/database-schema-metrics.md
 sub_tasks:
-  - "[ ] Confirm the new MVP PRD (`.dev/prd-mvp.md`) is finalized and agreed upon."
-  - "[ ] Confirm the target file structure (`.dev/file-system.md`) is confirmed."
-  - "[ ] Confirm the location of backend logic (API Routes, Supabase Edge Functions) is clearly understood, referencing the specified `.dev` documents."
+  - "[x] Confirm the new MVP PRD (`.dev/prd-mvp.md`) is finalized and agreed upon."
+  - "[x] Confirm the target file structure (`.dev/file-system.md`) is confirmed."
+  - "[x] Confirm the location of backend logic (API Routes, Supabase Edge Functions) is clearly understood, referencing the specified `.dev` documents."
 dependencies:
   - task001_branching_strategy_setup.md
 ---
