@@ -1,27 +1,38 @@
 # Project Tasks
 
-## Pending Tasks
+This file tracks the overall progress of tasks for the project. 
+Individual task details are in the `.ai/tasks/` directory.
 
-- [x] ID 1: Fix linting issues in providers.tsx (remove unnecessary else clause)
-- [x] ID 2: Fix useExhaustiveDependencies warning in hover-card.tsx
-- [x] ID 3: Fix accessibility issues in MultiSelectCombobox.tsx
-- [x] ID 4: Make breadcrumb link focusable in breadcrumb.tsx
-- [x] ID 5: Convert string concatenation to template literals in counting-number.tsx
-- [x] ID 6: Fix TypeScript and performance issues in calendar.tsx
+## Task List
 
-## In Progress
+### Phase 1: Refactoring Setup & Prerequisites
 
-- [x] ID 7: Address all linting issues
-  - [x] ID 7.1: Complete ID 1
-  - [x] ID 7.2: Complete ID 2
-  - [x] ID 7.3: Complete ID 3
-  - [x] ID 7.4: Complete ID 4
-  - [x] ID 7.5: Complete ID 5
-  - [x] ID 7.6: Complete ID 6
+- [ ] **task001_branching_strategy_setup.md**: Setup Refactoring Branching Strategy
+- [ ] **task002_prerequisites_verification.md**: Verify Refactoring Pre-requisites
+- [ ] **task003_refactor_src_app_directory.md**: Step 3.1: Refactor src/app/ Directory
+- [ ] **task004_refactor_src_components_directory.md**: Step 3.2: Refactor src/components/ Directory
+- [ ] **task005_refactor_src_lib_directory.md**: Step 3.3: Refactor src/lib/ Directory
+- [ ] **task006_refactor_aux_src_dirs.md**: Step 3.4: Refactor src/hooks/, src/types/, src/styles/
+- [ ] **task007_relocate_actions_services_logic.md**: Step 3.5: Relocate Logic from src/actions/ and src/services/
+
+### Phase 2: Design System Implementation
+
+- [ ] **task008_implement_design_system_foundation.md**: Step 4: Implement Design System Foundation
+- [ ] **task009_apply_component_level_design_styling.md**: Step 5: Apply Component-Level Design & MVP Styling
+
+### Phase 3: Testing & Finalization
+
+- [ ] **task010_post_refactor_finalization.md**: Step 7: Post-Refactor Finalization & Testing (incorporates testing from step 6)
 
 ## Completed Tasks
 
-- [x] ID 0: Initial task list creation
+_Moved from the main list upon completion._
+
+## Pending Tasks
+
+## In Progress
+
+
 
 ## Implementation Plan
 
