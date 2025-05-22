@@ -1,33 +1,33 @@
 /**
  * Authentication Callback Page
- * 
+ *
  * This client-side page handles the OAuth and email confirmation callbacks from Supabase Auth.
  * It processes the authentication code received in the URL, exchanges it for a session,
  * and redirects the user to the appropriate page based on the result.
- * 
+ *
  * The page serves as a critical part of the authentication flow, handling:
  * - Email confirmation links
  * - OAuth provider redirects (Google, GitHub, etc.)
  * - Password reset confirmations
- * 
+ *
  * During processing, it displays a loading state to the user and handles any errors
  * that might occur during the authentication process.
  */
 
 "use client";
 
-import { useEffect, useState } from "react";
 import { Skeleton } from "@/components/ui/skeleton";
-import { useRouter, useSearchParams } from "next/navigation";
 import { createBrowserClient } from "@supabase/ssr";
+import { useRouter, useSearchParams } from "next/navigation";
+import { useEffect, useState } from "react";
 
 /**
  * Authentication Callback Page Component
- * 
+ *
  * Handles the authentication callback process by exchanging the provided code
  * for a session with Supabase Auth. Shows loading state during processing and
  * error state if authentication fails.
- * 
+ *
  * @returns {JSX.Element} The rendered callback page with either loading or error state
  */
 export default function AuthCallbackPage() {
@@ -40,7 +40,7 @@ export default function AuthCallbackPage() {
     /**
      * Processes the authentication callback by exchanging the code for a session
      * and redirecting the user to the appropriate page based on the result.
-     * 
+     *
      * @async
      * @throws {Error} If authentication fails or environment variables are missing
      */

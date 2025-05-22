@@ -1,9 +1,9 @@
 /**
  * Root Layout Component
- * 
+ *
  * This is the top-level layout component for the entire application. It wraps all pages
  * and provides the fundamental HTML structure, global styles, fonts, and context providers.
- * 
+ *
  * The layout implements:
  * - Geist Sans and Geist Mono fonts from Google Fonts for consistent typography
  * - Global CSS styles imported from the styles directory
@@ -20,7 +20,7 @@ import Providers from "./providers";
 /**
  * Geist Sans font configuration
  * Loads the Geist Sans font and makes it available via CSS variables
- * 
+ *
  * @type {import('next/font/google').FontVariable}
  */
 const geistSans = Geist({
@@ -31,7 +31,7 @@ const geistSans = Geist({
 /**
  * Geist Mono font configuration
  * Loads the Geist Mono font for monospace text and makes it available via CSS variables
- * 
+ *
  * @type {import('next/font/google').FontVariable}
  */
 const geistMono = Geist_Mono({
@@ -51,10 +51,10 @@ export const metadata: Metadata = {
 
 /**
  * Root Layout Component
- * 
+ *
  * Provides the base HTML structure for all pages in the application.
  * Applies global fonts, includes the application-wide providers, and renders child components.
- * 
+ *
  * @param {Object} props - Component props
  * @param {React.ReactNode} props.children - The page content to render within the layout
  * @returns {JSX.Element} The complete HTML structure with providers and child content

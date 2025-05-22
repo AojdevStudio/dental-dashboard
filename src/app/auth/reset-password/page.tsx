@@ -1,10 +1,10 @@
 /**
  * Reset Password Page
- * 
+ *
  * This page provides the interface for users to request a password reset.
  * It's part of the authentication flow that allows users who have forgotten
  * their passwords to regain access to their accounts through a secure reset process.
- * 
+ *
  * The page uses a pre-built PasswordResetRequest component that handles:
  * - Email input validation
  * - Submission to the reset password API
@@ -12,8 +12,8 @@
  * - User feedback during the process
  */
 
-import type { Metadata } from "next";
 import { PasswordResetRequest } from "@/components/ui/password-reset-request";
+import type { Metadata } from "next";
 
 /**
  * Metadata for the reset password page
@@ -26,13 +26,13 @@ export const metadata: Metadata = {
 
 /**
  * Reset Password Page Component
- * 
+ *
  * Renders the password reset request form using a pre-built component
  * that handles the form submission and validation process.
- * 
+ *
  * When a user submits their email, the system will send a password reset link
  * to that email if it's associated with a valid account.
- * 
+ *
  * @returns {JSX.Element} The rendered password reset request page
  */
 export default function ResetPasswordPage() {

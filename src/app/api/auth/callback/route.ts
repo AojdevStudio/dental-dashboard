@@ -1,6 +1,6 @@
 /**
  * Authentication Callback API Route
- * 
+ *
  * This API route handles OAuth and email confirmation callbacks from Supabase Auth.
  * It processes the authentication code received from Supabase and exchanges it for a session.
  * This route is particularly important for handling authentication flows in non-browser environments

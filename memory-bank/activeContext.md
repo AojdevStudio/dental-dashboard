@@ -37,42 +37,27 @@
 4.  **Synchronization Trigger:** Set up initial manual triggers for the sync process (Supabase cron jobs will be part of a later task in this phase).
 
 ## Recent Changes
+- {{Current Date}}: EXECUTE: Completed major structural refactoring of `src/app/` directory as per Task 003 (`task003_refactor_src_app_directory.md`). Moved (auth) and (dashboard) pages/layouts, reorganized API routes to new granular structure with placeholders. Ran Biome to fix imports. Remaining work: detailed logic migration for some APIs, manual import/logic verification, and testing.
 - {{Current Date}}: PLAN: Extensively updated all memory bank files (`projectbrief.md`, `techContext.md`, `systemPatterns.md`, `progress.md`, `activeContext.md`) to reflect the new MVP project direction based on documents in `.dev/` and `.ai/plans/`.
 - 2025-05-18: EXECUTE: Completed Task 7 (Base Dashboard Layout & Navigation) and Task 4 (Google Sheets API services and routes).
 
-## Mode: PLAN (Transitioning to EXECUTE)
+## Mode: EXECUTE
 
-**Objective:** Ensure memory bank is fully aligned with the new MVP direction and prepare for the next phase of development: Core Google Sheets Integration & Data Pipeline.
+**Objective:** Implement the refactoring of the `src/app` directory (Task 003).
 
-**Current Task:** Finalize memory updates and define immediate next steps for PRD Phase MVP-2.
+**Current Task:** Completed structural changes for Task 003. Next steps involve developer review, logic migration for specific API routes, and testing.
 
-**Current Focus:** Confirming the plan for implementing Google Sheets column mapping and the data transformation pipeline using Supabase Edge Functions.
+**Current Focus:** Concluding Task 003 operations.
 
-**Blockers:** None for planning. For execution, clarity on specific mapping templates is needed.
+**Blockers:** None for current AI operations. Developer action required for next steps.
 
-**Next Steps (for EXECUTE mode):**
-- Focus on PRD Phase MVP-2: "Core Google Sheets Integration & Data Pipeline".
-- Task: Implement pre-defined column mapping logic for Google Sheets.
-- Task: Develop Supabase Edge Functions for data extraction, transformation (based on mappings), and validation.
-- Task: Implement logic to store transformed data into Supabase metric tables.
-- Task: Implement initial manual data synchronization triggers.
-
-## Current Task
-- Preparing to EXECUTE tasks for **PRD Phase MVP-2: Core Google Sheets Integration & Data Pipeline**.
-  - Sub-focus 1: Implement pre-defined column mapping selection and storage.
-  - Sub-focus 2: Develop data transformation pipeline (Supabase Edge Functions).
-  - Sub-focus 3: Implement data storage into metrics tables.
-
-## Current Focus
-- Reviewing `.dev/feature-spec.md` for column mapping template details.
-- Planning the structure of Supabase Edge Functions for the transformation pipeline.
-
-## Blockers
-- Detailed specifications for pre-defined column mapping templates, if not yet fully defined in `.dev/feature-spec.md`.
-
-## Next Steps
-- Begin implementation of column mapping logic.
-- Start development of Supabase Edge Functions for data extraction and transformation.
+**Next Steps (for Developer):**
+- Review all changes made to `src/app/`.
+- Manually verify import paths adjusted by Biome.
+- Migrate logic from old API routes (if any remnants or if placeholders need actual implementation) into the new granular API structure (e.g., `src/app/api/google-sheets/...`, `src/app/api/clinics/...`, `src/app/api/users/...`).
+- Review `src/app/auth/callback/page.tsx` and other pages for any server-side logic that should be in API routes (though initial check suggests client-side Supabase usage is appropriate here).
+- Thoroughly test all application functionality related to `src/app/` routes, layouts, and API interactions.
+- Address any remaining TODOs in placeholder files.
 
 ---
 
