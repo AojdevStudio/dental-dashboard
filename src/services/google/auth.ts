@@ -64,6 +64,44 @@ export function generateAuthUrl(): string {
 }
 
 /**
+ * Generates a Google OAuth authorization URL with custom scopes and state.
+ *
+ * This helper mirrors the getAuthorizationUrl function used in older parts of
+ * the codebase.  It provides a more flexible interface than `generateAuthUrl`
+ * by allowing callers to specify the OAuth scopes, an optional state parameter
+ * and whether offline access is required.  The URL is constructed manually to
+ * avoid relying on internal behaviour of the Google client library and to keep
+ * parity with the existing JavaScript implementation.
+ *
+ * @param scopes - Array of OAuth scopes to request. Defaults to `['profile', 'email']`.
+ * @param state - Optional state string that will be round‑tripped to the
+ *   callback URL.
+ * @param accessType - OAuth access type, either 'online' or 'offline'. Defaults
+ *   to 'online'.
+ * @returns Fully formed authorization URL.
+ */
+export function getAuthorizationUrl(
+  scopes: string[] = ["profile", "email"],
+  state = "",
+  accessType: "online" | "offline" = "online"
+): string {
+  if (!process.env.GOOGLE_CLIENT_ID || !process.env.GOOGLE_REDIRECT_URI) {
+    throw new Error("Google OAuth credentials are not properly configured");
+  }
+
+  const url = new URL("https://accounts.google.com/o/oauth2/v2/auth");
+  url.searchParams.set("client_id", process.env.GOOGLE_CLIENT_ID);
+  url.searchParams.set("redirect_uri", process.env.GOOGLE_REDIRECT_URI);
+  url.searchParams.set("response_type", "code");
+  url.searchParams.set("scope", scopes.join(" "));
+  url.searchParams.set("access_type", accessType);
+  if (state) {
+    url.searchParams.set("state", state);
+  }
+  return url.toString();
+}
+
+/**
  * Processes OAuth callback and exchanges authorization code for tokens
  *
  * Exchanges the authorization code from Google's OAuth callback for
