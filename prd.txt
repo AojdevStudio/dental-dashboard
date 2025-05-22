@@ -1,3 +1,30 @@
+<critique_mvp_scoping>
+**IMPORTANT NOTE FOR PRD REFINEMENT (MVP Focus):**
+
+This PRD outlines a comprehensive vision for the Dental Practice Analytics Dashboard. However, for the initial Minimum Viable Product (MVP), a sharper focus is required to ensure timely delivery and core value validation. The current document, particularly in sections like "Customizable Dashboard System" and the "Development Phases," blends MVP-level features with more advanced, post-MVP enhancements.
+
+**Key Areas for Re-evaluation and MVP Definition:**
+
+1.  **Dashboard Customization:**
+    *   The "User-configurable widgets and layouts" and "Saved views" are powerful features but represent significant complexity.
+    *   **MVP Recommendation:** Focus on delivering essential KPIs through fixed or a few selectable, pre-defined, hard-coded layouts. Full user-driven layout customization (drag-and-drop, resizing, widget palette, saved views) should be deferred to a post-MVP phase.
+    *   The PRD's "Development Phases" (Phase 3 vs. Phase 4) hints at this but needs to be made more explicit. "Dashboard layout customization capabilities" in Phase 3 for MVP should be narrowly defined (e.g., selecting from pre-coded templates or basic show/hide of widgets).
+
+2.  **Feature Prioritization:**
+    *   Re-assess all "Core Features" and details within "Data Visualization" against MVP viability.
+    *   The primary MVP goal is to get core KPIs visualized accurately and efficiently from Google Sheets.
+
+3.  **Clarity in Phasing:**
+    *   The "Development Phases" section should clearly distinguish MVP requirements from subsequent enhancements.
+
+**Action for PRD Author:**
+Thoroughly review and revise this PRD to:
+*   Clearly delineate a lean MVP scope.
+*   Move non-MVP features to "Future Enhancements" or later phases.
+*   Ensure all sections consistently reflect this MVP-first approach.
+This will help align development efforts.
+</critique_mvp_scoping>
+
 <prd>
 <overview>
 The Dental Practice Analytics Dashboard is a centralized web application designed to visualize and analyze key performance indicators (KPIs) from dental practices. It connects to existing Google Spreadsheets via API, transforms raw data into actionable insights, and presents them through intuitive visualizations. The system will initially serve as a read-only dashboard and eventually evolve into a complete reporting platform with form-based data entry, replacing the current spreadsheet-based workflow. This solution addresses the critical need for cohesive data analysis across multiple dental practices and provides real-time performance visibility against established goals.

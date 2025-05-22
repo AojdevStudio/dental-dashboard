@@ -1,0 +1,205 @@
+<svg viewBox="0 0 1200 800" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background -->
+  <rect width="1200" height="800" fill="#f8fafc"/>
+  
+  <!-- Title -->
+  <text x="600" y="30" text-anchor="middle" font-family="Arial, sans-serif" font-size="20" font-weight="bold" fill="#1e293b">Dental Practice Analytics Dashboard - MVP Architecture</text>
+  
+  <!-- External Services Layer -->
+  <rect x="50" y="60" width="300" height="120" rx="10" fill="#fef3c7" stroke="#f59e0b" stroke-width="2"/>
+  <text x="200" y="85" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" font-weight="bold" fill="#92400e">External Services</text>
+  
+  <!-- Google Sheets API -->
+  <rect x="70" y="100" width="120" height="60" rx="8" fill="#ffffff" stroke="#4285f4" stroke-width="2"/>
+  <text x="130" y="120" text-anchor="middle" font-family="Arial, sans-serif" font-size="11" fill="#1a73e8">Google Sheets</text>
+  <text x="130" y="135" text-anchor="middle" font-family="Arial, sans-serif" font-size="11" fill="#1a73e8">API v4</text>
+  <text x="130" y="150" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" fill="#5f6368">(OAuth 2.0)</text>
+  
+  <!-- Google OAuth -->
+  <rect x="210" y="100" width="120" height="60" rx="8" fill="#ffffff" stroke="#4285f4" stroke-width="2"/>
+  <text x="270" y="120" text-anchor="middle" font-family="Arial, sans-serif" font-size="11" fill="#1a73e8">Google OAuth</text>
+  <text x="270" y="135" text-anchor="middle" font-family="Arial, sans-serif" font-size="11" fill="#1a73e8">2.0 Service</text>
+  
+  <!-- Frontend Layer -->
+  <rect x="400" y="60" width="350" height="300" rx="10" fill="#dbeafe" stroke="#3b82f6" stroke-width="2"/>
+  <text x="575" y="85" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" font-weight="bold" fill="#1e40af">Frontend Layer (Next.js App Router)</text>
+  
+  <!-- Dashboard Components -->
+  <rect x="420" y="100" width="140" height="80" rx="8" fill="#ffffff" stroke="#3b82f6" stroke-width="1"/>
+  <text x="490" y="120" text-anchor="middle" font-family="Arial, sans-serif" font-size="11" font-weight="bold" fill="#1e40af">Dashboard UI</text>
+  <text x="490" y="135" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" fill="#3730a3">• ShadCN Components</text>
+  <text x="490" y="150" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" fill="#3730a3">• Recharts</text>
+  <text x="490" y="165" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" fill="#3730a3">• TailwindCSS</text>
+  
+  <!-- Auth Components -->
+  <rect x="580" y="100" width="140" height="80" rx="8" fill="#ffffff" stroke="#3b82f6" stroke-width="1"/>
+  <text x="650" y="120" text-anchor="middle" font-family="Arial, sans-serif" font-size="11" font-weight="bold" fill="#1e40af">Auth & Navigation</text>
+  <text x="650" y="135" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" fill="#3730a3">• Role-based Routes</text>
+  <text x="650" y="150" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" fill="#3730a3">• Session Management</text>
+  <text x="650" y="165" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" fill="#3730a3">• RLS Protection</text>
+  
+  <!-- State Management -->
+  <rect x="420" y="200" width="140" height="70" rx="8" fill="#ffffff" stroke="#3b82f6" stroke-width="1"/>
+  <text x="490" y="220" text-anchor="middle" font-family="Arial, sans-serif" font-size="11" font-weight="bold" fill="#1e40af">State Management</text>
+  <text x="490" y="235" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" fill="#3730a3">• TanStack Query</text>
+  <text x="490" y="250" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" fill="#3730a3">• Server State Cache</text>
+  <text x="490" y="265" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" fill="#3730a3">• Optimistic Updates</text>
+  
+  <!-- Google Integration -->
+  <rect x="580" y="200" width="140" height="70" rx="8" fill="#ffffff" stroke="#3b82f6" stroke-width="1"/>
+  <text x="650" y="220" text-anchor="middle" font-family="Arial, sans-serif" font-size="11" font-weight="bold" fill="#1e40af">Google Integration</text>
+  <text x="650" y="235" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" fill="#3730a3">• Sheet Selection UI</text>
+  <text x="650" y="250" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" fill="#3730a3">• Column Mapping</text>
+  <text x="650" y="265" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" fill="#3730a3">• Sync Status</text>
+  
+  <!-- Data Export -->
+  <rect x="500" y="290" width="140" height="50" rx="8" fill="#ffffff" stroke="#3b82f6" stroke-width="1"/>
+  <text x="570" y="310" text-anchor="middle" font-family="Arial, sans-serif" font-size="11" font-weight="bold" fill="#1e40af">Export & Reports</text>
+  <text x="570" y="325" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" fill="#3730a3">• PDF/CSV Export</text>
+  
+  <!-- API Layer -->
+  <rect x="800" y="60" width="350" height="300" rx="10" fill="#dcfce7" stroke="#16a34a" stroke-width="2"/>
+  <text x="975" y="85" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" font-weight="bold" fill="#15803d">API Layer (Next.js API Routes)</text>
+  
+  <!-- API Routes -->
+  <rect x="820" y="100" width="100" height="70" rx="8" fill="#ffffff" stroke="#16a34a" stroke-width="1"/>
+  <text x="870" y="120" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" font-weight="bold" fill="#15803d">Auth API</text>
+  <text x="870" y="135" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" fill="#166534">/api/auth/*</text>
+  <text x="870" y="150" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" fill="#166534">Session mgmt</text>
+  <text x="870" y="165" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" fill="#166534">Role validation</text>
+  
+  <rect x="940" y="100" width="100" height="70" rx="8" fill="#ffffff" stroke="#16a34a" stroke-width="1"/>
+  <text x="990" y="120" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" font-weight="bold" fill="#15803d">Google API</text>
+  <text x="990" y="135" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" fill="#166534">/api/google/*</text>
+  <text x="990" y="150" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" fill="#166534">Sheets integration</text>
+  <text x="990" y="165" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" fill="#166534">Data extraction</text>
+  
+  <rect x="1060" y="100" width="100" height="70" rx="8" fill="#ffffff" stroke="#16a34a" stroke-width="1"/>
+  <text x="1110" y="120" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" font-weight="bold" fill="#15803d">Metrics API</text>
+  <text x="1110" y="135" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" fill="#166534">/api/metrics/*</text>
+  <text x="1110" y="150" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" fill="#166534">KPI calculations</text>
+  <text x="1110" y="165" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" fill="#166534">Aggregations</text>
+  
+  <!-- Business Logic -->
+  <rect x="820" y="190" width="150" height="80" rx="8" fill="#ffffff" stroke="#16a34a" stroke-width="1"/>
+  <text x="895" y="210" text-anchor="middle" font-family="Arial, sans-serif" font-size="11" font-weight="bold" fill="#15803d">Business Logic Services</text>
+  <text x="895" y="225" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" fill="#166534">• Data Transformation</text>
+  <text x="895" y="240" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" fill="#166534">• KPI Calculations</text>
+  <text x="895" y="255" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" fill="#166534">• Validation Rules</text>
+  
+  <!-- Middleware -->
+  <rect x="990" y="190" width="150" height="80" rx="8" fill="#ffffff" stroke="#16a34a" stroke-width="1"/>
+  <text x="1065" y="210" text-anchor="middle" font-family="Arial, sans-serif" font-size="11" font-weight="bold" fill="#15803d">Middleware</text>
+  <text x="1065" y="225" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" fill="#166534">• Rate Limiting</text>
+  <text x="1065" y="240" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" fill="#166534">• Error Handling</text>
+  <text x="1065" y="255" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" fill="#166534">• Request Validation</text>
+  
+  <!-- Caching -->
+  <rect x="880" y="290" width="120" height="50" rx="8" fill="#ffffff" stroke="#16a34a" stroke-width="1"/>
+  <text x="940" y="310" text-anchor="middle" font-family="Arial, sans-serif" font-size="11" font-weight="bold" fill="#15803d">Caching Layer</text>
+  <text x="940" y="325" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" fill="#166534">TanStack Query Cache</text>
+  
+  <!-- Database Layer -->
+  <rect x="400" y="400" width="750" height="200" rx="10" fill="#fef7ff" stroke="#9333ea" stroke-width="2"/>
+  <text x="775" y="425" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" font-weight="bold" fill="#7c3aed">Database Layer (Supabase)</text>
+  
+  <!-- Supabase Auth -->
+  <rect x="420" y="450" width="120" height="80" rx="8" fill="#ffffff" stroke="#9333ea" stroke-width="1"/>
+  <text x="480" y="470" text-anchor="middle" font-family="Arial, sans-serif" font-size="11" font-weight="bold" fill="#7c3aed">Supabase Auth</text>
+  <text x="480" y="485" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" fill="#6b21a8">• OAuth 2.0</text>
+  <text x="480" y="500" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" fill="#6b21a8">• Session Management</text>
+  <text x="480" y="515" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" fill="#6b21a8">• Role-based Access</text>
+  
+  <!-- PostgreSQL -->
+  <rect x="560" y="450" width="140" height="80" rx="8" fill="#ffffff" stroke="#9333ea" stroke-width="1"/>
+  <text x="630" y="470" text-anchor="middle" font-family="Arial, sans-serif" font-size="11" font-weight="bold" fill="#7c3aed">PostgreSQL Database</text>
+  <text x="630" y="485" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" fill="#6b21a8">• Multi-tenant Schema</text>
+  <text x="630" y="500" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" fill="#6b21a8">• HIPAA Compliance</text>
+  <text x="630" y="515" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" fill="#6b21a8">• Row Level Security</text>
+  
+  <!-- Prisma ORM -->
+  <rect x="720" y="450" width="120" height="80" rx="8" fill="#ffffff" stroke="#9333ea" stroke-width="1"/>
+  <text x="780" y="470" text-anchor="middle" font-family="Arial, sans-serif" font-size="11" font-weight="bold" fill="#7c3aed">Prisma ORM</text>
+  <text x="780" y="485" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" fill="#6b21a8">• Type-safe Queries</text>
+  <text x="780" y="500" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" fill="#6b21a8">• Schema Migrations</text>
+  <text x="780" y="515" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" fill="#6b21a8">• Connection Pooling</text>
+  
+  <!-- Supabase Storage -->
+  <rect x="860" y="450" width="120" height="80" rx="8" fill="#ffffff" stroke="#9333ea" stroke-width="1"/>
+  <text x="920" y="470" text-anchor="middle" font-family="Arial, sans-serif" font-size="11" font-weight="bold" fill="#7c3aed">Supabase Storage</text>
+  <text x="920" y="485" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" fill="#6b21a8">• File Storage</text>
+  <text x="920" y="500" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" fill="#6b21a8">• Export Files</text>
+  <text x="920" y="515" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" fill="#6b21a8">• Asset Management</text>
+  
+  <!-- Edge Functions -->
+  <rect x="1000" y="450" width="120" height="80" rx="8" fill="#ffffff" stroke="#9333ea" stroke-width="1"/>
+  <text x="1060" y="470" text-anchor="middle" font-family="Arial, sans-serif" font-size="11" font-weight="bold" fill="#7c3aed">Edge Functions</text>
+  <text x="1060" y="485" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" fill="#6b21a8">• Data Processing</text>
+  <text x="1060" y="500" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" fill="#6b21a8">• Background Jobs</text>
+  <text x="1060" y="515" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" fill="#6b21a8">• Scheduled Sync</text>
+  
+  <!-- Row Level Security -->
+  <rect x="590" y="550" width="200" height="40" rx="8" fill="#ffffff" stroke="#9333ea" stroke-width="1"/>
+  <text x="690" y="570" text-anchor="middle" font-family="Arial, sans-serif" font-size="11" font-weight="bold" fill="#7c3aed">Row Level Security (RLS)</text>
+  <text x="690" y="585" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" fill="#6b21a8">Clinic-based Data Isolation</text>
+  
+  <!-- Infrastructure -->
+  <rect x="50" y="650" width="1100" height="120" rx="10" fill="#f1f5f9" stroke="#64748b" stroke-width="2"/>
+  <text x="600" y="675" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" font-weight="bold" fill="#334155">Infrastructure & DevOps</text>
+  
+  <!-- Vercel -->
+  <rect x="100" y="690" width="150" height="60" rx="8" fill="#ffffff" stroke="#000000" stroke-width="1"/>
+  <text x="175" y="710" text-anchor="middle" font-family="Arial, sans-serif" font-size="11" font-weight="bold" fill="#000000">Vercel Deployment</text>
+  <text x="175" y="725" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" fill="#374151">• Auto-scaling</text>
+  <text x="175" y="740" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" fill="#374151">• Edge Functions</text>
+  
+  <!-- Monitoring -->
+  <rect x="270" y="690" width="150" height="60" rx="8" fill="#ffffff" stroke="#64748b" stroke-width="1"/>
+  <text x="345" y="710" text-anchor="middle" font-family="Arial, sans-serif" font-size="11" font-weight="bold" fill="#334155">Monitoring</text>
+  <text x="345" y="725" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" fill="#475569">• Error Tracking</text>
+  <text x="345" y="740" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" fill="#475569">• Performance Metrics</text>
+  
+  <!-- Testing -->
+  <rect x="440" y="690" width="150" height="60" rx="8" fill="#ffffff" stroke="#64748b" stroke-width="1"/>
+  <text x="515" y="710" text-anchor="middle" font-family="Arial, sans-serif" font-size="11" font-weight="bold" fill="#334155">Testing (Vitest)</text>
+  <text x="515" y="725" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" fill="#475569">• Unit Tests</text>
+  <text x="515" y="740" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" fill="#475569">• Integration Tests</text>
+  
+  <!-- CI/CD -->
+  <rect x="610" y="690" width="150" height="60" rx="8" fill="#ffffff" stroke="#64748b" stroke-width="1"/>
+  <text x="685" y="710" text-anchor="middle" font-family="Arial, sans-serif" font-size="11" font-weight="bold" fill="#334155">CI/CD Pipeline</text>
+  <text x="685" y="725" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" fill="#475569">• GitHub Actions</text>
+  <text x="685" y="740" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" fill="#475569">• Automated Deploy</text>
+  
+  <!-- Analytics -->
+  <rect x="780" y="690" width="150" height="60" rx="8" fill="#ffffff" stroke="#64748b" stroke-width="1"/>
+  <text x="855" y="710" text-anchor="middle" font-family="Arial, sans-serif" font-size="11" font-weight="bold" fill="#334155">Analytics</text>
+  <text x="855" y="725" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" fill="#475569">• Usage Tracking</text>
+  <text x="855" y="740" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" fill="#475569">• Performance Data</text>
+  
+  <!-- Security -->
+  <rect x="950" y="690" width="150" height="60" rx="8" fill="#ffffff" stroke="#64748b" stroke-width="1"/>
+  <text x="1025" y="710" text-anchor="middle" font-family="Arial, sans-serif" font-size="11" font-weight="bold" fill="#334155">Security</text>
+  <text x="1025" y="725" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" fill="#475569">• HIPAA Compliance</text>
+  <text x="1025" y="740" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" fill="#475569">• Data Encryption</text>
+  
+  <!-- Data Flow Arrows -->
+  <!-- External to Frontend -->
+  <path d="M 350 130 L 400 130" stroke="#64748b" stroke-width="2" marker-end="url(#arrowhead)" fill="none"/>
+  
+  <!-- Frontend to API -->
+  <path d="M 750 180 L 800 180" stroke="#64748b" stroke-width="2" marker-end="url(#arrowhead)" fill="none"/>
+  
+  <!-- API to Database -->
+  <path d="M 975 360 L 775 400" stroke="#64748b" stroke-width="2" marker-end="url(#arrowhead)" fill="none"/>
+  
+  <!-- Define arrow marker -->
+  <defs>
+    <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#64748b"/>
+    </marker>
+  </defs>
+  
+  <!-- Legend -->
+  <text x="50" y="790" font-family="Arial, sans-serif" font-size="11" font-weight="bold" fill="#334155">Data Flow: External Services → Frontend → API → Database</text>
+</svg>
