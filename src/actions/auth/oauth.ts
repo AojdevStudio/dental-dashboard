@@ -1,6 +1,6 @@
 "use server";
 
-import { createClient } from "@/lib/supabase/server";
+import { createClient } from "@/lib/auth/session";
 
 /**
  * Supported OAuth providers for authentication.

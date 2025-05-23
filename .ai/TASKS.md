@@ -29,6 +29,11 @@ Individual task details are in the `.ai/tasks/` directory.
   - [x] **task005.1_create_lib_types_dir.md**: Create src/lib/types/ directory and placeholder files
   - [x] **task005.2_create_lib_utils_dir.md**: Create src/lib/utils/ directory and populate files
   - [x] **task005.3_confirm_original_lib_files_deleted.md**: Confirm deletion of original lib files after moves
+  - [x] **task006_refactor_hooks_types_styles.md**: Step 3.4: Refactor src/hooks/, src/types/, src/styles/
+  - [x] **task007_relocate_actions_services_logic.md**: Step 3.5: Relocate Logic from src/actions/ and src/services/
+  - [x] **task010_post_refactor_finalization.md**: Step 7: Post-Refactor Finalization & Testing
+  - [x] **task017_create_integration_metrics_placeholders.md**: Create Integration and Metrics Placeholder Files
+  - [x] **task018_refactor_utility_functions.md**: Refactor Utility Functions (cn to formatting)
 
 ### Project Setup Tasks
 - [x] **task016_create_supabase_function_placeholders.md**: Create Supabase Function Placeholders
@@ -37,7 +42,6 @@ Individual task details are in the `.ai/tasks/` directory.
 
 ### Phase 1: Refactoring
 - [-] **task003_refactor_src_app_directory.md**: Step 3.1: Refactor src/app/ Directory
-- [🔄] **task006_refactor_hooks_types_styles.md**: Step 3.4: Refactor src/hooks/, src/types/, src/styles/
 
 ## Pending Tasks
 
@@ -45,19 +49,14 @@ Individual task details are in the `.ai/tasks/` directory.
 - [ ] **task9_document_app_directory.md**: Document app directory
 - [ ] **task10_document_components_directory.md**: Document components directory
 
-## Future Tasks
-
 ### Phase 1: Refactoring
 - [ ] **task004_refactor_src_components_directory.md**: Step 3.2: Refactor src/components/ Directory
-- [ ] **task006_refactor_aux_src_dirs.md**: Step 3.4: Refactor src/hooks/, src/types/, src/styles/ # This seems like a duplicate or alternative naming for 006. Keeping for now.
-- [ ] **task007_relocate_actions_services_logic.md**: Step 3.5: Relocate Logic from src/actions/ and src/services/
 
 ### Phase 2: Design System Implementation
 - [ ] **task008_implement_design_system_foundation.md**: Step 4: Implement Design System Foundation
 - [ ] **task009_apply_component_level_design_styling.md**: Step 5: Apply Component-Level Design & MVP Styling
 
 ### Phase 3: Testing & Finalization
-- [ ] **task010_post_refactor_finalization.md**: Step 7: Post-Refactor Finalization & Testing
 
 ## Done Tasks (Archived)
 

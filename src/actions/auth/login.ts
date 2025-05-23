@@ -1,6 +1,6 @@
 "use server";
 
-import { createClient } from "@/lib/supabase/server";
+import { createClient } from "@/lib/auth/session";
 import { redirect } from "next/navigation";
 
 /**

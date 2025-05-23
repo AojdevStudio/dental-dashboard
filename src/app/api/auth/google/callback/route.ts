@@ -10,7 +10,7 @@
  * back to the dashboard with success or error information.
  */
 
-import { prisma } from "@/lib/prisma"; // Use named import
+import { prisma } from "@/lib/database/prisma"; // Use named import
 import { handleAuthCallback } from "@/services/google/auth"; // Adjust path
 import { type NextRequest, NextResponse } from "next/server";
 

@@ -7,7 +7,7 @@
  * or when the client-side callback handling is not sufficient.
  */
 
-import { createClient } from "@/lib/supabase/server";
+import { createClient } from "@/lib/auth/session";
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 

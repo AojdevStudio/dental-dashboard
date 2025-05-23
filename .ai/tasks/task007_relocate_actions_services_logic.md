@@ -1,10 +1,12 @@
 ---
 id: task007
 title: "Step 3.5: Relocate Logic from src/actions/ and src/services/"
-status: "To Do"
+status: "Done"
 assignee: "AI"
 priority: "High"
-creation_date: "{{current_date}}"
+creation_date: "2024-07-21T10:00:00Z"
+updated_at: "2025-05-22T23:34:55-05:00"
+completed_at: "2025-05-22T23:34:55-05:00"
 due_date: ""
 description: "Relocate all logic from the legacy `src/actions/` and `src/services/` directories to their new locations (Next.js API Routes, Supabase Edge Functions, or utility modules in `src/lib/`) as per the refactoring plan. This is critical as these directories will be removed from the frontend structure."
 tags: ["refactoring", "backend", "api", "architecture"]
