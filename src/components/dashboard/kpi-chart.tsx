@@ -75,7 +75,14 @@ export function KPIChart({
   valueSuffix = "",
 }: KPIChartProps) {
   // If no data is provided, use the sample data
-  const chartData = data || sampleChartData;
+  // If data is provided, use it for all time periods
+  const chartData = data
+    ? {
+        daily: data,
+        weekly: data,
+        monthly: data,
+      }
+    : sampleChartData;
 
   // Only show loading state if isLoading is true
   if (isLoading) {

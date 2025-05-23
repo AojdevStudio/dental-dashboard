@@ -48,12 +48,12 @@ export default function AuthErrorPage() {
         </ul>
         <div className="flex flex-col gap-4">
           <a
-            href="/auth/login"
+            href="/login"
             className="text-white bg-white/10 hover:bg-white/20 transition px-6 py-2 rounded-full"
           >
             Return to Login
           </a>
-          <a href="/auth/signup" className="text-white/80 hover:text-white underline">
+          <a href="/signup" className="text-white/80 hover:text-white underline">
             Create a new account
           </a>
         </div>

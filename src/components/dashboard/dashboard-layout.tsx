@@ -11,9 +11,9 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
-import { useFilterParams } from "@/hooks/useFilterStore";
+import { useFilterParams } from "@/hooks/use-filters";
 import React from "react";
-import { FilterBar } from "./filters";
+import { FilterBar } from "@/components/common/filters";
 
 /**
  * Dashboard Example Component

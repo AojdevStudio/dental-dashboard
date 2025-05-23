@@ -50,7 +50,7 @@ export async function middleware(request: NextRequest) {
   // If no user and not on auth pages, redirect to login
   if (!user && !isAuthPage) {
     const url = request.nextUrl.clone();
-    url.pathname = "/auth/login";
+    url.pathname = "/login";
     return NextResponse.redirect(url);
   }
 

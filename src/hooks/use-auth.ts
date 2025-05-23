@@ -1,11 +1,6 @@
-import {
-  type AuthChangeEvent,
-  type Session,
-  SupabaseClient,
-  type User,
-  createClient,
-} from "@supabase/supabase-js";
+import type { AuthChangeEvent, Session, User } from "@supabase/supabase-js";
 import { usePathname, useRouter } from "next/navigation";
+import { createClient } from "@/lib/supabase/client";
 /**
  * Authentication hook for managing user authentication state
  *
@@ -71,10 +66,8 @@ interface AuthState {
  * }
  */
 export function useAuth(): AuthState {
-  // Initialize Supabase client
-  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || "";
-  const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || "";
-  const supabase = createClient(supabaseUrl, supabaseKey);
+  // Initialize Supabase client using the SSR-compatible browser client
+  const supabase = createClient();
 
   const router = useRouter();
   const pathname = usePathname();

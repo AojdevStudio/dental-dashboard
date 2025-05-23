@@ -102,15 +102,27 @@ export function GoalCard({ goal, onEdit, onViewDetails, isLoading = false }: Goa
   const getStatusBadgeProps = (status: GoalStatus) => {
     switch (status) {
       case "on_track":
-        return { variant: "outline", className: "bg-green-50 text-green-700 border-green-200" };
+        return {
+          variant: "outline" as const,
+          className: "bg-green-50 text-green-700 border-green-200",
+        };
       case "at_risk":
-        return { variant: "outline", className: "bg-amber-50 text-amber-700 border-amber-200" };
+        return {
+          variant: "outline" as const,
+          className: "bg-amber-50 text-amber-700 border-amber-200",
+        };
       case "off_track":
-        return { variant: "outline", className: "bg-red-50 text-red-700 border-red-200" };
+        return { variant: "outline" as const, className: "bg-red-50 text-red-700 border-red-200" };
       case "achieved":
-        return { variant: "outline", className: "bg-blue-50 text-blue-700 border-blue-200" };
+        return {
+          variant: "outline" as const,
+          className: "bg-blue-50 text-blue-700 border-blue-200",
+        };
       default:
-        return { variant: "outline", className: "bg-slate-50 text-slate-700 border-slate-200" };
+        return {
+          variant: "outline" as const,
+          className: "bg-slate-50 text-slate-700 border-slate-200",
+        };
     }
   };
 

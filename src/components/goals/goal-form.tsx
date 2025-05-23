@@ -61,7 +61,7 @@ const goalFormSchema = z.object({
     to: z.date(),
   }),
   trackingFrequency: z.enum(["daily", "weekly", "monthly"]),
-  reminderEnabled: z.boolean().default(false),
+  reminderEnabled: z.boolean(),
 });
 
 /**

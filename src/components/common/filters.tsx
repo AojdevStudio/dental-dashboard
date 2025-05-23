@@ -35,10 +35,9 @@ import { Separator } from "@/components/ui/separator";
 import {
   type TimePeriod,
   createFilterUrlParams,
-  filterDependentQueries,
   parseFilterUrlParams,
   useFilterStore,
-} from "@/hooks/useFilterStore";
+} from "@/hooks/use-filters";
 import { cn } from "@/lib/utils";
 import { useQueryClient } from "@tanstack/react-query";
 import { useSuspenseQuery } from "@tanstack/react-query";
@@ -501,6 +500,14 @@ export function FilterBar() {
         updateUrlParams();
 
         // Invalidate queries that depend on the filter values
+        const filterDependentQueries = [
+          "dashboard",
+          "metrics",
+          "appointments",
+          "patients",
+          "providers",
+          "financial",
+        ];
         for (const queryKey of filterDependentQueries) {
           queryClient.invalidateQueries({ queryKey: [queryKey] });
         }

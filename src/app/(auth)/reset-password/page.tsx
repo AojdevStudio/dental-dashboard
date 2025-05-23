@@ -33,8 +33,8 @@ export const metadata: Metadata = {
  * When a user submits their email, the system will send a password reset link
  * to that email if it's associated with a valid account.
  *
- * @returns {JSX.Element} The rendered password reset request page
+ * @returns {React.ReactElement} The rendered password reset request page
  */
-export default function ResetPasswordPage() {
+export default function ResetPasswordPage(): React.ReactElement {
   return <PasswordResetRequest />;
 }

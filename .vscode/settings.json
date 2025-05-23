@@ -7,5 +7,6 @@
   },
   "biome.enabled": true,
   "biome.enabledLanguages": ["typescript", "typescriptreact"],
-  "biome.enabledRules": ["no-unused-vars"]
+  "biome.enabledRules": ["no-unused-vars"],
+  "svg.preview.background": "white"
 }

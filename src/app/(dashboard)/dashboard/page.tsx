@@ -23,7 +23,7 @@ import { Suspense } from "react";
  */
 export default function DashboardPage() {
   return (
-    <div className="container mx-auto py-6">
+    <div className="w-full space-y-6">
       <Suspense fallback={<DashboardSkeleton />}>
         <DashboardPlaceholder />
       </Suspense>

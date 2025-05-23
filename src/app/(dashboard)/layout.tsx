@@ -25,6 +25,7 @@ import {
 } from "@/components/ui/breadcrumb";
 import { Button } from "@/components/ui/button";
 import { Sidebar } from "@/components/common/sidebar";
+import { UserNav } from "@/components/common/user-nav";
 import { Bell, Menu, Search, X } from "lucide-react";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -120,18 +121,15 @@ export default function DashboardLayout({
               <Button variant="ghost" size="icon" className="h-10 w-10">
                 <Bell className="h-5 w-5" />
               </Button>
+              {/* User navigation dropdown with sign-out button */}
+              <UserNav />
             </div>
           </header>
 
           {/* Main content with scrollable area */}
           <main className="flex-1 overflow-auto p-3 sm:p-4 md:p-6">
             {/* Page content */}
-            <div className="container mx-auto">
-              {/* Grid layout for dashboard widgets - with fallback for very small screens */}
-              <div className="grid grid-cols-1 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
-                {children}
-              </div>
-            </div>
+            <div className="container mx-auto">{children}</div>
           </main>
         </div>
       </div>

@@ -47,7 +47,7 @@ export default function AuthCallbackPage() {
     async function handleCallback() {
       try {
         if (!code) {
-          router.replace("/auth/login");
+          router.replace("/login");
           return;
         }
 
@@ -70,7 +70,7 @@ export default function AuthCallbackPage() {
         console.error("Error during auth callback:", err);
         setError(err instanceof Error ? err.message : "Authentication error");
         setTimeout(() => {
-          router.replace("/auth/auth-error");
+          router.replace("/auth-error");
         }, 2000);
       }
     }
