@@ -1,6 +1,6 @@
 ---
-description:
-globs:
+description: 
+globs: 
 alwaysApply: false
 ---
 # Next.js 15 + Supabase SSR Cookie Error Fix
@@ -186,8 +186,8 @@ After applying the fix:
 
 ## 📚 Related Resources
 
-- [Next.js 15 Async Request APIs](https://nextjs.org/docs/messages/sync-dynamic-apis)
-- [Supabase SSR Documentation](https://supabase.com/docs/guides/auth/server-side/nextjs)
-- [Next.js 15 Migration Guide](https://nextjs.org/docs/app/building-your-application/upgrading/version-15)
+- [Next.js 15 Async Request APIs](mdc:https:/nextjs.org/docs/messages/sync-dynamic-apis)
+- [Supabase SSR Documentation](mdc:https:/supabase.com/docs/guides/auth/server-side/nextjs)
+- [Next.js 15 Migration Guide](mdc:https:/nextjs.org/docs/app/building-your-application/upgrading/version-15)
 
 This systematic approach ensures reliable authentication while maintaining compatibility with Next.js 15's async-first architecture.
