@@ -94,3 +94,8 @@
   - **Archived On:** 2025-05-22T22:55:01-05:00
 
 - [x] task016_create_supabase_function_placeholders.md (Completed on 2025-05-22 23:20:19)
+- [x] task006_refactor_hooks_types_styles.md (Completed on 2025-05-22 23:34:55)
+- [x] task007_relocate_actions_services_logic.md (Completed on 2025-05-22 23:34:55)
+- [x] task010_post_refactor_finalization.md (Completed on 2025-05-22 23:34:55)
+- [x] task017_create_integration_metrics_placeholders.md (Completed on 2025-05-22 23:34:55)
+- [x] task018_refactor_utility_functions.md (Completed on 2025-05-22 23:34:55)

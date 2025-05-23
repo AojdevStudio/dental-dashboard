@@ -164,32 +164,14 @@ const defaultDateRange = getDateRangeForPeriod(defaultTimePeriod);
  * @function resetToDefaults - Alias for clearFilters
  *
  * @example
- * // In a component:
- * import { useFilterStore } from '@/hooks/use-filters'; // MODIFIED
+ * // Usage in a component:
+ * import { useFilterStore } from '@/hooks/use-filters';
  *
- * function FilterControls() {
- *   const {
- *     timePeriod,
- *     setTimePeriod,
- *     startDate,
- *     endDate,
- *     // ... other filter states and setters
- *   } = useFilterStore();
- *
- *   const handleTimePeriodChange = (e) => {
- *     setTimePeriod(e.target.value as TimePeriod);
- *   };
- *
- *   return (
- *     <div>
- *       <select value={timePeriod} onChange={handleTimePeriodChange}>
- *         <option value="daily">Daily</option>
- *         <option value="weekly">Weekly</option>
- *         <option value="monthly">Monthly</option>
- *       </select>
- *       {/* Other filter controls for date range, clinics, providers */}
- *     </div>
- *   );
+ * function FilterComponent() {
+ *   const { timePeriod, setTimePeriod } = useFilterStore();
+ *   const handleTimePeriodChange = (event) => setTimePeriod(event.target.value);
+ *   // Render select dropdown with options for daily, weekly, monthly, etc.
+ *   // Include other filter controls for date range, clinics, providers
  * }
  */
 export const useFilterStore = create<FilterState>()(
@@ -208,8 +190,7 @@ export const useFilterStore = create<FilterState>()(
         set({ timePeriod: period, startDate: start, endDate: end });
       },
 
-      setDateRange: (startDate, endDate) =>
-        set({ timePeriod: "custom", startDate, endDate }),
+      setDateRange: (startDate, endDate) => set({ timePeriod: "custom", startDate, endDate }),
 
       setSelectedClinics: (clinics) => set({ selectedClinics: clinics }),
 
