@@ -11,7 +11,7 @@
  */
 
 import { createServerClient } from "@supabase/ssr";
-import { cookies } from 'next/headers';
+import { cookies } from "next/headers";
 
 /**
  * Creates a Supabase client for server environments

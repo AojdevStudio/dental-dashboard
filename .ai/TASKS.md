@@ -26,6 +26,8 @@ Individual task details are in the `.ai/tasks/` directory.
 - [x] **task13_document_services_directory.md**: Document services directory
 - [x] **task13_1_document_google_services.md**: Document Google services
 - [x] **task006.1_refactor_src_hooks.md**: Refactor src/hooks/ directory
+- [x] **task9_document_app_directory.md**: Document app directory
+- [x] **task10_document_components_directory.md**: Document components directory
 
 ### Refactoring Tasks (Phase 1)
 
@@ -71,17 +73,17 @@ Individual task details are in the `.ai/tasks/` directory.
   > Update database configuration (prisma.ts).
 - [ ] **ID 23: Implement Supabase SSR Authentication** (Priority: critical)
   > Parent task for setting up Supabase server-side rendering authentication.
-  - [ ] **ID 23.1: Install/Verify Supabase SSR Packages** (Priority: critical)
+  - [x] **ID 23.1: Install/Verify Supabase SSR Packages** (Priority: critical)
     > Install and verify `@supabase/ssr` and `@supabase/supabase-js`.
-  - [ ] **ID 23.2: Configure Supabase Environment Variables** (Priority: critical)
+  - [x] **ID 23.2: Configure Supabase Environment Variables** (Priority: critical)
     > Set up `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY`.
-  - [ ] **ID 23.3: Implement Supabase Browser Client Utility** (Priority: critical)
+  - [x] **ID 23.3: Implement Supabase Browser Client Utility** (Priority: critical)
     > Create `src/lib/supabase/client.ts`.
-  - [ ] **ID 23.4: Implement Supabase Server Client Utility** (Priority: critical)
+  - [x] **ID 23.4: Implement Supabase Server Client Utility** (Priority: critical)
     > Create `src/lib/supabase/server.ts`.
-  - [ ] **ID 23.5: Implement Supabase Auth Middleware** (Priority: critical)
+  - [x] **ID 23.5: Implement Supabase Auth Middleware** (Priority: critical)
     > Create `src/middleware.ts` for auth.
-  - [ ] **ID 23.6: Create Basic Login Page & Implement Sign-in/Sign-out** (Priority: critical)
+  - [-] **ID 23.6: Create Basic Login Page & Implement Sign-in/Sign-out** (Priority: critical) (In Progress)
     > Create `src/app/login/page.tsx` and auth actions.
   - [ ] **ID 23.7: Implement Route Protection & Redirection** (Priority: critical)
     > Ensure middleware correctly protects routes.
