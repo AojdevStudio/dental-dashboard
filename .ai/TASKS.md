@@ -30,6 +30,9 @@ Individual task details are in the `.ai/tasks/` directory.
   - [x] **task005.2_create_lib_utils_dir.md**: Create src/lib/utils/ directory and populate files
   - [x] **task005.3_confirm_original_lib_files_deleted.md**: Confirm deletion of original lib files after moves
 
+### Project Setup Tasks
+- [x] **task016_create_supabase_function_placeholders.md**: Create Supabase Function Placeholders
+
 ## In Progress Tasks
 
 ### Phase 1: Refactoring
