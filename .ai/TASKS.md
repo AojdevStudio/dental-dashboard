@@ -51,15 +51,6 @@ Individual task details are in the `.ai/tasks/` directory.
 
 ## Pending Tasks
 
-### Documentation Tasks
-
-- [ ] **task9_document_app_directory.md**: Document app directory
-- [ ] **task10_document_components_directory.md**: Document components directory
-
-### Phase 1: Refactoring
-
-- [ ] **task004_refactor_src_components_directory.md**: Step 3.2: Refactor src/components/ Directory
-
 ### Phase 2: Design System Implementation
 
 - [ ] **task008_implement_design_system_foundation.md**: Step 4: Implement Design System Foundation
@@ -78,51 +69,58 @@ Individual task details are in the `.ai/tasks/` directory.
 - [ ] **ID 19.2: Update Database Configuration** (Priority: critical)
   > Dependencies: 19
   > Update database configuration (prisma.ts).
-- [ ] **ID 20: Phase 2 - New File Creation** (Priority: high)
-  > Dependencies: 19
-  > Parent task for creating new files for various modules.
-- [ ] **ID 20.1: Create Auth Middleware** (Priority: high)
-  > Dependencies: 20, 19.1
-  > Create new authentication middleware.
-- [ ] **ID 20.2: Create User-Related Database Files** (Priority: high)
-  > Dependencies: 20, 19.2
-  > Implement user-related database query and schema files.
-- [ ] **ID 20.3: Create Clinic-Related Database Files** (Priority: high)
-  > Dependencies: 20, 19.2
-  > Implement clinic-related database query and schema files.
-- [ ] **ID 20.4: Create Metrics-Related Database Files** (Priority: high)
-  > Dependencies: 20, 19.2
-  > Implement metrics-related database query and schema files.
+- [ ] **ID 23: Implement Supabase SSR Authentication** (Priority: critical)
+  > Parent task for setting up Supabase server-side rendering authentication.
+  - [ ] **ID 23.1: Install/Verify Supabase SSR Packages** (Priority: critical)
+    > Install and verify `@supabase/ssr` and `@supabase/supabase-js`.
+  - [ ] **ID 23.2: Configure Supabase Environment Variables** (Priority: critical)
+    > Set up `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY`.
+  - [ ] **ID 23.3: Implement Supabase Browser Client Utility** (Priority: critical)
+    > Create `src/lib/supabase/client.ts`.
+  - [ ] **ID 23.4: Implement Supabase Server Client Utility** (Priority: critical)
+    > Create `src/lib/supabase/server.ts`.
+  - [ ] **ID 23.5: Implement Supabase Auth Middleware** (Priority: critical)
+    > Create `src/middleware.ts` for auth.
+  - [ ] **ID 23.6: Create Basic Login Page & Implement Sign-in/Sign-out** (Priority: critical)
+    > Create `src/app/login/page.tsx` and auth actions.
+  - [ ] **ID 23.7: Implement Route Protection & Redirection** (Priority: critical)
+    > Ensure middleware correctly protects routes.
+  - [ ] **ID 23.8: End-to-End Auth Flow Verification** (Priority: critical)
+    > Comprehensive testing of the entire auth flow.
+- [ ] **ID 24: Align Database Implementation with New Schema Design using Prisma** (Priority: critical)
+  > Review and update Prisma schema and database interactions post-auth refactor. (Sub-tasks to be defined)
+- [ ] **ID 25: Review and Update File System Documentation** (Priority: high)
+  > Ensure `.dev/file-system.md` and related docs reflect current project structure.
 - [ ] **ID 20.5: Create Google Sheets Core Integration Files** (Priority: high)
-  > Dependencies: 20
-  > Develop core Google Sheets integration files.
+  > Dependencies: 20 (Note: Parent ID 20 was removed, this dependency needs review)
+  > Develop core Google Sheets integration files. (Needs Review & Revision)
 - [ ] **ID 20.6: Create Google Sheets Data Processing Files** (Priority: high)
-  > Dependencies: 20, 20.5
-  > Develop Google Sheets data processing and validation files.
+  > Dependencies: 20, 20.5 (Note: Parent ID 20 was removed, this dependency needs review)
+  > Develop Google Sheets data processing and validation files. (Needs Review & Revision)
 - [ ] **ID 20.7: Create Metrics Processing Core Files** (Priority: high)
-  > Dependencies: 20, 20.4
-  > Create core metrics processing files.
+  > Dependencies: 20, 20.4 (Note: Parent ID 20 and 20.4 were removed, this dependency needs review)
+  > Create core metrics processing files. (Needs Review & Revision)
 - [ ] **ID 20.8: Create Metrics Processing Analytics Files** (Priority: high)
-  > Dependencies: 20, 20.7
-  > Create metrics processing analytics and aggregation files.
+  > Dependencies: 20, 20.7 (Note: Parent ID 20 was removed, this dependency needs review)
+  > Create metrics processing analytics and aggregation files. (Needs Review & Revision)
 - [ ] **ID 21: Phase 3 - File Deletions** (Priority: medium)
   > Dependencies: 20
   > Parent task for removing deprecated files and directories.
 - [ ] **ID 21.1: Remove Deprecated Files** (Priority: medium)
   > Dependencies: 21
-  > Remove deprecated files (db.ts, prisma.ts old versions).
+  > Remove deprecated files (db.ts, prisma.ts old versions). (Needs Review & Revision)
 - [ ] **ID 21.2: Delete Outdated Directories** (Priority: medium)
   > Dependencies: 21, 21.1
-  > Delete outdated directories (supabase/, temp_providers/).
+  > Delete outdated directories (supabase/, temp_providers/). (Needs Review & Revision)
 - [ ] **ID 22: Phase 4 - Import Reference Updates** (Priority: low)
   > Dependencies: 21
   > Parent task for updating import references in existing files.
 - [ ] **ID 22.1: Update Auth Action Import References** (Priority: low)
   > Dependencies: 22
-  > Update import references in 5 auth action files.
+  > Update import references in 5 auth action files. (Needs Review & Revision)
 - [ ] **ID 22.2: Update API Route Import References** (Priority: low)
   > Dependencies: 22
-  > Update import references in 2 API route files.
+  > Update import references in 2 API route files. (Needs Review & Revision)
 
 ## Done Tasks (Archived)
 

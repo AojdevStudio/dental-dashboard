@@ -9,6 +9,7 @@ file-size-guidelines.md: 8
 task-magic/_index.md: 13
 rule-analytics.md: 7
 naming-conventions.md: 1
+task-magic/tasks.mdc: 13
 ```
 
 ## Cursor Analytics Tracking
