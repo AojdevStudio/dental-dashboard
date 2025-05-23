@@ -1,0 +1,241 @@
+---
+description: 
+globs: src/app/(auth)/auth-error/page.tsx,src/app/(dashboard)/dashboard/page.tsx,src/app/(auth)/register/page.tsx,src/app/(auth)/login/page.tsx,src/app/(auth)/reset-password/page.tsx,src/app/(auth)/callback/page.tsx,src/app/auth/actions.ts,src/app/api/auth/session/route.ts,src/app/api/auth/google/callback/route.ts,src/app/api/auth/google/connect/route.ts,src/app/auth/actions.ts
+alwaysApply: false
+---
+# Authentication Flow Guidelines
+
+This rule documents the complete authentication flow in the dental dashboard application, ensuring consistent redirect paths and proper component usage throughout the authentication lifecycle.
+
+## Authentication Architecture Overview
+
+The application uses **Supabase Auth** with a hybrid approach:
+- **Server Actions** for form-based authentication (sign-in, sign-up)
+- **Client Hooks** for session management and client-side sign-out
+- **Middleware** for route protection and automatic redirects
+
+## Critical Path Requirements
+
+### ✅ Correct Login Path
+- **ALWAYS use `/login`** - This is the only valid login route
+- **NEVER use `/auth/login`** - This path does not exist and returns 404
+
+### ✅ Correct Route Structure
+```
+/login                    ✅ Valid login page
+/signup                   ✅ Valid signup page  
+/auth/callback           ✅ OAuth callback handler
+/auth/auth-error         ✅ Authentication error page
+/auth/login              ❌ DOES NOT EXIST - 404 error
+```
+
+## Sign-In Flow
+
+### 1. Login Page (`/login`)
+- **Location**: `src/app/(auth)/login/page.tsx`
+- **Form Handler**: Uses server action `signIn` from `src/app/auth/actions.ts`
+- **Success Redirect**: `/dashboard`
+- **Error Handling**: Display error message on same page
+
+```typescript
+// ✅ DO: Use server action for sign-in
+import { signIn } from "@/app/auth/actions";
+
+const handleSignIn = async (formData: FormData) => {
+  const result = await signIn(formData);
+  if (result?.error) {
+    setError(result.error);
+  }
+  // Redirect handled by server action
+};
+```
+
+### 2. Server Action Sign-In
+- **Location**: `src/app/auth/actions.ts`
+- **Method**: `signIn(formData: FormData)`
+- **Success Action**: `redirect("/dashboard")`
+- **Revalidation**: `revalidatePath("/", "layout")`
+
+## Sign-Out Flow
+
+### 1. User Navigation Component
+- **Location**: `src/components/common/user-nav.tsx`
+- **Hook**: Uses `useAuth` hook for sign-out functionality
+- **Trigger**: Dropdown menu item with sign-out button
+
+```typescript
+// ✅ DO: Use useAuth hook for client-side sign-out
+import { useAuth } from "@/hooks/use-auth";
+
+const { signOut } = useAuth();
+
+const handleSignOut = async () => {
+  try {
+    await signOut();
+  } catch (error) {
+    console.error("Sign-out error:", error);
+  }
+};
+```
+
+### 2. Client-Side Sign-Out Hook
+- **Location**: `src/hooks/use-auth.ts`
+- **Method**: `signOut(): Promise<void>`
+- **Success Action**: `router.push("/login")` ✅
+- **Session Cleanup**: Handled automatically by Supabase
+
+```typescript
+// ✅ DO: Redirect to correct login path
+const signOut = async (): Promise<void> => {
+  try {
+    await supabase.auth.signOut();
+    router.push("/login"); // ✅ Correct path
+  } catch (error) {
+    console.error("Error signing out:", error);
+  }
+};
+```
+
+### 3. Server-Side Sign-Out (Alternative)
+- **Location**: `src/actions/auth/get-session.ts`
+- **Method**: `signOut(): Promise<void>`
+- **Success Action**: `redirect("/login")` ✅
+
+## Route Protection
+
+### Middleware Configuration
+- **Location**: `middleware.ts`
+- **Protected Routes**: All routes except auth pages
+- **Unauthenticated Redirect**: `/login` ✅
+- **Authenticated Auth Page Redirect**: `/dashboard`
+
+```typescript
+// ✅ DO: Use correct login path in middleware
+if (!user && !isAuthPage) {
+  const url = request.nextUrl.clone();
+  url.pathname = "/login"; // ✅ Correct path
+  return NextResponse.redirect(url);
+}
+```
+
+### Auth Page Detection
+```typescript
+const isAuthPage =
+  request.nextUrl.pathname.startsWith("/auth/") ||
+  request.nextUrl.pathname === "/login" ||
+  request.nextUrl.pathname === "/signup";
+```
+
+## Common Anti-Patterns
+
+### ❌ DON'T: Use incorrect login paths
+```typescript
+// ❌ WRONG: This path doesn't exist
+router.push("/auth/login");
+redirect("/auth/login");
+href="/auth/login"
+
+// ✅ CORRECT: Use the actual login path
+router.push("/login");
+redirect("/login");
+href="/login"
+```
+
+### ❌ DON'T: Mix server and client sign-out methods
+```typescript
+// ❌ WRONG: Using server action in client component
+import { signOut } from "@/actions/auth/get-session";
+
+// ✅ CORRECT: Use appropriate method for context
+// Client components: useAuth hook
+// Server components: server action
+```
+
+## Authentication State Management
+
+### Session Tracking
+- **Hook**: `useAuth()` from `src/hooks/use-auth.ts`
+- **Properties**: `user`, `session`, `isLoading`, `isAuthenticated`
+- **Auto-refresh**: Handles Supabase auth state changes automatically
+
+```typescript
+// ✅ DO: Use useAuth for authentication state
+const { user, isLoading, isAuthenticated, signOut } = useAuth();
+
+if (isLoading) return <LoadingSpinner />;
+if (!isAuthenticated) return null;
+```
+
+### Protected Component Pattern
+```typescript
+// ✅ DO: Guard components with authentication checks
+export function ProtectedComponent() {
+  const { user, isLoading, isAuthenticated } = useAuth();
+
+  if (isLoading) return null;
+  if (!isAuthenticated || !user) return null;
+
+  return <div>Protected content for {user.email}</div>;
+}
+```
+
+## Error Handling
+
+### Authentication Errors
+- **Error Page**: `src/app/(auth)/auth-error/page.tsx`
+- **Callback Errors**: Handled in `src/app/(auth)/callback/page.tsx`
+- **Reset Password Errors**: `src/app/(auth)/reset-password/error.tsx`
+
+### Error Recovery Links
+```typescript
+// ✅ DO: Use correct login path in error recovery
+<a href="/login" className="...">
+  Return to Login
+</a>
+```
+
+## Testing Checklist
+
+### Sign-In Flow
+- [ ] Navigate to `/login` loads correctly
+- [ ] Valid credentials redirect to `/dashboard`
+- [ ] Invalid credentials show error message
+- [ ] Form validation works properly
+
+### Sign-Out Flow  
+- [ ] Sign-out button visible in user navigation
+- [ ] Clicking sign-out redirects to `/login`
+- [ ] Session is properly cleared
+- [ ] Protected routes redirect to `/login` after sign-out
+- [ ] No 404 errors during sign-out process
+
+### Route Protection
+- [ ] Unauthenticated users redirected to `/login`
+- [ ] Authenticated users can access protected routes
+- [ ] Auth pages redirect authenticated users to `/dashboard`
+
+## File Reference Map
+
+### Core Authentication Files
+- `src/app/(auth)/login/page.tsx` - Login page UI
+- `src/app/auth/actions.ts` - Server actions for auth
+- `src/hooks/use-auth.ts` - Client-side auth hook
+- `src/components/common/user-nav.tsx` - User navigation with sign-out
+- `middleware.ts` - Route protection
+- `src/actions/auth/get-session.ts` - Server-side auth utilities
+
+### Supporting Files
+- `src/app/(auth)/callback/page.tsx` - OAuth callback handler
+- `src/app/(auth)/auth-error/page.tsx` - Authentication error page
+- `src/lib/supabase/client.ts` - Supabase client configuration
+- `src/lib/supabase/server.ts` - Supabase server configuration
+
+## Implementation Notes
+
+1. **Consistency**: All redirect paths must use `/login`, never `/auth/login`
+2. **Error Prevention**: Always test sign-out flow to ensure no 404 errors
+3. **User Experience**: Sign-out should be easily accessible from any authenticated page
+4. **Security**: Middleware ensures proper route protection
+5. **State Management**: useAuth hook provides centralized authentication state
+
+This authentication flow ensures a smooth user experience with proper error handling and consistent redirect behavior throughout the application.

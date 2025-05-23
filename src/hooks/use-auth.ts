@@ -122,7 +122,7 @@ export function useAuth(): AuthState {
       await supabase.auth.signOut();
 
       // Redirect to login page after sign out
-      router.push("/auth/login");
+      router.push("/login");
     } catch (error) {
       console.error("Error signing out:", error);
     }

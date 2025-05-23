@@ -76,10 +76,7 @@ export default function ResetPasswordError({
             Try again
           </Button>
 
-          <a
-            href="/auth/login"
-            className="w-full text-center text-sm text-gray-400 hover:text-white"
-          >
+          <a href="/login" className="w-full text-center text-sm text-gray-400 hover:text-white">
             Return to login
           </a>
         </div>

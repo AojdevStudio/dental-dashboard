@@ -20,11 +20,11 @@ import { cookies } from "next/headers";
  * to gracefully handle cases where it might be called from a Server Component context
  * where setting cookies directly isn't possible (relying on middleware for session refresh).
  *
- * @returns {ReturnType<typeof createServerClient>} A Supabase client instance.
+ * @returns {Promise<ReturnType<typeof createServerClient>>} A Promise that resolves to a Supabase client instance.
  * @throws {Error} If `NEXT_PUBLIC_SUPABASE_URL` or `NEXT_PUBLIC_SUPABASE_ANON_KEY` are not set. (Implicitly, due to non-null assertion)
  */
-export function createClient() {
-  const cookieStore = cookies();
+export async function createClient() {
+  const cookieStore = await cookies();
 
   // The non-null assertion operator (!) is used here because the presence of these
   // environment variables should be guaranteed by the application's setup and Next.js environment loading.
@@ -36,15 +36,11 @@ export function createClient() {
     {
       cookies: {
         getAll() {
-          // @ts-expect-error TS2339: Property 'getAll' does not exist on type 'Promise<ReadonlyRequestCookies>'.
-          // Supabase SSR pattern expects synchronous access, overriding linter's inference.
           return cookieStore.getAll();
         },
         setAll(cookiesToSet: Array<{ name: string; value: string; options: CookieOptions }>) {
           try {
             for (const { name, value, options } of cookiesToSet) {
-              // @ts-expect-error TS2339: Property 'set' does not exist on type 'Promise<ReadonlyRequestCookies>'.
-              // Supabase SSR pattern expects synchronous access, overriding linter's inference.
               cookieStore.set(name, value, options);
             }
           } catch {
