@@ -10,7 +10,7 @@
  * provide a complete authentication flow.
  */
 
-import { SignIn1 } from "@/components/ui/modern-stunning-sign-in";
+import { LoginForm } from "@/components/auth/login-form";
 import type { Metadata } from "next";
 
 /**
@@ -31,5 +31,5 @@ export const metadata: Metadata = {
  * @returns {JSX.Element} The rendered login page with the SignIn component
  */
 export default function LoginPage() {
-  return <SignIn1 />;
+  return <LoginForm />;
 }

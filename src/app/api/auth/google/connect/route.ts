@@ -10,7 +10,7 @@
  * with a specific data source in the application.
  */
 
-import { getAuthorizationUrl } from "@/services/google/auth"; // Adjust path if necessary
+import { generateAuthUrl } from "@/services/google/auth"; // Adjust path if necessary
 import { type NextRequest, NextResponse } from "next/server";
 
 /**
@@ -56,7 +56,7 @@ export async function GET(request: NextRequest) {
   const accessType = "offline"; // To get a refresh token
 
   try {
-    const authorizationUrl = getAuthorizationUrl(scopes, dataSourceId, accessType);
+    const authorizationUrl = generateAuthUrl();
     return NextResponse.redirect(authorizationUrl);
   } catch (error) {
     console.error("Failed to generate Google authorization URL:", error);

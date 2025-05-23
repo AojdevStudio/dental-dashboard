@@ -1,4 +1,5 @@
 /** Placeholder page for specific Goal */
-export default function GoalIdPage({ params }: { params: { goalId: string } }) {
-  return <div>Goal Page for ID: {params.goalId}</div>;
+export default async function GoalIdPage({ params }: { params: Promise<{ goalId: string }> }) {
+  const { goalId } = await params;
+  return <div>Goal Page for ID: {goalId}</div>;
 }

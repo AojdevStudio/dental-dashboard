@@ -57,3 +57,38 @@
   - **Status:** Done
   - **Description:** Add proper JSDoc3 documentation to all files in the actions directory. This includes functions, types, and exports.
   - **Archived On:** 2025-05-21 
+
+- **Archived Task:** `task006.1_refactor_src_hooks.md`
+  - **ID:** 006.1
+  - **Title:** Refactor src/hooks/ directory
+  - **Status:** done
+  - **Description:** Reviewed and refactored `src/hooks/` directory, including file renames, import updates, deletions, and creation of new hooks.
+  - **Archived On:** 2025-05-22T22:47:18-05:00
+
+- **Archived Task:** `task005_refactor_src_lib_directory.md`
+  - **ID:** 005
+  - **Title:** Step 3.3: Refactor src/lib/ Directory
+  - **Status:** done
+  - **Description:** Reorganized `src/lib/` by creating `types` and `utils` subdirectories, populating them with new/moved files, and deleting originals.
+  - **Archived On:** 2025-05-22T22:55:01-05:00
+
+- **Archived Task:** `task005.1_create_lib_types_dir.md`
+  - **ID:** 005.1
+  - **Title:** Create src/lib/types/ directory and placeholder files
+  - **Status:** done
+  - **Description:** Created `src/lib/types/` with 5 placeholder files.
+  - **Archived On:** 2025-05-22T22:55:01-05:00
+
+- **Archived Task:** `task005.2_create_lib_utils_dir.md`
+  - **ID:** 005.2
+  - **Title:** Create src/lib/utils/ directory and populate files
+  - **Status:** done
+  - **Description:** Created `src/lib/utils/`, moved `cn.ts` & `logger.ts`, added 4 placeholders.
+  - **Archived On:** 2025-05-22T22:55:01-05:00
+
+- **Archived Task:** `task005.3_confirm_original_lib_files_deleted.md`
+  - **ID:** 005.3
+  - **Title:** Confirm deletion of original lib files after moves
+  - **Status:** done
+  - **Description:** Confirmed deletion of original files after successful moves to new `src/lib/` structure.
+  - **Archived On:** 2025-05-22T22:55:01-05:00

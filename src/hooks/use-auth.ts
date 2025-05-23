@@ -53,7 +53,7 @@ interface AuthState {
  *
  * @example
  * // In a component that needs auth state:
- * import { useAuth } from '@/hooks/useAuth';
+ * import { useAuth } from '@/hooks/use-auth'; // MODIFIED
  *
  * function Profile() {
  *   const { user, isLoading, signOut } = useAuth();

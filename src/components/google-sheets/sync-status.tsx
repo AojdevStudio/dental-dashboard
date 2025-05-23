@@ -312,11 +312,33 @@ function SyncHistoryItem({ entry }: { entry: SyncHistoryEntry }) {
     }
   };
 
+  /**
+   * Handle toggle expansion for both click and keyboard events
+   */
+  const handleToggle = () => {
+    setIsExpanded(!isExpanded);
+  };
+
+  /**
+   * Handle keyboard events for accessibility
+   * @param {React.KeyboardEvent} event - The keyboard event
+   */
+  const handleKeyDown = (event: React.KeyboardEvent) => {
+    if (event.key === "Enter" || event.key === " ") {
+      event.preventDefault();
+      handleToggle();
+    }
+  };
+
   return (
     <div className="border rounded-md p-2">
-      <div
-        className="flex items-center justify-between cursor-pointer"
-        onClick={() => setIsExpanded(!isExpanded)}
+      <button
+        type="button"
+        className="flex items-center justify-between cursor-pointer w-full text-left bg-transparent border-none p-0"
+        onClick={handleToggle}
+        onKeyDown={handleKeyDown}
+        aria-expanded={isExpanded}
+        aria-label={`Toggle sync history details for ${entry.timestamp.toLocaleDateString()} ${entry.timestamp.toLocaleTimeString()}`}
       >
         <div className="flex items-center gap-2">
           <StatusIcon />
@@ -325,7 +347,7 @@ function SyncHistoryItem({ entry }: { entry: SyncHistoryEntry }) {
           </span>
         </div>
         <ChevronRight className={`h-4 w-4 transition-transform ${isExpanded ? "rotate-90" : ""}`} />
-      </div>
+      </button>
 
       {isExpanded && (
         <div className="mt-2 pl-6 text-sm space-y-1 text-muted-foreground">

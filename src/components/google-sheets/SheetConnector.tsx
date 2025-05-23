@@ -199,27 +199,31 @@ async function fetchSheetHeaders(
     throw new Error(`Failed to fetch sheet headers: ${data.error}`);
   }
 
-  // Assuming headers are in the first row of the values array
-  if (data.values && data.values.length > 0 && Array.isArray(data.values[0])) {
-    return data.values[0].map(String); // Convert all header values to string
+  // Extract headers from the first row of values
+  if (data.values && data.values.length > 0 && data.values[0]) {
+    return data.values[0].filter((header) => header && header.trim() !== ""); // Filter out empty headers
   }
-  return []; // Return empty array if no headers found or unexpected format
+  return [];
 }
 
 /**
- * SheetConnector Component
+ * Sheet Connector Component
  *
- * Allows users to connect a Google Sheet to the dental dashboard by selecting
- * a specific sheet (tab) and mapping its columns to required data fields.
- * The component handles fetching available sheets, loading column headers,
- * and validating the column mapping before establishing the connection.
+ * Provides a multi-step interface for connecting a Google Sheet to the dental dashboard.
+ * The component guides users through:
+ * 1. Selecting a sheet (tab) from the spreadsheet
+ * 2. Mapping required data columns (date, production, collection) to sheet headers
+ * 3. Validating the mapping and establishing the connection
  *
- * Uses React Query for data fetching and state management, with appropriate
- * loading states, error handling, and UI feedback throughout the process.
+ * Features:
+ * - Fetches available sheets using React Query for caching and error handling
+ * - Dynamically loads column headers when a sheet is selected
+ * - Validates that all required fields are mapped before allowing connection
+ * - Provides clear error messages and loading states
+ * - Allows cancellation at any point in the process
  *
- * @component
  * @param {SheetConnectorProps} props - Component props
- * @returns {React.ReactElement} The rendered SheetConnector component
+ * @returns {JSX.Element} The rendered sheet connector component
  */
 const SheetConnector: React.FC<SheetConnectorProps> = ({
   clinicId,
@@ -227,15 +231,7 @@ const SheetConnector: React.FC<SheetConnectorProps> = ({
   onSheetConnected,
   onCancel,
 }) => {
-  /**
-   * State for the currently selected sheet name
-   */
   const [selectedSheetName, setSelectedSheetName] = useState<string | null>(null);
-
-  /**
-   * State for the column mapping configuration
-   * Maps required data fields (date, production, collection) to sheet column headers
-   */
   const [columnMapping, setColumnMapping] = useState<ColumnMapping>({
     date: null,
     production: null,
@@ -243,13 +239,15 @@ const SheetConnector: React.FC<SheetConnectorProps> = ({
   });
 
   /**
-   * Fetch the list of sheets (tabs) in the selected spreadsheet
-   * Uses React Query for data fetching, caching, and state management
+   * Fetch available sheets using React Query
+   *
+   * This query fetches the list of sheets (tabs) in the selected spreadsheet.
+   * It's only enabled when both spreadsheetId and clinicId are available.
    */
   const {
     data: sheets,
-    isLoading: isLoadingSheets,
-    error: errorSheets,
+    error: sheetsError,
+    isLoading: sheetsLoading,
   } = useQuery<Sheet[], Error>({
     queryKey: ["sheets", spreadsheetId, clinicId],
     queryFn: () => fetchSheets(spreadsheetId!, clinicId),
@@ -259,14 +257,15 @@ const SheetConnector: React.FC<SheetConnectorProps> = ({
   });
 
   /**
-   * Fetch the column headers from the selected sheet
-   * Only enabled when a sheet is selected
+   * Fetch sheet headers using React Query
+   *
+   * This query fetches the column headers from the first row of the selected sheet.
+   * It's only enabled when a sheet is selected and all required parameters are available.
    */
   const {
-    data: sheetHeaders,
-    isLoading: isLoadingHeaders,
-    error: errorHeaders,
-    refetch: refetchHeaders,
+    data: headers,
+    error: headersError,
+    isLoading: headersLoading,
   } = useQuery<string[], Error>({
     queryKey: ["sheetHeaders", spreadsheetId, selectedSheetName, clinicId],
     queryFn: () => fetchSheetHeaders(spreadsheetId!, selectedSheetName!, clinicId),
@@ -276,203 +275,237 @@ const SheetConnector: React.FC<SheetConnectorProps> = ({
   });
 
   /**
-   * Event Handlers
+   * Reset column mapping when sheet selection changes
+   *
+   * When the user selects a different sheet, clear any existing column mappings
+   * since the headers will be different.
    */
+  useEffect(() => {
+    setColumnMapping({
+      date: null,
+      production: null,
+      collection: null,
+    });
+  }, []);
 
   /**
-   * Handles selection of a sheet (tab) from the dropdown
-   * Resets column mapping when sheet changes to ensure consistent mapping
+   * Handles sheet selection from the dropdown
    *
    * @param {string} sheetName - The name of the selected sheet
    */
   const handleSheetSelect = (sheetName: string) => {
     setSelectedSheetName(sheetName);
-    // Reset column mapping when sheet changes
-    setColumnMapping({ date: null, production: null, collection: null });
   };
 
   /**
-   * Updates the column mapping when a user selects a header for a specific data field
+   * Handles column mapping for required data fields
    *
-   * @param {keyof ColumnMapping} type - The data field to map (date, production, or collection)
-   * @param {string|null} header - The selected column header from the sheet
+   * @param {keyof ColumnMapping} type - The type of data field (date, production, collection)
+   * @param {string | null} header - The selected column header or null to clear
    */
   const handleColumnMap = (type: keyof ColumnMapping, header: string | null) => {
-    setColumnMapping((prev) => ({ ...prev, [type]: header }));
+    setColumnMapping((prev) => ({
+      ...prev,
+      [type]: header,
+    }));
   };
 
   /**
-   * Handles the connection confirmation action
-   * Validates that all required fields are mapped before calling the onSheetConnected callback
+   * Handles the connection process
+   *
+   * Validates that all required fields are mapped and calls the onSheetConnected callback
+   * with the spreadsheet ID, sheet name, and column mapping.
    */
   const handleConnect = () => {
-    if (
-      spreadsheetId &&
-      selectedSheetName &&
-      columnMapping.date &&
-      columnMapping.production &&
-      columnMapping.collection
-    ) {
-      onSheetConnected(spreadsheetId, selectedSheetName, columnMapping as Required<ColumnMapping>);
+    if (!spreadsheetId || !selectedSheetName) return;
+
+    // Validate that all required fields are mapped
+    if (!columnMapping.date || !columnMapping.production || !columnMapping.collection) {
+      alert("Please map all required fields (Date, Production, Collection) before connecting.");
+      return;
     }
+
+    onSheetConnected(spreadsheetId, selectedSheetName, columnMapping);
   };
 
   /**
-   * Derived state to determine if connection can be established
-   * All required fields must be mapped for the connect button to be enabled
+   * Check if all required fields are mapped for enabling the connect button
    */
-  const canConnect =
-    !!selectedSheetName &&
-    !!columnMapping.date &&
-    !!columnMapping.production &&
-    !!columnMapping.collection;
+  const isConnectEnabled =
+    selectedSheetName && columnMapping.date && columnMapping.production && columnMapping.collection;
 
-  // --- Render Logic ---
-  if (!spreadsheetId) {
+  /**
+   * Render loading state while fetching sheets
+   */
+  if (sheetsLoading) {
     return (
-      <div className="p-4 border rounded-md bg-muted">
-        <p className="text-sm text-muted-foreground">Please select a spreadsheet first.</p>
+      <div className="space-y-4 p-4">
+        <h3 className="text-lg font-medium">Connect Google Sheet</h3>
+        <div className="space-y-2">
+          <Label>Select Sheet</Label>
+          <Skeleton className="h-10 w-full" />
+        </div>
+        <p className="text-sm text-muted-foreground">Loading available sheets...</p>
       </div>
     );
   }
 
-  return (
-    <div className="space-y-6 p-4 border rounded-md">
-      <div>
-        <Label htmlFor="sheet-select">Select Sheet (Tab)</Label>
-        {isLoadingSheets && <Skeleton className="h-10 w-full mt-1" />}
-        {errorSheets && (
-          <p className="text-sm text-destructive mt-1">
-            Error loading sheets: {errorSheets.message}
-          </p>
-        )}
-        {!isLoadingSheets &&
-          !errorSheets &&
-          sheets &&
-          (sheets.length === 0 ? (
-            <p className="text-sm text-muted-foreground mt-1">
-              No sheets found in this spreadsheet.
-            </p>
-          ) : (
-            <Select
-              value={selectedSheetName || ""}
-              onValueChange={handleSheetSelect}
-              disabled={isLoadingSheets || sheets.length === 0}
-            >
-              <SelectTrigger id="sheet-select" className="mt-1">
-                <SelectValue placeholder="Select a sheet" />
-              </SelectTrigger>
-              <SelectContent>
-                {sheets.map((sheet) => (
-                  <SelectItem key={sheet.id} value={sheet.title}>
-                    {sheet.title}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          ))}
-      </div>
-
-      {selectedSheetName && (
-        <div>
-          <h3 className="text-lg font-medium mb-2">Map Columns</h3>
-          <p className="text-sm text-muted-foreground mb-4">
-            Select the columns from your sheet that correspond to Date, Production, and Collection.
-          </p>
-          {isLoadingHeaders && (
-            <div className="space-y-4">
-              <Skeleton className="h-8 w-1/3" />
-              <Skeleton className="h-10 w-full" />
-              <Skeleton className="h-8 w-1/3" />
-              <Skeleton className="h-10 w-full" />
-              <Skeleton className="h-8 w-1/3" />
-              <Skeleton className="h-10 w-full" />
-            </div>
-          )}
-          {errorHeaders && (
-            <p className="text-sm text-destructive">
-              Error loading sheet headers: {errorHeaders.message}
-            </p>
-          )}
-          {!isLoadingHeaders &&
-            !errorHeaders &&
-            sheetHeaders &&
-            (sheetHeaders.length === 0 ? (
-              <p className="text-sm text-muted-foreground">
-                No headers found in the selected sheet, or the sheet is empty.
-              </p>
-            ) : (
-              <div className="space-y-4">
-                <div>
-                  <Label htmlFor="date-column">Date Column</Label>
-                  <Select
-                    value={columnMapping.date || ""}
-                    onValueChange={(value) => handleColumnMap("date", value)}
-                    disabled={sheetHeaders.length === 0}
-                  >
-                    <SelectTrigger id="date-column" className="mt-1">
-                      <SelectValue placeholder="Select date column" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {sheetHeaders.map((header) => (
-                        <SelectItem key={`date-col-${header}`} value={header}>
-                          {header}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div>
-                  <Label htmlFor="production-column">Production Column</Label>
-                  <Select
-                    value={columnMapping.production || ""}
-                    onValueChange={(value) => handleColumnMap("production", value)}
-                    disabled={sheetHeaders.length === 0}
-                  >
-                    <SelectTrigger id="production-column" className="mt-1">
-                      <SelectValue placeholder="Select production column" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {sheetHeaders.map((header) => (
-                        <SelectItem key={`prod-col-${header}`} value={header}>
-                          {header}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div>
-                  <Label htmlFor="collection-column">Collection Column</Label>
-                  <Select
-                    value={columnMapping.collection || ""}
-                    onValueChange={(value) => handleColumnMap("collection", value)}
-                    disabled={sheetHeaders.length === 0}
-                  >
-                    <SelectTrigger id="collection-column" className="mt-1">
-                      <SelectValue placeholder="Select collection column" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {sheetHeaders.map((header) => (
-                        <SelectItem key={`coll-col-${header}`} value={header}>
-                          {header}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
-            ))}
+  /**
+   * Render error state if sheet fetching fails
+   */
+  if (sheetsError) {
+    return (
+      <div className="space-y-4 p-4">
+        <h3 className="text-lg font-medium">Connect Google Sheet</h3>
+        <div className="text-destructive border border-destructive/50 rounded-md p-3">
+          <p className="font-medium">Error loading sheets:</p>
+          <p className="text-sm">{sheetsError.message}</p>
         </div>
-      )}
-
-      <div className="flex justify-end space-x-3 mt-6">
         <Button variant="outline" onClick={onCancel}>
           Cancel
         </Button>
-        <Button
-          onClick={handleConnect}
-          disabled={!canConnect || isLoadingSheets || isLoadingHeaders}
-        >
+      </div>
+    );
+  }
+
+  /**
+   * Render empty state if no sheets are available
+   */
+  if (!sheets || sheets.length === 0) {
+    return (
+      <div className="space-y-4 p-4">
+        <h3 className="text-lg font-medium">Connect Google Sheet</h3>
+        <div className="border border-border rounded-md p-3 text-muted-foreground">
+          <p>No sheets found in this spreadsheet.</p>
+        </div>
+        <Button variant="outline" onClick={onCancel}>
+          Cancel
+        </Button>
+      </div>
+    );
+  }
+
+  /**
+   * Render the main sheet connector interface
+   */
+  return (
+    <div className="space-y-6 p-4">
+      <h3 className="text-lg font-medium">Connect Google Sheet</h3>
+
+      {/* Sheet Selection */}
+      <div className="space-y-2">
+        <Label htmlFor="sheet-select">Select Sheet</Label>
+        <Select onValueChange={handleSheetSelect}>
+          <SelectTrigger id="sheet-select">
+            <SelectValue placeholder="Choose a sheet from the spreadsheet" />
+          </SelectTrigger>
+          <SelectContent>
+            {sheets.map((sheet) => (
+              <SelectItem key={sheet.id} value={sheet.title}>
+                {sheet.title}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
+
+      {/* Column Mapping Section - only show when sheet is selected */}
+      {selectedSheetName && (
+        <div className="space-y-4">
+          <h4 className="font-medium">Map Data Columns</h4>
+          <p className="text-sm text-muted-foreground">
+            Map the required data fields to columns in your sheet:
+          </p>
+
+          {/* Show loading state while fetching headers */}
+          {headersLoading && (
+            <div className="space-y-2">
+              <p className="text-sm text-muted-foreground">Loading column headers...</p>
+              <Skeleton className="h-10 w-full" />
+              <Skeleton className="h-10 w-full" />
+              <Skeleton className="h-10 w-full" />
+            </div>
+          )}
+
+          {/* Show error if header fetching fails */}
+          {headersError && (
+            <div className="text-destructive border border-destructive/50 rounded-md p-3">
+              <p className="font-medium">Error loading column headers:</p>
+              <p className="text-sm">{headersError.message}</p>
+            </div>
+          )}
+
+          {/* Show column mapping dropdowns when headers are loaded */}
+          {headers && headers.length > 0 && (
+            <div className="grid gap-4">
+              {/* Date Column Mapping */}
+              <div className="space-y-2">
+                <Label htmlFor="date-column">Date Column *</Label>
+                <Select onValueChange={(value) => handleColumnMap("date", value)}>
+                  <SelectTrigger id="date-column">
+                    <SelectValue placeholder="Select the column containing dates" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {headers.map((header, index) => (
+                      <SelectItem key={index} value={header}>
+                        {header}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              {/* Production Column Mapping */}
+              <div className="space-y-2">
+                <Label htmlFor="production-column">Production Column *</Label>
+                <Select onValueChange={(value) => handleColumnMap("production", value)}>
+                  <SelectTrigger id="production-column">
+                    <SelectValue placeholder="Select the column containing production data" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {headers.map((header, index) => (
+                      <SelectItem key={index} value={header}>
+                        {header}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              {/* Collection Column Mapping */}
+              <div className="space-y-2">
+                <Label htmlFor="collection-column">Collection Column *</Label>
+                <Select onValueChange={(value) => handleColumnMap("collection", value)}>
+                  <SelectTrigger id="collection-column">
+                    <SelectValue placeholder="Select the column containing collection data" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {headers.map((header, index) => (
+                      <SelectItem key={index} value={header}>
+                        {header}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+          )}
+
+          {/* Show message if no headers found */}
+          {headers && headers.length === 0 && (
+            <div className="border border-border rounded-md p-3 text-muted-foreground">
+              <p>No column headers found in the first row of this sheet.</p>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Action Buttons */}
+      <div className="flex gap-2 pt-4">
+        <Button variant="outline" onClick={onCancel}>
+          Cancel
+        </Button>
+        <Button onClick={handleConnect} disabled={!isConnectEnabled}>
           Connect Sheet
         </Button>
       </div>

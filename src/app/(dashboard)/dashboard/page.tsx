@@ -10,7 +10,6 @@
  * user experience by showing a loading state that matches the final UI structure.
  */
 
-import { DashboardExample } from "@/components/dashboards";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Suspense } from "react";
 
@@ -26,8 +25,24 @@ export default function DashboardPage() {
   return (
     <div className="container mx-auto py-6">
       <Suspense fallback={<DashboardSkeleton />}>
-        <DashboardExample />
+        <DashboardPlaceholder />
       </Suspense>
+    </div>
+  );
+}
+
+/**
+ * Dashboard Placeholder Component
+ *
+ * Temporary placeholder for the dashboard content while components are being implemented.
+ *
+ * @returns {JSX.Element} The rendered placeholder dashboard
+ */
+function DashboardPlaceholder() {
+  return (
+    <div className="w-full space-y-6">
+      <h1 className="text-3xl font-bold">Dashboard</h1>
+      <p className="text-muted-foreground">Dashboard components will be implemented here.</p>
     </div>
   );
 }

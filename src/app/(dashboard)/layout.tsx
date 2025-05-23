@@ -24,7 +24,7 @@ import {
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
 import { Button } from "@/components/ui/button";
-import { SessionNavBar } from "@/components/ui/sidebar";
+import { Sidebar } from "@/components/common/sidebar";
 import { Bell, Menu, Search, X } from "lucide-react";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -65,7 +65,7 @@ export default function DashboardLayout({
       <div className="flex h-screen overflow-hidden bg-background">
         {/* Sidebar - hidden on mobile unless menu is open */}
         <div className={`${isMobileMenuOpen ? "block" : "hidden"} md:block z-50`}>
-          <SessionNavBar />
+          <Sidebar />
         </div>
 
         {/* Main content area with header */}

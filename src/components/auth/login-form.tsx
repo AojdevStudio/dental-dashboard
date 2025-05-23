@@ -1,3 +1,5 @@
+"use client";
+
 /**
  * @fileoverview Login Form Component
  *
@@ -8,6 +10,7 @@
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { createBrowserClient } from "@supabase/ssr";
+import { Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import * as React from "react";
 import { useForm } from "react-hook-form";
@@ -23,7 +26,6 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { Icons } from "@/components/ui/icons";
 import { Input } from "@/components/ui/input";
 
 /**
@@ -166,7 +168,7 @@ export function LoginForm() {
         />
         {/* Submit button with loading spinner */}
         <Button type="submit" className="w-full" disabled={isLoading}>
-          {isLoading && <Icons.spinner className="mr-2 h-4 w-4 animate-spin" />}
+          {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
           Sign In
         </Button>
       </form>

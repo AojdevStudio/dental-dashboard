@@ -9,8 +9,6 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { Calendar } from "@/components/ui/calendar";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
 import { format } from "date-fns";
 import { Calendar as CalendarIcon } from "lucide-react";
@@ -51,34 +49,21 @@ export function DatePicker({
   disabled = false,
 }: DatePickerProps) {
   return (
-    <Popover>
-      <PopoverTrigger asChild>
-        <Button
-          variant="outline"
-          className={cn(
-            "w-full justify-start text-left font-normal",
-            !date && "text-muted-foreground",
-            disabled && "opacity-50 cursor-not-allowed"
-          )}
-          disabled={disabled}
-        >
-          <CalendarIcon className="mr-2 h-4 w-4" />
-          {date ? format(date, "PPP") : <span>{placeholder}</span>}
-        </Button>
-      </PopoverTrigger>
-      <PopoverContent className="w-auto p-0" align="start">
-        <Calendar
-          mode="single"
-          selected={date}
-          onSelect={(date) => {
-            if (date && onDateChange) {
-              onDateChange(date);
-            }
-          }}
-          initialFocus
-        />
-      </PopoverContent>
-    </Popover>
+    <div>
+      <Button
+        variant="outline"
+        className={cn(
+          "w-full justify-start text-left font-normal",
+          !date && "text-muted-foreground",
+          disabled && "opacity-50 cursor-not-allowed"
+        )}
+        disabled={disabled}
+      >
+        <CalendarIcon className="mr-2 h-4 w-4" />
+        {date ? format(date, "PPP") : <span>{placeholder}</span>}
+      </Button>
+      <div className="w-auto p-0" />
+    </div>
   );
 }
 
@@ -137,51 +122,30 @@ export function DateRangePicker({
   }, [range, onRangeChange]);
 
   return (
-    <Popover open={isOpen} onOpenChange={setIsOpen}>
-      <PopoverTrigger asChild>
-        <Button
-          variant="outline"
-          className={cn(
-            "w-full justify-start text-left font-normal",
-            !range.from && "text-muted-foreground",
-            disabled && "opacity-50 cursor-not-allowed"
-          )}
-          disabled={disabled}
-        >
-          <CalendarIcon className="mr-2 h-4 w-4" />
-          {range.from ? (
-            range.to ? (
-              <>
-                {format(range.from, "PPP")} - {format(range.to, "PPP")}
-              </>
-            ) : (
-              format(range.from, "PPP")
-            )
+    <div>
+      <Button
+        variant="outline"
+        className={cn(
+          "w-full justify-start text-left font-normal",
+          !range.from && "text-muted-foreground",
+          disabled && "opacity-50 cursor-not-allowed"
+        )}
+        disabled={disabled}
+      >
+        <CalendarIcon className="mr-2 h-4 w-4" />
+        {range.from ? (
+          range.to ? (
+            <>
+              {format(range.from, "PPP")} - {format(range.to, "PPP")}
+            </>
           ) : (
-            <span>{placeholder}</span>
-          )}
-        </Button>
-      </PopoverTrigger>
-      <PopoverContent className="w-auto p-0" align="start">
-        <Calendar
-          mode="range"
-          defaultMonth={range.from}
-          selected={{
-            from: range.from,
-            to: range.to,
-          }}
-          onSelect={(selectedRange) => {
-            if (selectedRange) {
-              setRange(selectedRange as { from: Date; to?: Date });
-              if (selectedRange.from && selectedRange.to) {
-                setIsOpen(false);
-              }
-            }
-          }}
-          numberOfMonths={2}
-          initialFocus
-        />
-      </PopoverContent>
-    </Popover>
+            format(range.from, "PPP")
+          )
+        ) : (
+          <span>{placeholder}</span>
+        )}
+      </Button>
+      <div className="w-auto p-0" />
+    </div>
   );
 }

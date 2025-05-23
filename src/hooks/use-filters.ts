@@ -145,48 +145,49 @@ const defaultTimePeriod: TimePeriod = "monthly";
 const defaultDateRange = getDateRangeForPeriod(defaultTimePeriod);
 
 /**
- * List of query keys that should be invalidated when filters change
- * Used to ensure data is refreshed when filter criteria change
+ * Zustand store for managing dashboard filter state
  *
- * @type {string[]}
- */
-export const filterDependentQueries = [
-  "metrics",
-  "kpis",
-  "appointments",
-  "patients",
-  "revenue",
-  "performance",
-  "dashboard",
-];
-
-/**
- * Custom hook for managing global filter state across the dashboard
+ * This store holds the current filter selections and provides actions to update them.
+ * It uses `persist` middleware to save the state to localStorage, so filter
+ * preferences are remembered between sessions.
  *
- * Uses Zustand with the persist middleware to maintain filter state in localStorage
- * between page refreshes and browser sessions.
- *
- * @returns {FilterState} Filter state and actions to manipulate it
+ * @property {TimePeriod} timePeriod - Current time period (e.g., 'monthly')
+ * @property {Date} startDate - Start of the date range
+ * @property {Date} endDate - End of the date range
+ * @property {string[]} selectedClinics - Array of selected clinic IDs
+ * @property {string[]} selectedProviders - Array of selected provider IDs
+ * @function setTimePeriod - Sets the time period and updates date range
+ * @function setDateRange - Sets a custom date range
+ * @function setSelectedClinics - Updates selected clinics
+ * @function setSelectedProviders - Updates selected providers
+ * @function clearFilters - Resets all filters to defaults
+ * @function resetToDefaults - Alias for clearFilters
  *
  * @example
  * // In a component:
- * import { useFilterStore } from '@/hooks/useFilterStore';
+ * import { useFilterStore } from '@/hooks/use-filters'; // MODIFIED
  *
  * function FilterControls() {
  *   const {
  *     timePeriod,
  *     setTimePeriod,
- *     selectedClinics,
- *     setSelectedClinics
+ *     startDate,
+ *     endDate,
+ *     // ... other filter states and setters
  *   } = useFilterStore();
+ *
+ *   const handleTimePeriodChange = (e) => {
+ *     setTimePeriod(e.target.value as TimePeriod);
+ *   };
  *
  *   return (
  *     <div>
- *       <select value={timePeriod} onChange={(e) => setTimePeriod(e.target.value as TimePeriod)}>
+ *       <select value={timePeriod} onChange={handleTimePeriodChange}>
  *         <option value="daily">Daily</option>
  *         <option value="weekly">Weekly</option>
  *         <option value="monthly">Monthly</option>
  *       </select>
+ *       {/* Other filter controls for date range, clinics, providers */}
  *     </div>
  *   );
  * }
@@ -204,19 +205,11 @@ export const useFilterStore = create<FilterState>()(
       // Actions
       setTimePeriod: (period) => {
         const { start, end } = getDateRangeForPeriod(period);
-        set({
-          timePeriod: period,
-          startDate: start,
-          endDate: end,
-        });
+        set({ timePeriod: period, startDate: start, endDate: end });
       },
 
       setDateRange: (startDate, endDate) =>
-        set({
-          timePeriod: "custom",
-          startDate,
-          endDate,
-        }),
+        set({ timePeriod: "custom", startDate, endDate }),
 
       setSelectedClinics: (clinics) => set({ selectedClinics: clinics }),
 
@@ -249,6 +242,11 @@ export const useFilterStore = create<FilterState>()(
 /**
  * Helper hook that extracts formatted filter parameters for use with React Query
  *
+ * This hook selects the necessary filter state from the `useFilterStore` and
+ * formats it into an object suitable for passing as query parameters to API requests.
+ * Dates are converted to ISO string format. Clinic and provider IDs are joined into
+ * comma-separated strings if selected, otherwise they are undefined.
+ *
  * @returns {Object} Formatted filter parameters ready to use in API requests
  * @returns {string} .startDate - ISO string format of the start date
  * @returns {string} .endDate - ISO string format of the end date
@@ -258,7 +256,7 @@ export const useFilterStore = create<FilterState>()(
  *
  * @example
  * // In a data fetching component:
- * import { useFilterParams } from '@/hooks/useFilterStore';
+ * import { useFilterParams } from '@/hooks/use-filters'; // MODIFIED
  * import { useQuery } from '@tanstack/react-query';
  *
  * function DashboardData() {
@@ -324,7 +322,7 @@ export const createFilterUrlParams = () => {
  *
  * @example
  * // In a page component:
- * import { parseFilterUrlParams } from '@/hooks/useFilterStore';
+ * import { parseFilterUrlParams } from '@/hooks/use-filters'; // MODIFIED
  * import { useSearchParams } from 'next/navigation';
  *
  * function DashboardPage() {

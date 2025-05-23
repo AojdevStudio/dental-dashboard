@@ -1,4 +1,5 @@
 /** Placeholder page for specific User */
-export default function UserIdPage({ params }: { params: { userId: string } }) {
-  return <div>User Page for ID: {params.userId}</div>;
+export default async function UserIdPage({ params }: { params: Promise<{ userId: string }> }) {
+  const { userId } = await params;
+  return <div>User Page for ID: {userId}</div>;
 }

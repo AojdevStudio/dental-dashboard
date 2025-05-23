@@ -11,7 +11,7 @@
  * This page completes the password reset flow that begins with the reset-password request page.
  */
 
-import { PasswordResetConfirm } from "@/components/ui/password-reset-confirm";
+import { PasswordResetConfirm } from "@/components/auth/password-reset-confirm";
 import type { Metadata } from "next";
 
 /**

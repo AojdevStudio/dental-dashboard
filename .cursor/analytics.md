@@ -5,9 +5,10 @@ This file tracks how many times cursor or windsurf has used each rule in the pro
 ## Windsurf Analytics Tracking
 ```
 commenting-guidelines.md: 20
-file-size-guidelines.md: 7
+file-size-guidelines.md: 8
 task-magic/_index.md: 8
-rule-analytics.md: 6
+rule-analytics.md: 7
+naming-conventions.md: 1
 ```
 
 ## Cursor Analytics Tracking
@@ -15,4 +16,3 @@ rule-analytics.md: 6
 ```
 task-magic/_index.md: 1
 rule-analytics.md: 1
-```

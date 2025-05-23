@@ -165,7 +165,6 @@ export function MultiSelectCombobox({
       <PopoverTrigger asChild>
         <Button
           variant="outline"
-          role="combobox"
           className={cn("w-full justify-between", disabled && "opacity-50 cursor-not-allowed")}
           disabled={disabled}
         >
@@ -196,32 +195,56 @@ export function MultiSelectCombobox({
           </div>
           <div className="max-h-[300px] overflow-y-auto">
             {filteredItems.length > 0 ? (
-              filteredItems.map((item) => (
-                <div
-                  key={item.value}
-                  className="flex items-center px-3 py-2 cursor-pointer hover:bg-accent"
-                  onClick={() => {
-                    const newValues = selectedValues.includes(item.value)
-                      ? selectedValues.filter((v) => v !== item.value)
-                      : [...selectedValues, item.value];
-                    onValueChange(newValues);
-                  }}
-                >
+              filteredItems.map((item) => {
+                /**
+                 * Handle item selection for both click and keyboard events
+                 */
+                const handleItemSelect = () => {
+                  const newValues = selectedValues.includes(item.value)
+                    ? selectedValues.filter((v) => v !== item.value)
+                    : [...selectedValues, item.value];
+                  onValueChange(newValues);
+                };
+
+                /**
+                 * Handle keyboard events for accessibility
+                 * @param {React.KeyboardEvent} event - The keyboard event
+                 */
+                const handleKeyDown = (event: React.KeyboardEvent) => {
+                  if (event.key === "Enter" || event.key === " ") {
+                    event.preventDefault();
+                    handleItemSelect();
+                  }
+                };
+
+                return (
                   <div
-                    className={cn(
-                      "mr-2 flex h-4 w-4 items-center justify-center rounded-sm border",
-                      selectedValues.includes(item.value)
-                        ? "bg-primary border-primary"
-                        : "border-primary"
-                    )}
+                    key={item.value}
+                    className="flex items-center px-3 py-2 cursor-pointer hover:bg-accent"
+                    onClick={handleItemSelect}
+                    onKeyDown={handleKeyDown}
+                    // biome-ignore lint/a11y/useSemanticElements: Custom combobox requires role="option" on div elements per ARIA spec
+                    role="option"
+                    tabIndex={0}
+                    aria-selected={selectedValues.includes(item.value)}
+                    aria-label={`${selectedValues.includes(item.value) ? "Deselect" : "Select"} ${item.label}`}
                   >
-                    {selectedValues.includes(item.value) && (
-                      <Check className="h-3 w-3 text-primary-foreground" />
-                    )}
+                    <div
+                      className={cn(
+                        "mr-2 flex h-4 w-4 items-center justify-center rounded-sm border",
+                        selectedValues.includes(item.value)
+                          ? "bg-primary border-primary"
+                          : "border-primary"
+                      )}
+                    >
+                      {selectedValues.includes(item.value) && (
+                        <Check className="h-3 w-3 text-primary-foreground" />
+                      )}
+                    </div>
+                    <span>{item.label}</span>
                   </div>
-                  <span>{item.label}</span>
-                </div>
-              ))
+                );
+              })
             ) : (
               <div className="px-3 py-2 text-muted-foreground">{emptyMessage}</div>
             )}
@@ -478,9 +501,9 @@ export function FilterBar() {
         updateUrlParams();
 
         // Invalidate queries that depend on the filter values
-        filterDependentQueries.forEach((queryKey) => {
+        for (const queryKey of filterDependentQueries) {
           queryClient.invalidateQueries({ queryKey: [queryKey] });
-        });
+        }
       }, 300); // Small delay to avoid excessive URL updates for quick successive changes
 
       return () => clearTimeout(timeoutId);

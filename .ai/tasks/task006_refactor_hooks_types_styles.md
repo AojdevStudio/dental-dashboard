@@ -1,11 +1,12 @@
 ---
 id: 006
 title: "Step 3.4: Refactor src/hooks/, src/types/, src/styles/"
-status: todo
+status: inprogress
 priority: medium
 area: refactoring
 assignee:
-created_date: {{Current Date}}
+created_at: "2025-05-22T22:47:18-05:00"
+updated_at: "2025-05-22T22:47:18-05:00"
 due_date:
 description: >
   Ensure `src/hooks/`, `src/types/`, and `src/styles/` directories align with the 
@@ -17,7 +18,7 @@ related_files:
   - src/types/
   - src/styles/
 sub_tasks:
-  - "[ ] Review current files in `src/hooks/` and map/move them to the new structure if necessary."
+  - "[x] Review current files in `src/hooks/` and map/move them to the new structure if necessary. (Completed: 2025-05-22)"
   - "[ ] Review current files in `src/types/` and map/move them to new structure (e.g., `src/lib/database/schemas/` or more granular type files like `src/lib/types/metrics.ts`)."
   - "[ ] Review current files in `src/styles/` and ensure alignment with new structure and global styling approach."
   - "[ ] Run `biome check --apply-unsafe src/` (or more targeted checks) after moves and manually verify import paths."

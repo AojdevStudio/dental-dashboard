@@ -12,7 +12,7 @@
  * - User feedback during the process
  */
 
-import { PasswordResetRequest } from "@/components/ui/password-reset-request";
+import { PasswordResetRequest } from "@/components/auth/password-reset-request";
 import type { Metadata } from "next";
 
 /**

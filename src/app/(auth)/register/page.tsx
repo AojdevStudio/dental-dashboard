@@ -10,7 +10,7 @@
  * provide a complete user registration flow, including email verification.
  */
 
-import { ModernStunningSignUp } from "@/components/ui/modern-stunning-sign-up";
+import { RegisterForm } from "@/components/auth/register-form";
 import type { Metadata } from "next";
 
 /**
@@ -37,5 +37,5 @@ export const metadata: Metadata = {
  * @returns {JSX.Element} The rendered sign up page with the ModernStunningSignUp component
  */
 export default function SignUpPage() {
-  return <ModernStunningSignUp />;
+  return <RegisterForm />;
 }

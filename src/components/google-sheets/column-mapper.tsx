@@ -200,11 +200,11 @@ export function ColumnMapper({
     const newErrors: Record<string, string> = {};
 
     // Check that all required fields have mappings
-    fields.forEach((field) => {
+    for (const field of fields) {
       if (field.required && !getSelectedColumnId(field.id)) {
         newErrors[field.id] = "This field is required";
       }
-    });
+    }
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;

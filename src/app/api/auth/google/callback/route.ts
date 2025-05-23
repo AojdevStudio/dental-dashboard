@@ -11,7 +11,7 @@
  */
 
 import { prisma } from "@/lib/prisma"; // Use named import
-import { exchangeCodeForTokens } from "@/services/google/auth"; // Adjust path
+import { handleAuthCallback } from "@/services/google/auth"; // Adjust path
 import { type NextRequest, NextResponse } from "next/server";
 
 /**
@@ -77,19 +77,17 @@ export async function GET(request: NextRequest) {
   const dataSourceId = state;
 
   try {
-    const tokenResponse = (await exchangeCodeForTokens(code)) as GoogleTokenResponse;
+    const tokenData = await handleAuthCallback(code);
 
-    if (!tokenResponse.access_token) {
-      // This case should ideally be caught by exchangeCodeForTokens if it throws on bad response
-      console.error("Access token not found in Google response object:", tokenResponse);
-      throw new Error("Access token not found in Google response");
+    if (!tokenData.accessToken) {
+      // This case should ideally be caught by handleAuthCallback if it throws on bad response
+      console.error("Access token not found in token data:", tokenData);
+      throw new Error("Access token not found in token data");
     }
 
-    const accessToken = tokenResponse.access_token;
-    const refreshToken = tokenResponse.refresh_token;
-    const expiresIn = tokenResponse.expires_in; // In seconds
-
-    const expiryDate = new Date(Date.now() + expiresIn * 1000);
+    const accessToken = tokenData.accessToken;
+    const refreshToken = tokenData.refreshToken;
+    const expiryDate = new Date(tokenData.expiryDate);
 
     /**
      * Interface for the data to update in the data source record.

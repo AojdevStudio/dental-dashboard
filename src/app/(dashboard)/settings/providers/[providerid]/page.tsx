@@ -10,4 +10,12 @@
  * - Provider profile summary
  * - Contact information
  * - Practice details
- * */
+ */
+
+/** Placeholder page for specific Provider */
+export default async function ProviderIdPage({
+  params,
+}: { params: Promise<{ providerid: string }> }) {
+  const { providerid } = await params;
+  return <div>Provider Page for ID: {providerid}</div>;
+}
