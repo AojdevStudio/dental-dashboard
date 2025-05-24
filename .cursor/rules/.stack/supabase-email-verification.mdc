@@ -83,7 +83,7 @@ export default function AuthError() {
       <div className="bg-card rounded-xl p-8 max-w-sm w-full text-center">
         <h2 className="text-2xl font-semibold text-destructive mb-4">Authentication Error</h2>
         <p className="text-muted-foreground mb-6">We couldn't verify your email. The link may have expired or is invalid.</p>
-        <a href="/auth/login" className="underline text-primary hover:text-primary/80">Back to Login</a>
+        <a href="/login" className="underline text-primary hover:text-primary/80">Back to Login</a>
       </div>
     </div>
   )
