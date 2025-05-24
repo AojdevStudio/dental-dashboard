@@ -111,3 +111,7 @@ Core entities managed by Prisma:
 3. **Authentication Flow**: Always check user session before accessing protected resources
 4. **Google API Limits**: Be mindful of rate limits when fetching spreadsheet data
 5. **Type Generation**: Run `pnpm prisma:generate` after schema changes
+
+## Development Guidelines
+
+- We cannot use npm or npx commands in this repo.. always use pnpm

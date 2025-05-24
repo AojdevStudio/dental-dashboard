@@ -43,14 +43,15 @@ interface TokenData {
  * with specific scopes. Uses offline access type to obtain a refresh token
  * and forces consent prompt to ensure a refresh token is issued.
  *
+ * @param {string} dataSourceId - Optional data source ID to include in state parameter
  * @returns {string} Authorization URL for redirecting to Google's consent screen
  *
  * @example
  * // Redirect user to Google's consent screen
- * const authUrl = generateAuthUrl();
+ * const authUrl = generateAuthUrl(dataSourceId);
  * res.redirect(authUrl);
  */
-export function generateAuthUrl(): string {
+export function generateAuthUrl(dataSourceId?: string): string {
   const scopes = [
     "https://www.googleapis.com/auth/spreadsheets",
     "https://www.googleapis.com/auth/drive.readonly",
@@ -60,6 +61,7 @@ export function generateAuthUrl(): string {
     access_type: "offline",
     scope: scopes,
     prompt: "consent",
+    state: dataSourceId,
   });
 }
 

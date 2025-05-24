@@ -10,8 +10,11 @@
  * with a specific data source in the application.
  */
 
-import { generateAuthUrl } from "@/services/google/auth"; // Adjust path if necessary
-import { type NextRequest, NextResponse } from "next/server";
+import { generateAuthUrl } from "@/services/google/auth"
+import { type NextRequest, NextResponse } from "next/server"
+import { withAuth } from '@/lib/api/middleware'
+import { ApiError, ApiResponse } from '@/lib/api/utils'
+import * as googleSheetsQueries from '@/lib/database/queries/google-sheets'
 
 /**
  * Handles GET requests to initiate Google OAuth authentication.
@@ -19,8 +22,8 @@ import { type NextRequest, NextResponse } from "next/server";
  *
  * The function performs the following steps:
  * 1. Validates the dataSourceId parameter is present
- * 2. Checks for required environment configuration
- * 3. Defines the required API scopes for Google Drive and Sheets
+ * 2. Verifies user has access to the data source
+ * 3. Checks for required environment configuration
  * 4. Generates the authorization URL with state parameter
  * 5. Redirects the user to Google's authorization page
  *
@@ -29,41 +32,42 @@ import { type NextRequest, NextResponse } from "next/server";
  * @returns {Promise<NextResponse>} Redirect to Google's authorization page or error response
  *   - 302: Redirect to Google authorization URL
  *   - 400: Bad request if dataSourceId is missing
+ *   - 404: Not found if data source doesn't exist
+ *   - 403: Forbidden if user doesn't have access
  *   - 500: Server error if environment is misconfigured or URL generation fails
  */
-export async function GET(request: NextRequest) {
-  const { searchParams } = new URL(request.url);
-  const dataSourceId = searchParams.get("dataSourceId");
+export const GET = withAuth(async (request, { authContext }) => {
+  const { searchParams } = new URL(request.url)
+  const dataSourceId = searchParams.get("dataSourceId")
 
   if (!dataSourceId) {
-    return NextResponse.json({ error: "dataSourceId is required" }, { status: 400 });
+    throw new ApiError("dataSourceId is required", 400)
   }
 
-  const googleRedirectUri = process.env.GOOGLE_REDIRECT_URI;
+  // Verify the data source exists and user has access
+  const dataSource = await googleSheetsQueries.getDataSourceById(
+    authContext,
+    dataSourceId
+  )
+
+  if (!dataSource) {
+    throw new ApiError("Data source not found", 404)
+  }
+
+  const googleRedirectUri = process.env.GOOGLE_REDIRECT_URI
   if (!googleRedirectUri) {
-    console.error("GOOGLE_REDIRECT_URI is not set in environment variables.");
-    return NextResponse.json({ error: "Server configuration error" }, { status: 500 });
+    console.error("GOOGLE_REDIRECT_URI is not set in environment variables.")
+    throw new ApiError("Server configuration error", 500)
   }
-
-  // Define the OAuth scopes required for accessing Google Drive and Sheets
-  const scopes = [
-    "https://www.googleapis.com/auth/drive.readonly",
-    "https://www.googleapis.com/auth/spreadsheets.readonly",
-    // Consider adding 'profile' and 'email' if you need user info during auth and don't get it elsewhere
-    // 'https://www.googleapis.com/auth/userinfo.profile',
-    // 'https://www.googleapis.com/auth/userinfo.email',
-  ];
-  const accessType = "offline"; // To get a refresh token
 
   try {
-    const authorizationUrl = generateAuthUrl();
-    return NextResponse.redirect(authorizationUrl);
+    // Generate auth URL with dataSourceId in state
+    const authorizationUrl = generateAuthUrl(dataSourceId)
+    return NextResponse.redirect(authorizationUrl)
   } catch (error) {
-    console.error("Failed to generate Google authorization URL:", error);
-    // Potentially redirect to an error page on the client or return JSON
-    return NextResponse.json(
-      { error: "Failed to initiate Google authentication" },
-      { status: 500 }
-    );
+    console.error("Failed to generate Google authorization URL:", error)
+    throw new ApiError("Failed to initiate Google authentication", 500)
   }
-}
+}, {
+  requireClinicAdmin: true, // Only clinic admins can manage Google auth
+})

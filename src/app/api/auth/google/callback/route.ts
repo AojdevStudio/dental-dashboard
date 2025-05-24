@@ -6,34 +6,15 @@
  * exchanges it for access and refresh tokens, and updates the data source in the database
  * with the new credentials.
  *
- * The route is designed to be called by Google's OAuth service and redirects the user
- * back to the dashboard with success or error information.
+ * Note: This route does NOT use withAuth middleware because it's called by Google's OAuth service,
+ * not by our authenticated users. The state parameter contains the dataSourceId which we validate.
  */
 
-import { prisma } from "@/lib/database/prisma"; // Use named import
-import { handleAuthCallback } from "@/services/google/auth"; // Adjust path
-import { type NextRequest, NextResponse } from "next/server";
-
-/**
- * Interface representing the token response from Google OAuth 2.0.
- * Contains the access and refresh tokens along with expiration information.
- *
- * @typedef {Object} GoogleTokenResponse
- * @property {string} access_token - The token used to access Google APIs
- * @property {string} [refresh_token] - Token used to refresh the access token when it expires
- * @property {number} expires_in - Time in seconds until the access token expires
- * @property {string} [id_token] - JWT token containing user information (for OpenID Connect)
- * @property {string} [scope] - Space-delimited list of scopes granted
- * @property {string} [token_type] - Type of token, usually "Bearer"
- */
-interface GoogleTokenResponse {
-  access_token: string;
-  refresh_token?: string;
-  expires_in: number;
-  id_token?: string;
-  scope?: string;
-  token_type?: string;
-}
+import { NextRequest, NextResponse } from "next/server"
+import { handleAuthCallback } from "@/services/google/auth"
+import * as googleSheetsQueries from '@/lib/database/queries/google-sheets'
+import { getAuthContextByAuthId } from '@/lib/database/auth-context'
+import { createClient } from '@/lib/supabase/server'
 
 /**
  * Handles the OAuth 2.0 callback from Google after user authorization.
@@ -54,86 +35,84 @@ interface GoogleTokenResponse {
  * @throws {Error} If token exchange fails or database update fails
  */
 export async function GET(request: NextRequest) {
-  const { searchParams } = new URL(request.url);
-  const code = searchParams.get("code");
-  const state = searchParams.get("state"); // This should be the dataSourceId
-  const error = searchParams.get("error");
+  const { searchParams } = new URL(request.url)
+  const code = searchParams.get("code")
+  const state = searchParams.get("state") // This should be the dataSourceId
+  const error = searchParams.get("error")
 
   // Redirect base URL - can be adjusted to a more specific success/error page
-  const redirectBaseUrl = new URL("/dashboard/settings", request.nextUrl.origin);
+  const redirectBaseUrl = new URL("/dashboard/settings", request.nextUrl.origin)
 
   if (error) {
-    console.error("Google OAuth error:", error);
-    redirectBaseUrl.searchParams.set("googleAuthError", error);
-    return NextResponse.redirect(redirectBaseUrl);
+    console.error("Google OAuth error:", error)
+    redirectBaseUrl.searchParams.set("googleAuthError", error)
+    return NextResponse.redirect(redirectBaseUrl)
   }
 
   if (!code || !state) {
-    console.error("Missing code or state in Google OAuth callback");
-    redirectBaseUrl.searchParams.set("googleAuthError", "Callback parameters missing");
-    return NextResponse.redirect(redirectBaseUrl);
+    console.error("Missing code or state in Google OAuth callback")
+    redirectBaseUrl.searchParams.set("googleAuthError", "Callback parameters missing")
+    return NextResponse.redirect(redirectBaseUrl)
   }
 
-  const dataSourceId = state;
+  const dataSourceId = state
 
   try {
-    const tokenData = await handleAuthCallback(code);
+    // Get the current user's auth context
+    const supabase = await createClient()
+    const { data: { user }, error: authError } = await supabase.auth.getUser()
+
+    if (authError || !user) {
+      console.error("User not authenticated during Google callback")
+      redirectBaseUrl.searchParams.set("googleAuthError", "User not authenticated")
+      return NextResponse.redirect(redirectBaseUrl)
+    }
+
+    const authContext = await getAuthContextByAuthId(user.id)
+    if (!authContext) {
+      console.error("Failed to get auth context for user:", user.id)
+      redirectBaseUrl.searchParams.set("googleAuthError", "Failed to get user context")
+      return NextResponse.redirect(redirectBaseUrl)
+    }
+
+    // Verify the data source exists and user has access
+    const dataSource = await googleSheetsQueries.getDataSourceById(
+      authContext,
+      dataSourceId
+    )
+
+    if (!dataSource) {
+      console.error("Data source not found or access denied:", dataSourceId)
+      redirectBaseUrl.searchParams.set("googleAuthError", "Data source not found")
+      return NextResponse.redirect(redirectBaseUrl)
+    }
+
+    // Exchange the code for tokens
+    const tokenData = await handleAuthCallback(code)
 
     if (!tokenData.accessToken) {
-      // This case should ideally be caught by handleAuthCallback if it throws on bad response
-      console.error("Access token not found in token data:", tokenData);
-      throw new Error("Access token not found in token data");
+      console.error("Access token not found in token data:", tokenData)
+      throw new Error("Access token not found in token data")
     }
 
-    const accessToken = tokenData.accessToken;
-    const refreshToken = tokenData.refreshToken;
-    const expiryDate = new Date(tokenData.expiryDate);
+    // Update the data source with the new tokens
+    await googleSheetsQueries.updateDataSourceTokens(
+      authContext,
+      dataSourceId,
+      {
+        accessToken: tokenData.accessToken,
+        refreshToken: tokenData.refreshToken,
+        expiryDate: new Date(tokenData.expiryDate),
+      }
+    )
 
-    /**
-     * Interface for the data to update in the data source record.
-     * Defines the structure of the credentials and status information.
-     *
-     * @typedef {Object} DataSourceUpdateData
-     * @property {string} googleAccessToken - The Google API access token
-     * @property {string} [googleRefreshToken] - The Google API refresh token (if provided)
-     * @property {Date} googleExpiryDate - When the access token expires
-     * @property {string} connectionStatus - Current connection status (e.g., "CONNECTED")
-     * @property {string} [lastSyncStatus] - Status of the last synchronization
-     * @property {Date} updatedAt - When the record was last updated
-     */
-    interface DataSourceUpdateData {
-      googleAccessToken: string;
-      googleRefreshToken?: string;
-      googleExpiryDate: Date;
-      connectionStatus: string; // Consider using an enum if you have defined states
-      lastSyncStatus?: string; // Consider an enum
-      updatedAt: Date;
-    }
-
-    const updateData: DataSourceUpdateData = {
-      googleAccessToken: accessToken,
-      googleExpiryDate: expiryDate,
-      connectionStatus: "CONNECTED",
-      lastSyncStatus: "PENDING",
-      updatedAt: new Date(),
-    };
-
-    if (refreshToken) {
-      updateData.googleRefreshToken = refreshToken;
-    }
-
-    await prisma.dataSource.update({
-      where: { id: dataSourceId },
-      data: updateData,
-    });
-
-    redirectBaseUrl.searchParams.set("googleAuthSuccess", "true");
-    redirectBaseUrl.searchParams.set("dataSourceId", dataSourceId);
-    return NextResponse.redirect(redirectBaseUrl);
+    redirectBaseUrl.searchParams.set("googleAuthSuccess", "true")
+    redirectBaseUrl.searchParams.set("dataSourceId", dataSourceId)
+    return NextResponse.redirect(redirectBaseUrl)
   } catch (err) {
-    console.error("Failed to exchange Google code for tokens or update data source:", err);
-    const errorMessage = err instanceof Error ? err.message : "Token exchange failed";
-    redirectBaseUrl.searchParams.set("googleAuthError", errorMessage);
-    return NextResponse.redirect(redirectBaseUrl);
+    console.error("Failed to exchange Google code for tokens or update data source:", err)
+    const errorMessage = err instanceof Error ? err.message : "Token exchange failed"
+    redirectBaseUrl.searchParams.set("googleAuthError", errorMessage)
+    return NextResponse.redirect(redirectBaseUrl)
   }
 }

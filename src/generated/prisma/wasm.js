@@ -126,7 +126,8 @@ exports.Prisma.ClinicScalarFieldEnum = {
   location: 'location',
   status: 'status',
   createdAt: 'createdAt',
-  updatedAt: 'updatedAt'
+  updatedAt: 'updatedAt',
+  uuidId: 'uuidId'
 };
 
 exports.Prisma.UserScalarFieldEnum = {
@@ -137,6 +138,8 @@ exports.Prisma.UserScalarFieldEnum = {
   lastLogin: 'lastLogin',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt',
+  authId: 'authId',
+  uuidId: 'uuidId',
   clinicId: 'clinicId'
 };
 
@@ -224,6 +227,8 @@ exports.Prisma.DashboardScalarFieldEnum = {
   layoutConfig: 'layoutConfig',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt',
+  uuidId: 'uuidId',
+  userUuidId: 'userUuidId',
   userId: 'userId'
 };
 
@@ -242,6 +247,166 @@ exports.Prisma.WidgetScalarFieldEnum = {
   metricDefinitionId: 'metricDefinitionId'
 };
 
+exports.Prisma.UserClinicRoleScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  clinicId: 'clinicId',
+  role: 'role',
+  isActive: 'isActive',
+  createdBy: 'createdBy',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
+exports.Prisma.GoalTemplateScalarFieldEnum = {
+  id: 'id',
+  name: 'name',
+  description: 'description',
+  category: 'category',
+  metricDefinitionId: 'metricDefinitionId',
+  targetFormula: 'targetFormula',
+  timePeriod: 'timePeriod',
+  isSystemTemplate: 'isSystemTemplate',
+  clinicId: 'clinicId',
+  createdBy: 'createdBy',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
+exports.Prisma.FinancialMetricScalarFieldEnum = {
+  id: 'id',
+  clinicId: 'clinicId',
+  date: 'date',
+  metricType: 'metricType',
+  category: 'category',
+  amount: 'amount',
+  providerId: 'providerId',
+  insuranceCarrier: 'insuranceCarrier',
+  paymentMethod: 'paymentMethod',
+  procedureCode: 'procedureCode',
+  notes: 'notes',
+  sourceReference: 'sourceReference',
+  createdBy: 'createdBy',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
+exports.Prisma.AppointmentMetricScalarFieldEnum = {
+  id: 'id',
+  clinicId: 'clinicId',
+  date: 'date',
+  providerId: 'providerId',
+  appointmentType: 'appointmentType',
+  scheduledCount: 'scheduledCount',
+  completedCount: 'completedCount',
+  cancelledCount: 'cancelledCount',
+  noShowCount: 'noShowCount',
+  averageDuration: 'averageDuration',
+  productionAmount: 'productionAmount',
+  utilizationRate: 'utilizationRate',
+  createdBy: 'createdBy',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
+exports.Prisma.CallMetricScalarFieldEnum = {
+  id: 'id',
+  clinicId: 'clinicId',
+  date: 'date',
+  callType: 'callType',
+  totalCalls: 'totalCalls',
+  connectedCalls: 'connectedCalls',
+  voicemails: 'voicemails',
+  appointmentsScheduled: 'appointmentsScheduled',
+  conversionRate: 'conversionRate',
+  averageCallDuration: 'averageCallDuration',
+  staffMemberId: 'staffMemberId',
+  createdBy: 'createdBy',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
+exports.Prisma.PatientMetricScalarFieldEnum = {
+  id: 'id',
+  clinicId: 'clinicId',
+  date: 'date',
+  activePatients: 'activePatients',
+  newPatients: 'newPatients',
+  reactivatedPatients: 'reactivatedPatients',
+  lostPatients: 'lostPatients',
+  patientRetentionRate: 'patientRetentionRate',
+  averagePatientValue: 'averagePatientValue',
+  recareComplianceRate: 'recareComplianceRate',
+  treatmentAcceptanceRate: 'treatmentAcceptanceRate',
+  createdBy: 'createdBy',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
+exports.Prisma.MetricAggregationScalarFieldEnum = {
+  id: 'id',
+  clinicId: 'clinicId',
+  metricDefinitionId: 'metricDefinitionId',
+  aggregationType: 'aggregationType',
+  periodStart: 'periodStart',
+  periodEnd: 'periodEnd',
+  value: 'value',
+  count: 'count',
+  minimum: 'minimum',
+  maximum: 'maximum',
+  average: 'average',
+  standardDeviation: 'standardDeviation',
+  providerId: 'providerId',
+  metadata: 'metadata',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
+exports.Prisma.GoogleCredentialScalarFieldEnum = {
+  id: 'id',
+  clinicId: 'clinicId',
+  userId: 'userId',
+  accessToken: 'accessToken',
+  refreshToken: 'refreshToken',
+  expiresAt: 'expiresAt',
+  scope: 'scope',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
+exports.Prisma.SpreadsheetConnectionScalarFieldEnum = {
+  id: 'id',
+  clinicId: 'clinicId',
+  credentialId: 'credentialId',
+  spreadsheetId: 'spreadsheetId',
+  spreadsheetName: 'spreadsheetName',
+  sheetNames: 'sheetNames',
+  lastSyncAt: 'lastSyncAt',
+  syncStatus: 'syncStatus',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
+exports.Prisma.ColumnMappingV2ScalarFieldEnum = {
+  id: 'id',
+  connectionId: 'connectionId',
+  sheetName: 'sheetName',
+  mappingConfig: 'mappingConfig',
+  templateName: 'templateName',
+  version: 'version',
+  isActive: 'isActive',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
+exports.Prisma.IdMappingScalarFieldEnum = {
+  id: 'id',
+  tableName: 'tableName',
+  oldId: 'oldId',
+  newId: 'newId',
+  createdAt: 'createdAt'
+};
+
 exports.Prisma.SortOrder = {
   asc: 'asc',
   desc: 'desc'
@@ -249,6 +414,10 @@ exports.Prisma.SortOrder = {
 
 exports.Prisma.NullableJsonNullValueInput = {
   DbNull: Prisma.DbNull,
+  JsonNull: Prisma.JsonNull
+};
+
+exports.Prisma.JsonNullValueInput = {
   JsonNull: Prisma.JsonNull
 };
 
@@ -279,7 +448,18 @@ exports.Prisma.ModelName = {
   MetricValue: 'MetricValue',
   Goal: 'Goal',
   Dashboard: 'Dashboard',
-  Widget: 'Widget'
+  Widget: 'Widget',
+  UserClinicRole: 'UserClinicRole',
+  GoalTemplate: 'GoalTemplate',
+  FinancialMetric: 'FinancialMetric',
+  AppointmentMetric: 'AppointmentMetric',
+  CallMetric: 'CallMetric',
+  PatientMetric: 'PatientMetric',
+  MetricAggregation: 'MetricAggregation',
+  GoogleCredential: 'GoogleCredential',
+  SpreadsheetConnection: 'SpreadsheetConnection',
+  ColumnMappingV2: 'ColumnMappingV2',
+  IdMapping: 'IdMapping'
 };
 
 /**
