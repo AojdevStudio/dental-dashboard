@@ -32,7 +32,7 @@ ALTER TABLE id_mappings ENABLE ROW LEVEL SECURITY;
 -- =============================================
 
 -- Get user's clinic access list
-CREATE OR REPLACE FUNCTION auth.get_user_clinics()
+CREATE OR REPLACE FUNCTION public.get_user_clinics()
 RETURNS SETOF uuid
 LANGUAGE sql
 SECURITY DEFINER
@@ -46,7 +46,7 @@ AS $$
 $$;
 
 -- Check if user has access to a specific clinic
-CREATE OR REPLACE FUNCTION auth.has_clinic_access(clinic_id text)
+CREATE OR REPLACE FUNCTION public.has_clinic_access(clinic_id text)
 RETURNS boolean
 LANGUAGE sql
 SECURITY DEFINER
@@ -63,7 +63,7 @@ AS $$
 $$;
 
 -- Check if user is a clinic admin
-CREATE OR REPLACE FUNCTION auth.is_clinic_admin(clinic_id text)
+CREATE OR REPLACE FUNCTION public.is_clinic_admin(clinic_id text)
 RETURNS boolean
 LANGUAGE sql
 SECURITY DEFINER
@@ -81,7 +81,7 @@ AS $$
 $$;
 
 -- Get user's role in a clinic
-CREATE OR REPLACE FUNCTION auth.get_user_role(clinic_id text)
+CREATE OR REPLACE FUNCTION public.get_user_role(clinic_id text)
 RETURNS text
 LANGUAGE sql
 SECURITY DEFINER
@@ -106,7 +106,7 @@ ON clinics FOR SELECT
 TO authenticated
 USING (
   id IN (
-    SELECT clinic_id::text
+    SELECT ucr.clinic_id::text
     FROM user_clinic_roles ucr
     INNER JOIN users u ON u.id = ucr.user_id
     WHERE u.auth_id = (SELECT auth.uid())::text
@@ -125,10 +125,10 @@ CREATE POLICY "Clinic admins can update their clinic"
 ON clinics FOR UPDATE
 TO authenticated
 USING (
-  (SELECT auth.is_clinic_admin(id))
+  (SELECT public.is_clinic_admin(id))
 )
 WITH CHECK (
-  (SELECT auth.is_clinic_admin(id))
+  (SELECT public.is_clinic_admin(id))
 );
 
 -- DELETE: Only super admins can delete clinics (disabled by default)
@@ -147,7 +147,7 @@ ON users FOR SELECT
 TO authenticated
 USING (
   clinic_id IN (
-    SELECT clinic_id::text
+    SELECT ucr.clinic_id::text
     FROM user_clinic_roles ucr
     INNER JOIN users u ON u.id = ucr.user_id
     WHERE u.auth_id = (SELECT auth.uid())::text
@@ -160,7 +160,7 @@ CREATE POLICY "Clinic admins can create users"
 ON users FOR INSERT
 TO authenticated
 WITH CHECK (
-  (SELECT auth.is_clinic_admin(clinic_id))
+  (SELECT public.is_clinic_admin(clinic_id))
 );
 
 -- UPDATE: Users can update their own profile, clinic admins can update users in their clinic
@@ -169,11 +169,11 @@ ON users FOR UPDATE
 TO authenticated
 USING (
   auth_id = (SELECT auth.uid())::text
-  OR (SELECT auth.is_clinic_admin(clinic_id))
+  OR (SELECT public.is_clinic_admin(clinic_id))
 )
 WITH CHECK (
   auth_id = (SELECT auth.uid())::text
-  OR (SELECT auth.is_clinic_admin(clinic_id))
+  OR (SELECT public.is_clinic_admin(clinic_id))
 );
 
 -- DELETE: Only clinic admins can delete users in their clinic
@@ -181,7 +181,7 @@ CREATE POLICY "Clinic admins can delete users"
 ON users FOR DELETE
 TO authenticated
 USING (
-  (SELECT auth.is_clinic_admin(clinic_id))
+  (SELECT public.is_clinic_admin(clinic_id))
 );
 
 -- =============================================
@@ -193,7 +193,7 @@ CREATE POLICY "Users can view providers in their clinics"
 ON providers FOR SELECT
 TO authenticated
 USING (
-  (SELECT auth.has_clinic_access(clinic_id))
+  (SELECT public.has_clinic_access(clinic_id))
 );
 
 -- INSERT: Clinic admins can create providers
@@ -201,7 +201,7 @@ CREATE POLICY "Clinic admins can create providers"
 ON providers FOR INSERT
 TO authenticated
 WITH CHECK (
-  (SELECT auth.is_clinic_admin(clinic_id))
+  (SELECT public.is_clinic_admin(clinic_id))
 );
 
 -- UPDATE: Clinic admins can update providers
@@ -209,10 +209,10 @@ CREATE POLICY "Clinic admins can update providers"
 ON providers FOR UPDATE
 TO authenticated
 USING (
-  (SELECT auth.is_clinic_admin(clinic_id))
+  (SELECT public.is_clinic_admin(clinic_id))
 )
 WITH CHECK (
-  (SELECT auth.is_clinic_admin(clinic_id))
+  (SELECT public.is_clinic_admin(clinic_id))
 );
 
 -- DELETE: Clinic admins can delete providers
@@ -220,7 +220,7 @@ CREATE POLICY "Clinic admins can delete providers"
 ON providers FOR DELETE
 TO authenticated
 USING (
-  (SELECT auth.is_clinic_admin(clinic_id))
+  (SELECT public.is_clinic_admin(clinic_id))
 );
 
 -- =============================================
@@ -261,7 +261,7 @@ CREATE POLICY "Users can view data sources in their clinics"
 ON data_sources FOR SELECT
 TO authenticated
 USING (
-  (SELECT auth.has_clinic_access(clinic_id))
+  (SELECT public.has_clinic_access(clinic_id))
 );
 
 -- INSERT: Clinic admins can create data sources
@@ -269,7 +269,7 @@ CREATE POLICY "Clinic admins can create data sources"
 ON data_sources FOR INSERT
 TO authenticated
 WITH CHECK (
-  (SELECT auth.is_clinic_admin(clinic_id))
+  (SELECT public.is_clinic_admin(clinic_id))
 );
 
 -- UPDATE: Clinic admins can update data sources
@@ -277,10 +277,10 @@ CREATE POLICY "Clinic admins can update data sources"
 ON data_sources FOR UPDATE
 TO authenticated
 USING (
-  (SELECT auth.is_clinic_admin(clinic_id))
+  (SELECT public.is_clinic_admin(clinic_id))
 )
 WITH CHECK (
-  (SELECT auth.is_clinic_admin(clinic_id))
+  (SELECT public.is_clinic_admin(clinic_id))
 );
 
 -- DELETE: Clinic admins can delete data sources
@@ -288,7 +288,7 @@ CREATE POLICY "Clinic admins can delete data sources"
 ON data_sources FOR DELETE
 TO authenticated
 USING (
-  (SELECT auth.is_clinic_admin(clinic_id))
+  (SELECT public.is_clinic_admin(clinic_id))
 );
 
 -- =============================================
@@ -304,7 +304,7 @@ USING (
     SELECT 1
     FROM data_sources ds
     WHERE ds.id = column_mappings.data_source_id
-      AND (SELECT auth.has_clinic_access(ds.clinic_id))
+      AND (SELECT public.has_clinic_access(ds.clinic_id))
   )
 );
 
@@ -317,7 +317,7 @@ WITH CHECK (
     SELECT 1
     FROM data_sources ds
     WHERE ds.id = column_mappings.data_source_id
-      AND (SELECT auth.is_clinic_admin(ds.clinic_id))
+      AND (SELECT public.is_clinic_admin(ds.clinic_id))
   )
 );
 
@@ -330,7 +330,7 @@ USING (
     SELECT 1
     FROM data_sources ds
     WHERE ds.id = column_mappings.data_source_id
-      AND (SELECT auth.is_clinic_admin(ds.clinic_id))
+      AND (SELECT public.is_clinic_admin(ds.clinic_id))
   )
 )
 WITH CHECK (
@@ -338,7 +338,7 @@ WITH CHECK (
     SELECT 1
     FROM data_sources ds
     WHERE ds.id = column_mappings.data_source_id
-      AND (SELECT auth.is_clinic_admin(ds.clinic_id))
+      AND (SELECT public.is_clinic_admin(ds.clinic_id))
   )
 );
 
@@ -351,7 +351,7 @@ USING (
     SELECT 1
     FROM data_sources ds
     WHERE ds.id = column_mappings.data_source_id
-      AND (SELECT auth.is_clinic_admin(ds.clinic_id))
+      AND (SELECT public.is_clinic_admin(ds.clinic_id))
   )
 );
 
@@ -365,7 +365,7 @@ ON metric_values FOR SELECT
 TO authenticated
 USING (
   clinic_id IS NULL -- System metrics
-  OR (SELECT auth.has_clinic_access(clinic_id))
+  OR (SELECT public.has_clinic_access(clinic_id))
 );
 
 -- INSERT: Users with appropriate role can create metric values
@@ -375,8 +375,8 @@ TO authenticated
 WITH CHECK (
   clinic_id IS NULL -- System metrics (restricted at app level)
   OR (
-    (SELECT auth.has_clinic_access(clinic_id))
-    AND (SELECT auth.get_user_role(clinic_id)) IN ('clinic_admin', 'provider', 'staff')
+    (SELECT public.has_clinic_access(clinic_id))
+    AND (SELECT public.get_user_role(clinic_id)) IN ('clinic_admin', 'provider', 'staff')
   )
 );
 
@@ -386,13 +386,13 @@ ON metric_values FOR UPDATE
 TO authenticated
 USING (
   clinic_id IS NOT NULL
-  AND (SELECT auth.has_clinic_access(clinic_id))
-  AND (SELECT auth.get_user_role(clinic_id)) IN ('clinic_admin', 'provider', 'staff')
+  AND (SELECT public.has_clinic_access(clinic_id))
+  AND (SELECT public.get_user_role(clinic_id)) IN ('clinic_admin', 'provider', 'staff')
 )
 WITH CHECK (
   clinic_id IS NOT NULL
-  AND (SELECT auth.has_clinic_access(clinic_id))
-  AND (SELECT auth.get_user_role(clinic_id)) IN ('clinic_admin', 'provider', 'staff')
+  AND (SELECT public.has_clinic_access(clinic_id))
+  AND (SELECT public.get_user_role(clinic_id)) IN ('clinic_admin', 'provider', 'staff')
 );
 
 -- DELETE: Only clinic admins can delete metric values
@@ -401,7 +401,7 @@ ON metric_values FOR DELETE
 TO authenticated
 USING (
   clinic_id IS NOT NULL
-  AND (SELECT auth.is_clinic_admin(clinic_id))
+  AND (SELECT public.is_clinic_admin(clinic_id))
 );
 
 -- =============================================
@@ -414,7 +414,7 @@ ON goals FOR SELECT
 TO authenticated
 USING (
   clinic_id IS NULL -- System goals
-  OR (SELECT auth.has_clinic_access(clinic_id))
+  OR (SELECT public.has_clinic_access(clinic_id))
 );
 
 -- INSERT: Clinic admins and providers can create goals
@@ -423,8 +423,8 @@ ON goals FOR INSERT
 TO authenticated
 WITH CHECK (
   clinic_id IS NOT NULL
-  AND (SELECT auth.has_clinic_access(clinic_id))
-  AND (SELECT auth.get_user_role(clinic_id)) IN ('clinic_admin', 'provider')
+  AND (SELECT public.has_clinic_access(clinic_id))
+  AND (SELECT public.get_user_role(clinic_id)) IN ('clinic_admin', 'provider')
 );
 
 -- UPDATE: Clinic admins and goal owners can update goals
@@ -433,13 +433,13 @@ ON goals FOR UPDATE
 TO authenticated
 USING (
   clinic_id IS NOT NULL
-  AND (SELECT auth.has_clinic_access(clinic_id))
-  AND (SELECT auth.get_user_role(clinic_id)) IN ('clinic_admin', 'provider')
+  AND (SELECT public.has_clinic_access(clinic_id))
+  AND (SELECT public.get_user_role(clinic_id)) IN ('clinic_admin', 'provider')
 )
 WITH CHECK (
   clinic_id IS NOT NULL
-  AND (SELECT auth.has_clinic_access(clinic_id))
-  AND (SELECT auth.get_user_role(clinic_id)) IN ('clinic_admin', 'provider')
+  AND (SELECT public.has_clinic_access(clinic_id))
+  AND (SELECT public.get_user_role(clinic_id)) IN ('clinic_admin', 'provider')
 );
 
 -- DELETE: Clinic admins can delete goals
@@ -448,7 +448,7 @@ ON goals FOR DELETE
 TO authenticated
 USING (
   clinic_id IS NOT NULL
-  AND (SELECT auth.is_clinic_admin(clinic_id))
+  AND (SELECT public.is_clinic_admin(clinic_id))
 );
 
 -- =============================================
@@ -466,7 +466,7 @@ USING (
     WHERE u.id = dashboards.user_id
       AND (
         u.auth_id = (SELECT auth.uid())::text -- Own dashboards
-        OR (SELECT auth.has_clinic_access(u.clinic_id)) -- Clinic dashboards
+        OR (SELECT public.has_clinic_access(u.clinic_id)) -- Clinic dashboards
       )
   )
 );
@@ -534,7 +534,7 @@ USING (
     WHERE d.id = widgets.dashboard_id
       AND (
         u.auth_id = (SELECT auth.uid())::text
-        OR (SELECT auth.has_clinic_access(u.clinic_id))
+        OR (SELECT public.has_clinic_access(u.clinic_id))
       )
   )
 );
@@ -599,7 +599,7 @@ CREATE POLICY "Users can view roles in their clinics"
 ON user_clinic_roles FOR SELECT
 TO authenticated
 USING (
-  (SELECT auth.has_clinic_access(clinic_id))
+  (SELECT public.has_clinic_access(clinic_id))
 );
 
 -- INSERT: Clinic admins can create roles
@@ -607,7 +607,7 @@ CREATE POLICY "Clinic admins can create roles"
 ON user_clinic_roles FOR INSERT
 TO authenticated
 WITH CHECK (
-  (SELECT auth.is_clinic_admin(clinic_id))
+  (SELECT public.is_clinic_admin(clinic_id))
 );
 
 -- UPDATE: Clinic admins can update roles
@@ -615,10 +615,10 @@ CREATE POLICY "Clinic admins can update roles"
 ON user_clinic_roles FOR UPDATE
 TO authenticated
 USING (
-  (SELECT auth.is_clinic_admin(clinic_id))
+  (SELECT public.is_clinic_admin(clinic_id))
 )
 WITH CHECK (
-  (SELECT auth.is_clinic_admin(clinic_id))
+  (SELECT public.is_clinic_admin(clinic_id))
 );
 
 -- DELETE: Clinic admins can delete roles
@@ -626,7 +626,7 @@ CREATE POLICY "Clinic admins can delete roles"
 ON user_clinic_roles FOR DELETE
 TO authenticated
 USING (
-  (SELECT auth.is_clinic_admin(clinic_id))
+  (SELECT public.is_clinic_admin(clinic_id))
 );
 
 -- =============================================
@@ -640,7 +640,7 @@ TO authenticated
 USING (
   is_system_template = true
   OR clinic_id IS NULL
-  OR (SELECT auth.has_clinic_access(clinic_id))
+  OR (SELECT public.has_clinic_access(clinic_id))
 );
 
 -- INSERT: Clinic admins can create clinic-specific templates
@@ -650,7 +650,7 @@ TO authenticated
 WITH CHECK (
   is_system_template = false
   AND clinic_id IS NOT NULL
-  AND (SELECT auth.is_clinic_admin(clinic_id))
+  AND (SELECT public.is_clinic_admin(clinic_id))
 );
 
 -- UPDATE: Clinic admins can update their clinic templates
@@ -660,12 +660,12 @@ TO authenticated
 USING (
   is_system_template = false
   AND clinic_id IS NOT NULL
-  AND (SELECT auth.is_clinic_admin(clinic_id))
+  AND (SELECT public.is_clinic_admin(clinic_id))
 )
 WITH CHECK (
   is_system_template = false
   AND clinic_id IS NOT NULL
-  AND (SELECT auth.is_clinic_admin(clinic_id))
+  AND (SELECT public.is_clinic_admin(clinic_id))
 );
 
 -- DELETE: Clinic admins can delete their clinic templates
@@ -675,7 +675,7 @@ TO authenticated
 USING (
   is_system_template = false
   AND clinic_id IS NOT NULL
-  AND (SELECT auth.is_clinic_admin(clinic_id))
+  AND (SELECT public.is_clinic_admin(clinic_id))
 );
 
 -- =============================================
@@ -687,7 +687,7 @@ CREATE POLICY "Users can view financial metrics for their clinics"
 ON financial_metrics FOR SELECT
 TO authenticated
 USING (
-  (SELECT auth.has_clinic_access(clinic_id))
+  (SELECT public.has_clinic_access(clinic_id))
 );
 
 -- INSERT: Authorized users can create financial metrics
@@ -695,8 +695,8 @@ CREATE POLICY "Authorized users can create financial metrics"
 ON financial_metrics FOR INSERT
 TO authenticated
 WITH CHECK (
-  (SELECT auth.has_clinic_access(clinic_id))
-  AND (SELECT auth.get_user_role(clinic_id)) IN ('clinic_admin', 'provider', 'staff')
+  (SELECT public.has_clinic_access(clinic_id))
+  AND (SELECT public.get_user_role(clinic_id)) IN ('clinic_admin', 'provider', 'staff')
 );
 
 -- UPDATE: Clinic admins and staff can update financial metrics
@@ -704,12 +704,12 @@ CREATE POLICY "Authorized users can update financial metrics"
 ON financial_metrics FOR UPDATE
 TO authenticated
 USING (
-  (SELECT auth.has_clinic_access(clinic_id))
-  AND (SELECT auth.get_user_role(clinic_id)) IN ('clinic_admin', 'staff')
+  (SELECT public.has_clinic_access(clinic_id))
+  AND (SELECT public.get_user_role(clinic_id)) IN ('clinic_admin', 'staff')
 )
 WITH CHECK (
-  (SELECT auth.has_clinic_access(clinic_id))
-  AND (SELECT auth.get_user_role(clinic_id)) IN ('clinic_admin', 'staff')
+  (SELECT public.has_clinic_access(clinic_id))
+  AND (SELECT public.get_user_role(clinic_id)) IN ('clinic_admin', 'staff')
 );
 
 -- DELETE: Only clinic admins can delete financial metrics
@@ -717,7 +717,7 @@ CREATE POLICY "Clinic admins can delete financial metrics"
 ON financial_metrics FOR DELETE
 TO authenticated
 USING (
-  (SELECT auth.is_clinic_admin(clinic_id))
+  (SELECT public.is_clinic_admin(clinic_id))
 );
 
 -- =============================================
@@ -729,7 +729,7 @@ CREATE POLICY "Users can view appointment metrics for their clinics"
 ON appointment_metrics FOR SELECT
 TO authenticated
 USING (
-  (SELECT auth.has_clinic_access(clinic_id))
+  (SELECT public.has_clinic_access(clinic_id))
 );
 
 -- INSERT: Authorized users can create appointment metrics
@@ -737,8 +737,8 @@ CREATE POLICY "Authorized users can create appointment metrics"
 ON appointment_metrics FOR INSERT
 TO authenticated
 WITH CHECK (
-  (SELECT auth.has_clinic_access(clinic_id))
-  AND (SELECT auth.get_user_role(clinic_id)) IN ('clinic_admin', 'provider', 'staff')
+  (SELECT public.has_clinic_access(clinic_id))
+  AND (SELECT public.get_user_role(clinic_id)) IN ('clinic_admin', 'provider', 'staff')
 );
 
 -- UPDATE: Clinic admins and staff can update appointment metrics
@@ -746,12 +746,12 @@ CREATE POLICY "Authorized users can update appointment metrics"
 ON appointment_metrics FOR UPDATE
 TO authenticated
 USING (
-  (SELECT auth.has_clinic_access(clinic_id))
-  AND (SELECT auth.get_user_role(clinic_id)) IN ('clinic_admin', 'staff')
+  (SELECT public.has_clinic_access(clinic_id))
+  AND (SELECT public.get_user_role(clinic_id)) IN ('clinic_admin', 'staff')
 )
 WITH CHECK (
-  (SELECT auth.has_clinic_access(clinic_id))
-  AND (SELECT auth.get_user_role(clinic_id)) IN ('clinic_admin', 'staff')
+  (SELECT public.has_clinic_access(clinic_id))
+  AND (SELECT public.get_user_role(clinic_id)) IN ('clinic_admin', 'staff')
 );
 
 -- DELETE: Only clinic admins can delete appointment metrics
@@ -759,7 +759,7 @@ CREATE POLICY "Clinic admins can delete appointment metrics"
 ON appointment_metrics FOR DELETE
 TO authenticated
 USING (
-  (SELECT auth.is_clinic_admin(clinic_id))
+  (SELECT public.is_clinic_admin(clinic_id))
 );
 
 -- =============================================
@@ -771,7 +771,7 @@ CREATE POLICY "Users can view call metrics for their clinics"
 ON call_metrics FOR SELECT
 TO authenticated
 USING (
-  (SELECT auth.has_clinic_access(clinic_id))
+  (SELECT public.has_clinic_access(clinic_id))
 );
 
 -- INSERT: Authorized users can create call metrics
@@ -779,8 +779,8 @@ CREATE POLICY "Authorized users can create call metrics"
 ON call_metrics FOR INSERT
 TO authenticated
 WITH CHECK (
-  (SELECT auth.has_clinic_access(clinic_id))
-  AND (SELECT auth.get_user_role(clinic_id)) IN ('clinic_admin', 'staff')
+  (SELECT public.has_clinic_access(clinic_id))
+  AND (SELECT public.get_user_role(clinic_id)) IN ('clinic_admin', 'staff')
 );
 
 -- UPDATE: Clinic admins and staff can update call metrics
@@ -788,12 +788,12 @@ CREATE POLICY "Authorized users can update call metrics"
 ON call_metrics FOR UPDATE
 TO authenticated
 USING (
-  (SELECT auth.has_clinic_access(clinic_id))
-  AND (SELECT auth.get_user_role(clinic_id)) IN ('clinic_admin', 'staff')
+  (SELECT public.has_clinic_access(clinic_id))
+  AND (SELECT public.get_user_role(clinic_id)) IN ('clinic_admin', 'staff')
 )
 WITH CHECK (
-  (SELECT auth.has_clinic_access(clinic_id))
-  AND (SELECT auth.get_user_role(clinic_id)) IN ('clinic_admin', 'staff')
+  (SELECT public.has_clinic_access(clinic_id))
+  AND (SELECT public.get_user_role(clinic_id)) IN ('clinic_admin', 'staff')
 );
 
 -- DELETE: Only clinic admins can delete call metrics
@@ -801,7 +801,7 @@ CREATE POLICY "Clinic admins can delete call metrics"
 ON call_metrics FOR DELETE
 TO authenticated
 USING (
-  (SELECT auth.is_clinic_admin(clinic_id))
+  (SELECT public.is_clinic_admin(clinic_id))
 );
 
 -- =============================================
@@ -813,7 +813,7 @@ CREATE POLICY "Users can view patient metrics for their clinics"
 ON patient_metrics FOR SELECT
 TO authenticated
 USING (
-  (SELECT auth.has_clinic_access(clinic_id))
+  (SELECT public.has_clinic_access(clinic_id))
 );
 
 -- INSERT: Authorized users can create patient metrics
@@ -821,8 +821,8 @@ CREATE POLICY "Authorized users can create patient metrics"
 ON patient_metrics FOR INSERT
 TO authenticated
 WITH CHECK (
-  (SELECT auth.has_clinic_access(clinic_id))
-  AND (SELECT auth.get_user_role(clinic_id)) IN ('clinic_admin', 'provider', 'staff')
+  (SELECT public.has_clinic_access(clinic_id))
+  AND (SELECT public.get_user_role(clinic_id)) IN ('clinic_admin', 'provider', 'staff')
 );
 
 -- UPDATE: Clinic admins and staff can update patient metrics
@@ -830,12 +830,12 @@ CREATE POLICY "Authorized users can update patient metrics"
 ON patient_metrics FOR UPDATE
 TO authenticated
 USING (
-  (SELECT auth.has_clinic_access(clinic_id))
-  AND (SELECT auth.get_user_role(clinic_id)) IN ('clinic_admin', 'staff')
+  (SELECT public.has_clinic_access(clinic_id))
+  AND (SELECT public.get_user_role(clinic_id)) IN ('clinic_admin', 'staff')
 )
 WITH CHECK (
-  (SELECT auth.has_clinic_access(clinic_id))
-  AND (SELECT auth.get_user_role(clinic_id)) IN ('clinic_admin', 'staff')
+  (SELECT public.has_clinic_access(clinic_id))
+  AND (SELECT public.get_user_role(clinic_id)) IN ('clinic_admin', 'staff')
 );
 
 -- DELETE: Only clinic admins can delete patient metrics
@@ -843,7 +843,7 @@ CREATE POLICY "Clinic admins can delete patient metrics"
 ON patient_metrics FOR DELETE
 TO authenticated
 USING (
-  (SELECT auth.is_clinic_admin(clinic_id))
+  (SELECT public.is_clinic_admin(clinic_id))
 );
 
 -- =============================================
@@ -855,7 +855,7 @@ CREATE POLICY "Users can view metric aggregations for their clinics"
 ON metric_aggregations FOR SELECT
 TO authenticated
 USING (
-  (SELECT auth.has_clinic_access(clinic_id))
+  (SELECT public.has_clinic_access(clinic_id))
 );
 
 -- INSERT: System process creates aggregations (service role)
@@ -886,8 +886,8 @@ CREATE POLICY "Users can view Google credentials for their clinics"
 ON google_credentials FOR SELECT
 TO authenticated
 USING (
-  (SELECT auth.has_clinic_access(clinic_id))
-  AND (SELECT auth.get_user_role(clinic_id)) IN ('clinic_admin')
+  (SELECT public.has_clinic_access(clinic_id))
+  AND (SELECT public.get_user_role(clinic_id)) IN ('clinic_admin')
 );
 
 -- INSERT: Clinic admins can create credentials
@@ -895,7 +895,7 @@ CREATE POLICY "Clinic admins can create Google credentials"
 ON google_credentials FOR INSERT
 TO authenticated
 WITH CHECK (
-  (SELECT auth.is_clinic_admin(clinic_id))
+  (SELECT public.is_clinic_admin(clinic_id))
 );
 
 -- UPDATE: Clinic admins can update credentials
@@ -903,10 +903,10 @@ CREATE POLICY "Clinic admins can update Google credentials"
 ON google_credentials FOR UPDATE
 TO authenticated
 USING (
-  (SELECT auth.is_clinic_admin(clinic_id))
+  (SELECT public.is_clinic_admin(clinic_id))
 )
 WITH CHECK (
-  (SELECT auth.is_clinic_admin(clinic_id))
+  (SELECT public.is_clinic_admin(clinic_id))
 );
 
 -- DELETE: Clinic admins can delete credentials
@@ -914,7 +914,7 @@ CREATE POLICY "Clinic admins can delete Google credentials"
 ON google_credentials FOR DELETE
 TO authenticated
 USING (
-  (SELECT auth.is_clinic_admin(clinic_id))
+  (SELECT public.is_clinic_admin(clinic_id))
 );
 
 -- =============================================
@@ -926,7 +926,7 @@ CREATE POLICY "Users can view spreadsheet connections for their clinics"
 ON spreadsheet_connections FOR SELECT
 TO authenticated
 USING (
-  (SELECT auth.has_clinic_access(clinic_id))
+  (SELECT public.has_clinic_access(clinic_id))
 );
 
 -- INSERT: Clinic admins can create connections
@@ -934,7 +934,7 @@ CREATE POLICY "Clinic admins can create spreadsheet connections"
 ON spreadsheet_connections FOR INSERT
 TO authenticated
 WITH CHECK (
-  (SELECT auth.is_clinic_admin(clinic_id))
+  (SELECT public.is_clinic_admin(clinic_id))
 );
 
 -- UPDATE: Clinic admins can update connections
@@ -942,10 +942,10 @@ CREATE POLICY "Clinic admins can update spreadsheet connections"
 ON spreadsheet_connections FOR UPDATE
 TO authenticated
 USING (
-  (SELECT auth.is_clinic_admin(clinic_id))
+  (SELECT public.is_clinic_admin(clinic_id))
 )
 WITH CHECK (
-  (SELECT auth.is_clinic_admin(clinic_id))
+  (SELECT public.is_clinic_admin(clinic_id))
 );
 
 -- DELETE: Clinic admins can delete connections
@@ -953,7 +953,7 @@ CREATE POLICY "Clinic admins can delete spreadsheet connections"
 ON spreadsheet_connections FOR DELETE
 TO authenticated
 USING (
-  (SELECT auth.is_clinic_admin(clinic_id))
+  (SELECT public.is_clinic_admin(clinic_id))
 );
 
 -- =============================================
@@ -969,7 +969,7 @@ USING (
     SELECT 1
     FROM spreadsheet_connections sc
     WHERE sc.id = column_mappings_v2.connection_id
-      AND (SELECT auth.has_clinic_access(sc.clinic_id))
+      AND (SELECT public.has_clinic_access(sc.clinic_id))
   )
 );
 
@@ -982,7 +982,7 @@ WITH CHECK (
     SELECT 1
     FROM spreadsheet_connections sc
     WHERE sc.id = column_mappings_v2.connection_id
-      AND (SELECT auth.is_clinic_admin(sc.clinic_id))
+      AND (SELECT public.is_clinic_admin(sc.clinic_id))
   )
 );
 
@@ -995,7 +995,7 @@ USING (
     SELECT 1
     FROM spreadsheet_connections sc
     WHERE sc.id = column_mappings_v2.connection_id
-      AND (SELECT auth.is_clinic_admin(sc.clinic_id))
+      AND (SELECT public.is_clinic_admin(sc.clinic_id))
   )
 )
 WITH CHECK (
@@ -1003,7 +1003,7 @@ WITH CHECK (
     SELECT 1
     FROM spreadsheet_connections sc
     WHERE sc.id = column_mappings_v2.connection_id
-      AND (SELECT auth.is_clinic_admin(sc.clinic_id))
+      AND (SELECT public.is_clinic_admin(sc.clinic_id))
   )
 );
 
@@ -1016,7 +1016,7 @@ USING (
     SELECT 1
     FROM spreadsheet_connections sc
     WHERE sc.id = column_mappings_v2.connection_id
-      AND (SELECT auth.is_clinic_admin(sc.clinic_id))
+      AND (SELECT public.is_clinic_admin(sc.clinic_id))
   )
 );
 
@@ -1098,7 +1098,7 @@ GRANT USAGE ON SCHEMA public TO authenticated;
 GRANT ALL ON ALL TABLES IN SCHEMA public TO authenticated;
 GRANT ALL ON ALL SEQUENCES IN SCHEMA public TO authenticated;
 GRANT EXECUTE ON ALL FUNCTIONS IN SCHEMA public TO authenticated;
-GRANT EXECUTE ON ALL FUNCTIONS IN SCHEMA auth TO authenticated;
+-- Auth schema functions are handled by Supabase internally
 
 -- Comment on the migration
 COMMENT ON SCHEMA public IS 'Phase 3: Row Level Security implementation complete with multi-tenant isolation';

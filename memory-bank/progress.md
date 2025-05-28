@@ -1,10 +1,10 @@
 # Progress Tracker: Dental Practice Analytics Dashboard
-*Version: 1.0*
+*Version: 1.2*
 *Created: 2025-05-17*
-*Last Updated: 2025-05-18*
+*Last Updated: 2025-05-28*
 
 ## Project Status
-Overall Completion: ~5% (Development phase in progress)
+Overall Completion: ~25% (Core infrastructure and security layers complete)
 
 ## What Works
 - Project initialized within CursorRIPER Framework.
@@ -26,12 +26,50 @@ Overall Completion: ~5% (Development phase in progress)
     - Supabase Auth setup for user authentication.
     - Basic RLS policies for data isolation conceptualized (implementation pending detailed tasks).
 
+### Major Infrastructure Updates (2025-05-27 - 2025-05-28)
+- **Database Migration to Multi-Tenant UUID Architecture:**
+    - Successfully migrated from single-tenant String-based IDs to multi-tenant UUID-based architecture
+    - All tables now support UUID primary keys with backward compatibility via id_mappings table
+    - Migration completed in 8 phases as documented in docs/migration/complete-migration-summary.md
+    
+- **Row Level Security (RLS) Implementation:**
+    - Comprehensive RLS policies applied to all 21 tables
+    - Helper functions created: get_user_clinics(), has_clinic_access(), is_clinic_admin(), get_user_role()
+    - Performance indexes added for RLS queries
+    - All tables now have row-level security enabled
+    
+- **Database Triggers and Functions:**
+    - Auth sync triggers: Automatically sync auth.users to public.users table
+    - Audit logging system: Comprehensive audit trail for sensitive operations
+    - Data validation triggers: Ensure clinic membership before data modifications
+    - Helper functions for permission checks and user clinic management
+    
+- **Scheduled Jobs Infrastructure:**
+    - pg_cron extension successfully installed and configured
+    - Active scheduled jobs deployed:
+        - Daily aggregation (2 AM): `scheduled_daily_aggregation()`
+        - Weekly reports (3 AM Mondays): `scheduled_weekly_reports()`
+        - Monthly cleanup (4 AM 1st of month): `scheduled_monthly_cleanup()`
+        - Hourly sync check (15 past each hour): Updates last_sync_attempt for active data sources
+        - Daily statistics update (5 AM): Runs ANALYZE on key tables
+        - Weekly materialized view refresh (6 AM Sundays): `refresh_materialized_views()`
+    - Monitoring views for job health and execution history
+    - All jobs verified as active and scheduled in production
+
 ## What's In Progress
-- According to `.ai/TASKS.md`, the project is currently between Phase 1 (Refactoring Setup & Prerequisites - largely superseded by new MVP direction but foundational elements like branching are done) and Phase 2 (Design System Implementation - foundational styling and component usage are implicitly part of dashboard layout).
+- **Database Infrastructure Complete:**
+    - Multi-tenant UUID architecture fully deployed to production
+    - All 23 tables migrated and verified with proper constraints
+    - RLS policies active on all sensitive tables (users, clinics, providers, goals, metric_values, audit_logs)
+    - Helper functions operational: get_user_clinics(), has_clinic_access(), is_clinic_admin(), get_user_role()
+    - Audit logging system capturing all sensitive operations
+    - Database triggers ensuring data integrity and auth synchronization
+    - Scheduled jobs running on defined schedules for maintenance and aggregation
 - The immediate next steps align with starting PRD Phase MVP-2: Core Google Sheets Integration & Data Pipeline, focusing on: 
     - Implementing pre-defined column mapping templates for Google Sheets.
     - Building the initial data transformation and synchronization pipeline using Supabase Edge Functions.
     - Storing standardized data in metrics tables (as defined in `.dev/database-schema-metrics.md`).
+    - Updating existing API routes and services to work with the new UUID-based schema
 
 ## What's Left To Build (MVP Focus)
 (Based on `.dev/prd-mvp.md` and `.dev/mvp.md`)
@@ -64,10 +102,21 @@ Overall Completion: ~5% (Development phase in progress)
 ## Known Issues
 - Some tasks in `.ai/TASKS.md` (e.g., task002-task007 related to extensive refactoring) may need re-evaluation or archiving due to the strong pivot to the new MVP plan. The current MVP plan implies a more greenfield approach for many features.
 - Placeholder pages for many navigation links will result in 404s until implemented.
+- Migration Learnings:
+    - Supabase MCP has limitations with complex DDL statements requiring alternative approaches
+    - Auth schema permissions require using public schema for custom functions
+    - Supabase CLI is the most reliable method for applying complex migrations
+    - pg_cron job management requires specific column names (jobid not job_id)
 
 ## Decisions Made
 - Sidebar navigation structure aligned with MVP core feature areas.
 - Architectural decision to heavily leverage Supabase Edge Functions for backend processing for the MVP.
+- Database Migration Decisions:
+    - Use public schema for all custom functions to avoid auth schema permission issues
+    - Implement comprehensive RLS with helper functions for performance
+    - Use table aliases in RLS policies to prevent ambiguous column references
+    - Archive Prisma migrations to prevent re-execution by Supabase CLI
+    - Implement robust error handling in migration scripts for idempotency
 
 ## Milestones (Aligned with MVP Phases from `.dev/prd-mvp.md`)
 - **Milestone 1: MVP Phase 1 - Foundation & Core Setup** - STATUS: Partially Complete (Project infra, DB schema conceptualized, Auth setup, initial Google Sheets API connection).
