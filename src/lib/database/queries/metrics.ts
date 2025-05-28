@@ -4,8 +4,8 @@
  */
 
 import { prisma } from '../client'
-import { AuthContext, validateClinicAccess, getUserClinicRole } from '../auth-context'
-import { Prisma } from '@/generated/prisma'
+import { type AuthContext, validateClinicAccess, getUserClinicRole } from '../auth-context'
+import type { Prisma } from '@/generated/prisma'
 
 export interface CreateMetricInput {
   metricDefinitionId: string
@@ -370,7 +370,7 @@ export async function getMetricStatistics(
   }
 
   // Calculate statistics
-  const values = metrics.map(m => parseFloat(m.value)).filter(v => !isNaN(v))
+  const values = metrics.map(m => Number.parseFloat(m.value)).filter(v => !isNaN(v))
   const sum = values.reduce((acc, val) => acc + val, 0)
   const avg = sum / values.length
   const min = Math.min(...values)
@@ -439,7 +439,7 @@ async function computeAggregations(
 
   // Calculate aggregations
   const aggregations = Array.from(groupedMetrics.entries()).map(([periodKey, periodMetrics]) => {
-    const values = periodMetrics.map(m => parseFloat(m.value)).filter(v => !isNaN(v))
+    const values = periodMetrics.map(m => Number.parseFloat(m.value)).filter(v => !isNaN(v))
     const sum = values.reduce((acc, val) => acc + val, 0)
     const avg = values.length > 0 ? sum / values.length : 0
     const min = values.length > 0 ? Math.min(...values) : 0

@@ -7,7 +7,7 @@ import { ZodError } from 'zod'
 export class ApiError extends Error {
   constructor(
     message: string,
-    public statusCode: number = 500,
+    public statusCode = 500,
     public code?: string
   ) {
     super(message)
@@ -57,11 +57,11 @@ export class ApiResponse {
  */
 export function getPaginationParams(searchParams: URLSearchParams) {
   const limit = Math.min(
-    parseInt(searchParams.get('limit') || '10'),
+    Number.parseInt(searchParams.get('limit') || '10'),
     100
   )
   const page = Math.max(
-    parseInt(searchParams.get('page') || '1'),
+    Number.parseInt(searchParams.get('page') || '1'),
     1
   )
   const offset = (page - 1) * limit

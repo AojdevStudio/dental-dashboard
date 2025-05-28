@@ -472,11 +472,12 @@ const config = {
     "db"
   ],
   "activeProvider": "postgresql",
+  "postinstall": false,
   "inlineDatasources": {
     "db": {
       "url": {
         "fromEnvVar": "DATABASE_URL",
-        "value": "postgresql://postgres.yovbdmjwrrgardkgrenc:4Fd5TiV9nrJxWt@aws-0-us-east-2.pooler.supabase.com:6543/postgres?pgbouncer=true"
+        "value": null
       }
     }
   },

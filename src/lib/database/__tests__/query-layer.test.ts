@@ -2,7 +2,7 @@
  * @vitest-environment node
  */
 import { describe, it, expect, beforeEach, vi } from 'vitest'
-import { AuthContext } from '../auth-context'
+import type { AuthContext } from '../auth-context'
 import * as userQueries from '../queries/users'
 import * as clinicQueries from '../queries/clinics'
 import * as metricQueries from '../queries/metrics'

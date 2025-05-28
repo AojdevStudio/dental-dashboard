@@ -4,8 +4,8 @@
  */
 
 import { prisma } from '../client'
-import { AuthContext, validateClinicAccess, getUserClinicRole } from '../auth-context'
-import { Prisma } from '@/generated/prisma'
+import { type AuthContext, validateClinicAccess, getUserClinicRole } from '../auth-context'
+import type { Prisma } from '@/generated/prisma'
 
 export interface CreateGoalInput {
   metricDefinitionId: string
@@ -426,7 +426,7 @@ async function calculateGoalProgress(goal: any) {
   if (metrics.length === 0) {
     return {
       currentValue: 0,
-      targetValue: parseFloat(goal.targetValue),
+      targetValue: Number.parseFloat(goal.targetValue),
       percentage: 0,
       trend: 'neutral' as const,
       daysRemaining: Math.ceil((goal.endDate.getTime() - Date.now()) / (1000 * 60 * 60 * 24)),
@@ -434,10 +434,10 @@ async function calculateGoalProgress(goal: any) {
   }
 
   // Calculate current value based on metric type
-  const values = metrics.map(m => parseFloat(m.value)).filter(v => !isNaN(v))
+  const values = metrics.map(m => Number.parseFloat(m.value)).filter(v => !isNaN(v))
   const currentValue = values.reduce((acc, val) => acc + val, 0) // Sum for now, could be avg
 
-  const targetValue = parseFloat(goal.targetValue)
+  const targetValue = Number.parseFloat(goal.targetValue)
   const percentage = targetValue > 0 ? (currentValue / targetValue) * 100 : 0
 
   // Calculate trend
@@ -494,13 +494,13 @@ async function calculateTargetFromFormula(
     })
 
     const previousSum = previousMetrics
-      .map(m => parseFloat(m.value))
+      .map(m => Number.parseFloat(m.value))
       .filter(v => !isNaN(v))
       .reduce((acc, val) => acc + val, 0)
 
     // Apply formula multiplier
     const multiplierMatch = formula.match(/\* ([\d.]+)/)
-    const multiplier = multiplierMatch ? parseFloat(multiplierMatch[1]) : 1
+    const multiplier = multiplierMatch ? Number.parseFloat(multiplierMatch[1]) : 1
 
     return String(Math.round(previousSum * multiplier))
   }

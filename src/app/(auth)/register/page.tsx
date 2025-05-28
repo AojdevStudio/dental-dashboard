@@ -10,7 +10,7 @@
  * provide a complete user registration flow, including email verification.
  */
 
-import { RegisterForm } from "@/components/auth/register-form";
+import { RegisterFormWorking } from "@/components/auth/register-form-working";
 import type { Metadata } from "next";
 
 /**
@@ -25,7 +25,7 @@ export const metadata: Metadata = {
 /**
  * Sign Up Page Component
  *
- * Renders the registration page using a pre-built ModernStunningSignUp component
+ * Renders the registration page using a working RegisterForm component
  * that handles the registration form, validation, and submission process.
  *
  * The component manages:
@@ -34,8 +34,8 @@ export const metadata: Metadata = {
  * - Email verification process initiation
  * - Error handling and user feedback
  *
- * @returns {JSX.Element} The rendered sign up page with the ModernStunningSignUp component
+ * @returns {JSX.Element} The rendered sign up page with the working RegisterForm component
  */
 export default function SignUpPage() {
-  return <RegisterForm />;
+  return <RegisterFormWorking />;
 }

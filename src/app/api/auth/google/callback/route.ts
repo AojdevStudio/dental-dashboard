@@ -10,7 +10,7 @@
  * not by our authenticated users. The state parameter contains the dataSourceId which we validate.
  */
 
-import { NextRequest, NextResponse } from "next/server"
+import { type NextRequest, NextResponse } from "next/server"
 import { handleAuthCallback } from "@/services/google/auth"
 import * as googleSheetsQueries from '@/lib/database/queries/google-sheets'
 import { getAuthContextByAuthId } from '@/lib/database/auth-context'
@@ -40,8 +40,8 @@ export async function GET(request: NextRequest) {
   const state = searchParams.get("state") // This should be the dataSourceId
   const error = searchParams.get("error")
 
-  // Redirect base URL - can be adjusted to a more specific success/error page
-  const redirectBaseUrl = new URL("/dashboard/settings", request.nextUrl.origin)
+  // Redirect base URL - go back to the test page for now
+  const redirectBaseUrl = new URL("/integrations/google-sheets/test", request.nextUrl.origin)
 
   if (error) {
     console.error("Google OAuth error:", error)

@@ -3,9 +3,9 @@
  * Provides authentication and auth context for API routes
  */
 
-import { NextRequest, NextResponse } from 'next/server'
+import { type NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
-import { getAuthContext, AuthContext } from '@/lib/database/auth-context'
+import { getAuthContext, type AuthContext } from '@/lib/database/auth-context'
 import { cookies } from 'next/headers'
 import { handleApiError } from '@/lib/api/utils'
 

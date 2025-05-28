@@ -80,7 +80,7 @@ export function Sidebar() {
   const pathname = usePathname();
 
   return (
-    <nav className="flex flex-col space-y-1 px-2 py-4">
+    <nav className="flex flex-col space-y-1 px-3 sm:px-4 py-4">
       {navItems.map((item) => {
         // Check if the current path matches this item's path
         const isActive = pathname === item.href || pathname.startsWith(`${item.href}/`);

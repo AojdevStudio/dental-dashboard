@@ -95,7 +95,7 @@ class DataMigration {
       }
 
       // Get or create checkpoint
-      let checkpoint = this.checkpoints.get(table) || {
+      const checkpoint = this.checkpoints.get(table) || {
         phase: 'uuid_migration',
         table,
         lastProcessedId: null,
@@ -207,7 +207,7 @@ class DataMigration {
         return
       }
 
-      let checkpoint = this.checkpoints.get(table) || {
+      const checkpoint = this.checkpoints.get(table) || {
         phase: 'uuid_migration',
         table,
         lastProcessedId: null,
@@ -313,7 +313,7 @@ class DataMigration {
         return
       }
 
-      let checkpoint = this.checkpoints.get(table) || {
+      const checkpoint = this.checkpoints.get(table) || {
         phase: 'uuid_migration',
         table,
         lastProcessedId: null,

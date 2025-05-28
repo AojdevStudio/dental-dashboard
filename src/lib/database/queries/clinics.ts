@@ -4,8 +4,8 @@
  */
 
 import { prisma } from '../client'
-import { AuthContext, validateClinicAccess, isClinicAdmin } from '../auth-context'
-import { Prisma } from '@/generated/prisma'
+import { type AuthContext, validateClinicAccess, isClinicAdmin } from '../auth-context'
+import type { Prisma } from '@/generated/prisma'
 
 export interface CreateClinicInput {
   name: string
