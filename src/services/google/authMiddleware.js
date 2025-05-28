@@ -1,3 +1,4 @@
+import { PrismaClient } from "@prisma/client";
 /**
  * Google Authentication Middleware
  *
@@ -10,7 +11,6 @@
  * Google OAuth tokens and their expiry information.
  */
 import { refreshAccessToken } from "./auth";
-import { PrismaClient } from "@prisma/client";
 
 const prisma = new PrismaClient();
 

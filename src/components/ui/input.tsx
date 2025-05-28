@@ -1,6 +1,6 @@
 /**
  * @fileoverview Input Component
- * 
+ *
  * This file implements a reusable input component with consistent styling and accessibility features.
  * The input component is designed to work within forms and supports all standard HTML input attributes.
  * It includes proper styling for different states including focus, disabled, and validation states.
@@ -14,31 +14,31 @@ import { cn } from "@/lib/utils";
 
 /**
  * Input component with consistent styling
- * 
+ *
  * A styled input component that supports all standard HTML input attributes.
  * Provides consistent styling across the application with proper states for
  * focus, disabled, and validation.
- * 
+ *
  * @component
  * @param {Object} props - Component props
  * @param {string} [props.className] - Additional CSS class names
  * @param {string} [props.type='text'] - HTML input type attribute
  * @param {React.InputHTMLAttributes<HTMLInputElement>} props.props - All standard input attributes
  * @returns {JSX.Element} The input element
- * 
+ *
  * @example
  * // Basic text input
  * <Input placeholder="Enter your name" />
- * 
+ *
  * @example
  * // Email input with validation
- * <Input 
- *   type="email" 
+ * <Input
+ *   type="email"
  *   placeholder="Email address"
  *   required
  *   aria-invalid={emailError ? true : undefined}
  * />
- * 
+ *
  * @example
  * // Password input
  * <Input type="password" placeholder="Password" />

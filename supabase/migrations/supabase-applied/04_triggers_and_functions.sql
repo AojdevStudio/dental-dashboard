@@ -1,0 +1,3 @@
+-- This file has been moved to 05_triggers_and_functions.sql
+-- due to version conflict with 04_scheduled_jobs_setup.sql
+-- Please see 05_triggers_and_functions.sql for the actual migration

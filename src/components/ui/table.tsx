@@ -1,6 +1,6 @@
 /**
  * @fileoverview Table Component
- * 
+ *
  * Accessible table components for displaying structured data
  * with consistent styling and responsive behavior.
  */
@@ -11,7 +11,7 @@ import { cn } from "@/lib/utils";
 
 /**
  * Main table container with overflow handling
- * 
+ *
  * @param {React.HTMLAttributes<HTMLTableElement>} props - Table element props
  * @returns {JSX.Element} The table container
  */
@@ -26,7 +26,7 @@ Table.displayName = "Table";
 
 /**
  * Table header container for column headings
- * 
+ *
  * @param {React.HTMLAttributes<HTMLTableSectionElement>} props - Table header props
  * @returns {JSX.Element} The table header element
  */
@@ -38,7 +38,7 @@ TableHeader.displayName = "TableHeader";
 
 /**
  * Table body container for data rows
- * 
+ *
  * @param {React.HTMLAttributes<HTMLTableSectionElement>} props - Table body props
  * @returns {JSX.Element} The table body element
  */
@@ -52,7 +52,7 @@ TableBody.displayName = "TableBody";
 
 /**
  * Table footer for summary rows or actions
- * 
+ *
  * @param {React.HTMLAttributes<HTMLTableSectionElement>} props - Table footer props
  * @returns {JSX.Element} The table footer element
  */
@@ -73,7 +73,7 @@ TableFooter.displayName = "TableFooter";
 
 /**
  * Table row with hover and selection states
- * 
+ *
  * @param {React.HTMLAttributes<HTMLTableRowElement>} props - Table row props
  * @returns {JSX.Element} The table row element
  */
@@ -93,7 +93,7 @@ TableRow.displayName = "TableRow";
 
 /**
  * Table heading cell with styling for column headers
- * 
+ *
  * @param {React.ThHTMLAttributes<HTMLTableCellElement>} props - Table heading props
  * @returns {JSX.Element} The table heading cell
  */
@@ -114,7 +114,7 @@ TableHead.displayName = "TableHead";
 
 /**
  * Table data cell for row content
- * 
+ *
  * @param {React.TdHTMLAttributes<HTMLTableCellElement>} props - Table cell props
  * @returns {JSX.Element} The table data cell
  */
@@ -135,7 +135,7 @@ TableCell.displayName = "TableCell";
 
 /**
  * Table caption for accessible table descriptions
- * 
+ *
  * @param {React.HTMLAttributes<HTMLTableCaptionElement>} props - Table caption props
  * @returns {JSX.Element} The table caption element
  */

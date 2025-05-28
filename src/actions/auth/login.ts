@@ -1,12 +1,12 @@
 "use server";
 
-import { createClient } from "@/lib/supabase/server";
+import { createClient } from "@/lib/auth/session";
 import { redirect } from "next/navigation";
 
 /**
  * Type definition for login credentials.
  * Contains the required fields for authenticating a user with email and password.
- * 
+ *
  * @typedef {Object} LoginData
  * @property {string} email - The user's email address for authentication
  * @property {string} password - The user's password for authentication

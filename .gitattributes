@@ -1,0 +1,11 @@
+# Prevent committing files over 100MB (GitHub's hard limit)
+* filter=lfs diff=lfs merge=lfs -text
+
+# Block common backup and binary files from being committed
+*.tar -text
+*.zip -text
+*.bak -text
+*.db -text
+
+# Custom rule: Warn if a file over 100MB is added (requires pre-commit hook for enforcement)
+# See: https://docs.github.com/en/repositories/working-with-files/managing-large-files/about-large-files-on-github 

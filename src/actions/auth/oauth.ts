@@ -1,11 +1,11 @@
 "use server";
 
-import { createClient } from "@/lib/supabase/server";
+import { createClient } from "@/lib/auth/session";
 
 /**
  * Supported OAuth providers for authentication.
  * The application currently supports Google, GitHub, and Azure as identity providers.
- * 
+ *
  * @typedef {('google'|'github'|'azure')} Provider
  */
 export type Provider = "google" | "github" | "azure";

@@ -1,9 +1,9 @@
 /**
  * @fileoverview Accordion Component
- * 
+ *
  * This file implements an accessible accordion component based on Radix UI's Accordion primitive.
  * An accordion is a vertically stacked set of interactive headings that each reveal a section of content.
- * 
+ *
  * The implementation follows the WAI-ARIA design pattern for accordions and includes animations
  * for expanding and collapsing content sections. It's fully keyboard navigable and supports
  * all standard accordion behaviors including single and multiple expanded sections.
@@ -11,15 +11,15 @@
 
 "use client";
 
-import type * as React from "react";
 import * as AccordionPrimitive from "@radix-ui/react-accordion";
 import { ChevronDownIcon } from "lucide-react";
+import type * as React from "react";
 
 import { cn } from "@/lib/utils";
 
 /**
  * Root accordion component that contains all accordion items
- * 
+ *
  * @component
  * @param {React.ComponentProps<typeof AccordionPrimitive.Root>} props - Props extending Radix UI's Accordion Root
  * @param {string} [props.type="single"] - Whether only one item can be opened at a time ("single") or multiple ("multiple")
@@ -35,7 +35,7 @@ function Accordion({ ...props }: React.ComponentProps<typeof AccordionPrimitive.
 
 /**
  * Individual accordion item containing a header/trigger and content section
- * 
+ *
  * @component
  * @param {Object} props - Component props
  * @param {string} [props.className] - Additional CSS class names
@@ -59,10 +59,10 @@ function AccordionItem({
 
 /**
  * Clickable trigger element that toggles the visibility of its associated accordion content
- * 
+ *
  * The trigger includes a chevron icon that rotates to indicate the expanded/collapsed state.
  * It's wrapped in an AccordionHeader for proper accessibility semantics and keyboard navigation.
- * 
+ *
  * @component
  * @param {Object} props - Component props
  * @param {string} [props.className] - Additional CSS class names
@@ -94,10 +94,10 @@ function AccordionTrigger({
 
 /**
  * Content section of an accordion item that is shown or hidden based on the expanded state
- * 
+ *
  * Includes smooth animations for expanding and collapsing. The content is wrapped in a div
  * with padding to provide consistent spacing within the accordion.
- * 
+ *
  * @component
  * @param {Object} props - Component props
  * @param {string} [props.className] - Additional CSS class names for the inner content div
@@ -123,7 +123,7 @@ function AccordionContent({
 
 /**
  * Export all accordion components for use throughout the application
- * 
+ *
  * Typical usage:
  * ```tsx
  * <Accordion type="single" collapsible>

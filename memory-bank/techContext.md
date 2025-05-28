@@ -1,23 +1,23 @@
 # Technical Context: Dental Practice Analytics Dashboard
 *Version: 1.0*
 *Created: 2025-05-17*
-*Last Updated: 2025-05-17*
+*Last Updated: {{Current Date}}*
 
 ## Technology Stack
 - **Package Manager:** pnpm (REQUIRED)
-- **Frontend Framework:** Next.js
+- **Frontend Framework:** Next.js (App Router)
 - **UI Component Library:** shadcn/ui
 - **Styling:** Tailwind CSS
 - **Charting Library:** Recharts
-- **Backend API:** Next.js API Routes
+- **Backend Logic:** Next.js API Routes and **Supabase Edge Functions** (Primary for complex calculations, data transformations, and business logic as per MVP plan)
 - **Database ORM:** Prisma
 - **Database:** Supabase PostgreSQL
 - **Authentication:** Supabase Auth
-- **State Management:** React Query & Zustand
-- **Testing Framework:** Vite & Vitest
+- **State Management:** React Query (TanStack Query) for server state; Zustand for minimal global UI state if necessary.
+- **Testing Framework:** Vitest
 - **Deployment Platform:** Vercel
 - **Additional Libraries:**
-    - Google API Client Library (for Google Sheets integration) - Successfully utilized for authentication, spreadsheet discovery, and data extraction as per Task 4.
+    - Google API Client Library (`googleapis`) - For Google Sheets integration (authentication, discovery, data extraction).
     - date-fns (for date manipulation)
     - Zod (for runtime type validation)
     - Axios (for HTTP requests outside of Next.js)
@@ -61,9 +61,11 @@
 - Must use pnpm as the package manager.
 - Database must be Supabase PostgreSQL.
 - ORM must be Prisma.
-- Testing framework must be Vite/Vitest.
-- Initial phase is read-only data from Google Sheets.
-- Future phase will introduce form-based data entry.
+- Testing framework must be Vitest.
+- **MVP is read-only:** All data originates from Google Sheets; no form-based data entry in MVP.
+- **Fixed Dashboards:** No user customization of dashboard layouts or widgets in MVP.
+- **Limited Historical Data:** MVP focuses on manageable datasets (e.g., < 1000 rows for initial import).
+- **Pre-defined Column Mapping:** Complex UI for custom column mapping is out of scope for MVP; focus on pre-defined templates.
 
 ## Build and Deployment
 - **Build Process:** Utilized Next.js build process (`next build`), managed via pnpm scripts and Turborepo if multiple packages/apps are involved in the monorepo.

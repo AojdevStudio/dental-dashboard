@@ -1,6 +1,6 @@
 "use server";
 
-import { createClient } from "@/lib/supabase/server";
+import { createClient } from "@/lib/auth/session";
 import { redirect } from "next/navigation";
 
 /**
@@ -34,13 +34,13 @@ export async function getUser() {
  * If the user is not authenticated, they are redirected to the login page.
  *
  * @returns {Promise<User>} The authenticated user object
- * @throws {Redirect} Redirects to /auth/login if not authenticated
+ * @throws {Redirect} Redirects to /login if not authenticated
  */
 export async function requireAuth() {
   const { user } = await getUser();
 
   if (!user) {
-    redirect("/auth/login");
+    redirect("/login");
   }
 
   return user;
@@ -51,10 +51,10 @@ export async function requireAuth() {
  * This invalidates the user's session with Supabase Auth.
  *
  * @returns {Promise<void>}
- * @throws {Redirect} Always redirects to /auth/login after sign out
+ * @throws {Redirect} Always redirects to /login after sign out
  */
 export async function signOut() {
   const supabase = await createClient();
   await supabase.auth.signOut();
-  redirect("/auth/login");
+  redirect("/login");
 }

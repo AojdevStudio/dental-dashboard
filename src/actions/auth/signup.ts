@@ -1,12 +1,12 @@
 "use server";
 
-import { createClient } from "@/lib/supabase/server";
+import { createClient } from "@/lib/auth/session";
 import { redirect } from "next/navigation";
 
 /**
  * Type definition for user registration data.
  * Contains the required fields for creating a new user account.
- * 
+ *
  * @typedef {Object} SignupData
  * @property {string} email - The email address for the new user account
  * @property {string} password - The password for the new user account
@@ -24,7 +24,7 @@ export type SignupData = {
  * @param {SignupData} userData - The user registration data
  * @param {string} userData.email - The email address for the new user account
  * @param {string} userData.password - The password for the new user account
- * @returns {Promise<{success?: boolean, message?: string, error?: string}>} 
+ * @returns {Promise<{success?: boolean, message?: string, error?: string}>}
  *   Object containing success status, message, or error if registration fails
  */
 export async function signUp({ email, password }: SignupData) {

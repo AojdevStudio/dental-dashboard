@@ -1,70 +1,65 @@
 # Project Brief: Dental Practice Analytics Dashboard
 *Version: 1.0*
 *Created: 2025-05-17*
-*Last Updated: 2025-05-17*
+*Last Updated: {{Current Date}}*
 
 ## Project Overview
-The Dental Practice Analytics Dashboard is a centralized web application designed to visualize and analyze key performance indicators (KPIs) from dental practices. It connects to existing Google Spreadsheets via API, transforms raw data into actionable insights, and presents them through intuitive visualizations. The system will initially serve as a read-only dashboard and eventually evolve into a complete reporting platform with form-based data entry, replacing the current spreadsheet-based workflow. This solution addresses the critical need for cohesive data analysis across multiple dental practices and provides real-time performance visibility against established goals.
+The Dental Practice Analytics Dashboard (MVP) is a centralized web application designed to visualize and analyze key performance indicators (KPIs) from dental practices. It connects to existing Google Spreadsheets via API, transforms raw data into actionable insights, and presents them through intuitive, **fixed-layout** visualizations. The MVP system will serve as a **read-only dashboard**, addressing the critical need for cohesive data analysis and real-time performance visibility against established goals. This document provides a high-level overview; detailed specifications are in `.dev/` and `.ai/plans/` directories.
 
-## Core Requirements
-- Securely connect to Google Sheets API using OAuth.
-- Provide a visual interface for mapping spreadsheet columns to system metrics.
-- Automate data synchronization with configurable frequency.
-- Implement a data transformation pipeline for normalizing and standardizing information.
-- Support historical data import and incremental updates.
-- Display interactive dashboards for financial metrics (production, collections, payments).
-- Enable provider performance analysis (production, treatment planning, procedure statistics).
-- Show patient metrics (active patients, new patients, recare rates).
-- Provide appointment analytics (total appointments, hygiene breakdown, cancellation rates).
-- Track call performance (unscheduled treatment, hygiene reactivation).
-- Report on treatment plan acceptance and conversion.
-- Allow multi-level filtering: clinic-level, provider-specific, time-based (daily, weekly, monthly, quarterly, annual).
-- Implement goal tracking and variance reporting.
-- Provide trend analysis with historical comparisons.
-- Offer role-based dashboard templates.
-- Allow user-configurable widgets and layouts.
-- Enable saved views for frequently accessed reports.
-- Provide export capabilities for presentations and meetings.
-- (Future Phase) Develop a custom form builder for different data collection needs.
-- (Future Phase) Implement data validation and business rule enforcement for form-based entry.
-- (Future Phase) Support gradual migration from spreadsheet-based to form-based reporting.
+## Core MVP Requirements
+The MVP will focus on the following core features, as detailed in `.dev/mvp.md`, `.dev/feature-spec.md`, and `.ai/plans/PLAN.MD`:
 
-## Success Criteria
-- Real-time visibility into practice performance against established goals.
-- Cohesive data analysis across multiple dental practices.
-- Reduction in manual data aggregation and reporting efforts.
-- Improved operational efficiency through actionable insights.
-- Successful replacement of spreadsheet-based workflow with form-based data entry (in later phases).
-- High adoption and satisfaction rates among Office Managers, Dentists/Providers, and Front Desk Staff.
+1.  **Google Sheets Integration Core:** Secure OAuth connection to Google Sheets API with basic data extraction and standardized metric mapping for essential dental practice KPIs.
+2.  **Essential KPI Dashboard:** Fixed dashboard layouts displaying core dental practice metrics (financial, patient, appointment, provider, call tracking) with basic filtering and time period selection.
+3.  **Multi-Tenant User Management:** Role-based access control (RBAC) supporting multiple dental practices with provider-specific data isolation.
+4.  **Data Synchronization & Processing (MVP Scope):** Automated background processing for Google Sheets data transformation and essential metric calculations.
+5.  **Goal Tracking & Reporting (Basic MVP):** Basic goal setting for key metrics and performance tracking against established targets.
+
+## Success Criteria for MVP
+-   Users can securely connect their Google Sheets.
+-   Core KPIs (as defined for MVP) are accurately extracted, processed, and stored.
+-   Users can view their relevant core KPIs on role-based, fixed-layout dashboards.
+-   Basic filtering (time, clinic, provider) functions correctly.
+-   System is stable and performs adequately for up to 50 concurrent users.
+-   Multi-tenant data isolation is secure.
 
 ## Scope
-### In Scope
-- Integration with Google Sheets for data extraction.
-- Visualization of key dental practice KPIs.
-- Multi-level filtering and analysis.
-- Customizable dashboards and reporting features.
-- User roles and permissions (Office Manager, Dentist/Provider, Front Desk Staff, Admin).
-- Initial read-only dashboard functionality.
-- Future development of form-based data entry.
+### In Scope (MVP)
+-   Secure Google Sheets API connection, data extraction, and pre-defined mapping templates.
+-   Fixed, role-based dashboards for essential KPIs (financial, patient, appointments, provider, call tracking).
+-   Basic filtering (time, clinic, provider).
+-   Multi-tenant user management with RLS.
+-   Automated data sync and MVP-scoped metric calculations (Supabase Edge Functions).
+-   Basic goal setting and progress display on fixed dashboards.
+-   Read-only dashboard functionality.
 
-### Out of Scope
-- Direct integration with Practice Management Software (PMS) beyond Google Sheets.
-- Patient scheduling or direct patient communication tools.
-- Billing or insurance claim processing.
-- Advanced AI-driven predictive analytics (beyond trend analysis).
+### Out of Scope (MVP)
+The following are explicitly **out of scope** for this MVP, as per `.dev/prd-mvp.md`:
+-   **Advanced Dashboard Customization:** User-configurable widgets, drag-and-drop layouts, saved views.
+-   **Advanced Filtering/Analysis:** Complex trend analysis beyond simple historical views, deep drill-downs.
+-   **Form-Based Data Entry:** All data comes from Google Sheets for MVP.
+-   **Advanced Goal Features:** Complex goal hierarchies, detailed forecasting.
+-   **Extensive Export Capabilities:** Full PDF/CSV export might be deferred or simplified.
+-   **Large-Scale Historical Data Import:** MVP focuses on manageable datasets (e.g., < 1000 rows initially).
+-   **Complex UI for Column Mapping:** Focus on pre-defined templates.
+-   Direct integration with Practice Management Software (PMS) beyond Google Sheets.
+-   Patient scheduling or direct patient communication tools.
+-   Billing or insurance claim processing.
+-   Advanced AI-driven predictive analytics.
 
-## Timeline
-(Based on PRD - Development Phases)
-- **Phase 1: Foundation & Google Sheets Integration:** 4-6 weeks
-- **Phase 2: Data Processing & Storage:** 3-4 weeks
-- **Phase 3: Dashboard Foundation & Core Visualizations:** 4-5 weeks
-- **Phase 4: Advanced Visualizations & Features:** 3-4 weeks
-- **Phase 5: Form-Based Reporting (Future Phase):** 5-6 weeks
+## Timeline (MVP Development Phases)
+Based on `.dev/prd-mvp.md`, high-level MVP phases:
 
-## Stakeholders
-- **Office Managers:** Overall practice performance monitoring, financial oversight, staff management.
-- **Dentists/Providers:** Individual performance metrics, treatment planning effectiveness, patient-related statistics.
-- **Front Desk Staff:** Appointment metrics, patient statistics, call performance data.
+*   **Phase MVP-1: Foundation & Core Setup** (Partially Completed: Project infra, DB schema, Auth, Initial Google Sheets API)
+*   **Phase MVP-2: Core Google Sheets Integration & Data Pipeline** (Refine connection, implement mapping, build transformation pipeline)
+*   **Phase MVP-3: Essential KPI Calculation & Fixed Dashboards** (Develop backend logic for KPIs, implement fixed dashboards and basic filtering)
+*   **Phase MVP-4: Basic Goal Tracking & User Management Refinement** (Implement MVP goal tracking, refine user management, test RLS)
+*   **Phase MVP-5: Testing, Refinement & Deployment Prep** (End-to-end testing, performance testing, documentation, deployment prep)
+
+## Stakeholders (Target Audience for MVP)
+-   **Office Managers:** Responsible for overall practice performance monitoring and financial oversight.
+-   **Dentists/Providers:** Need visibility into their individual core performance metrics.
+-   **Front Desk Staff:** Require access to essential appointment and call metrics.
 
 ---
 

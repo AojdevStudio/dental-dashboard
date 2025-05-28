@@ -3,8 +3,8 @@
 ## Branch Structure
 
 - **Main Development Branch**: `main`
-- **Primary Feature Branch**: `feature/mvp-structure-refactor`
-- **Sub-branches**: Optional for each major incremental step, following the naming convention: `feature/mvp-structure-refactor/component-name`
+- **Primary Feature Branch**: `refactor`
+- **Sub-branches**: Optional for each major incremental step, following the naming convention: `refactor-component-name`
 
 ## Pull Request Strategy
 
@@ -12,8 +12,9 @@
 
 1. **Creation**: Create sub-branches directly from the main feature branch
    ```bash
-   git checkout feature/mvp-structure-refactor
-   git checkout -b feature/mvp-structure-refactor/app-layout
+   git checkout refactor
+   git checkout -b refactor-app-directory
+   git push --set-upstream origin refactor-app-directory
    ```
 
 2. **Development Workflow**:
@@ -21,11 +22,11 @@
    - Commit regularly with descriptive messages
    - Push changes to remote regularly for backup and visibility
    ```bash
-   git push -u origin feature/mvp-structure-refactor/app-layout
+   git push origin refactor-app-directory
    ```
 
 3. **Pull Request Process**:
-   - When a sub-branch's work is complete, create a pull request targeting the main feature branch (`feature/mvp-structure-refactor`)
+   - When a sub-branch's work is complete, create a pull request targeting the main feature branch (`refactor`)
    - Use a descriptive title that clearly identifies the component/area refactored
    - Include in the PR description:
      - Summary of changes made
@@ -35,7 +36,7 @@
    - Request review from team members if applicable
 
 4. **Merging**:
-   - After approval, merge the sub-branch PR into `feature/mvp-structure-refactor`
+   - After approval, merge the sub-branch PR into `refactor`
    - Use a standard merge (not squash) to preserve the commit history
    - Delete the sub-branch after successful merge
 
@@ -43,12 +44,12 @@
 
 1. **Final Testing**:
    - Once all refactoring steps are complete and the main feature branch contains all changes
-   - Perform thorough testing on the `feature/mvp-structure-refactor` branch
+   - Perform thorough testing on the `refactor` branch
    - Run all tests and verify the application functions correctly
    - Check for any regression issues or conflicts
 
 2. **Main PR Process**:
-   - Create a pull request from `feature/mvp-structure-refactor` to the main development branch (`main`)
+   - Create a pull request from `refactor` to the main development branch (`main`)
    - Use a comprehensive PR title that indicates the complete refactoring
    - Include in the PR description:
      - Overview of all major changes
@@ -78,4 +79,29 @@ For all PRs, reviewers should check:
 Link related issues to PRs using GitHub's linking syntax in PR descriptions or commit messages:
 - "Fixes #123" 
 - "Resolves #123"
-- "Relates to #123" 
+- "Relates to #123"
+
+# App directory
+git checkout refactor
+git checkout -b refactor-app-directory
+git push --set-upstream origin refactor-app-directory
+
+# Components directory
+git checkout refactor
+git checkout -b refactor-components-directory
+git push --set-upstream origin refactor-components-directory
+
+# Lib directory
+git checkout refactor
+git checkout -b refactor-lib-directory
+git push --set-upstream origin refactor-lib-directory
+
+# Aux directories
+git checkout refactor
+git checkout -b refactor-aux-directories
+git push --set-upstream origin refactor-aux-directories
+
+# Actions and services
+git checkout refactor
+git checkout -b refactor-actions-services
+git push --set-upstream origin refactor-actions-services 

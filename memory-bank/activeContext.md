@@ -1,92 +1,63 @@
 # Active Context: Dental Practice Analytics Dashboard
 *Version: 1.0*
 *Created: 2025-05-17*
-*Last Updated: 2025-05-18T15:15:00Z*
-*Current RIPER Mode: EXECUTE
+*Last Updated: {{Current Date}}*
+*Current RIPER Mode: PLAN (Transitioning to EXECUTE)*
 
 ## Active Context (RIPER Workflow)
 
-**Current Mode:** EXECUTE
-**Current Focus:** Implementing the dashboard layout and navigation structure (Task 7).
-**Key Objectives:** Creating a responsive dashboard layout with proper navigation that aligns with dental practice KPI requirements.
+**Current Mode:** PLAN (Completed memory updates, preparing for EXECUTE)
+**Current Focus:** Transitioning to implement the Core Google Sheets Integration & Data Pipeline (PRD Phase MVP-2).
+**Key Objectives:** 
+- Implement pre-defined column mapping templates for Google Sheets data.
+- Develop the data transformation pipeline using Supabase Edge Functions.
+- Ensure extracted and transformed data is correctly stored in the designated Supabase tables (`financial_metrics`, `patient_metrics`, etc., as per `.dev/database-schema-metrics.md`).
 
 **Relevant Files & Rules:**
-- `src/app/dashboard/layout.tsx` (Dashboard layout with responsive design)
-- `src/components/ui/sidebar.tsx` (Sidebar navigation component)
-- `memory-bank/systemPatterns.md` (Updated with navigation structure documentation)
-- PRD requirements for visualization categories and navigation needs
+- `.dev/prd-mvp.md` (Overall MVP Plan)
+- `.dev/mvp.md` (MVP Feature Details)
+- `.dev/feature-spec.md` (Especially Google Sheets column mapping and data transformation)
+- `.dev/database-schema-design.md` (Spreadsheet connection and mapping tables)
+- `.dev/database-schema-metrics.md` (Target tables for transformed data)
+- `.ai/plans/PLAN.MD` (Condensed MVP vision)
+- `memory-bank/systemPatterns.md` (For data flow and Edge Function architecture)
+- Potentially `.cursor/rules/.stack/supabase-edge-functions.mdc` (if available and relevant for Edge Function development guidelines)
 
 **Pending Decisions / Blockers:**
-- Implementation of actual dashboard content and metrics visualizations
-- Setting up the necessary routes for all sidebar navigation links
+- Confirm specific pre-defined column mapping templates if not yet finalized in `.dev/feature-spec.md`.
+- Detailed error handling strategy for the data transformation pipeline in Edge Functions.
 
-**Next Steps (Post-Review):**
-- Implement individual dashboard pages/routes (clinics, providers, metrics, etc.)
-- Create visualization components for each KPI category
+**Next Steps (Transitioning to EXECUTE mode):**
+1.  **Column Mapping Implementation:** Develop UI components or backend logic to apply pre-defined mapping templates to selected Google Sheets (as per `.dev/feature-spec.md`). Store these mappings (e.g., in `column_mappings` table from `.dev/database-schema-design.md`).
+2.  **Data Transformation Edge Functions:** Create Supabase Edge Functions to:
+    a.  Fetch raw data from Google Sheets based on stored connections and mappings.
+    b.  Apply transformation rules (data type coercion, standardization) to align with target metric table schemas.
+    c.  Implement validation (Zod) for transformed data.
+3.  **Data Storage Logic:** Ensure transformed data is correctly and efficiently upserted into the respective metrics tables in Supabase (e.g., `financial_metrics`, `patient_metrics`).
+4.  **Synchronization Trigger:** Set up initial manual triggers for the sync process (Supabase cron jobs will be part of a later task in this phase).
 
 ## Recent Changes
-- 2025-05-18: EXECUTE: Made additional responsive improvements after testing:
-    - Increased button sizes to 40px (h-10 w-10) for better touch targets on mobile devices
-    - Improved spacing on very small screens with tiered padding and gap values
-    - Added hidden/visible patterns for breadcrumb navigation on different screen sizes
-    - Refined grid layout with better spacing for very small screens
-    - Implemented proper container constraints for extra-small viewports
-- 2025-05-18: EXECUTE: Verified responsive behavior across viewport sizes:
-    - Confirmed sidebar correctly toggles visibility on mobile and expands on larger screens
-    - Validated header layout adapts to different screen widths
-    - Verified grid layout shifts from 1 column (mobile) to 2 columns (tablet) to 3 columns (desktop)
-    - Confirmed breadcrumb navigation remains usable across device sizes
-    - Tested proper spacing and padding adjustments using Tailwind's responsive classes
-- 2025-05-18: EXECUTE: Implemented base dashboard layout with:
-    - Responsive container using Tailwind's flex/grid
-    - Sidebar navigation for different dashboard sections
-    - Responsive header with user profile and actions
-    - Breadcrumb navigation for context
-    - Collapsible sidebar for mobile views
-    - Content area for future widgets and charts
-- 2025-05-18: Updated sidebar navigation to match PRD requirements:
-    - Restructured menu items to align with dental practice KPI categories
-    - Added appropriate icons for each section
-    - Grouped navigation items logically based on PRD needs
-    - Updated profile information to reflect dental context
-- 2025-05-18: Updated systemPatterns.md with documentation of the navigation structure
-- 2025-05-17: EXECUTE: Implemented all planned Google Sheets API routes (Task 4 complete)
+- {{Current Date}}: EXECUTE: Completed major structural refactoring of `src/app/` directory as per Task 003 (`task003_refactor_src_app_directory.md`). Moved (auth) and (dashboard) pages/layouts, reorganized API routes to new granular structure with placeholders. Ran Biome to fix imports. Remaining work: detailed logic migration for some APIs, manual import/logic verification, and testing.
+- {{Current Date}}: PLAN: Extensively updated all memory bank files (`projectbrief.md`, `techContext.md`, `systemPatterns.md`, `progress.md`, `activeContext.md`) to reflect the new MVP project direction based on documents in `.dev/` and `.ai/plans/`.
+- 2025-05-18: EXECUTE: Completed Task 7 (Base Dashboard Layout & Navigation) and Task 4 (Google Sheets API services and routes).
 
 ## Mode: EXECUTE
 
-**Objective:** Complete the implementation of the base dashboard layout with navigation.
+**Objective:** Implement the refactoring of the `src/app` directory (Task 003).
 
-**Current Task:** Task 7 - Implement Base Dashboard Layout with Navigation.
+**Current Task:** Completed structural changes for Task 003. Next steps involve developer review, logic migration for specific API routes, and testing.
 
-**Current Focus:** Creating a responsive dashboard layout with proper navigation components using shadcn/ui and Tailwind CSS.
+**Current Focus:** Concluding Task 003 operations.
 
-**Blockers:** None. Implementation is complete, need to proceed to creating the individual page routes.
+**Blockers:** None for current AI operations. Developer action required for next steps.
 
-**Next Steps (for this task):**
-- Create placeholder pages for each section in the navigation
-- Implement dashboard widgets for the main overview page
-- Add filtering capabilities as specified in the PRD
-
-## Current Task
-- Task 7: Implement Base Dashboard Layout with Navigation [COMPLETE]
-  - Implemented sidebar navigation pattern with links to different dashboard sections ✓
-  - Created responsive header with user profile and actions ✓
-  - Ensured layout adapts to different screen sizes ✓
-  - Added breadcrumb component for navigation context ✓
-  - Implemented collapsible sidebar functionality for mobile views ✓
-  - Created placeholder content areas for widgets ✓
-  - Tested layout across different viewport sizes to ensure responsiveness ✓
-
-## Current Focus
-- Aligning the navigation structure with the PRD requirements for KPI visualization and filtering.
-
-## Blockers
-- None.
-
-## Next Steps
-- Begin implementing individual dashboard pages with corresponding metrics visualizations.
-- Set up proper routing for all navigation items.
-- Implement data fetching and visualization components for each section.
+**Next Steps (for Developer):**
+- Review all changes made to `src/app/`.
+- Manually verify import paths adjusted by Biome.
+- Migrate logic from old API routes (if any remnants or if placeholders need actual implementation) into the new granular API structure (e.g., `src/app/api/google-sheets/...`, `src/app/api/clinics/...`, `src/app/api/users/...`).
+- Review `src/app/auth/callback/page.tsx` and other pages for any server-side logic that should be in API routes (though initial check suggests client-side Supabase usage is appropriate here).
+- Thoroughly test all application functionality related to `src/app/` routes, layouts, and API interactions.
+- Address any remaining TODOs in placeholder files.
 
 ---
 
