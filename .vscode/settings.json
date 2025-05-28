@@ -8,5 +8,8 @@
   "biome.enabled": true,
   "biome.enabledLanguages": ["typescript", "typescriptreact"],
   "biome.enabledRules": ["no-unused-vars"],
-  "svg.preview.background": "white"
+  "svg.preview.background": "white",
+  "terminal.integrated.hideOnStartup": "always",
+  "terminal.integrated.smoothScrolling": true,
+  "terminal.integrated.suggest.enabled": true
 }

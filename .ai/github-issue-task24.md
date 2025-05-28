@@ -18,16 +18,16 @@ This issue tracks all subtasks for the database migration and authentication int
 
 ## Subtasks Overview
 
-- [ ] **24.1:** Schema Analysis & Migration Planning
-- [ ] **24.2:** Create Backup & Rollback Strategy _(skipped: not needed, see below)_
-- [ ] **24.3:** Phase 1 - Add New Multi-Tenant Tables
-- [ ] **24.4:** Phase 2 - Update User Model for Auth Integration
-- [ ] **24.5:** Phase 3 - Implement Row Level Security Policies
-- [ ] **24.6:** Phase 4 - Data Migration & Validation
-- [ ] **24.7:** Phase 5 - Update Database Query Layer
-- [ ] **24.8:** Phase 6 - Update API Routes & Middleware
-- [ ] **24.9:** Phase 7 - Implement Database Triggers & Functions
-- [ ] **24.10:** Phase 8 - End-to-End Integration Testing
+- [x] **24.1:** Schema Analysis & Migration Planning
+- [x] **24.2:** Create Backup & Rollback Strategy _(skipped: not needed, see below)_
+- [x] **24.3:** Phase 1 - Add New Multi-Tenant Tables
+- [x] **24.4:** Phase 2 - Update User Model for Auth Integration
+- [x] **24.5:** Phase 3 - Implement Row Level Security Policies
+- [x] **24.6:** Phase 4 - Data Migration & Validation
+- [x] **24.7:** Phase 5 - Update Database Query Layer
+- [x] **24.8:** Phase 6 - Update API Routes & Middleware
+- [x] **24.9:** Phase 7 - Implement Database Triggers & Functions
+- [x] **24.10:** Phase 8 - End-to-End Integration Testing
 
 ---
 

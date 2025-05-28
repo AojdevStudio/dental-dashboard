@@ -66,6 +66,41 @@ Individual task details are in the `.ai/tasks/` directory.
   - [x] **ID 23.8: End-to-End Auth Flow Verification** (Priority: critical)
     > Comprehensive testing of the entire auth flow.
 
+### Database Migration & Auth Integration
+
+- [x] **ID 24: Align Database Implementation with New Schema Design using Prisma** (Priority: critical) ✅ **COMPLETED**
+  > Review and update Prisma schema and database interactions post-auth refactor. CRITICAL: Current schema uses String IDs but target uses UUID + Supabase auth integration. Requires careful migration strategy.
+  - [x] **ID 24.1: Schema Analysis & Migration Planning** (Priority: critical) ✅ **COMPLETED**
+    > Dependencies: 23
+    > Analyze current vs target schema differences, create detailed migration plan addressing ID type changes (String→UUID), auth integration, and multi-tenancy requirements.
+  - [x] **ID 24.2: Create Backup & Rollback Strategy** (Priority: critical) ✅ **COMPLETED**
+    > Dependencies: 24.1
+    > Implement comprehensive backup strategy and rollback procedures for schema migration. Test on development environment first.
+  - [x] **ID 24.3: Phase 1 - Add New Multi-Tenant Tables** (Priority: critical) ✅ **COMPLETED**
+    > Dependencies: 24.2
+    > Add new tables (user_clinic_roles, goal_templates, financial_metrics, etc.) without breaking existing schema. Use additive approach.
+  - [x] **ID 24.4: Phase 2 - Update User Model for Auth Integration** (Priority: critical) ✅ **COMPLETED**
+    > Dependencies: 24.3
+    > Carefully migrate User model to reference Supabase auth.users. Handle ID type conversion and foreign key constraints.
+  - [x] **ID 24.5: Phase 3 - Implement Row Level Security Policies** (Priority: critical) ✅ **COMPLETED**
+    > Dependencies: 24.4
+    > Create comprehensive RLS policies for all tables ensuring multi-tenant data isolation and proper auth context.
+  - [x] **ID 24.6: Phase 4 - Data Migration & Validation** (Priority: high) ✅ **COMPLETED**
+    > Dependencies: 24.5
+    > Migrate existing data to new schema structure, validate data integrity, and ensure no data loss during transition.
+  - [x] **ID 24.7: Phase 5 - Update Database Query Layer** (Priority: high) ✅ **COMPLETED**
+    > Dependencies: 24.6
+    > Refactor all database queries in lib/database/queries/ to work with new auth-integrated schema and multi-tenant structure.
+  - [x] **ID 24.8: Phase 6 - Update API Routes & Middleware** (Priority: high) ✅ **COMPLETED**
+    > Dependencies: 24.7
+    > Modify all API routes to use updated database queries, ensure proper auth context, and implement RLS-aware data access.
+  - [x] **ID 24.9: Phase 7 - Implement Database Triggers & Functions** (Priority: medium) ✅ **COMPLETED**
+    > Dependencies: 24.5, 24.6
+    > Create Supabase functions for automatic user profile creation, data consistency, and audit logging.
+  - [x] **ID 24.10: Phase 8 - End-to-End Integration Testing** (Priority: medium) ✅ **COMPLETED**
+    > Dependencies: 24.8, 24.9
+    > Comprehensive testing of auth + database integration across all user flows, including multi-tenant scenarios and edge cases.
+
 ## In Progress Tasks
 
 ### Phase 1: Refactoring
@@ -92,36 +127,36 @@ Individual task details are in the `.ai/tasks/` directory.
 - [ ] **ID 19.2: Update Database Configuration** (Priority: critical)
   > Dependencies: 19
   > Update database configuration (prisma.ts).
-- [ ] **ID 24: Align Database Implementation with New Schema Design using Prisma** (Priority: critical)
+- [x] **ID 24: Align Database Implementation with New Schema Design using Prisma** (Priority: critical)
   > Review and update Prisma schema and database interactions post-auth refactor. CRITICAL: Current schema uses String IDs but target uses UUID + Supabase auth integration. Requires careful migration strategy.
-  - [ ] **ID 24.1: Schema Analysis & Migration Planning** (Priority: critical)
+  - [x] **ID 24.1: Schema Analysis & Migration Planning** (Priority: critical)
     > Dependencies: 23
     > Analyze current vs target schema differences, create detailed migration plan addressing ID type changes (String→UUID), auth integration, and multi-tenancy requirements.
-  - [ ] **ID 24.2: Create Backup & Rollback Strategy** (Priority: critical)
+  - [x] **ID 24.2: Create Backup & Rollback Strategy** (Priority: critical)
     > Dependencies: 24.1
     > Implement comprehensive backup strategy and rollback procedures for schema migration. Test on development environment first.
-  - [ ] **ID 24.3: Phase 1 - Add New Multi-Tenant Tables** (Priority: critical)
+  - [x] **ID 24.3: Phase 1 - Add New Multi-Tenant Tables** (Priority: critical)
     > Dependencies: 24.2
     > Add new tables (user_clinic_roles, goal_templates, financial_metrics, etc.) without breaking existing schema. Use additive approach.
-  - [ ] **ID 24.4: Phase 2 - Update User Model for Auth Integration** (Priority: critical)
+  - [x] **ID 24.4: Phase 2 - Update User Model for Auth Integration** (Priority: critical)
     > Dependencies: 24.3
     > Carefully migrate User model to reference Supabase auth.users. Handle ID type conversion and foreign key constraints.
-  - [ ] **ID 24.5: Phase 3 - Implement Row Level Security Policies** (Priority: critical)
+  - [x] **ID 24.5: Phase 3 - Implement Row Level Security Policies** (Priority: critical)
     > Dependencies: 24.4
     > Create comprehensive RLS policies for all tables ensuring multi-tenant data isolation and proper auth context.
-  - [ ] **ID 24.6: Phase 4 - Data Migration & Validation** (Priority: high)
+  - [x] **ID 24.6: Phase 4 - Data Migration & Validation** (Priority: high)
     > Dependencies: 24.5
     > Migrate existing data to new schema structure, validate data integrity, and ensure no data loss during transition.
-  - [ ] **ID 24.7: Phase 5 - Update Database Query Layer** (Priority: high)
+  - [x] **ID 24.7: Phase 5 - Update Database Query Layer** (Priority: high)
     > Dependencies: 24.6
     > Refactor all database queries in lib/database/queries/ to work with new auth-integrated schema and multi-tenant structure.
-  - [ ] **ID 24.8: Phase 6 - Update API Routes & Middleware** (Priority: high)
+  - [x] **ID 24.8: Phase 6 - Update API Routes & Middleware** (Priority: high)
     > Dependencies: 24.7
     > Modify all API routes to use updated database queries, ensure proper auth context, and implement RLS-aware data access.
-  - [ ] **ID 24.9: Phase 7 - Implement Database Triggers & Functions** (Priority: medium)
+  - [x] **ID 24.9: Phase 7 - Implement Database Triggers & Functions** (Priority: medium)
     > Dependencies: 24.5, 24.6
     > Create Supabase functions for automatic user profile creation, data consistency, and audit logging.
-  - [ ] **ID 24.10: Phase 8 - End-to-End Integration Testing** (Priority: medium)
+  - [x] **ID 24.10: Phase 8 - End-to-End Integration Testing** (Priority: medium)
     > Dependencies: 24.8, 24.9
     > Comprehensive testing of auth + database integration across all user flows, including multi-tenant scenarios and edge cases.
 - [ ] **ID 25: Review and Update File System Documentation** (Priority: high)
