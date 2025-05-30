@@ -1,14 +1,14 @@
 /**
  * @vitest-environment node
  */
-import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest'
-import { PrismaClient } from '@prisma/client'
-import { DataMigration } from '@/scripts/data-migration/migrate-to-uuid'
-import { MigrationValidator } from '@/scripts/data-migration/validate-migration'
-import { v4 as uuidv4 } from 'uuid'
+import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
+import { PrismaClient } from "@prisma/client";
+import { DataMigration } from "@/scripts/data-migration/migrate-to-uuid";
+import { MigrationValidator } from "@/scripts/data-migration/validate-migration";
+import { v4 as uuidv4 } from "uuid";
 
 // Mock Prisma Client
-vi.mock('@prisma/client', () => ({
+vi.mock("@prisma/client", () => ({
   PrismaClient: vi.fn(() => ({
     $connect: vi.fn(),
     $disconnect: vi.fn(),
@@ -33,32 +33,32 @@ vi.mock('@prisma/client', () => ({
       count: vi.fn(),
     },
   })),
-}))
+}));
 
-describe('Data Migration', () => {
-  let prisma: any
-  let migration: DataMigration
+describe("Data Migration", () => {
+  let prisma: any;
+  let migration: DataMigration;
 
   beforeEach(() => {
-    prisma = new PrismaClient()
-    migration = new DataMigration()
-    vi.clearAllMocks()
-  })
+    prisma = new PrismaClient();
+    migration = new DataMigration();
+    vi.clearAllMocks();
+  });
 
   afterEach(async () => {
-    await prisma.$disconnect()
-  })
+    await prisma.$disconnect();
+  });
 
-  describe('User Migration', () => {
-    it('should migrate users with UUIDs', async () => {
+  describe("User Migration", () => {
+    it("should migrate users with UUIDs", async () => {
       const testUsers = [
-        { id: 'user1', email: 'user1@example.com', name: 'User 1', uuidId: null },
-        { id: 'user2', email: 'user2@example.com', name: 'User 2', uuidId: null },
-      ]
+        { id: "user1", email: "user1@example.com", name: "User 1", uuidId: null },
+        { id: "user2", email: "user2@example.com", name: "User 2", uuidId: null },
+      ];
 
-      prisma.user.count.mockResolvedValue(2)
-      prisma.user.findMany.mockResolvedValueOnce(testUsers).mockResolvedValueOnce([])
-      
+      prisma.user.count.mockResolvedValue(2);
+      prisma.user.findMany.mockResolvedValueOnce(testUsers).mockResolvedValueOnce([]);
+
       prisma.$transaction.mockImplementation(async (callback: any) => {
         const tx = {
           user: {
@@ -67,30 +67,30 @@ describe('Data Migration', () => {
           idMapping: {
             create: vi.fn().mockResolvedValue({}),
           },
-        }
-        await callback(tx)
-        
+        };
+        await callback(tx);
+
         // Verify updates were called for each user
-        expect(tx.user.update).toHaveBeenCalledTimes(2)
-        expect(tx.idMapping.create).toHaveBeenCalledTimes(2)
-      })
+        expect(tx.user.update).toHaveBeenCalledTimes(2);
+        expect(tx.idMapping.create).toHaveBeenCalledTimes(2);
+      });
 
-      await migration.migrateUsers()
+      await migration.migrateUsers();
 
-      expect(prisma.user.count).toHaveBeenCalled()
-      expect(prisma.user.findMany).toHaveBeenCalled()
-    })
+      expect(prisma.user.count).toHaveBeenCalled();
+      expect(prisma.user.findMany).toHaveBeenCalled();
+    });
 
-    it('should handle users that already have UUIDs', async () => {
+    it("should handle users that already have UUIDs", async () => {
       const testUsers = [
-        { id: 'user1', email: 'user1@example.com', name: 'User 1', uuidId: uuidv4() },
-        { id: 'user2', email: 'user2@example.com', name: 'User 2', uuidId: null },
-      ]
+        { id: "user1", email: "user1@example.com", name: "User 1", uuidId: uuidv4() },
+        { id: "user2", email: "user2@example.com", name: "User 2", uuidId: null },
+      ];
 
-      prisma.user.count.mockResolvedValue(2)
+      prisma.user.count.mockResolvedValue(2);
       prisma.user.findMany
         .mockResolvedValueOnce([testUsers[1]]) // Only user without UUID
-        .mockResolvedValueOnce([])
+        .mockResolvedValueOnce([]);
 
       prisma.$transaction.mockImplementation(async (callback: any) => {
         const tx = {
@@ -100,41 +100,39 @@ describe('Data Migration', () => {
           idMapping: {
             create: vi.fn().mockResolvedValue({}),
           },
-        }
-        await callback(tx)
-        
+        };
+        await callback(tx);
+
         // Should only update the user without UUID
-        expect(tx.user.update).toHaveBeenCalledTimes(1)
-        expect(tx.idMapping.create).toHaveBeenCalledTimes(1)
-      })
+        expect(tx.user.update).toHaveBeenCalledTimes(1);
+        expect(tx.idMapping.create).toHaveBeenCalledTimes(1);
+      });
 
-      await migration.migrateUsers()
-    })
+      await migration.migrateUsers();
+    });
 
-    it('should handle migration errors gracefully', async () => {
-      const testUsers = [
-        { id: 'user1', email: 'user1@example.com', name: 'User 1', uuidId: null },
-      ]
+    it("should handle migration errors gracefully", async () => {
+      const testUsers = [{ id: "user1", email: "user1@example.com", name: "User 1", uuidId: null }];
 
-      prisma.user.count.mockResolvedValue(1)
-      prisma.user.findMany.mockResolvedValueOnce(testUsers).mockResolvedValueOnce([])
-      
-      prisma.$transaction.mockRejectedValue(new Error('Database error'))
+      prisma.user.count.mockResolvedValue(1);
+      prisma.user.findMany.mockResolvedValueOnce(testUsers).mockResolvedValueOnce([]);
 
-      await expect(migration.migrateUsers()).rejects.toThrow('Database error')
-    })
-  })
+      prisma.$transaction.mockRejectedValue(new Error("Database error"));
 
-  describe('Clinic Migration', () => {
-    it('should migrate clinics with UUIDs', async () => {
+      await expect(migration.migrateUsers()).rejects.toThrow("Database error");
+    });
+  });
+
+  describe("Clinic Migration", () => {
+    it("should migrate clinics with UUIDs", async () => {
       const testClinics = [
-        { id: 'clinic1', name: 'Clinic 1', location: 'Location 1', uuidId: null },
-        { id: 'clinic2', name: 'Clinic 2', location: 'Location 2', uuidId: null },
-      ]
+        { id: "clinic1", name: "Clinic 1", location: "Location 1", uuidId: null },
+        { id: "clinic2", name: "Clinic 2", location: "Location 2", uuidId: null },
+      ];
 
-      prisma.clinic.count.mockResolvedValue(2)
-      prisma.clinic.findMany.mockResolvedValueOnce(testClinics).mockResolvedValueOnce([])
-      
+      prisma.clinic.count.mockResolvedValue(2);
+      prisma.clinic.findMany.mockResolvedValueOnce(testClinics).mockResolvedValueOnce([]);
+
       prisma.$transaction.mockImplementation(async (callback: any) => {
         const tx = {
           clinic: {
@@ -143,36 +141,36 @@ describe('Data Migration', () => {
           idMapping: {
             create: vi.fn().mockResolvedValue({}),
           },
-        }
-        await callback(tx)
-        
-        expect(tx.clinic.update).toHaveBeenCalledTimes(2)
-        expect(tx.idMapping.create).toHaveBeenCalledTimes(2)
-      })
+        };
+        await callback(tx);
 
-      await migration.migrateClinics()
+        expect(tx.clinic.update).toHaveBeenCalledTimes(2);
+        expect(tx.idMapping.create).toHaveBeenCalledTimes(2);
+      });
 
-      expect(prisma.clinic.count).toHaveBeenCalled()
-      expect(prisma.clinic.findMany).toHaveBeenCalled()
-    })
-  })
+      await migration.migrateClinics();
 
-  describe('Dashboard Migration', () => {
-    it('should migrate dashboards with user UUID references', async () => {
-      const userUuid = uuidv4()
+      expect(prisma.clinic.count).toHaveBeenCalled();
+      expect(prisma.clinic.findMany).toHaveBeenCalled();
+    });
+  });
+
+  describe("Dashboard Migration", () => {
+    it("should migrate dashboards with user UUID references", async () => {
+      const userUuid = uuidv4();
       const testDashboards = [
         {
-          id: 'dash1',
-          name: 'Dashboard 1',
-          userId: 'user1',
+          id: "dash1",
+          name: "Dashboard 1",
+          userId: "user1",
           uuidId: null,
-          user: { id: 'user1', uuidId: userUuid },
+          user: { id: "user1", uuidId: userUuid },
         },
-      ]
+      ];
 
-      prisma.dashboard.count.mockResolvedValue(1)
-      prisma.dashboard.findMany.mockResolvedValueOnce(testDashboards).mockResolvedValueOnce([])
-      
+      prisma.dashboard.count.mockResolvedValue(1);
+      prisma.dashboard.findMany.mockResolvedValueOnce(testDashboards).mockResolvedValueOnce([]);
+
       prisma.$transaction.mockImplementation(async (callback: any) => {
         const tx = {
           dashboard: {
@@ -181,35 +179,35 @@ describe('Data Migration', () => {
           idMapping: {
             create: vi.fn().mockResolvedValue({}),
           },
-        }
-        await callback(tx)
-        
+        };
+        await callback(tx);
+
         expect(tx.dashboard.update).toHaveBeenCalledWith({
-          where: { id: 'dash1' },
+          where: { id: "dash1" },
           data: expect.objectContaining({
             uuidId: expect.any(String),
             userUuidId: userUuid,
           }),
-        })
-      })
+        });
+      });
 
-      await migration.migrateDashboards()
-    })
+      await migration.migrateDashboards();
+    });
 
-    it('should fail if user has no UUID', async () => {
+    it("should fail if user has no UUID", async () => {
       const testDashboards = [
         {
-          id: 'dash1',
-          name: 'Dashboard 1',
-          userId: 'user1',
+          id: "dash1",
+          name: "Dashboard 1",
+          userId: "user1",
           uuidId: null,
-          user: { id: 'user1', uuidId: null }, // User without UUID
+          user: { id: "user1", uuidId: null }, // User without UUID
         },
-      ]
+      ];
 
-      prisma.dashboard.count.mockResolvedValue(1)
-      prisma.dashboard.findMany.mockResolvedValueOnce(testDashboards).mockResolvedValueOnce([])
-      
+      prisma.dashboard.count.mockResolvedValue(1);
+      prisma.dashboard.findMany.mockResolvedValueOnce(testDashboards).mockResolvedValueOnce([]);
+
       prisma.$transaction.mockImplementation(async (callback: any) => {
         const tx = {
           dashboard: {
@@ -218,47 +216,47 @@ describe('Data Migration', () => {
           idMapping: {
             create: vi.fn(),
           },
-        }
-        
+        };
+
         // Simulate error handling in transaction
         try {
-          await callback(tx)
+          await callback(tx);
         } catch (error) {
           // Expected error
         }
-        
+
         // Should not update dashboard with missing user UUID
-        expect(tx.dashboard.update).not.toHaveBeenCalled()
-      })
+        expect(tx.dashboard.update).not.toHaveBeenCalled();
+      });
 
-      await migration.migrateDashboards()
-    })
-  })
+      await migration.migrateDashboards();
+    });
+  });
 
-  describe('Batch Processing', () => {
-    it('should process large datasets in batches', async () => {
-      const BATCH_SIZE = 1000
-      const TOTAL_USERS = 2500
-      
+  describe("Batch Processing", () => {
+    it("should process large datasets in batches", async () => {
+      const BATCH_SIZE = 1000;
+      const TOTAL_USERS = 2500;
+
       // Create test users
-      const createBatch = (start: number, size: number) => 
+      const createBatch = (start: number, size: number) =>
         Array.from({ length: size }, (_, i) => ({
           id: `user${start + i}`,
           email: `user${start + i}@example.com`,
           name: `User ${start + i}`,
           uuidId: null,
-        }))
+        }));
 
-      prisma.user.count.mockResolvedValue(TOTAL_USERS)
-      
+      prisma.user.count.mockResolvedValue(TOTAL_USERS);
+
       // Mock three batches
       prisma.user.findMany
         .mockResolvedValueOnce(createBatch(0, BATCH_SIZE))
         .mockResolvedValueOnce(createBatch(1000, BATCH_SIZE))
         .mockResolvedValueOnce(createBatch(2000, 500))
-        .mockResolvedValueOnce([])
+        .mockResolvedValueOnce([]);
 
-      let totalProcessed = 0
+      let totalProcessed = 0;
       prisma.$transaction.mockImplementation(async (callback: any) => {
         const tx = {
           user: {
@@ -267,168 +265,160 @@ describe('Data Migration', () => {
           idMapping: {
             create: vi.fn().mockResolvedValue({}),
           },
-        }
-        await callback(tx)
-        totalProcessed += tx.user.update.mock.calls.length
-      })
+        };
+        await callback(tx);
+        totalProcessed += tx.user.update.mock.calls.length;
+      });
 
-      await migration.migrateUsers()
+      await migration.migrateUsers();
 
-      expect(prisma.user.findMany).toHaveBeenCalledTimes(4)
-      expect(totalProcessed).toBe(TOTAL_USERS)
-    })
-  })
-})
+      expect(prisma.user.findMany).toHaveBeenCalledTimes(4);
+      expect(totalProcessed).toBe(TOTAL_USERS);
+    });
+  });
+});
 
-describe('Migration Validation', () => {
-  let prisma: any
-  let validator: MigrationValidator
+describe("Migration Validation", () => {
+  let prisma: any;
+  let validator: MigrationValidator;
 
   beforeEach(() => {
-    prisma = new PrismaClient()
-    validator = new MigrationValidator()
-    vi.clearAllMocks()
-  })
+    prisma = new PrismaClient();
+    validator = new MigrationValidator();
+    vi.clearAllMocks();
+  });
 
-  describe('User Validation', () => {
-    it('should validate all users have UUIDs', async () => {
+  describe("User Validation", () => {
+    it("should validate all users have UUIDs", async () => {
       prisma.user.count
         .mockResolvedValueOnce(10) // Total users
-        .mockResolvedValueOnce(10) // Users with UUID
+        .mockResolvedValueOnce(10); // Users with UUID
 
       prisma.user.findMany.mockResolvedValue([
-        { id: 'user1', uuidId: uuidv4() },
-        { id: 'user2', uuidId: uuidv4() },
-      ])
+        { id: "user1", uuidId: uuidv4() },
+        { id: "user2", uuidId: uuidv4() },
+      ]);
 
-      prisma.idMapping.count.mockResolvedValue(10)
+      prisma.idMapping.count.mockResolvedValue(10);
 
-      prisma.$queryRaw.mockResolvedValue([])
+      prisma.$queryRaw.mockResolvedValue([]);
 
-      await validator.validateUsers()
-      
+      await validator.validateUsers();
+
       // Validation should pass
-      expect(prisma.user.count).toHaveBeenCalled()
-    })
+      expect(prisma.user.count).toHaveBeenCalled();
+    });
 
-    it('should detect users without UUIDs', async () => {
+    it("should detect users without UUIDs", async () => {
       prisma.user.count
         .mockResolvedValueOnce(10) // Total users
-        .mockResolvedValueOnce(8)  // Users with UUID (2 missing)
+        .mockResolvedValueOnce(8); // Users with UUID (2 missing)
 
-      prisma.user.findMany.mockResolvedValue([])
-      prisma.idMapping.count.mockResolvedValue(8)
-      prisma.$queryRaw.mockResolvedValue([])
+      prisma.user.findMany.mockResolvedValue([]);
+      prisma.idMapping.count.mockResolvedValue(8);
+      prisma.$queryRaw.mockResolvedValue([]);
 
-      await validator.validateUsers()
-      
+      await validator.validateUsers();
+
       // Should detect the discrepancy
-      expect(prisma.user.count).toHaveBeenCalledTimes(2)
-    })
+      expect(prisma.user.count).toHaveBeenCalledTimes(2);
+    });
 
-    it('should detect duplicate UUIDs', async () => {
-      const duplicateUuid = uuidv4()
-      
+    it("should detect duplicate UUIDs", async () => {
+      const duplicateUuid = uuidv4();
+
       prisma.user.count
         .mockResolvedValueOnce(3) // Total users
-        .mockResolvedValueOnce(3) // Users with UUID
+        .mockResolvedValueOnce(3); // Users with UUID
 
       prisma.user.findMany.mockResolvedValue([
-        { id: 'user1', uuidId: duplicateUuid },
-        { id: 'user2', uuidId: duplicateUuid }, // Duplicate!
-        { id: 'user3', uuidId: uuidv4() },
-      ])
+        { id: "user1", uuidId: duplicateUuid },
+        { id: "user2", uuidId: duplicateUuid }, // Duplicate!
+        { id: "user3", uuidId: uuidv4() },
+      ]);
 
-      prisma.idMapping.count.mockResolvedValue(3)
-      prisma.$queryRaw.mockResolvedValue([])
+      prisma.idMapping.count.mockResolvedValue(3);
+      prisma.$queryRaw.mockResolvedValue([]);
 
-      await validator.validateUsers()
-      
+      await validator.validateUsers();
+
       // Should detect duplicate UUIDs
-      expect(prisma.user.findMany).toHaveBeenCalled()
-    })
-  })
+      expect(prisma.user.findMany).toHaveBeenCalled();
+    });
+  });
 
-  describe('Relationship Validation', () => {
-    it('should detect orphaned providers', async () => {
-      prisma.provider.findMany.mockResolvedValue([
-        { id: 'provider1', name: 'Orphaned Provider' },
-      ])
+  describe("Relationship Validation", () => {
+    it("should detect orphaned providers", async () => {
+      prisma.provider.findMany.mockResolvedValue([{ id: "provider1", name: "Orphaned Provider" }]);
 
-      prisma.provider.count.mockResolvedValue(1)
-      prisma.metricValue.findMany.mockResolvedValue([])
-      prisma.metricValue.count.mockResolvedValue(0)
-      prisma.dashboard.findMany.mockResolvedValue([])
-      prisma.widget.count.mockResolvedValue(0)
+      prisma.provider.count.mockResolvedValue(1);
+      prisma.metricValue.findMany.mockResolvedValue([]);
+      prisma.metricValue.count.mockResolvedValue(0);
+      prisma.dashboard.findMany.mockResolvedValue([]);
+      prisma.widget.count.mockResolvedValue(0);
 
-      await validator.validateRelationships()
-      
+      await validator.validateRelationships();
+
       expect(prisma.provider.findMany).toHaveBeenCalledWith({
         where: { clinic: { is: null } },
         select: { id: true, name: true },
-      })
-    })
+      });
+    });
 
-    it('should validate dashboard-user relationships', async () => {
-      prisma.provider.findMany.mockResolvedValue([])
-      prisma.provider.count.mockResolvedValue(0)
-      prisma.metricValue.findMany.mockResolvedValue([])
-      prisma.metricValue.count.mockResolvedValue(0)
-      
-      prisma.dashboard.findMany.mockResolvedValue([
-        { id: 'dash1', name: 'Orphaned Dashboard' },
-      ])
-      
-      prisma.widget.count.mockResolvedValue(0)
+    it("should validate dashboard-user relationships", async () => {
+      prisma.provider.findMany.mockResolvedValue([]);
+      prisma.provider.count.mockResolvedValue(0);
+      prisma.metricValue.findMany.mockResolvedValue([]);
+      prisma.metricValue.count.mockResolvedValue(0);
 
-      await validator.validateRelationships()
-      
+      prisma.dashboard.findMany.mockResolvedValue([{ id: "dash1", name: "Orphaned Dashboard" }]);
+
+      prisma.widget.count.mockResolvedValue(0);
+
+      await validator.validateRelationships();
+
       expect(prisma.dashboard.findMany).toHaveBeenCalledWith({
         where: { user: { is: null } },
         select: { id: true, name: true },
-      })
-    })
-  })
+      });
+    });
+  });
 
-  describe('Data Integrity Validation', () => {
-    it('should detect future timestamps', async () => {
+  describe("Data Integrity Validation", () => {
+    it("should detect future timestamps", async () => {
       prisma.$queryRaw
         .mockResolvedValueOnce([
-          { table_name: 'users', count: BigInt(0) },
-          { table_name: 'clinics', count: BigInt(2) }, // 2 records with future timestamps
-          { table_name: 'providers', count: BigInt(0) },
+          { table_name: "users", count: BigInt(0) },
+          { table_name: "clinics", count: BigInt(2) }, // 2 records with future timestamps
+          { table_name: "providers", count: BigInt(0) },
         ])
-        .mockResolvedValueOnce([{ count: BigInt(0) }])
+        .mockResolvedValueOnce([{ count: BigInt(0) }]);
 
-      prisma.user.count.mockResolvedValue(0)
+      prisma.user.count.mockResolvedValue(0);
 
-      await validator.validateDataIntegrity()
-      
-      expect(prisma.$queryRaw).toHaveBeenCalled()
-    })
+      await validator.validateDataIntegrity();
 
-    it('should validate required fields', async () => {
+      expect(prisma.$queryRaw).toHaveBeenCalled();
+    });
+
+    it("should validate required fields", async () => {
       prisma.$queryRaw
         .mockResolvedValueOnce([
-          { table_name: 'users', count: BigInt(0) },
-          { table_name: 'clinics', count: BigInt(0) },
-          { table_name: 'providers', count: BigInt(0) },
+          { table_name: "users", count: BigInt(0) },
+          { table_name: "clinics", count: BigInt(0) },
+          { table_name: "providers", count: BigInt(0) },
         ])
-        .mockResolvedValueOnce([{ count: BigInt(0) }])
+        .mockResolvedValueOnce([{ count: BigInt(0) }]);
 
-      prisma.user.count.mockResolvedValue(3) // 3 users with missing data
+      prisma.user.count.mockResolvedValue(3); // 3 users with missing data
 
-      await validator.validateDataIntegrity()
-      
+      await validator.validateDataIntegrity();
+
       expect(prisma.user.count).toHaveBeenCalledWith({
         where: {
-          OR: [
-            { email: null },
-            { name: null },
-            { role: null },
-          ],
+          OR: [{ email: null }, { name: null }, { role: null }],
         },
-      })
-    })
-  })
-})
+      });
+    });
+  });
+});

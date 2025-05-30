@@ -14,12 +14,13 @@ datasource db {
 
 // Clinics
 model Clinic {
-  id        String   @id @default(cuid())
-  name      String
-  location  String
-  status    String // active/inactive
-  createdAt DateTime @default(now()) @map("created_at")
-  updatedAt DateTime @updatedAt @map("updated_at")
+  id               String   @id @default(cuid())
+  name             String
+  location         String
+  status           String // active/inactive
+  registrationCode String?  @unique @map("registration_code") // For users to join clinic
+  createdAt        DateTime @default(now()) @map("created_at")
+  updatedAt        DateTime @updatedAt @map("updated_at")
 
   // Phase 2: UUID Migration Field
   uuidId String? @unique @map("uuid_id")

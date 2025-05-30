@@ -511,8 +511,8 @@ export namespace Prisma {
   export import Exact = $Public.Exact
 
   /**
-   * Prisma Client JS version: 6.7.0
-   * Query Engine version: 3cff47a7f5d65c3ea74883f1d736e41d68ce91ed
+   * Prisma Client JS version: 6.8.2
+   * Query Engine version: 2060c79ba17c6bb9f5823312b6f6b7f4a845738e
    */
   export type PrismaVersion = {
     client: string
@@ -2970,6 +2970,7 @@ export namespace Prisma {
     name: string | null
     location: string | null
     status: string | null
+    registrationCode: string | null
     createdAt: Date | null
     updatedAt: Date | null
     uuidId: string | null
@@ -2980,6 +2981,7 @@ export namespace Prisma {
     name: string | null
     location: string | null
     status: string | null
+    registrationCode: string | null
     createdAt: Date | null
     updatedAt: Date | null
     uuidId: string | null
@@ -2990,6 +2992,7 @@ export namespace Prisma {
     name: number
     location: number
     status: number
+    registrationCode: number
     createdAt: number
     updatedAt: number
     uuidId: number
@@ -3002,6 +3005,7 @@ export namespace Prisma {
     name?: true
     location?: true
     status?: true
+    registrationCode?: true
     createdAt?: true
     updatedAt?: true
     uuidId?: true
@@ -3012,6 +3016,7 @@ export namespace Prisma {
     name?: true
     location?: true
     status?: true
+    registrationCode?: true
     createdAt?: true
     updatedAt?: true
     uuidId?: true
@@ -3022,6 +3027,7 @@ export namespace Prisma {
     name?: true
     location?: true
     status?: true
+    registrationCode?: true
     createdAt?: true
     updatedAt?: true
     uuidId?: true
@@ -3105,6 +3111,7 @@ export namespace Prisma {
     name: string
     location: string
     status: string
+    registrationCode: string | null
     createdAt: Date
     updatedAt: Date
     uuidId: string | null
@@ -3132,6 +3139,7 @@ export namespace Prisma {
     name?: boolean
     location?: boolean
     status?: boolean
+    registrationCode?: boolean
     createdAt?: boolean
     updatedAt?: boolean
     uuidId?: boolean
@@ -3148,6 +3156,7 @@ export namespace Prisma {
     name?: boolean
     location?: boolean
     status?: boolean
+    registrationCode?: boolean
     createdAt?: boolean
     updatedAt?: boolean
     uuidId?: boolean
@@ -3158,6 +3167,7 @@ export namespace Prisma {
     name?: boolean
     location?: boolean
     status?: boolean
+    registrationCode?: boolean
     createdAt?: boolean
     updatedAt?: boolean
     uuidId?: boolean
@@ -3168,12 +3178,13 @@ export namespace Prisma {
     name?: boolean
     location?: boolean
     status?: boolean
+    registrationCode?: boolean
     createdAt?: boolean
     updatedAt?: boolean
     uuidId?: boolean
   }
 
-  export type ClinicOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "name" | "location" | "status" | "createdAt" | "updatedAt" | "uuidId", ExtArgs["result"]["clinic"]>
+  export type ClinicOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "name" | "location" | "status" | "registrationCode" | "createdAt" | "updatedAt" | "uuidId", ExtArgs["result"]["clinic"]>
   export type ClinicInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     users?: boolean | Clinic$usersArgs<ExtArgs>
     providers?: boolean | Clinic$providersArgs<ExtArgs>
@@ -3199,6 +3210,7 @@ export namespace Prisma {
       name: string
       location: string
       status: string
+      registrationCode: string | null
       createdAt: Date
       updatedAt: Date
       uuidId: string | null
@@ -3634,6 +3646,7 @@ export namespace Prisma {
     readonly name: FieldRef<"Clinic", 'String'>
     readonly location: FieldRef<"Clinic", 'String'>
     readonly status: FieldRef<"Clinic", 'String'>
+    readonly registrationCode: FieldRef<"Clinic", 'String'>
     readonly createdAt: FieldRef<"Clinic", 'DateTime'>
     readonly updatedAt: FieldRef<"Clinic", 'DateTime'>
     readonly uuidId: FieldRef<"Clinic", 'String'>
@@ -26930,6 +26943,7 @@ export namespace Prisma {
     name: 'name',
     location: 'location',
     status: 'status',
+    registrationCode: 'registrationCode',
     createdAt: 'createdAt',
     updatedAt: 'updatedAt',
     uuidId: 'uuidId'
@@ -27430,6 +27444,7 @@ export namespace Prisma {
     name?: StringFilter<"Clinic"> | string
     location?: StringFilter<"Clinic"> | string
     status?: StringFilter<"Clinic"> | string
+    registrationCode?: StringNullableFilter<"Clinic"> | string | null
     createdAt?: DateTimeFilter<"Clinic"> | Date | string
     updatedAt?: DateTimeFilter<"Clinic"> | Date | string
     uuidId?: StringNullableFilter<"Clinic"> | string | null
@@ -27445,6 +27460,7 @@ export namespace Prisma {
     name?: SortOrder
     location?: SortOrder
     status?: SortOrder
+    registrationCode?: SortOrderInput | SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
     uuidId?: SortOrderInput | SortOrder
@@ -27457,6 +27473,7 @@ export namespace Prisma {
 
   export type ClinicWhereUniqueInput = Prisma.AtLeast<{
     id?: string
+    registrationCode?: string
     uuidId?: string
     AND?: ClinicWhereInput | ClinicWhereInput[]
     OR?: ClinicWhereInput[]
@@ -27471,13 +27488,14 @@ export namespace Prisma {
     metrics?: MetricValueListRelationFilter
     goals?: GoalListRelationFilter
     dataSources?: DataSourceListRelationFilter
-  }, "id" | "uuidId">
+  }, "id" | "registrationCode" | "uuidId">
 
   export type ClinicOrderByWithAggregationInput = {
     id?: SortOrder
     name?: SortOrder
     location?: SortOrder
     status?: SortOrder
+    registrationCode?: SortOrderInput | SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
     uuidId?: SortOrderInput | SortOrder
@@ -27494,6 +27512,7 @@ export namespace Prisma {
     name?: StringWithAggregatesFilter<"Clinic"> | string
     location?: StringWithAggregatesFilter<"Clinic"> | string
     status?: StringWithAggregatesFilter<"Clinic"> | string
+    registrationCode?: StringNullableWithAggregatesFilter<"Clinic"> | string | null
     createdAt?: DateTimeWithAggregatesFilter<"Clinic"> | Date | string
     updatedAt?: DateTimeWithAggregatesFilter<"Clinic"> | Date | string
     uuidId?: StringNullableWithAggregatesFilter<"Clinic"> | string | null
@@ -29223,6 +29242,7 @@ export namespace Prisma {
     name: string
     location: string
     status: string
+    registrationCode?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     uuidId?: string | null
@@ -29238,6 +29258,7 @@ export namespace Prisma {
     name: string
     location: string
     status: string
+    registrationCode?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     uuidId?: string | null
@@ -29253,6 +29274,7 @@ export namespace Prisma {
     name?: StringFieldUpdateOperationsInput | string
     location?: StringFieldUpdateOperationsInput | string
     status?: StringFieldUpdateOperationsInput | string
+    registrationCode?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     uuidId?: NullableStringFieldUpdateOperationsInput | string | null
@@ -29268,6 +29290,7 @@ export namespace Prisma {
     name?: StringFieldUpdateOperationsInput | string
     location?: StringFieldUpdateOperationsInput | string
     status?: StringFieldUpdateOperationsInput | string
+    registrationCode?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     uuidId?: NullableStringFieldUpdateOperationsInput | string | null
@@ -29283,6 +29306,7 @@ export namespace Prisma {
     name: string
     location: string
     status: string
+    registrationCode?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     uuidId?: string | null
@@ -29293,6 +29317,7 @@ export namespace Prisma {
     name?: StringFieldUpdateOperationsInput | string
     location?: StringFieldUpdateOperationsInput | string
     status?: StringFieldUpdateOperationsInput | string
+    registrationCode?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     uuidId?: NullableStringFieldUpdateOperationsInput | string | null
@@ -29303,6 +29328,7 @@ export namespace Prisma {
     name?: StringFieldUpdateOperationsInput | string
     location?: StringFieldUpdateOperationsInput | string
     status?: StringFieldUpdateOperationsInput | string
+    registrationCode?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     uuidId?: NullableStringFieldUpdateOperationsInput | string | null
@@ -31287,17 +31313,6 @@ export namespace Prisma {
     not?: NestedStringFilter<$PrismaModel> | string
   }
 
-  export type DateTimeFilter<$PrismaModel = never> = {
-    equals?: Date | string | DateTimeFieldRefInput<$PrismaModel>
-    in?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel>
-    notIn?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel>
-    lt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
-    lte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
-    gt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
-    gte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
-    not?: NestedDateTimeFilter<$PrismaModel> | Date | string
-  }
-
   export type StringNullableFilter<$PrismaModel = never> = {
     equals?: string | StringFieldRefInput<$PrismaModel> | null
     in?: string[] | ListStringFieldRefInput<$PrismaModel> | null
@@ -31311,6 +31326,17 @@ export namespace Prisma {
     endsWith?: string | StringFieldRefInput<$PrismaModel>
     mode?: QueryMode
     not?: NestedStringNullableFilter<$PrismaModel> | string | null
+  }
+
+  export type DateTimeFilter<$PrismaModel = never> = {
+    equals?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    in?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel>
+    notIn?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel>
+    lt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    lte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    gt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    gte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    not?: NestedDateTimeFilter<$PrismaModel> | Date | string
   }
 
   export type UserListRelationFilter = {
@@ -31373,6 +31399,7 @@ export namespace Prisma {
     name?: SortOrder
     location?: SortOrder
     status?: SortOrder
+    registrationCode?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
     uuidId?: SortOrder
@@ -31383,6 +31410,7 @@ export namespace Prisma {
     name?: SortOrder
     location?: SortOrder
     status?: SortOrder
+    registrationCode?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
     uuidId?: SortOrder
@@ -31393,6 +31421,7 @@ export namespace Prisma {
     name?: SortOrder
     location?: SortOrder
     status?: SortOrder
+    registrationCode?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
     uuidId?: SortOrder
@@ -31416,20 +31445,6 @@ export namespace Prisma {
     _max?: NestedStringFilter<$PrismaModel>
   }
 
-  export type DateTimeWithAggregatesFilter<$PrismaModel = never> = {
-    equals?: Date | string | DateTimeFieldRefInput<$PrismaModel>
-    in?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel>
-    notIn?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel>
-    lt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
-    lte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
-    gt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
-    gte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
-    not?: NestedDateTimeWithAggregatesFilter<$PrismaModel> | Date | string
-    _count?: NestedIntFilter<$PrismaModel>
-    _min?: NestedDateTimeFilter<$PrismaModel>
-    _max?: NestedDateTimeFilter<$PrismaModel>
-  }
-
   export type StringNullableWithAggregatesFilter<$PrismaModel = never> = {
     equals?: string | StringFieldRefInput<$PrismaModel> | null
     in?: string[] | ListStringFieldRefInput<$PrismaModel> | null
@@ -31446,6 +31461,20 @@ export namespace Prisma {
     _count?: NestedIntNullableFilter<$PrismaModel>
     _min?: NestedStringNullableFilter<$PrismaModel>
     _max?: NestedStringNullableFilter<$PrismaModel>
+  }
+
+  export type DateTimeWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    in?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel>
+    notIn?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel>
+    lt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    lte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    gt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    gte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    not?: NestedDateTimeWithAggregatesFilter<$PrismaModel> | Date | string
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedDateTimeFilter<$PrismaModel>
+    _max?: NestedDateTimeFilter<$PrismaModel>
   }
 
   export type DateTimeNullableFilter<$PrismaModel = never> = {
@@ -32804,12 +32833,12 @@ export namespace Prisma {
     set?: string
   }
 
-  export type DateTimeFieldUpdateOperationsInput = {
-    set?: Date | string
-  }
-
   export type NullableStringFieldUpdateOperationsInput = {
     set?: string | null
+  }
+
+  export type DateTimeFieldUpdateOperationsInput = {
+    set?: Date | string
   }
 
   export type UserUpdateManyWithoutClinicNestedInput = {
@@ -33666,17 +33695,6 @@ export namespace Prisma {
     not?: NestedStringFilter<$PrismaModel> | string
   }
 
-  export type NestedDateTimeFilter<$PrismaModel = never> = {
-    equals?: Date | string | DateTimeFieldRefInput<$PrismaModel>
-    in?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel>
-    notIn?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel>
-    lt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
-    lte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
-    gt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
-    gte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
-    not?: NestedDateTimeFilter<$PrismaModel> | Date | string
-  }
-
   export type NestedStringNullableFilter<$PrismaModel = never> = {
     equals?: string | StringFieldRefInput<$PrismaModel> | null
     in?: string[] | ListStringFieldRefInput<$PrismaModel> | null
@@ -33689,6 +33707,17 @@ export namespace Prisma {
     startsWith?: string | StringFieldRefInput<$PrismaModel>
     endsWith?: string | StringFieldRefInput<$PrismaModel>
     not?: NestedStringNullableFilter<$PrismaModel> | string | null
+  }
+
+  export type NestedDateTimeFilter<$PrismaModel = never> = {
+    equals?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    in?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel>
+    notIn?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel>
+    lt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    lte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    gt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    gte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    not?: NestedDateTimeFilter<$PrismaModel> | Date | string
   }
 
   export type NestedStringWithAggregatesFilter<$PrismaModel = never> = {
@@ -33719,20 +33748,6 @@ export namespace Prisma {
     not?: NestedIntFilter<$PrismaModel> | number
   }
 
-  export type NestedDateTimeWithAggregatesFilter<$PrismaModel = never> = {
-    equals?: Date | string | DateTimeFieldRefInput<$PrismaModel>
-    in?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel>
-    notIn?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel>
-    lt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
-    lte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
-    gt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
-    gte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
-    not?: NestedDateTimeWithAggregatesFilter<$PrismaModel> | Date | string
-    _count?: NestedIntFilter<$PrismaModel>
-    _min?: NestedDateTimeFilter<$PrismaModel>
-    _max?: NestedDateTimeFilter<$PrismaModel>
-  }
-
   export type NestedStringNullableWithAggregatesFilter<$PrismaModel = never> = {
     equals?: string | StringFieldRefInput<$PrismaModel> | null
     in?: string[] | ListStringFieldRefInput<$PrismaModel> | null
@@ -33759,6 +33774,20 @@ export namespace Prisma {
     gt?: number | IntFieldRefInput<$PrismaModel>
     gte?: number | IntFieldRefInput<$PrismaModel>
     not?: NestedIntNullableFilter<$PrismaModel> | number | null
+  }
+
+  export type NestedDateTimeWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    in?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel>
+    notIn?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel>
+    lt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    lte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    gt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    gte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    not?: NestedDateTimeWithAggregatesFilter<$PrismaModel> | Date | string
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedDateTimeFilter<$PrismaModel>
+    _max?: NestedDateTimeFilter<$PrismaModel>
   }
 
   export type NestedDateTimeNullableFilter<$PrismaModel = never> = {
@@ -34307,6 +34336,7 @@ export namespace Prisma {
     name: string
     location: string
     status: string
+    registrationCode?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     uuidId?: string | null
@@ -34321,6 +34351,7 @@ export namespace Prisma {
     name: string
     location: string
     status: string
+    registrationCode?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     uuidId?: string | null
@@ -34385,6 +34416,7 @@ export namespace Prisma {
     name?: StringFieldUpdateOperationsInput | string
     location?: StringFieldUpdateOperationsInput | string
     status?: StringFieldUpdateOperationsInput | string
+    registrationCode?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     uuidId?: NullableStringFieldUpdateOperationsInput | string | null
@@ -34399,6 +34431,7 @@ export namespace Prisma {
     name?: StringFieldUpdateOperationsInput | string
     location?: StringFieldUpdateOperationsInput | string
     status?: StringFieldUpdateOperationsInput | string
+    registrationCode?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     uuidId?: NullableStringFieldUpdateOperationsInput | string | null
@@ -34444,6 +34477,7 @@ export namespace Prisma {
     name: string
     location: string
     status: string
+    registrationCode?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     uuidId?: string | null
@@ -34458,6 +34492,7 @@ export namespace Prisma {
     name: string
     location: string
     status: string
+    registrationCode?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     uuidId?: string | null
@@ -34560,6 +34595,7 @@ export namespace Prisma {
     name?: StringFieldUpdateOperationsInput | string
     location?: StringFieldUpdateOperationsInput | string
     status?: StringFieldUpdateOperationsInput | string
+    registrationCode?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     uuidId?: NullableStringFieldUpdateOperationsInput | string | null
@@ -34574,6 +34610,7 @@ export namespace Prisma {
     name?: StringFieldUpdateOperationsInput | string
     location?: StringFieldUpdateOperationsInput | string
     status?: StringFieldUpdateOperationsInput | string
+    registrationCode?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     uuidId?: NullableStringFieldUpdateOperationsInput | string | null
@@ -34919,6 +34956,7 @@ export namespace Prisma {
     name: string
     location: string
     status: string
+    registrationCode?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     uuidId?: string | null
@@ -34933,6 +34971,7 @@ export namespace Prisma {
     name: string
     location: string
     status: string
+    registrationCode?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     uuidId?: string | null
@@ -34995,6 +35034,7 @@ export namespace Prisma {
     name?: StringFieldUpdateOperationsInput | string
     location?: StringFieldUpdateOperationsInput | string
     status?: StringFieldUpdateOperationsInput | string
+    registrationCode?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     uuidId?: NullableStringFieldUpdateOperationsInput | string | null
@@ -35009,6 +35049,7 @@ export namespace Prisma {
     name?: StringFieldUpdateOperationsInput | string
     location?: StringFieldUpdateOperationsInput | string
     status?: StringFieldUpdateOperationsInput | string
+    registrationCode?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     uuidId?: NullableStringFieldUpdateOperationsInput | string | null
@@ -35222,6 +35263,7 @@ export namespace Prisma {
     name: string
     location: string
     status: string
+    registrationCode?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     uuidId?: string | null
@@ -35236,6 +35278,7 @@ export namespace Prisma {
     name: string
     location: string
     status: string
+    registrationCode?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     uuidId?: string | null
@@ -35375,6 +35418,7 @@ export namespace Prisma {
     name?: StringFieldUpdateOperationsInput | string
     location?: StringFieldUpdateOperationsInput | string
     status?: StringFieldUpdateOperationsInput | string
+    registrationCode?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     uuidId?: NullableStringFieldUpdateOperationsInput | string | null
@@ -35389,6 +35433,7 @@ export namespace Prisma {
     name?: StringFieldUpdateOperationsInput | string
     location?: StringFieldUpdateOperationsInput | string
     status?: StringFieldUpdateOperationsInput | string
+    registrationCode?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     uuidId?: NullableStringFieldUpdateOperationsInput | string | null
@@ -35518,6 +35563,7 @@ export namespace Prisma {
     name: string
     location: string
     status: string
+    registrationCode?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     uuidId?: string | null
@@ -35532,6 +35578,7 @@ export namespace Prisma {
     name: string
     location: string
     status: string
+    registrationCode?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     uuidId?: string | null
@@ -35630,6 +35677,7 @@ export namespace Prisma {
     name?: StringFieldUpdateOperationsInput | string
     location?: StringFieldUpdateOperationsInput | string
     status?: StringFieldUpdateOperationsInput | string
+    registrationCode?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     uuidId?: NullableStringFieldUpdateOperationsInput | string | null
@@ -35644,6 +35692,7 @@ export namespace Prisma {
     name?: StringFieldUpdateOperationsInput | string
     location?: StringFieldUpdateOperationsInput | string
     status?: StringFieldUpdateOperationsInput | string
+    registrationCode?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     uuidId?: NullableStringFieldUpdateOperationsInput | string | null

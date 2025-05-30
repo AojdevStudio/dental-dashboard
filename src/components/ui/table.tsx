@@ -1,8 +1,10 @@
 /**
- * @fileoverview Table Component
- *
- * Accessible table components for displaying structured data
- * with consistent styling and responsive behavior.
+ * @file Table Components
+ * @description This file provides a collection of accessible and styled table components
+ * for displaying structured data. It includes components for the main table,
+ * header, body, footer, rows, heading cells, data cells, and caption, all
+ * built using `React.forwardRef` for ref forwarding and `cn` for utility class merging.
+ * These components aim to offer consistent styling and responsive behavior.
  */
 
 import * as React from "react";
@@ -10,10 +12,21 @@ import * as React from "react";
 import { cn } from "@/lib/utils";
 
 /**
- * Main table container with overflow handling
+ * @component Table
+ * @description The main table container component. It wraps the HTML `<table>` element
+ * and includes a `div` wrapper to handle overflow by making the table horizontally scrollable.
  *
- * @param {React.HTMLAttributes<HTMLTableElement>} props - Table element props
- * @returns {JSX.Element} The table container
+ * @param {React.HTMLAttributes<HTMLTableElement>} props - Props for the HTML `<table>` element.
+ * @param {string} [props.className] - Additional CSS class names to be applied to the `<table>` element.
+ *                                     These are merged with the default styles.
+ * @param {React.Ref<HTMLTableElement>} ref - Forwarded ref to the underlying `<table>` element.
+ * @returns {JSX.Element} The rendered table container with a scrollable table.
+ *
+ * @example
+ * <Table>
+ *   <TableHeader>...</TableHeader>
+ *   <TableBody>...</TableBody>
+ * </Table>
  */
 const Table = React.forwardRef<HTMLTableElement, React.HTMLAttributes<HTMLTableElement>>(
   ({ className, ...props }, ref) => (
@@ -25,10 +38,14 @@ const Table = React.forwardRef<HTMLTableElement, React.HTMLAttributes<HTMLTableE
 Table.displayName = "Table";
 
 /**
- * Table header container for column headings
+ * @component TableHeader
+ * @description A container component for the header section (`<thead>`) of a table.
+ * It is intended to wrap `TableRow` components that contain `TableHead` cells.
  *
- * @param {React.HTMLAttributes<HTMLTableSectionElement>} props - Table header props
- * @returns {JSX.Element} The table header element
+ * @param {React.HTMLAttributes<HTMLTableSectionElement>} props - Props for the HTML `<thead>` element.
+ * @param {string} [props.className] - Additional CSS class names for the `<thead>` element.
+ * @param {React.Ref<HTMLTableSectionElement>} ref - Forwarded ref to the underlying `<thead>` element.
+ * @returns {JSX.Element} The rendered table header element.
  */
 const TableHeader = React.forwardRef<
   HTMLTableSectionElement,
@@ -37,10 +54,14 @@ const TableHeader = React.forwardRef<
 TableHeader.displayName = "TableHeader";
 
 /**
- * Table body container for data rows
+ * @component TableBody
+ * @description A container component for the body section (`<tbody>`) of a table.
+ * It is intended to wrap `TableRow` components that contain `TableCell` data cells.
  *
- * @param {React.HTMLAttributes<HTMLTableSectionElement>} props - Table body props
- * @returns {JSX.Element} The table body element
+ * @param {React.HTMLAttributes<HTMLTableSectionElement>} props - Props for the HTML `<tbody>` element.
+ * @param {string} [props.className] - Additional CSS class names for the `<tbody>` element.
+ * @param {React.Ref<HTMLTableSectionElement>} ref - Forwarded ref to the underlying `<tbody>` element.
+ * @returns {JSX.Element} The rendered table body element.
  */
 const TableBody = React.forwardRef<
   HTMLTableSectionElement,
@@ -51,10 +72,14 @@ const TableBody = React.forwardRef<
 TableBody.displayName = "TableBody";
 
 /**
- * Table footer for summary rows or actions
+ * @component TableFooter
+ * @description A container component for the footer section (`<tfoot>`) of a table.
+ * Often used for summary rows or actions related to the table data.
  *
- * @param {React.HTMLAttributes<HTMLTableSectionElement>} props - Table footer props
- * @returns {JSX.Element} The table footer element
+ * @param {React.HTMLAttributes<HTMLTableSectionElement>} props - Props for the HTML `<tfoot>` element.
+ * @param {string} [props.className] - Additional CSS class names for the `<tfoot>` element.
+ * @param {React.Ref<HTMLTableSectionElement>} ref - Forwarded ref to the underlying `<tfoot>` element.
+ * @returns {JSX.Element} The rendered table footer element.
  */
 const TableFooter = React.forwardRef<
   HTMLTableSectionElement,
@@ -72,10 +97,14 @@ const TableFooter = React.forwardRef<
 TableFooter.displayName = "TableFooter";
 
 /**
- * Table row with hover and selection states
+ * @component TableRow
+ * @description A component representing a row (`<tr>`) within a table.
+ * It includes styling for hover and selection states.
  *
- * @param {React.HTMLAttributes<HTMLTableRowElement>} props - Table row props
- * @returns {JSX.Element} The table row element
+ * @param {React.HTMLAttributes<HTMLTableRowElement>} props - Props for the HTML `<tr>` element.
+ * @param {string} [props.className] - Additional CSS class names for the `<tr>` element.
+ * @param {React.Ref<HTMLTableRowElement>} ref - Forwarded ref to the underlying `<tr>` element.
+ * @returns {JSX.Element} The rendered table row element.
  */
 const TableRow = React.forwardRef<HTMLTableRowElement, React.HTMLAttributes<HTMLTableRowElement>>(
   ({ className, ...props }, ref) => (
@@ -92,10 +121,15 @@ const TableRow = React.forwardRef<HTMLTableRowElement, React.HTMLAttributes<HTML
 TableRow.displayName = "TableRow";
 
 /**
- * Table heading cell with styling for column headers
+ * @component TableHead
+ * @description A component representing a header cell (`<th>`) in a table.
+ * Typically used within a `TableRow` inside a `TableHeader`.
+ * Includes styling for column headers and special handling for checkbox cells.
  *
- * @param {React.ThHTMLAttributes<HTMLTableCellElement>} props - Table heading props
- * @returns {JSX.Element} The table heading cell
+ * @param {React.ThHTMLAttributes<HTMLTableCellElement>} props - Props for the HTML `<th>` element.
+ * @param {string} [props.className] - Additional CSS class names for the `<th>` element.
+ * @param {React.Ref<HTMLTableCellElement>} ref - Forwarded ref to the underlying `<th>` element.
+ * @returns {JSX.Element} The rendered table heading cell.
  */
 const TableHead = React.forwardRef<
   HTMLTableCellElement,
@@ -113,10 +147,15 @@ const TableHead = React.forwardRef<
 TableHead.displayName = "TableHead";
 
 /**
- * Table data cell for row content
+ * @component TableCell
+ * @description A component representing a standard data cell (`<td>`) in a table.
+ * Typically used within a `TableRow` inside a `TableBody` or `TableFooter`.
+ * Includes styling and special handling for checkbox cells.
  *
- * @param {React.TdHTMLAttributes<HTMLTableCellElement>} props - Table cell props
- * @returns {JSX.Element} The table data cell
+ * @param {React.TdHTMLAttributes<HTMLTableCellElement>} props - Props for the HTML `<td>` element.
+ * @param {string} [props.className] - Additional CSS class names for the `<td>` element.
+ * @param {React.Ref<HTMLTableCellElement>} ref - Forwarded ref to the underlying `<td>` element.
+ * @returns {JSX.Element} The rendered table data cell.
  */
 const TableCell = React.forwardRef<
   HTMLTableCellElement,
@@ -134,10 +173,14 @@ const TableCell = React.forwardRef<
 TableCell.displayName = "TableCell";
 
 /**
- * Table caption for accessible table descriptions
+ * @component TableCaption
+ * @description A component representing the caption (`<caption>`) for a table.
+ * Used to provide an accessible description or title for the table content.
  *
- * @param {React.HTMLAttributes<HTMLTableCaptionElement>} props - Table caption props
- * @returns {JSX.Element} The table caption element
+ * @param {React.HTMLAttributes<HTMLTableCaptionElement>} props - Props for the HTML `<caption>` element.
+ * @param {string} [props.className] - Additional CSS class names for the `<caption>` element.
+ * @param {React.Ref<HTMLTableCaptionElement>} ref - Forwarded ref to the underlying `<caption>` element.
+ * @returns {JSX.Element} The rendered table caption element.
  */
 const TableCaption = React.forwardRef<
   HTMLTableCaptionElement,
@@ -148,6 +191,8 @@ const TableCaption = React.forwardRef<
 TableCaption.displayName = "TableCaption";
 
 /**
- * Export table components for structured data display
+ * @module table
+ * @description Exports all the table-related components for easy import and use
+ * in displaying structured data throughout the application.
  */
 export { Table, TableBody, TableCaption, TableCell, TableFooter, TableHead, TableHeader, TableRow };

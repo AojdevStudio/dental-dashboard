@@ -1,13 +1,13 @@
-import Link from "next/link"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import Link from "next/link";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 
 /** Google Sheets Integration Page */
 export default function GoogleSheetsPage() {
   return (
     <div className="container mx-auto p-6">
       <h1 className="text-3xl font-bold mb-6">Google Sheets Integration</h1>
-      
+
       <div className="grid gap-6">
         <Card>
           <CardHeader>
@@ -18,8 +18,8 @@ export default function GoogleSheetsPage() {
           </CardHeader>
           <CardContent>
             <p className="mb-4 text-sm text-muted-foreground">
-              Connect your Google account to access spreadsheets and automatically sync data 
-              for real-time analytics and reporting.
+              Connect your Google account to access spreadsheets and automatically sync data for
+              real-time analytics and reporting.
             </p>
             <div className="flex gap-4">
               <Button>Connect Google Account</Button>
@@ -29,7 +29,7 @@ export default function GoogleSheetsPage() {
             </div>
           </CardContent>
         </Card>
-        
+
         <Card>
           <CardHeader>
             <CardTitle>Connected Spreadsheets</CardTitle>

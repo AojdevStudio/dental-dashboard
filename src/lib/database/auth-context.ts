@@ -3,16 +3,16 @@
  * Provides user and clinic context for database queries
  */
 
-import { createClient } from '@supabase/supabase-js'
-import { cookies } from 'next/headers'
-import { prisma } from './client'
+import { createClient } from "@supabase/supabase-js";
+import { cookies } from "next/headers";
+import { prisma } from "./client";
 
 export interface AuthContext {
-  userId: string
-  authId: string
-  clinicIds: string[]
-  currentClinicId?: string
-  role?: string
+  userId: string;
+  authId: string;
+  clinicIds: string[];
+  currentClinicId?: string;
+  role?: string;
 }
 
 /**
@@ -20,23 +20,26 @@ export interface AuthContext {
  */
 export async function getAuthContext(): Promise<AuthContext | null> {
   try {
-    const cookieStore = await cookies()
+    const cookieStore = await cookies();
     const supabase = createClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
       process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
       {
         cookies: {
           get(name: string) {
-            return cookieStore.get(name)?.value
+            return cookieStore.get(name)?.value;
           },
         },
       }
-    )
+    );
 
-    const { data: { user }, error } = await supabase.auth.getUser()
-    
+    const {
+      data: { user },
+      error,
+    } = await supabase.auth.getUser();
+
     if (error || !user) {
-      return null
+      return null;
     }
 
     // Get user details and clinic access
@@ -45,10 +48,10 @@ export async function getAuthContext(): Promise<AuthContext | null> {
       include: {
         clinic: true,
       },
-    })
+    });
 
     if (!dbUser) {
-      return null
+      return null;
     }
 
     // Get all clinic access for the user
@@ -61,18 +64,18 @@ export async function getAuthContext(): Promise<AuthContext | null> {
         clinicId: true,
         role: true,
       },
-    })
+    });
 
     return {
       userId: dbUser.id,
       authId: user.id,
-      clinicIds: clinicAccess.map(ca => ca.clinicId),
+      clinicIds: clinicAccess.map((ca) => ca.clinicId),
       currentClinicId: dbUser.clinicId, // Primary clinic
       role: dbUser.role,
-    }
+    };
   } catch (error) {
-    console.error('Error getting auth context:', error)
-    return null
+    console.error("Error getting auth context:", error);
+    return null;
   }
 }
 
@@ -83,7 +86,7 @@ export async function validateClinicAccess(
   authContext: AuthContext,
   clinicId: string
 ): Promise<boolean> {
-  return authContext.clinicIds.includes(clinicId)
+  return authContext.clinicIds.includes(clinicId);
 }
 
 /**
@@ -103,20 +106,17 @@ export async function getUserClinicRole(
     select: {
       role: true,
     },
-  })
+  });
 
-  return role?.role || null
+  return role?.role || null;
 }
 
 /**
  * Check if user is a clinic admin
  */
-export async function isClinicAdmin(
-  authContext: AuthContext,
-  clinicId: string
-): Promise<boolean> {
-  const role = await getUserClinicRole(authContext, clinicId)
-  return role === 'clinic_admin'
+export async function isClinicAdmin(authContext: AuthContext, clinicId: string): Promise<boolean> {
+  const role = await getUserClinicRole(authContext, clinicId);
+  return role === "clinic_admin";
 }
 
 /**
@@ -131,10 +131,10 @@ export async function getAuthContextByAuthId(authId: string): Promise<AuthContex
       include: {
         clinic: true,
       },
-    })
+    });
 
     if (!dbUser) {
-      return null
+      return null;
     }
 
     // Get all clinic access for the user
@@ -147,18 +147,18 @@ export async function getAuthContextByAuthId(authId: string): Promise<AuthContex
         clinicId: true,
         role: true,
       },
-    })
+    });
 
     return {
       userId: dbUser.id,
       authId,
-      clinicIds: clinicAccess.map(ca => ca.clinicId),
+      clinicIds: clinicAccess.map((ca) => ca.clinicId),
       currentClinicId: dbUser.clinicId, // Primary clinic
       role: dbUser.role,
-    }
+    };
   } catch (error) {
-    console.error('Error getting auth context by ID:', error)
-    return null
+    console.error("Error getting auth context by ID:", error);
+    return null;
   }
 }
 
@@ -167,9 +167,9 @@ export async function getAuthContextByAuthId(authId: string): Promise<AuthContex
  */
 export function getServiceContext(): AuthContext {
   return {
-    userId: 'system',
-    authId: 'system',
-    clinicIds: ['*'], // Access to all clinics
-    role: 'system',
-  }
+    userId: "system",
+    authId: "system",
+    clinicIds: ["*"], // Access to all clinics
+    role: "system",
+  };
 }

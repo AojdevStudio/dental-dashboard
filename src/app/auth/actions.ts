@@ -1,21 +1,14 @@
-/**
- * @file Server actions for user authentication (sign-in, sign-out).
- * These actions interact with Supabase to manage user sessions.
- */
-
 "use server";
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
-import { createClient } from "@/lib/supabase/server"; // Assuming createClient is the server client factory
+import { createClient } from "@/lib/supabase/server";
+import { prisma } from "@/lib/database/prisma";
 
 /**
- * Handles user sign-in with email and password.
- *
- * @param {FormData} formData - The form data containing email and password.
- * @returns {Promise<{ error: string | null }>} An object containing an error message if sign-in fails, or null on success (before redirect).
+ * Enhanced sign-in that verifies both auth and database user
  */
-export async function signIn(
+export async function signInWithVerification(
   formData: FormData
 ): Promise<{ error: string | null; success: boolean }> {
   const email = formData.get("email") as string;
@@ -26,40 +19,157 @@ export async function signIn(
     return { error: "Email and password are required.", success: false };
   }
 
-  const { error } = await supabase.auth.signInWithPassword({
+  // Step 1: Authenticate with Supabase
+  const { data: authData, error: authError } = await supabase.auth.signInWithPassword({
     email,
     password,
   });
 
-  if (error) {
-    // Log the error for server-side debugging if needed
-    // console.error('Sign-in error:', error.message);
-    return { error: error.message || "Could not authenticate user.", success: false };
+  if (authError || !authData.user) {
+    return { error: authError?.message || "Authentication failed.", success: false };
   }
 
-  revalidatePath("/", "layout"); // Revalidate all paths to update user session state across the app
-  redirect("/dashboard"); // Redirect to dashboard on successful sign-in
-  // Note: redirect() throws an error, so this line below is effectively unreachable if redirect occurs.
-  // return { error: null, success: true };
+  // Step 2: Verify user exists in database with proper setup
+  try {
+    // First try to find by authId
+    let dbUser = await prisma.user.findUnique({
+      where: { authId: authData.user.id },
+      include: {
+        clinic: true,
+      },
+    });
+
+    // If not found by authId, try by email (for existing users before UUID migration)
+    if (!dbUser) {
+      dbUser = await prisma.user.findUnique({
+        where: { email: authData.user.email! },
+        include: {
+          clinic: true,
+        },
+      });
+
+      // If found by email but authId doesn't match, update it
+      if (dbUser && dbUser.authId !== authData.user.id) {
+        console.log("Updating authId for user:", dbUser.email);
+        dbUser = await prisma.user.update({
+          where: { id: dbUser.id },
+          data: {
+            authId: authData.user.id,
+            uuidId: authData.user.id, // Also set UUID for future migration
+          },
+          include: {
+            clinic: true,
+          },
+        });
+      }
+    }
+
+    // Check for user clinic roles separately
+    const userRoles = await prisma.userClinicRole.findMany({
+      where: { userId: dbUser?.id || "" },
+    });
+
+    if (!dbUser) {
+      // User exists in auth but not in database - this is the "granting user" error
+      console.error("User authenticated but not found in database:", authData.user.id);
+
+      // Sign them out to prevent partial access
+      await supabase.auth.signOut();
+
+      return {
+        error: "Your account setup is incomplete. Please contact support or register again.",
+        success: false,
+      };
+    }
+
+    // Verify user has a clinic assignment
+    if (!dbUser.clinicId || !dbUser.clinic) {
+      console.error("User has no clinic assignment:", dbUser.id);
+
+      await supabase.auth.signOut();
+
+      return {
+        error: "Your account is not associated with a clinic. Please contact your administrator.",
+        success: false,
+      };
+    }
+
+    // Verify user has role assignments
+    if (!userRoles || userRoles.length === 0) {
+      console.error("User has no clinic roles:", dbUser.id);
+
+      // Try to create a default role
+      try {
+        await prisma.userClinicRole.create({
+          data: {
+            userId: dbUser.id,
+            clinicId: dbUser.clinicId,
+            role: "staff",
+            isActive: true,
+          },
+        });
+      } catch (roleError) {
+        console.error("Failed to create default role:", roleError);
+      }
+    }
+
+    // Everything is good - proceed with login
+    console.log("Login successful for user:", dbUser.email);
+    
+    revalidatePath("/", "layout");
+    
+    // Return success without redirect - let client handle navigation
+    return { error: null, success: true };
+  } catch (dbError) {
+    console.error("Database error during sign-in:", dbError);
+    console.error("Error details:", {
+      message: dbError instanceof Error ? dbError.message : 'Unknown error',
+      stack: dbError instanceof Error ? dbError.stack : undefined
+    });
+
+    // Sign them out to prevent partial access
+    await supabase.auth.signOut();
+
+    return {
+      error: "Database error while granting user access. Please try again or contact support.",
+      success: false,
+    };
+  }
 }
 
 /**
- * Handles user sign-out.
- *
- * @returns {Promise<void>} A promise that resolves when sign-out is complete (before redirect).
+ * Enhanced sign-out that ensures complete session cleanup
  */
-export async function signOut(): Promise<void> {
+export async function signOutWithCleanup() {
   const supabase = await createClient();
-  const { error } = await supabase.auth.signOut();
 
-  if (error) {
-    // Log the error for server-side debugging
-    // console.error('Sign-out error:', error.message);
-    // Optionally, you could return an error object here if you want to display it on the client,
-    // but typically sign-out errors are less critical to show directly to the user.
-    // For now, we'll just proceed to redirect.
+  try {
+    // Get current user before signing out for logging purposes
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+
+    if (user) {
+      console.log("Signing out user:", user.id);
+    }
+
+    // Sign out from Supabase Auth
+    const { error } = await supabase.auth.signOut();
+
+    if (error) {
+      console.error("Sign-out error:", error);
+      // Continue with cleanup even if sign out partially fails
+    }
+
+    // Clear any client-side storage (this will be handled by middleware)
+    // Revalidate all cached paths to ensure fresh data
+    revalidatePath("/", "layout");
+
+    // Always redirect to login, even if there was an error
+    redirect("/login");
+  } catch (error) {
+    console.error("Error during sign out:", error);
+    // Force redirect to login even on error
+    redirect("/login");
   }
-
-  revalidatePath("/", "layout"); // Revalidate all paths
-  redirect("/login"); // Redirect to login page on successful sign-out
 }

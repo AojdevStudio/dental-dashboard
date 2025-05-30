@@ -1,7 +1,7 @@
-import { type NextRequest, NextResponse } from "next/server"
-import { withAuth } from '@/lib/api/middleware'
-import { ApiError } from '@/lib/api/utils'
-import { prisma } from '@/lib/database/prisma'
+import { type NextRequest, NextResponse } from "next/server";
+import { withAuth } from "@/lib/api/middleware";
+import { ApiError } from "@/lib/api/utils";
+import { prisma } from "@/lib/database/prisma";
 
 /**
  * GET /api/test/data-source
@@ -12,17 +12,17 @@ export const GET = withAuth(async (request, { authContext }) => {
     const dataSource = await prisma.dataSource.findFirst({
       where: {
         clinicId: authContext.clinicId,
-        name: { contains: "Test Google Sheets Connection" }
+        name: { contains: "Test Google Sheets Connection" },
       },
-      orderBy: { createdAt: 'desc' }
-    })
+      orderBy: { createdAt: "desc" },
+    });
 
-    return NextResponse.json({ dataSource })
+    return NextResponse.json({ dataSource });
   } catch (error) {
-    console.error("Failed to fetch data source:", error)
-    throw new ApiError("Failed to fetch data source", 500)
+    console.error("Failed to fetch data source:", error);
+    throw new ApiError("Failed to fetch data source", 500);
   }
-})
+});
 
 /**
  * POST /api/test/data-source
@@ -40,21 +40,21 @@ export const POST = withAuth(async (request, { authContext }) => {
         connectionStatus: "pending",
         accessToken: "pending",
         clinicId: authContext.clinicId,
-      }
-    })
+      },
+    });
 
-    return NextResponse.json({ 
+    return NextResponse.json({
       success: true,
       dataSource: {
         id: dataSource.id,
         name: dataSource.name,
         spreadsheetId: dataSource.spreadsheetId,
         connectionStatus: dataSource.connectionStatus,
-        clinicId: dataSource.clinicId
-      }
-    })
+        clinicId: dataSource.clinicId,
+      },
+    });
   } catch (error) {
-    console.error("Failed to create data source:", error)
-    throw new ApiError("Failed to create data source", 500)
+    console.error("Failed to create data source:", error);
+    throw new ApiError("Failed to create data source", 500);
   }
-})
+});

@@ -115,3 +115,10 @@ Core entities managed by Prisma:
 ## Development Guidelines
 
 - We cannot use npm or npx commands in this repo.. always use pnpm
+
+## Docs and Guide Management
+- Always put docs and guides in the @docs directory
+
+## Memory Management
+
+- Use the Supabase MCP as much as possible to handle simple transactions

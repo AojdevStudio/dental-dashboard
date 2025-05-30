@@ -79,6 +79,7 @@ export async function middleware(request: NextRequest) {
     const isAuthPage =
       request.nextUrl.pathname.startsWith("/auth/") ||
       request.nextUrl.pathname === "/login" ||
+      request.nextUrl.pathname === "/register" ||
       request.nextUrl.pathname === "/signup";
 
     console.log(`[${new Date().toISOString()}] Route protection analysis`, {

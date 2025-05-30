@@ -1,7 +1,7 @@
 # System Patterns: Dental Practice Analytics Dashboard
-*Version: 1.0*
+*Version: 1.1*
 *Created: 2025-05-17*
-*Last Updated: {{Current Date}}*
+*Last Updated: 2025-01-15*
 
 ## Architecture Overview
 The Dental Practice Analytics Dashboard (MVP) adopts a layered architecture. It leverages Next.js (App Router) for frontend and API Routes. **Supabase Edge Functions will be the primary location for complex calculations, data transformations, and business logic, augmented by Next.js API Routes where appropriate.** Supabase (PostgreSQL) serves as the database with Prisma as the ORM. The system is designed for modularity across its Data Layer, Business Logic Layer (primarily in Edge Functions), API Layer, and Presentation Layer. State management uses React Query (TanStack Query) for server state and Zustand for minimal global UI state.
@@ -27,19 +27,22 @@ The Dental Practice Analytics Dashboard (MVP) adopts a layered architecture. It 
     - `Calculation Engines (within Edge Functions)`: For MVP-specific metrics and KPI computations.
 
 ### 3. API Layer
-- **Responsibilities:** Exposing consistent RESTful endpoints (via Next.js API Routes) that often trigger Supabase Edge Functions for data fetching and processing, request validation, response formatting, error handling, and security. **No Server Actions for data mutation in MVP as it's read-only.**
+- **Responsibilities:** Exposing consistent RESTful endpoints (via Next.js API Routes) that often trigger Supabase Edge Functions for data fetching and processing, request validation, response formatting, error handling, and security. **Enhanced with comprehensive authentication and OAuth integration.**
 - **Key Sub-Components:**
     - `Next.js API Routes` (e.g., `src/app/api/[domain]/route.ts`): For data fetching operations initiated by the client, often acting as an interface to Supabase Edge Functions.
+    - `Authentication API Routes`: Enhanced login, registration, and OAuth callback handling.
+    - `Google Sheets API Routes`: OAuth integration, spreadsheet discovery, and data extraction endpoints.
     - `Middleware`: For common concerns like authentication (Supabase Auth), logging, and error handling.
 
 ### 4. Presentation Layer (UI)
-- **Responsibilities:** User interface rendering (Next.js React Server Components and Client Components), data visualization for **fixed dashboards** (Recharts), user interaction handling, layout, and responsive design (Tailwind CSS, shadcn/ui).
+- **Responsibilities:** User interface rendering (Next.js React Server Components and Client Components), data visualization for **fixed dashboards** (Recharts), user interaction handling, layout, and responsive design (Tailwind CSS, shadcn/ui). **Enhanced with comprehensive authentication flows and error handling.**
 - **Key Sub-Components:**
     - `Next.js Pages/Views`: Located in `src/app/`, structured using the App Router conventions, adhering to the file structure in `.dev/file-system.md`.
+    - `Authentication Components`: Multi-step registration form, enhanced login page, OAuth integration, loading and error states.
     - `Reusable UI Components`: Located in `src/components/`, built with shadcn/ui and Tailwind CSS, styled according to `.dev/design-brief.md`.
     - `Chart Components`: Specific Recharts implementations in `src/components/charts/` for MVP KPIs.
     - `Layout Components`: In `src/components/layout/` for consistent page structure (fixed layouts for MVP).
-    - `Forms`: **Out of scope for MVP.**
+    - `Integration Components`: Google Sheets testing interface, data source management.
     - `Navigation Structure`: The dashboard employs a sidebar navigation pattern (`src/components/ui/sidebar.tsx`) that organizes access to key areas as per PRD/MVP focus:
         - **Dashboard Section**: Overview (main dashboard with MVP KPI summary), Clinics (basic clinic views), Providers (basic provider views).
         - **Metrics Section**: Financial, Patients, Appointments, Call Tracking (displaying MVP-defined core metrics).
@@ -47,50 +50,128 @@ The Dental Practice Analytics Dashboard (MVP) adopts a layered architecture. It 
         - **Administration**: Settings, User Profile.
 
 ### 5. State Management
-- **Responsibilities:** Managing UI state, handling server data caching and synchronization (via React Query).
+- **Responsibilities:** Managing UI state, handling server data caching and synchronization (via React Query), authentication state management.
 - **Key Sub-Components:**
     - `React Query (TanStack Query)`: For managing server state, caching, and data fetching operations.
     - `Zustand`: For managing minimal global or complex local UI state, if necessary.
+    - `Supabase Auth State`: Integrated authentication state management with proper session handling.
 
 ## Design Patterns
+
+### Authentication Patterns
+- **Multi-Step Registration Pattern:** Three-step process with validation at each stage and transaction-based data consistency.
+- **Enhanced Login Pattern:** Database verification with proper error handling and automatic cleanup of partial states.
+- **OAuth Integration Pattern:** Secure token management with proper callback handling and refresh mechanisms.
+
+### Data Integration Patterns
 - **Repository Pattern:** To abstract data access logic.
 - **Service Layer Pattern (Primarily within Edge Functions):** To encapsulate business logic.
 - **Adapter Pattern:** For Google Sheets API integration.
-- **Layered Architecture:** As described.
+- **OAuth Token Management Pattern:** Secure storage and retrieval of API tokens with refresh capabilities.
+
+### UI/UX Patterns
+- **Loading State Pattern:** Consistent loading states across all pages with skeleton UI.
+- **Error Boundary Pattern:** Comprehensive error handling with user-friendly messages.
+- **Progressive Form Pattern:** Multi-step forms with validation and progress indicators.
+- **Responsive Design Pattern:** Mobile-first approach with consistent breakpoints.
+
+### Architecture Patterns
+- **Layered Architecture:** As described above.
 - **Server Components & Client Components (Next.js):** To optimize rendering.
+- **Transaction Pattern:** For ensuring data consistency across multiple database operations.
 
 ## Data Flow (MVP Focus)
-1.  **Data Ingestion (Google Sheets - Read Only):**
-    *   User authenticates via Google OAuth.
-    *   System lists available spreadsheets.
-    *   User selects spreadsheet; pre-defined mapping template applied (details in `.dev/feature-spec.md`). Mapping stored in `column_mappings`.
-    *   Scheduled sync (Supabase cron job) triggers a **Supabase Edge Function**.
-    *   Edge Function extracts data, performs MVP-scoped transformations, and stores it in metrics tables (e.g., `financial_metrics`, `patient_metrics` as per `.dev/database-schema-metrics.md`).
-2.  **Data Display (Fixed Dashboards):**
-    *   User navigates to a dashboard page.
-    *   Page/Component (Client Component with React Query) fetches data from a Next.js `API Route`.
-    *   The `API Route` may call a **Supabase Edge Function** for data aggregation/computation.
-    *   Edge Function/API Route uses `Repository` (Prisma) to get data from Supabase.
-    *   Data is returned to the Presentation Layer.
-    *   `Recharts` components visualize the data on fixed dashboards.
-3.  **Data Mutation:** **Out of scope for MVP.**
+
+### 1. Authentication Flow
+**Registration Flow:**
+1. User accesses multi-step registration form (`RegisterFormComprehensive`)
+2. Step 1: Account information validation (email, password, name)
+3. Step 2: Role selection and clinic association (join existing or create new)
+4. Step 3: Terms acceptance and registration summary
+5. Form submission triggers transaction-based API (`/api/auth/register-comprehensive`)
+6. API creates Supabase auth user, database user, clinic (if new), and role assignments
+7. User receives email verification and is redirected to login
+
+**Login Flow:**
+1. User submits credentials via enhanced login form
+2. `signInWithVerification` authenticates with Supabase Auth
+3. System verifies user exists in database with proper clinic and role assignments
+4. If verification fails, user is signed out and receives appropriate error message
+5. Successful login redirects to dashboard with proper session state
+
+**OAuth Flow (Google Sheets):**
+1. User initiates Google OAuth from integration page
+2. System redirects to Google OAuth with proper callback URL
+3. Google redirects back with authorization code
+4. Callback handler exchanges code for access/refresh tokens
+5. Tokens are securely stored in data source record
+6. User can now access Google Sheets integration features
+
+### 2. Data Ingestion (Google Sheets - Enhanced)
+1. **OAuth Authentication:** User authenticates via Google OAuth with secure token storage
+2. **Spreadsheet Discovery:** System lists available spreadsheets using stored tokens
+3. **Data Source Management:** Connection status tracking and token validation
+4. **Data Extraction:** Fetch data with range support and proper error handling
+5. **Testing Infrastructure:** Comprehensive testing page for validating integration
+6. **Future Pipeline:** Pre-defined mapping templates and transformation (to be implemented)
+
+### 3. Data Display (Fixed Dashboards)
+*   User navigates to a dashboard page.
+*   Page/Component (Client Component with React Query) fetches data from a Next.js `API Route`.
+*   The `API Route` may call a **Supabase Edge Function** for data aggregation/computation.
+*   Edge Function/API Route uses `Repository` (Prisma) to get data from Supabase.
+*   Data is returned to the Presentation Layer.
+*   `Recharts` components visualize the data on fixed dashboards.
 
 ## Dashboard Navigation & User Experience
 The dashboard implements a consistent navigation experience:
 1. **Collapsible Sidebar**: As previously defined, responsive for mobile and desktop.
 2. **Navigation Structure**: Aligned with MVP core features: Dashboard (Overview, Clinics, Providers), Metrics (Financial, Patients, Appointments, Call Tracking), Data (Google Sheets, Goals), Admin (Settings, Profile).
-3. **Responsive Design**: Adapts to different screen sizes.
+3. **Responsive Design**: Adapts to different screen sizes with consistent breakpoints.
 4. **Context Awareness**: Active route highlighting, breadcrumbs.
+5. **Authentication States**: Proper handling of authenticated and unauthenticated states.
 
 ## Key Technical Decisions (MVP Focus)
-- **Next.js App Router:** For modern React features.
+
+### Core Architecture
+- **Next.js App Router:** For modern React features with proper SSR/CSR optimization.
 - **Supabase BaaS:** For PostgreSQL, Auth, and critically, **Edge Functions for backend business logic and data processing.**
-- **Prisma as ORM:** For type-safe database interactions.
-- **shadcn/ui with Tailwind CSS:** For UI development.
-- **Focus on Supabase Edge Functions for Backend Logic:** Complex calculations, data transformations, and business logic will primarily reside in Supabase Edge Functions for the MVP. Next.js API routes will often serve as an interface to these functions.
-- **Read-Only System for MVP:** No form-based data entry or direct data mutation by users.
+- **Prisma as ORM:** For type-safe database interactions with multi-tenant support.
+- **shadcn/ui with Tailwind CSS:** For consistent UI development with responsive design.
+
+### Authentication & Security
+- **Enhanced Supabase Auth:** With comprehensive database verification and proper error handling.
+- **Multi-Step Registration:** For better user experience and data collection.
+- **OAuth Integration:** For secure third-party API access (Google Sheets).
+- **Transaction-Based Operations:** For data consistency across multiple database operations.
+
+### Integration & Data Management
+- **Google Sheets OAuth 2.0:** For secure API access with token refresh capabilities.
+- **Data Source Pattern:** For managing multiple integration connections per clinic.
+- **Testing Infrastructure:** Comprehensive testing framework before production implementation.
+- **Focus on Supabase Edge Functions for Backend Logic:** Complex calculations, data transformations, and business logic will primarily reside in Supabase Edge Functions for the MVP.
+
+### UI/UX Standards
+- **Consistent Loading States:** Skeleton UI patterns across all pages.
+- **Error Boundaries:** User-friendly error handling with proper recovery options.
+- **Progressive Forms:** Multi-step forms with validation and progress indicators.
+- **Responsive Design:** Mobile-first approach with consistent breakpoints.
 
 ## Component Relationships (High-Level - MVP)
+
+### Authentication Flow
+- **Auth Components (`src/components/auth`)** handle user registration and login
+- **Auth Actions (`src/app/auth/actions.ts`)** manage server-side authentication logic
+- **OAuth Actions (`src/actions/auth/oauth.ts`)** handle third-party authentication
+- **Registration API (`src/app/api/auth/register-comprehensive`)** processes multi-step registration
+
+### Data Integration Flow
+- **Integration Pages (`src/app/(dashboard)/integrations`)** provide user interfaces for connections
+- **Google Sheets APIs (`src/app/api/google/sheets`)** handle OAuth and data extraction
+- **Google Services (`src/services/google`)** abstract Google API interactions
+- **Data Source Management** stores and manages integration tokens and status
+
+### UI Component Hierarchy
 - **UI Components (`src/components`)** used by **Pages/Views (`src/app`)**.
 - **Pages/Views (Client Components)** interact with **Next.js API Routes** (using React Query).
 - **Server Components** (if used for data fetching) might directly call services that could invoke Edge Functions or simple data retrievals.

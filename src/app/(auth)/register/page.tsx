@@ -10,7 +10,7 @@
  * provide a complete user registration flow, including email verification.
  */
 
-import { RegisterFormWorking } from "@/components/auth/register-form-working";
+import { RegisterFormComprehensive } from "@/components/auth/register-form-comprehensive";
 import type { Metadata } from "next";
 
 /**
@@ -18,24 +18,25 @@ import type { Metadata } from "next";
  * Defines the page title and description for SEO and browser tabs
  */
 export const metadata: Metadata = {
-  title: "Sign Up",
-  description: "Create a new account",
+  title: "Sign Up - Dental Analytics Dashboard",
+  description: "Create your account and set up your dental practice",
 };
 
 /**
  * Sign Up Page Component
  *
- * Renders the registration page using a working RegisterForm component
- * that handles the registration form, validation, and submission process.
+ * Renders the comprehensive registration page that collects:
+ * - User account information
+ * - Role selection
+ * - Clinic association (join existing or create new)
+ * - Provider-specific information for dentists
+ * - Terms and privacy acceptance
  *
- * The component manages:
- * - Form input validation
- * - Password strength requirements
- * - Email verification process initiation
- * - Error handling and user feedback
+ * The multi-step form ensures proper data collection for multi-tenant
+ * setup and role-based access control.
  *
- * @returns {JSX.Element} The rendered sign up page with the working RegisterForm component
+ * @returns {JSX.Element} The rendered sign up page with comprehensive registration
  */
 export default function SignUpPage() {
-  return <RegisterFormWorking />;
+  return <RegisterFormComprehensive />;
 }
