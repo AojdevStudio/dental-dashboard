@@ -237,3 +237,20 @@ By following these steps, you can confidently verify and, if necessary, correct 
   - KamDental Humble: cmbb4nxwt0001simcd9tinaot
   - KamDental Baytown: cmbb4nxmo0000simc91siqz7k
   - Adriane Smith (Hygienist): provider-humble-adriane
+
+    2. Database Schema
+
+  dentist_production (
+      id                    TEXT PRIMARY KEY,
+      clinic_id            TEXT,
+      date                 DATE,
+      month_tab            TEXT,
+      verified_production_humble   DECIMAL(10,2),  -- Key field
+      verified_production_baytown  DECIMAL(10,2),  -- Key field  
+      total_production     DECIMAL(10,2),
+      monthly_goal         DECIMAL(10,2),
+      production_per_hour  DECIMAL(8,2),
+      avg_daily_production DECIMAL(10,2),
+      provider_name        TEXT,                   -- "Dr. Obi"
+      created_at          TIMESTAMPTZ,
+      updated_at          TIMESTAMPTZ

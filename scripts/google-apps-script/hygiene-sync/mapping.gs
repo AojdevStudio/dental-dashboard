@@ -42,41 +42,72 @@ function mapHeaders_(headers) {
   headers.forEach((header, index) => {
     const cleanHeader = String(header).toLowerCase().trim();
     
+    // Use exact matches first, then contains matches, and only set if not already mapped
+    
     // Date column
-    if (HYGIENE_COLUMN_HEADERS.DATE.some(pattern => cleanHeader.includes(pattern))) {
+    if (mapping.date === -1 && HYGIENE_COLUMN_HEADERS.DATE.some(pattern => cleanHeader === pattern || cleanHeader.includes(pattern))) {
       mapping.date = index;
     }
-    // Hours worked
-    else if (HYGIENE_COLUMN_HEADERS.HOURS_WORKED.some(pattern => cleanHeader.includes(pattern))) {
+    // Hours worked - exact match to avoid "Average Hours worked"
+    else if (mapping.hoursWorked === -1 && cleanHeader === 'hours worked') {
       mapping.hoursWorked = index;
     }
     // Estimated production
-    else if (HYGIENE_COLUMN_HEADERS.ESTIMATED_PRODUCTION.some(pattern => cleanHeader.includes(pattern))) {
+    else if (mapping.estimatedProduction === -1 && HYGIENE_COLUMN_HEADERS.ESTIMATED_PRODUCTION.some(pattern => cleanHeader === pattern || cleanHeader.includes(pattern))) {
       mapping.estimatedProduction = index;
     }
     // Verified production
-    else if (HYGIENE_COLUMN_HEADERS.VERIFIED_PRODUCTION.some(pattern => cleanHeader.includes(pattern))) {
+    else if (mapping.verifiedProduction === -1 && HYGIENE_COLUMN_HEADERS.VERIFIED_PRODUCTION.some(pattern => cleanHeader === pattern || cleanHeader.includes(pattern))) {
       mapping.verifiedProduction = index;
     }
-    // Production goal
-    else if (HYGIENE_COLUMN_HEADERS.PRODUCTION_GOAL.some(pattern => cleanHeader.includes(pattern))) {
+    // Production goal - exact match to avoid "Over/Under Production Goal"
+    else if (mapping.productionGoal === -1 && cleanHeader === 'production goal') {
       mapping.productionGoal = index;
     }
-    // Variance
-    else if (HYGIENE_COLUMN_HEADERS.VARIANCE.some(pattern => cleanHeader.includes(pattern))) {
+    // Variance - exact match to avoid longer variance column names
+    else if (mapping.variance === -1 && cleanHeader === 'variance') {
       mapping.variance = index;
     }
-    // Bonus
-    else if (HYGIENE_COLUMN_HEADERS.BONUS.some(pattern => cleanHeader.includes(pattern))) {
+    // Bonus - exact match
+    else if (mapping.bonus === -1 && cleanHeader === 'bonus') {
       mapping.bonus = index;
     }
     // UUID
-    else if (HYGIENE_COLUMN_HEADERS.UUID.some(pattern => cleanHeader.includes(pattern))) {
+    else if (mapping.uuid === -1 && HYGIENE_COLUMN_HEADERS.UUID.some(pattern => cleanHeader === pattern || cleanHeader.includes(pattern))) {
       mapping.uuid = index;
     }
   });
 
+  // Debug logging to help troubleshoot missing columns
+  Logger.log('=== HEADER MAPPING DEBUG ===');
+  Logger.log('Sheet headers: ' + JSON.stringify(headers));
+  Logger.log('Final mapping: ' + JSON.stringify(mapping));
+  Logger.log('Missing mappings: ' + Object.keys(mapping).filter(key => mapping[key] === -1).join(', '));
+
   return mapping;
+}
+
+/**
+ * Extract provider name from spreadsheet name - SIMPLE VERSION
+ * @param {string} sheetName - The spreadsheet name
+ * @return {string} The provider name (e.g., "Adriane")
+ */
+function extractProviderNameFromSheet_(sheetName) {
+  // Remove common words and get the first name
+  const cleanName = sheetName
+    .replace(/hygiene/gi, '')
+    .replace(/production/gi, '')
+    .replace(/tracker/gi, '')
+    .replace(/data/gi, '')
+    .replace(/sheet/gi, '')
+    .replace(/dashboard/gi, '')
+    .replace(/dr\./gi, '')
+    .replace(/\s*-\s*/g, ' ')
+    .trim();
+  
+  // Get first word as provider name
+  const words = cleanName.split(/\s+/).filter(word => word.length > 0);
+  return words.length > 0 ? words[0] : 'Unknown';
 }
 
 /**
@@ -122,10 +153,10 @@ function parseHygieneRow_(row, mapping, monthTab, clinicId) {
       variancePercentage = ((verifiedProduction - productionGoal) / productionGoal);
     }
 
-    // Get provider and data source info
-    const providerInfo = getProviderInfo_();
-    const providerId = providerInfo ? providerInfo.providerId : null;
-    const dataSourceId = providerInfo ? providerInfo.dataSourceId : null;
+    // Extract provider name from spreadsheet name
+    const ss = SpreadsheetApp.openById(HYGIENE_SHEET_ID);
+    const spreadsheetName = ss.getName();
+    const providerName = extractProviderNameFromSheet_(spreadsheetName);
 
     return {
       id: String(uuid),
@@ -138,8 +169,7 @@ function parseHygieneRow_(row, mapping, monthTab, clinicId) {
       production_goal: productionGoal,
       variance_percentage: variancePercentage !== null ? Number(variancePercentage.toFixed(4)) : null,
       bonus_amount: bonus,
-      provider_id: providerId,
-      data_source_id: dataSourceId,
+      provider_name: providerName,
       created_at: new Date().toISOString(),
       updated_at: new Date().toISOString()
     };

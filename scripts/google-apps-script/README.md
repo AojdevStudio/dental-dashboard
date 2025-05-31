@@ -13,6 +13,7 @@ A **simple, GUI-based Google Apps Script** that syncs hygiene production data fr
 - **📝 Complete logging** and error tracking
 - **🆔 Auto-generates UUIDs** for missing records
 - **✅ Smart column detection** (works with your existing headers)
+- **👤 Provider name extraction** from spreadsheet names (e.g., "Adriane" from "Hygiene Production Tracker - Adriane - Dec-23")
 
 ## 🚀 **5-Minute Setup**
 
@@ -65,28 +66,40 @@ const HYGIENE_SHEET_ID = 'your-actual-sheet-id-here';
 ### 3. **Run Setup**
 
 1. **Refresh your Google Sheet** (the custom menu should appear)
-2. **🦷 Hygiene Sync → 1. 🔧 Setup Sync**
-3. **Enter your credentials** when prompted:
-   - Supabase Project URL (e.g., `https://abc123.supabase.co`)
-   - Supabase Service Role Key 
-   - Clinic ID from your database
+2. **🦷 Hygiene Sync → 🔧 1. First Time Setup**
+3. **Enter your credentials** when prompted (3 simple steps):
+   - **Step 1/3**: Supabase Project URL (e.g., `https://abc123.supabase.co`)
+   - **Step 2/3**: Supabase Service Role Key 
+   - **Step 3/3**: Clinic ID from your database
 4. **Done!** The setup will automatically:
    - Test the connection
    - Create triggers for auto-sync
    - Seed missing UUIDs
    - Create a log sheet
+   - Extract provider name from spreadsheet title
 
 ## 📋 **How It Works**
 
 ### **Automatic Column Detection**
 
-The script automatically detects your columns based on common names:
-- **Date**: "date", "day", "work date"
-- **Hours Worked**: "hours worked", "hours", "time worked"  
-- **Verified Production**: "verified production", "actual production"
-- **Production Goal**: "production goal", "goal", "target"
-- **Bonus**: "bonus", "bonus amount"
-- **UUID**: "uuid", "id", "unique id"
+The script automatically detects your columns with **exact matching** to avoid conflicts:
+- **Date**: "date" 
+- **Hours Worked**: "hours worked" (exact match to avoid "Average Hours worked")
+- **Estimated Production**: "estimated production"
+- **Verified Production**: "verified production"
+- **Production Goal**: "production goal" (exact match to avoid "Over/Under Production Goal")
+- **Variance**: "variance" (exact match)
+- **Bonus**: "bonus" (exact match)
+- **UUID**: "uuid"
+
+### **Provider Name Extraction**
+
+The script automatically extracts provider names from spreadsheet titles:
+- **"Hygiene Production Tracker - Adriane - Dec-23"** → **"Adriane"**
+- **"Dr. Smith Hygiene Data"** → **"Smith"**
+- **"Hygiene Dashboard - Jennifer"** → **"Jennifer"**
+
+All records include the provider name automatically - no manual setup required!
 
 ### **Smart Sync Logic**
 
@@ -100,10 +113,13 @@ The script automatically detects your columns based on common names:
 ### **Built-in GUI Features**
 
 Access via **🦷 Hygiene Sync** menu:
-- **🔄 Run Full Sync Now** - Sync all month tabs
-- **📝 Sync Current Sheet Only** - Quick sync for one tab
-- **🎯 Sync Selected Row** - Test single row sync
-- **🛠️ Utilities** - Test connection, view logs, debug
+- **🔧 1. First Time Setup** - Complete setup wizard
+- **▶️ 2. Sync All Data Now** - Sync all month tabs  
+- **🔍 3. Test Connection** - Verify Supabase connection
+- **🧪 4. Test Provider Name** - Preview provider name extraction
+- **🔍 5. Test Column Mapping** - Debug column detection
+- **📊 View & Manage** - Statistics, logs, backups
+- **⚙️ Advanced** - UUID seeding, validation, exports
 
 ## 📊 **Database Structure**
 
@@ -121,6 +137,7 @@ hygiene_production (
     production_goal     DECIMAL(10,2),     -- 779.03
     variance_percentage DECIMAL(5,2),      -- -77.26
     bonus_amount        DECIMAL(8,2),      -- 0.00
+    provider_name       TEXT,              -- "Adriane" (auto-extracted)
     created_at          TIMESTAMPTZ,
     updated_at          TIMESTAMPTZ
 )
@@ -158,8 +175,9 @@ hygiene_production (
 
 ### **Debugging Tools**
 
-- **📋 View Sync Logs** - See detailed sync history
-- **🔍 Debug Sheet Headers** - Check column detection
+- **🧪 4. Test Provider Name** - Preview what provider name will be extracted
+- **🔍 5. Test Column Mapping** - See exactly which columns are detected
+- **📋 View Sync Logs** - See detailed sync history in the "Hygiene-Sync-Log" tab
 - **📊 Get Sync Statistics** - View synced data summary
 - **💾 Create Data Backup** - Backup before major changes
 

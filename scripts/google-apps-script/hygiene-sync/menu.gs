@@ -16,12 +16,11 @@ function onOpen() {
   ui.createMenu('🦷 Hygiene Sync')
     .addItem('🔧 1. First Time Setup', 'menuSetupHygieneSync')
     .addSeparator()
-    .addItem('🌐 2. Set Dashboard URL (Optional)', 'menuSetDashboardUrl')
+    .addItem('▶️ 2. Sync All Data Now', 'menuSyncAllData')
+    .addItem('🔍 3. Test Connection', 'menuTestConnection')
     .addSeparator()
-    .addItem('▶️ 3. Sync All Data Now', 'menuSyncAllData')
-    .addItem('🔍 4. Test Connection', 'menuTestConnection')
-    .addSeparator()
-    .addItem('👩‍⚕️ 5. Update Provider Info', 'menuSetProviderInfo')
+    .addItem('🧪 4. Test Provider Name', 'testProviderNameExtraction')
+    .addItem('🔍 5. Test Column Mapping', 'testColumnMapping')
     .addSeparator()
     .addSubMenu(ui.createMenu('📊 View & Manage')
       .addItem('📈 View Sync Statistics', 'getSyncStatistics')
@@ -137,19 +136,7 @@ function menuSetupHygieneSync() {
       Logger.log('Credentials successfully set.');
     }
 
-    // Ensure provider information is set
-    const providerInfo = getProviderInfo_();
-    if (!providerInfo || !providerInfo.providerId) {
-      Logger.log('Provider information not found, attempting to set it...');
-      if (!setProviderInfo_()) {
-        Logger.log('Provider setup cancelled or failed.');
-        logToHygieneSheet_(functionName, 'ERROR', null, null, null, 'Provider setup cancelled or failed.');
-        return;
-      }
-      Logger.log('Provider information successfully set.');
-    } else {
-      Logger.log('Provider information already configured.');
-    }
+    // Provider names are now automatically extracted from sheet names - no setup needed!
 
     // Test connection
     try {
@@ -184,7 +171,7 @@ function menuSetupHygieneSync() {
     Logger.log(`${functionName} completed successfully. Triggers created for Sheet ID: ${HYGIENE_SHEET_ID}.`);
     logToHygieneSheet_(functionName, 'SUCCESS', null, null, null, 'Setup complete. Triggers created.');
     
-    ui.alert('🎉 Hygiene Sync Setup Successful!\n\n✅ Credentials stored\n✅ Provider information captured\n✅ Log sheet created\n✅ Triggers set up\n✅ UUIDs seeded\n\nYour hygiene data will now sync automatically with provider tracking!');
+    ui.alert('🎉 Hygiene Sync Setup Successful!\n\n✅ Credentials stored\n✅ Provider name auto-detection enabled\n✅ Log sheet created\n✅ Triggers set up\n✅ UUIDs seeded\n\nYour hygiene data will now sync automatically with provider names!');
 
   } catch (error) {
     const errorMsg = `Setup failed: ${error.message}`;
@@ -230,52 +217,7 @@ function menuViewStatistics() {
   }
 }
 
-/**
- * Menu function: Configure dashboard integration
- */
-function menuSetDashboardUrl() {
-  // This function is implemented directly here since it's simple
-  const ui = SpreadsheetApp.getUi();
-  
-  const response = ui.prompt(
-    '🌐 Dashboard API URL Setup', 
-    `Enter your Dashboard API URL (optional):\n(e.g., https://your-app.vercel.app)\n\nThis enables enhanced sync features. Leave blank to use direct Supabase sync.`, 
-    ui.ButtonSet.OK_CANCEL
-  );
-  
-  if (response.getSelectedButton() === ui.Button.OK) {
-    const apiUrl = response.getResponseText().trim();
-    
-    if (apiUrl) {
-      if (!apiUrl.startsWith('http://') && !apiUrl.startsWith('https://')) {
-        ui.alert('❌ Invalid URL format. Please include http:// or https://');
-        return;
-      }
-      
-      const scriptProperties = PropertiesService.getScriptProperties();
-      scriptProperties.setProperty(DASHBOARD_API_URL_PROPERTY_KEY, apiUrl);
-      
-      ui.alert(`✅ Dashboard API URL set successfully!\n\n${apiUrl}\n\nSync will now use enhanced features.`);
-    } else {
-      const scriptProperties = PropertiesService.getScriptProperties();
-      scriptProperties.deleteProperty(DASHBOARD_API_URL_PROPERTY_KEY);
-      
-      ui.alert('✅ Dashboard API URL cleared.\n\nSync will use direct Supabase connection.');
-    }
-  }
-}
 
-/**
- * Menu function: Set or update provider information
- */
-function menuSetProviderInfo() {
-  try {
-    setProviderInfo_(); // Calls the actual function in credentials.gs
-  } catch (error) {
-    Logger.log(`Menu provider setup error: ${error.message}`);
-    SpreadsheetApp.getUi().alert(`❌ Provider Setup Error: ${error.message}`);
-  }
-}
 
 /**
  * Shows help information about the sync system

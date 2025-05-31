@@ -11,6 +11,7 @@ naming-conventions.md: 1
 task-magic/tasks.mdc: 25
 .agent/installing-packages.md: 1
 supabase-auth-setup.md: 5
+project-structure.md: 1
 
 ## Cursor Analytics Tracking
 task-magic/_index.md: 1
