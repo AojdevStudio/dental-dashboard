@@ -25,11 +25,12 @@ model Clinic {
   // Phase 2: UUID Migration Field
   uuidId String? @unique @map("uuid_id")
 
-  users       User[]
-  providers   Provider[]
-  metrics     MetricValue[]
-  goals       Goal[]
-  dataSources DataSource[]
+  users             User[]
+  providers         Provider[]
+  metrics           MetricValue[]
+  goals             Goal[]
+  dataSources       DataSource[]
+  hygieneProduction HygieneProduction[]
 
   @@map("clinics")
 }
@@ -58,16 +59,22 @@ model User {
 // Providers
 model Provider {
   id           String   @id @default(cuid())
-  name         String
+  name         String // Full name (generated from firstName + lastName)
+  firstName    String?  @map("first_name") // Captured during Google Apps Script setup
+  lastName     String?  @map("last_name") // Captured during Google Apps Script setup
+  email        String? // Optional contact info
   providerType String   @map("provider_type") // dentist, hygienist, specialist
+  position     String? // More detailed position info from setup
   status       String // active/inactive
   createdAt    DateTime @default(now()) @map("created_at")
   updatedAt    DateTime @updatedAt @map("updated_at")
 
-  clinicId String        @map("clinic_id")
-  clinic   Clinic        @relation(fields: [clinicId], references: [id])
-  metrics  MetricValue[]
-  goals    Goal[]
+  clinicId          String              @map("clinic_id")
+  clinic            Clinic              @relation(fields: [clinicId], references: [id])
+  metrics           MetricValue[]
+  goals             Goal[]
+  dataSources       DataSource[] // Link providers to their data sources
+  hygieneProduction HygieneProduction[]
 
   @@map("providers")
 }
@@ -110,11 +117,15 @@ model DataSource {
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
-  columnMappings ColumnMapping[]
-  metrics        MetricValue[]
+  columnMappings    ColumnMapping[]
+  metrics           MetricValue[]
+  hygieneProduction HygieneProduction[]
 
   clinicId String @map("clinic_id")
   clinic   Clinic @relation(fields: [clinicId], references: [id])
+
+  providerId String?   @map("provider_id") // Link to specific provider
+  provider   Provider? @relation(fields: [providerId], references: [id])
 
   @@map("data_sources")
 }
@@ -436,6 +447,39 @@ model ColumnMappingV2 {
 
   @@index([connectionId])
   @@map("column_mappings_v2")
+}
+
+// ===== HYGIENE PRODUCTION TRACKING =====
+
+// Dedicated table for hygiene production data with enhanced provider tracking
+model HygieneProduction {
+  id                  String   @id @default(cuid())
+  date                DateTime
+  monthTab            String   @map("month_tab") // e.g., "Dec-23"
+  hoursWorked         Decimal? @map("hours_worked") @db.Decimal(5, 2)
+  estimatedProduction Decimal? @map("estimated_production") @db.Decimal(10, 2)
+  verifiedProduction  Decimal? @map("verified_production") @db.Decimal(10, 2)
+  productionGoal      Decimal? @map("production_goal") @db.Decimal(10, 2)
+  variancePercentage  Decimal? @map("variance_percentage") @db.Decimal(5, 4)
+  bonusAmount         Decimal? @map("bonus_amount") @db.Decimal(10, 2)
+  createdAt           DateTime @default(now()) @map("created_at")
+  updatedAt           DateTime @updatedAt @map("updated_at")
+
+  // Links to provider and clinic
+  clinicId String @map("clinic_id")
+  clinic   Clinic @relation(fields: [clinicId], references: [id])
+
+  providerId String?   @map("provider_id")
+  provider   Provider? @relation(fields: [providerId], references: [id])
+
+  // For tracking sync source
+  dataSourceId String?     @map("data_source_id")
+  dataSource   DataSource? @relation(fields: [dataSourceId], references: [id])
+
+  @@index([clinicId, date])
+  @@index([providerId, date])
+  @@index([dataSourceId])
+  @@map("hygiene_production")
 }
 
 // ===== PHASE 2: UUID MIGRATION SUPPORT =====

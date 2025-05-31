@@ -123,3 +123,117 @@ The authentication utility includes:
         - revokeToken() - Revokes tokens when needed
         - validateConfig() - Validates that credentials are properly configured
     - The utility is designed to work with the Google OAuth credentials you provided in your .env file and follows modern JavaScript practices with proper error handling and documentation.
+
+### POSTgREST Issues Troubleshooting
+
+    - I ran this query:
+    ```sql
+    SELECT setrole::regrole, setconfig
+    FROM pg_db_role_setting
+    WHERE setrole::regrole = 'authenticator'::regrole;
+```
+    - I got this response:
+    ["session_preload_libraries=safeupdate","statement_timeout=8s","lock_timeout=8s"]
+
+I want to immediately restore API access to the specified schemas and updates to the database. But unsure if i should do this by running the following query:
+
+```sql
+ALTER ROLE authenticator SET pgrst.db_schemas = 'public, storage';
+NOTIFY pgrst;
+```
+
+Here are some additional debugging steps I can take:
+4. Check Schema and Table Privileges
+
+Ensure the relevant roles (anon, authenticated, service_role) have the necessary privileges on the schema and its tables.
+
+For custom schemas, grant usage and table access:
+
+sql
+GRANT USAGE ON SCHEMA myschema TO anon, authenticated, service_role;
+GRANT ALL ON ALL TABLES IN SCHEMA myschema TO anon, authenticated, service_role;
+Adjust privileges as needed for your security model.
+
+5. Row Level Security (RLS)
+
+Supabase requires RLS to be enabled for any table exposed via the Data API.
+
+If you created tables outside the dashboard, manually enable RLS.
+
+6. Reload or Notify PostgREST
+
+After making changes to roles or schema exposure, use NOTIFY pgrst; to reload PostgREST's configuration immediately.
+
+7. Additional Debugging Tools
+
+Use the Supabase CLI's inspect db commands to check for database issues, bloat, or privilege problems.
+
+Review API documentation and error messages for clues (e.g., "The schema must be one of the following: storage" indicates a misconfiguration in exposed schemas or the authenticator role).
+
+To verify if your PostgREST schema exposure is enabled correctly in Supabase, follow these steps:
+
+1. Check Exposed Schemas in Supabase Dashboard
+
+Go to your Supabase project dashboard.
+
+Navigate to API Settings.
+
+Under "Exposed schemas", ensure your desired schemas (e.g., public, storage, or any custom schema) are listed. This allows those schemas to be available via the API.
+
+2. Verify Database Role Configuration
+
+Sometimes, even if the dashboard lists your schema as exposed, the underlying PostgreSQL role (authenticator) may not be configured correctly.
+
+Run the following SQL query in the SQL editor to check the current setting:
+
+sql
+SELECT setrole::regrole, setconfig
+FROM pg_db_role_setting
+WHERE setrole::regrole = 'authenticator'::regrole;
+Look for the pgrst.db_schemas setting. It should include all schemas you want exposed (e.g., public, storage). If your intended schema is missing, that's the issue.
+
+3. Fix Schema Exposure (if needed)
+
+If the schema is missing from pgrst.db_schemas, update it with:
+
+sql
+ALTER ROLE authenticator SET pgrst.db_schemas = 'public, storage';
+NOTIFY pgrst;
+Replace 'public, storage' with your actual schema list as needed. This change takes effect immediately and restores schema visibility in the API and docs.
+
+4. Confirm Privileges and RLS
+
+Make sure the correct roles (anon, authenticated, service_role) have usage and access privileges on the schema and its tables.
+
+For every table you want exposed, ensure Row Level Security (RLS) is enabled and that appropriate policies exist.
+
+5. Test API Access
+
+Use the Supabase client with the correct schema specified:
+
+js
+import { createClient } from '@supabase/supabase-js'
+const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, { db: { schema: 'myschema' } })
+const { data, error } = await supabase.from('your_table').select('*')
+Alternatively, use curl or Postman to request data from your API endpoint and verify you receive the expected results.
+
+6. Check API Documentation
+
+Visit your project's auto-generated API docs in the Supabase dashboard.
+
+Your exposed schemas and their tables should appear. If not, double-check the steps above.
+
+Summary Table
+
+Step	What to Check/Do
+Dashboard Settings	Schema listed under "Exposed schemas"
+Role Configuration	authenticator role's pgrst.db_schemas includes your schema
+Privileges & RLS	Roles have usage/access, RLS enabled with policies
+API Test	Data accessible via API (Supabase client, curl, or Postman)
+API Docs	Schema and tables visible in auto-generated docs
+By following these steps, you can confidently verify and, if necessary, correct your PostgREST schema exposure in Supabase.
+
+⏺ Excellent! Now we have:
+  - KamDental Humble: cmbb4nxwt0001simcd9tinaot
+  - KamDental Baytown: cmbb4nxmo0000simc91siqz7k
+  - Adriane Smith (Hygienist): provider-humble-adriane

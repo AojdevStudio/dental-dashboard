@@ -476,6 +476,19 @@ export default function GoogleSheetsTestPage() {
               <div className="mt-4 p-4 bg-gray-50 rounded overflow-auto">
                 <h4 className="font-medium mb-2">Sheet Data:</h4>
                 <pre className="text-xs">{JSON.stringify(sheetData, null, 2)}</pre>
+                
+                {/* Add button to test column mapping */}
+                <div className="mt-4 pt-4 border-t">
+                  <Button
+                    onClick={() => {
+                      const sheetName = testRange.split('!')[0] || 'Sheet1';
+                      router.push(`/integrations/google-sheets/mapping?spreadsheetId=${encodeURIComponent(testSpreadsheetId)}&sheetName=${encodeURIComponent(sheetName)}`);
+                    }}
+                    className="w-full"
+                  >
+                    🚀 Test Column Mapping with this Sheet
+                  </Button>
+                </div>
               </div>
             )}
           </CardContent>

@@ -91,6 +91,7 @@
   },
   "devDependencies": {
     "@biomejs/biome": "^1.9.4",
+    "@google/clasp": "3.0.5-alpha",
     "@stagewise/toolbar-next": "^0.1.2",
     "@tailwindcss/postcss": "^4.1.8",
     "@testing-library/jest-dom": "^6.6.3",

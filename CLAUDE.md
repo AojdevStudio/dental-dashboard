@@ -122,3 +122,8 @@ Core entities managed by Prisma:
 ## Memory Management
 
 - Use the Supabase MCP as much as possible to handle simple transactions
+
+## Memories
+
+- Use Prisma for the schema changes since this is a significant structural update that should be tracked.
+- Use pnpm commands always, npm or npx is not allowed in this project.

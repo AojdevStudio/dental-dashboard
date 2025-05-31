@@ -1,0 +1,19 @@
+{
+  "records": [
+    {
+      "id": "test-sync-2023-12-11",
+      "date": "2023-12-11",
+      "month_tab": "Dec-23",
+      "hours_worked": 8.37,
+      "estimated_production": 2220.00,
+      "verified_production": 2196.00,
+      "production_goal": 1187.70,
+      "variance_percentage": 0.85,
+      "bonus_amount": 151.24,
+      "clinic_id": "cmbb4nxwt0001simcd9tinaot",
+      "provider_id": null,
+      "data_source_id": null
+    }
+  ],
+  "supabase_key": "test-key"
+}

@@ -147,7 +147,11 @@ exports.Prisma.UserScalarFieldEnum = {
 exports.Prisma.ProviderScalarFieldEnum = {
   id: 'id',
   name: 'name',
+  firstName: 'firstName',
+  lastName: 'lastName',
+  email: 'email',
   providerType: 'providerType',
+  position: 'position',
   status: 'status',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt',
@@ -180,7 +184,8 @@ exports.Prisma.DataSourceScalarFieldEnum = {
   expiryDate: 'expiryDate',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt',
-  clinicId: 'clinicId'
+  clinicId: 'clinicId',
+  providerId: 'providerId'
 };
 
 exports.Prisma.ColumnMappingScalarFieldEnum = {
@@ -400,6 +405,23 @@ exports.Prisma.ColumnMappingV2ScalarFieldEnum = {
   updatedAt: 'updatedAt'
 };
 
+exports.Prisma.HygieneProductionScalarFieldEnum = {
+  id: 'id',
+  date: 'date',
+  monthTab: 'monthTab',
+  hoursWorked: 'hoursWorked',
+  estimatedProduction: 'estimatedProduction',
+  verifiedProduction: 'verifiedProduction',
+  productionGoal: 'productionGoal',
+  variancePercentage: 'variancePercentage',
+  bonusAmount: 'bonusAmount',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt',
+  clinicId: 'clinicId',
+  providerId: 'providerId',
+  dataSourceId: 'dataSourceId'
+};
+
 exports.Prisma.IdMappingScalarFieldEnum = {
   id: 'id',
   tableName: 'tableName',
@@ -460,6 +482,7 @@ exports.Prisma.ModelName = {
   GoogleCredential: 'GoogleCredential',
   SpreadsheetConnection: 'SpreadsheetConnection',
   ColumnMappingV2: 'ColumnMappingV2',
+  HygieneProduction: 'HygieneProduction',
   IdMapping: 'IdMapping'
 };
 
