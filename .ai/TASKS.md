@@ -107,9 +107,19 @@ Individual task details are in the `.ai/tasks/` directory.
 
 - [x] **task003_refactor_src_app_directory.md**: Step 3.1: Refactor src/app/ Directory
 
+### API Documentation
+
+- [🔄] **task024_document_backend_api_routes.md**: Document Backend API Routes (In Progress)
+
 ## Pending Tasks
 
 ### Phase 2: Design System Implementation
+
+### API Documentation (Sub-tasks for Task 024)
+
+- [ ] **task024.1_create_api_mermaid_diagrams.md**: Create API Mermaid Diagrams
+- [ ] **task024.2_document_deployment_scalability_security.md**: Document Deployment, Scalability, and Security for API
+- [ ] **task024.3_resolve_user_invitation_flow.md**: Resolve User Invitation Flow with Supabase Auth
 
 - [ ] **task008_implement_design_system_foundation.md**: Step 4: Implement Design System Foundation
 - [ ] **task009_apply_component_level_design_styling.md**: Step 5: Apply Component-Level Design & MVP Styling

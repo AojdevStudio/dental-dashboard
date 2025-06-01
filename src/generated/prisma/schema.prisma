@@ -31,6 +31,7 @@ model Clinic {
   goals             Goal[]
   dataSources       DataSource[]
   hygieneProduction HygieneProduction[]
+  dentistProduction DentistProduction[]
 
   @@map("clinics")
 }
@@ -49,8 +50,8 @@ model User {
   authId String? @unique @map("auth_id") // Supabase auth.users.id
   uuidId String? @unique @map("uuid_id") // Future primary key
 
-  clinicId   String      @map("clinic_id")
-  clinic     Clinic      @relation(fields: [clinicId], references: [id])
+  clinicId   String?     @map("clinic_id") // Optional for system admins
+  clinic     Clinic?     @relation(fields: [clinicId], references: [id])
   dashboards Dashboard[]
 
   @@map("users")
@@ -120,6 +121,7 @@ model DataSource {
   columnMappings    ColumnMapping[]
   metrics           MetricValue[]
   hygieneProduction HygieneProduction[]
+  dentistProduction DentistProduction[]
 
   clinicId String @map("clinic_id")
   clinic   Clinic @relation(fields: [clinicId], references: [id])
@@ -480,6 +482,37 @@ model HygieneProduction {
   @@index([providerId, date])
   @@index([dataSourceId])
   @@map("hygiene_production")
+}
+
+// ===== DENTIST PRODUCTION TRACKING =====
+
+// Dedicated table for dentist production data with dual-location tracking
+model DentistProduction {
+  id                        String   @id @default(cuid())
+  date                      DateTime
+  monthTab                  String   @map("month_tab") // e.g., "Nov-24"
+  verifiedProductionHumble  Decimal? @map("verified_production_humble") @db.Decimal(10, 2)
+  verifiedProductionBaytown Decimal? @map("verified_production_baytown") @db.Decimal(10, 2)
+  totalProduction           Decimal? @map("total_production") @db.Decimal(10, 2)
+  monthlyGoal               Decimal? @map("monthly_goal") @db.Decimal(10, 2)
+  productionPerHour         Decimal? @map("production_per_hour") @db.Decimal(8, 2)
+  avgDailyProduction        Decimal? @map("avg_daily_production") @db.Decimal(10, 2)
+  providerName              String?  @map("provider_name") // e.g., "Dr. Obi"
+  createdAt                 DateTime @default(now()) @map("created_at")
+  updatedAt                 DateTime @updatedAt @map("updated_at")
+
+  // Links to clinic
+  clinicId String @map("clinic_id")
+  clinic   Clinic @relation(fields: [clinicId], references: [id])
+
+  // For tracking sync source
+  dataSourceId String?     @map("data_source_id")
+  dataSource   DataSource? @relation(fields: [dataSourceId], references: [id])
+
+  @@index([clinicId, date])
+  @@index([providerName, date])
+  @@index([dataSourceId])
+  @@map("dentist_production")
 }
 
 // ===== PHASE 2: UUID MIGRATION SUPPORT =====

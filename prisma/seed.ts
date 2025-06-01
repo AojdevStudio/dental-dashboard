@@ -33,17 +33,18 @@ async function main() {
 
   console.log('✅ Created clinics:', clinics.map(c => `${c.name} (${c.id})`))
 
-  // Create initial admin user for Humble clinic
+  // Create system admin user with access to all clinics (not tied to specific clinic)
   const adminUser = await prisma.user.upsert({
     where: { email: 'admin@kamdental.com' },
     update: {},
     create: {
       email: 'admin@kamdental.com',
-      name: 'KamDental Admin',
-      role: 'admin',
-      clinicId: clinics[0].id, // Humble clinic
+      name: 'KamDental System Admin',
+      role: 'system_admin',
+      authId: 'e48f8f72-542f-4d1d-9674-6b59d5855996', // Supabase auth UID
       uuidId: 'user-admin-uuid-001'
-    }
+      // clinicId omitted - system admin not tied to any specific clinic
+    } as any // Type assertion to bypass Prisma's strict typing for this system admin case
   })
 
   console.log('✅ Created admin user:', adminUser.email)

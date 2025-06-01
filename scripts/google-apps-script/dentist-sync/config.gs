@@ -1,7 +1,7 @@
 // --- Dentist Production Sync Configuration ---
 
 /** @const {string} ID of the Google Spreadsheet containing dentist data. CHANGE THIS! */
-const DENTIST_SHEET_ID = 'YOUR_DENTIST_SHEET_ID_HERE';
+const DENTIST_SHEET_ID = '1bcbzCiPHMRATJe2koBpvyadZaDvxfSA7tpJ84-o-x2c';
 
 /** @const {string} Name of the sheet tab for logging sync operations. */
 const DENTIST_LOG_TAB_NAME = 'Dentist-Sync-Log';

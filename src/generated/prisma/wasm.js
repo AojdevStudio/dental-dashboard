@@ -422,6 +422,23 @@ exports.Prisma.HygieneProductionScalarFieldEnum = {
   dataSourceId: 'dataSourceId'
 };
 
+exports.Prisma.DentistProductionScalarFieldEnum = {
+  id: 'id',
+  date: 'date',
+  monthTab: 'monthTab',
+  verifiedProductionHumble: 'verifiedProductionHumble',
+  verifiedProductionBaytown: 'verifiedProductionBaytown',
+  totalProduction: 'totalProduction',
+  monthlyGoal: 'monthlyGoal',
+  productionPerHour: 'productionPerHour',
+  avgDailyProduction: 'avgDailyProduction',
+  providerName: 'providerName',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt',
+  clinicId: 'clinicId',
+  dataSourceId: 'dataSourceId'
+};
+
 exports.Prisma.IdMappingScalarFieldEnum = {
   id: 'id',
   tableName: 'tableName',
@@ -483,6 +500,7 @@ exports.Prisma.ModelName = {
   SpreadsheetConnection: 'SpreadsheetConnection',
   ColumnMappingV2: 'ColumnMappingV2',
   HygieneProduction: 'HygieneProduction',
+  DentistProduction: 'DentistProduction',
   IdMapping: 'IdMapping'
 };
 
