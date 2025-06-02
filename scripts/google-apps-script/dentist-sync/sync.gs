@@ -121,6 +121,7 @@ function syncSheetData_(sheet, monthTab) {
       }
 
       if (records.length > 0) {
+        // Call the simplified batch upsert function
         const success = upsertBatchToSupabase_(records, credentials);
         if (success) {
           processedRows += records.length;
@@ -138,7 +139,9 @@ function syncSheetData_(sheet, monthTab) {
 }
 
 /**
- * Sync a single row to Supabase
+ * Sync a single row to Supabase.
+ * Note: This can be adapted to call upsertBatchToSupabase_ with a single record if needed.
+ * For now, primarily relying on batch sync.
  * @param {Sheet} sheet - The Google Sheet
  * @param {number} rowNumber - 1-based row number
  * @return {boolean} Success status
@@ -146,7 +149,8 @@ function syncSheetData_(sheet, monthTab) {
 function syncSingleRow_(sheet, rowNumber) {
   const credentials = getSupabaseCredentials_();
   if (!credentials) {
-    throw new Error('No credentials available');
+    Logger.log('No credentials available for syncSingleRow_');
+    return false;
   }
 
   try {
@@ -155,243 +159,52 @@ function syncSingleRow_(sheet, rowNumber) {
     const mapping = mapHeaders_(headers);
     
     if (mapping.date === -1) {
-      throw new Error('No date column found in this sheet');
+      Logger.log(`No date column found in ${sheetName} for syncSingleRow_`);
+      return false;
     }
 
-    const row = sheet.getRange(rowNumber, 1, 1, sheet.getLastColumn()).getValues()[0];
+    const rowValues = sheet.getRange(rowNumber, 1, 1, sheet.getLastColumn()).getValues()[0];
     
-    // Skip empty rows
-    if (!row[mapping.date] || String(row[mapping.date]).trim() === '') {
-      throw new Error('Row has no date value');
+    if (!rowValues[mapping.date] || String(rowValues[mapping.date]).trim() === '') {
+      Logger.log(`Row ${rowNumber} in ${sheetName} has no date value.`);
+      return false;
     }
 
-    const record = parseDentistRow_(row, mapping, sheetName, credentials.clinicId);
+    const record = parseDentistRow_(rowValues, mapping, sheetName, credentials.clinicId);
     if (!record) {
-      throw new Error('Could not parse row data');
+      Logger.log(`Could not parse row ${rowNumber} from ${sheetName}.`);
+      return false;
     }
 
-    const success = upsertToSupabase_(record, credentials);
+    // Upsert as a batch of one
+    const success = upsertBatchToSupabase_([record], credentials);
     
     if (success) {
       logToDentistSheet_('syncSingleRow', 'SUCCESS', 1, 0, null, `Row ${rowNumber} from ${sheetName} synced`);
     } else {
       logToDentistSheet_('syncSingleRow', 'ERROR', 0, 0, null, `Failed to sync row ${rowNumber} from ${sheetName}`);
     }
-
     return success;
 
   } catch (error) {
-    logToDentistSheet_('syncSingleRow', 'ERROR', 0, 0, null, `Error syncing row ${rowNumber}: ${error.message}`);
-    throw error;
+    logToDentistSheet_('syncSingleRow', 'ERROR', 0, 0, null, `Error in syncSingleRow_ for row ${rowNumber} from ${sheet.getName()}: ${error.message}`);
+    Logger.log(`Error in syncSingleRow_: ${error.message} \nStack: ${error.stack}`);
+    return false;
   }
 }
 
 /**
- * Upsert a batch of records to the dental dashboard API
- * @param {array} records - Array of hygiene records
- * @param {object} credentials - Supabase credentials
- * @return {boolean} Success status
+ * Upserts a batch of records directly to Supabase using 'resolution=merge-duplicates'.
+ * @param {array} records - Array of dentist records.
+ * @param {object} credentials - Supabase credentials { url, key, clinicId }.
+ * @return {boolean} Success status.
  */
 function upsertBatchToSupabase_(records, credentials) {
-  try {
-    // Try to get dashboard API URL from script properties
-    const scriptProperties = PropertiesService.getScriptProperties();
-    const dashboardApiUrl = scriptProperties.getProperty(DASHBOARD_API_URL_PROPERTY_KEY);
-    
-    if (dashboardApiUrl) {
-      // Use the new hygiene production sync API endpoint
-      const url = `${dashboardApiUrl}/api/hygiene-production/sync`;
-      
-      const payload = {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        payload: JSON.stringify({
-          records: records,
-          supabase_key: credentials.key
-        })
-      };
-
-      const response = UrlFetchApp.fetch(url, payload);
-      const responseData = response.getContentText();
-
-      if (response.getResponseCode() >= 200 && response.getResponseCode() < 300) {
-        try {
-          const result = JSON.parse(responseData);
-          Logger.log(`Successfully synced batch of ${records.length} records via dashboard API. Results: ${JSON.stringify(result)}`);
-          return true;
-        } catch (parseError) {
-          Logger.log(`Sync successful but could not parse response: ${responseData}`);
-          return true;
-        }
-      } else {
-        Logger.log(`Failed to sync batch via dashboard API: ${response.getResponseCode()} - ${responseData}`);
-        
-        // Fall back to direct Supabase API
-        Logger.log('Falling back to direct Supabase API...');
-        return upsertBatchToSupabaseDirect_(records, credentials);
-      }
-    } else {
-      // No dashboard API URL configured, use direct Supabase API
-      Logger.log('No dashboard API URL configured, using direct Supabase API...');
-      return upsertBatchToSupabaseDirect_(records, credentials);
-    }
-
-  } catch (error) {
-    Logger.log(`Error upserting batch to dashboard API: ${error.message}`);
-    
-    // Fall back to direct Supabase API
-    Logger.log('Falling back to direct Supabase API due to error...');
-    return upsertBatchToSupabaseDirect_(records, credentials);
+  if (!records || records.length === 0) {
+    Logger.log('upsertBatchToSupabase_ called with no records.');
+    return true; // No records to process is a form of success
   }
-}
 
-/**
- * Fallback: Direct upsert to Supabase (original implementation)
- * @param {array} records - Array of hygiene records
- * @param {object} credentials - Supabase credentials
- * @return {boolean} Success status
- */
-function upsertBatchToSupabaseDirect_(records, credentials) {
-  try {
-    // Try different upsert strategies
-    return upsertBatchWithRetry_(records, credentials, 0);
-  } catch (error) {
-    Logger.log(`Error upserting batch to Supabase directly: ${error.message}`);
-    return false;
-  }
-}
-
-/**
- * Retry upsert with different strategies
- */
-function upsertBatchWithRetry_(records, credentials, retryCount) {
-  const maxRetries = 3;
-  const strategies = [
-    'resolution=merge-duplicates',
-    'resolution=ignore-duplicates', 
-    'return=minimal'
-  ];
-  
-  for (let i = 0; i < strategies.length; i++) {
-    try {
-      const url = `${credentials.url}/rest/v1/${SUPABASE_TABLE_NAME}`;
-      
-      const payload = {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${credentials.key}`,
-          'apikey': credentials.key,
-          'Prefer': strategies[i]
-        },
-        payload: JSON.stringify(records),
-        muteHttpExceptions: true // Get full error details
-      };
-
-      const response = UrlFetchApp.fetch(url, payload);
-      const responseCode = response.getResponseCode();
-      const responseText = response.getContentText();
-
-      if (responseCode >= 200 && responseCode < 300) {
-        Logger.log(`Successfully synced batch of ${records.length} records via direct Supabase (strategy: ${strategies[i]})`);
-        return true;
-      } else if (responseCode === 409 || responseCode === 500) {
-        // Conflict or server error - try individual record upserts
-        Logger.log(`Batch failed with ${responseCode}, trying individual upserts...`);
-        return upsertRecordsIndividually_(records, credentials);
-      } else {
-        Logger.log(`Strategy ${strategies[i]} failed: ${responseCode} - ${responseText}`);
-        // Continue to next strategy
-      }
-    } catch (error) {
-      Logger.log(`Strategy ${strategies[i]} error: ${error.message}`);
-      // Continue to next strategy
-    }
-  }
-  
-  // All strategies failed
-  Logger.log(`All upsert strategies failed for batch of ${records.length} records`);
-  return false;
-}
-
-/**
- * Fallback: Upsert records one by one
- */
-function upsertRecordsIndividually_(records, credentials) {
-  let successCount = 0;
-  
-  for (let i = 0; i < records.length; i++) {
-    try {
-      const record = records[i];
-      const success = upsertSingleRecord_(record, credentials);
-      if (success) {
-        successCount++;
-      } else {
-        Logger.log(`Failed to upsert record ${i + 1}: ${record.id}`);
-      }
-    } catch (error) {
-      Logger.log(`Error upserting individual record ${i + 1}: ${error.message}`);
-    }
-  }
-  
-  Logger.log(`Individual upsert completed: ${successCount}/${records.length} records successful`);
-  return successCount > 0;
-}
-
-/**
- * Upsert a single record with conflict handling
- */
-function upsertSingleRecord_(record, credentials) {
-  try {
-    const url = `${credentials.url}/rest/v1/${SUPABASE_TABLE_NAME}?id=eq.${record.id}`;
-    
-    // Try update first
-    let payload = {
-      method: 'PATCH',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${credentials.key}`,
-        'apikey': credentials.key,
-        'Prefer': 'return=minimal'
-      },
-      payload: JSON.stringify(record),
-      muteHttpExceptions: true
-    };
-
-    let response = UrlFetchApp.fetch(url, payload);
-    
-    if (response.getResponseCode() === 200 || response.getResponseCode() === 204) {
-      return true;
-    }
-    
-    // If update failed, try insert
-    const insertUrl = `${credentials.url}/rest/v1/${SUPABASE_TABLE_NAME}`;
-    payload.method = 'POST';
-    
-    response = UrlFetchApp.fetch(insertUrl, payload);
-    
-    if (response.getResponseCode() === 201) {
-      return true;
-    }
-    
-    Logger.log(`Single record upsert failed: ${response.getResponseCode()} - ${response.getContentText()}`);
-    return false;
-    
-  } catch (error) {
-    Logger.log(`Single record error: ${error.message}`);
-    return false;
-  }
-}
-
-/**
- * Upsert single record to Supabase
- * @param {object} record - Hygiene record
- * @param {object} credentials - Supabase credentials
- * @return {boolean} Success status
- */
-function upsertToSupabase_(record, credentials) {
   try {
     const url = `${credentials.url}/rest/v1/${SUPABASE_TABLE_NAME}`;
     
@@ -401,23 +214,33 @@ function upsertToSupabase_(record, credentials) {
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${credentials.key}`,
         'apikey': credentials.key,
-        'Prefer': 'resolution=merge-duplicates'
+        'Prefer': 'resolution=merge-duplicates' // Key for upsert behavior
       },
-      payload: JSON.stringify(record)
+      payload: JSON.stringify(records),
+      muteHttpExceptions: true // Allows us to handle errors based on response code
     };
 
+    Logger.log(`Attempting to upsert ${records.length} records to ${SUPABASE_TABLE_NAME} with 'merge-duplicates'.`);
     const response = UrlFetchApp.fetch(url, payload);
+    const responseCode = response.getResponseCode();
+    const responseText = response.getContentText();
 
-    if (response.getResponseCode() >= 200 && response.getResponseCode() < 300) {
-      Logger.log(`Successfully synced record for ${record.date}`);
+    if (responseCode >= 200 && responseCode < 300) {
+      // HTTP 200 OK, HTTP 201 Created, HTTP 204 No Content (though POST usually returns 201)
+      Logger.log(`Successfully synced batch of ${records.length} records. Response Code: ${responseCode}`);
+      // Logger.log(`Response: ${responseText}`); // Optional: log response text for more detail
       return true;
     } else {
-      Logger.log(`Failed to sync record for ${record.date}: ${response.getContentText()}`);
+      // Log detailed error information
+      Logger.log(`Failed to sync batch. Response Code: ${responseCode}`);
+      Logger.log(`Error Response: ${responseText}`);
+      logToDentistSheet_('upsertBatchToSupabase_', 'ERROR', 0, 0, null, `Supabase upsert failed. Code: ${responseCode}. Response: ${responseText.substring(0, 200)}`);
       return false;
     }
-
   } catch (error) {
-    Logger.log(`Error upserting to Supabase: ${error.message}`);
+    Logger.log(`Exception during upsertBatchToSupabase_: ${error.message}`);
+    Logger.log(`Stack: ${error.stack}`);
+    logToDentistSheet_('upsertBatchToSupabase_', 'ERROR', 0, 0, null, `Exception: ${error.message}`);
     return false;
   }
 }

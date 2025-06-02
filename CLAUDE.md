@@ -33,13 +33,6 @@ pnpm prisma:push          # Push schema changes to database
 pnpm prisma:studio        # Open Prisma Studio GUI
 ```
 
-### Task Management CLI
-```bash
-pnpm list                 # List project tasks
-pnpm generate             # Generate new tasks
-pnpm parse-prd            # Parse PRD to generate tasks
-```
-
 ## High-Level Architecture
 
 ### Authentication Architecture

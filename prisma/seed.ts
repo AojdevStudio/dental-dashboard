@@ -53,6 +53,45 @@ async function main() {
   // when real users connect their spreadsheets with their actual names
   console.log('✅ Clinic structure ready for provider setup through Apps Script')
 
+  console.log('⚙️ Applying service_role permissions...')
+
+  // Grant usage on public schema to service_role
+  await prisma.$executeRawUnsafe(`GRANT USAGE ON SCHEMA public TO service_role;`);
+  console.log('Granted USAGE ON SCHEMA public TO service_role.');
+
+  // List all tables that service_role needs access to
+  // Ensure this list is kept up-to-date with your schema.prisma
+  const tablesToGrantPermissions = [
+    "clinics", "users", "providers", "metric_definitions", 
+    "data_sources", "column_mappings", "metric_values", "goals",
+    "dashboards", "widgets", "user_clinic_roles", "goal_templates",
+    "financial_metrics", "appointment_metrics", "call_metrics",
+    "patient_metrics", "metric_aggregations", "google_credentials",
+    "spreadsheet_connections", "column_mappings_v2",
+    "hygiene_production", "dentist_production", "id_mappings"
+    // Add any new table names here as your schema evolves
+  ];
+
+  for (const table of tablesToGrantPermissions) {
+    try {
+      await prisma.$executeRawUnsafe(`GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE public."${table}" TO service_role;`);
+      console.log(`Granted CRUD permissions on public."${table}" to service_role.`);
+    } catch (error) {
+      console.error(`Failed to grant permissions on table public."${table}":`, error);
+    }
+  }
+  
+  // Grant permissions on all sequences in the public schema to service_role.
+  // This is important if service_role interacts with tables that use auto-incrementing IDs.
+  try {
+    await prisma.$executeRawUnsafe(`GRANT USAGE, SELECT, UPDATE ON ALL SEQUENCES IN SCHEMA public TO service_role;`);
+    console.log('Granted USAGE, SELECT, UPDATE ON ALL SEQUENCES in public schema to service_role.');
+  } catch (error) {
+    console.error('Failed to grant permissions on sequences in public schema:', error);
+  }
+
+  console.log('✅ Service_role permissions application step completed.')
+
   console.log('🎉 Database seeding completed!')
 }
 

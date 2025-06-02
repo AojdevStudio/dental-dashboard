@@ -27,6 +27,9 @@ const SUPABASE_KEY_PROPERTY_KEY = 'DENTIST_SUPABASE_KEY';
 /** @const {string} Key for storing Clinic ID in Script Properties. */
 const CLINIC_ID_PROPERTY_KEY = 'DENTIST_CLINIC_ID';
 
+/** @const {string} Key for storing Dashboard API URL in Script Properties (optional). */
+const DASHBOARD_API_URL_PROPERTY_KEY = 'DENTIST_DASHBOARD_API_URL';
+
 /** @const {string} Name of the time-based sync function for trigger management. */
 const SYNC_FUNCTION_NAME = 'syncAllDentistData';
 

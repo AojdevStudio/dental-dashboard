@@ -28,6 +28,16 @@ function getSheetHeaders_(sheet) {
  * @return {object} Object mapping field names to column indices
  */
 function mapHeaders_(headers) {
+  // Add extensive logging to verify column mapping is working:
+  console.log('Raw headers:', headers);
+  console.log('Clean header 0:', String(headers[0]).toLowerCase().trim());
+  // Ensure DENTIST_COLUMN_HEADERS.DATE exists and is an array before calling .some
+  if (typeof DENTIST_COLUMN_HEADERS !== 'undefined' && DENTIST_COLUMN_HEADERS && Array.isArray(DENTIST_COLUMN_HEADERS.DATE)) {
+    console.log('Date pattern match:', DENTIST_COLUMN_HEADERS.DATE.some(pattern => String(headers[0]).toLowerCase().trim().includes(pattern)));
+  } else {
+    console.log('DENTIST_COLUMN_HEADERS.DATE is not defined or not an array');
+  }
+
   const mapping = {
     date: -1,
     verifiedProductionHumble: -1,
@@ -42,38 +52,38 @@ function mapHeaders_(headers) {
   headers.forEach((header, index) => {
     const cleanHeader = String(header).toLowerCase().trim();
     
-    // Use exact matches to avoid conflicts
+    // Use individual if statements instead of else-if chain to allow multiple matches
     
     // Date column
     if (mapping.date === -1 && DENTIST_COLUMN_HEADERS.DATE.some(pattern => cleanHeader === pattern || cleanHeader.includes(pattern))) {
       mapping.date = index;
     }
-    // Verified Production Humble - exact match
-    else if (mapping.verifiedProductionHumble === -1 && cleanHeader === 'verified production (billing department only) humble') {
+    // Verified Production Humble - use pattern matching instead of exact match
+    if (mapping.verifiedProductionHumble === -1 && cleanHeader.includes('verified production') && cleanHeader.includes('humble')) {
       mapping.verifiedProductionHumble = index;
     }
-    // Verified Production Baytown - exact match
-    else if (mapping.verifiedProductionBaytown === -1 && cleanHeader === 'verified production (billing department only) baytown') {
+    // Verified Production Baytown - use pattern matching instead of exact match
+    if (mapping.verifiedProductionBaytown === -1 && cleanHeader.includes('verified production') && cleanHeader.includes('baytown')) {
       mapping.verifiedProductionBaytown = index;
     }
     // Total Production
-    else if (mapping.totalProduction === -1 && DENTIST_COLUMN_HEADERS.TOTAL_PRODUCTION.some(pattern => cleanHeader === pattern || cleanHeader.includes(pattern))) {
+    if (mapping.totalProduction === -1 && DENTIST_COLUMN_HEADERS.TOTAL_PRODUCTION.some(pattern => cleanHeader === pattern || cleanHeader.includes(pattern))) {
       mapping.totalProduction = index;
     }
     // Monthly Goal
-    else if (mapping.monthlyGoal === -1 && DENTIST_COLUMN_HEADERS.MONTHLY_GOAL.some(pattern => cleanHeader === pattern || cleanHeader.includes(pattern))) {
+    if (mapping.monthlyGoal === -1 && DENTIST_COLUMN_HEADERS.MONTHLY_GOAL.some(pattern => cleanHeader === pattern || cleanHeader.includes(pattern))) {
       mapping.monthlyGoal = index;
     }
     // Production Per Hour
-    else if (mapping.productionPerHour === -1 && DENTIST_COLUMN_HEADERS.PRODUCTION_PER_HOUR.some(pattern => cleanHeader === pattern || cleanHeader.includes(pattern))) {
+    if (mapping.productionPerHour === -1 && DENTIST_COLUMN_HEADERS.PRODUCTION_PER_HOUR.some(pattern => cleanHeader === pattern || cleanHeader.includes(pattern))) {
       mapping.productionPerHour = index;
     }
     // Average Daily Production
-    else if (mapping.avgDailyProduction === -1 && DENTIST_COLUMN_HEADERS.AVG_DAILY_PRODUCTION.some(pattern => cleanHeader === pattern || cleanHeader.includes(pattern))) {
+    if (mapping.avgDailyProduction === -1 && DENTIST_COLUMN_HEADERS.AVG_DAILY_PRODUCTION.some(pattern => cleanHeader === pattern || cleanHeader.includes(pattern))) {
       mapping.avgDailyProduction = index;
     }
     // UUID
-    else if (mapping.uuid === -1 && DENTIST_COLUMN_HEADERS.UUID.some(pattern => cleanHeader === pattern || cleanHeader.includes(pattern))) {
+    if (mapping.uuid === -1 && DENTIST_COLUMN_HEADERS.UUID.some(pattern => cleanHeader === pattern || cleanHeader.includes(pattern))) {
       mapping.uuid = index;
     }
   });
