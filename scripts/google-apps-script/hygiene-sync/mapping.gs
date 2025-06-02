@@ -14,10 +14,12 @@ function getSheetHeaders_(sheet) {
       String(cell).toLowerCase().includes('day')
     );
     if (hasDateColumn) {
+      Logger.log(`getSheetHeaders_: Header row found at index ${i} in sheet '${sheet.getName()}'. Headers: ${JSON.stringify(row.map(cell => String(cell).trim()))}`);
       return row.map(cell => String(cell).trim());
     }
   }
   
+  Logger.log(`getSheetHeaders_: No header row containing "date" or "day" found within the first 5 rows for sheet '${sheet.getName()}'. Falling back to first row if available.`);
   // Fallback to first row
   return data.length > 0 ? data[0].map(cell => String(cell).trim()) : [];
 }
@@ -34,46 +36,63 @@ function mapHeaders_(headers) {
     estimatedProduction: -1,
     verifiedProduction: -1,
     productionGoal: -1,
-    variance: -1,
-    bonus: -1,
+    variancePercentage: -1,
+    bonusAmount: -1,
     uuid: -1
   };
 
   headers.forEach((header, index) => {
-    const cleanHeader = String(header).toLowerCase().trim();
-    
-    // Use exact matches first, then contains matches, and only set if not already mapped
+    const cleanSheetHeader = String(header).toLowerCase().trim();
     
     // Date column
-    if (mapping.date === -1 && HYGIENE_COLUMN_HEADERS.DATE.some(pattern => cleanHeader === pattern || cleanHeader.includes(pattern))) {
+    if (mapping.date === -1 && 
+        HYGIENE_COLUMN_HEADERS.DATE.some(pattern => {
+            const lowerPattern = String(pattern).toLowerCase();
+            return cleanSheetHeader === lowerPattern || cleanSheetHeader.includes(lowerPattern);
+        })) {
       mapping.date = index;
     }
     // Hours worked - exact match to avoid "Average Hours worked"
-    else if (mapping.hoursWorked === -1 && cleanHeader === 'hours worked') {
+    else if (mapping.hoursWorked === -1 && cleanSheetHeader === 'hours worked') { // This implies HYGIENE_COLUMN_HEADERS.HOURS_WORKED contains 'hours worked'
       mapping.hoursWorked = index;
     }
     // Estimated production
-    else if (mapping.estimatedProduction === -1 && HYGIENE_COLUMN_HEADERS.ESTIMATED_PRODUCTION.some(pattern => cleanHeader === pattern || cleanHeader.includes(pattern))) {
+    else if (mapping.estimatedProduction === -1 && 
+             HYGIENE_COLUMN_HEADERS.ESTIMATED_PRODUCTION.some(pattern => {
+                const lowerPattern = String(pattern).toLowerCase();
+                return cleanSheetHeader === lowerPattern || cleanSheetHeader.includes(lowerPattern);
+            })) {
       mapping.estimatedProduction = index;
     }
     // Verified production
-    else if (mapping.verifiedProduction === -1 && HYGIENE_COLUMN_HEADERS.VERIFIED_PRODUCTION.some(pattern => cleanHeader === pattern || cleanHeader.includes(pattern))) {
+    else if (mapping.verifiedProduction === -1 && 
+             HYGIENE_COLUMN_HEADERS.VERIFIED_PRODUCTION.some(pattern => {
+                const lowerPattern = String(pattern).toLowerCase();
+                return cleanSheetHeader === lowerPattern || cleanSheetHeader.includes(lowerPattern);
+            })) {
       mapping.verifiedProduction = index;
     }
     // Production goal - exact match to avoid "Over/Under Production Goal"
-    else if (mapping.productionGoal === -1 && cleanHeader === 'production goal') {
+    else if (mapping.productionGoal === -1 && cleanSheetHeader === 'production goal') { // Implies exact match desired from HYGIENE_COLUMN_HEADERS.PRODUCTION_GOAL
       mapping.productionGoal = index;
     }
-    // Variance - exact match to avoid longer variance column names
-    else if (mapping.variance === -1 && cleanHeader === 'variance') {
-      mapping.variance = index;
+    // Variance Percentage - flexible matching, using camelCase internal key
+    else if (mapping.variancePercentage === -1 && 
+             (cleanSheetHeader === 'variance %' || cleanSheetHeader === 'variance' || cleanSheetHeader === 'variance percentage' || cleanSheetHeader.includes('variance')) && 
+             !cleanSheetHeader.includes('amount') && !cleanSheetHeader.includes('value') // Avoid matching variance amount/value if those exist
+            ) { 
+      mapping.variancePercentage = index;
     }
-    // Bonus - exact match
-    else if (mapping.bonus === -1 && cleanHeader === 'bonus') {
-      mapping.bonus = index;
+    // Bonus - exact match, maps to bonusAmount
+    else if (mapping.bonusAmount === -1 && cleanSheetHeader === 'bonus') { 
+      mapping.bonusAmount = index;
     }
     // UUID
-    else if (mapping.uuid === -1 && HYGIENE_COLUMN_HEADERS.UUID.some(pattern => cleanHeader === pattern || cleanHeader.includes(pattern))) {
+    else if (mapping.uuid === -1 && 
+             HYGIENE_COLUMN_HEADERS.UUID.some(pattern => {
+                const lowerPattern = String(pattern).toLowerCase();
+                return cleanSheetHeader === lowerPattern || cleanSheetHeader.includes(lowerPattern);
+            })) {
       mapping.uuid = index;
     }
   });
@@ -84,98 +103,140 @@ function mapHeaders_(headers) {
   Logger.log('Final mapping: ' + JSON.stringify(mapping));
   Logger.log('Missing mappings: ' + Object.keys(mapping).filter(key => mapping[key] === -1).join(', '));
 
+  // Log a warning to the sheet if critical columns are missing
+  const criticalColumns = ['date', 'verifiedProduction']; // Add other critical columns as needed (keys from HYGIENE_COLUMN_HEADERS)
+  const missingCritical = criticalColumns.filter(key => mapping[key.toLowerCase()] === -1 || mapping[key.toUpperCase()] === -1 ); // Check for both cases just in case config keys change case
+  
+  // Attempt to get sheet name for logging, may not be available here directly
+  // This function is generic, so sheet name isn't passed. Consider if context is needed for log sheet.
+  // For now, this will log to Logger.log primarily if sheet name context is complex to get here.
+
+  if (missingCritical.length > 0) {
+    const message = `Critical columns not mapped: ${missingCritical.join(', ')}. This will likely prevent data sync. Headers found: ${JSON.stringify(headers)}`;
+    Logger.log(`mapHeaders_ WARNING: ${message}`);
+    // Consider if this specific warning should go to the main log sheet. 
+    // logToHygieneSheet_('mapHeaders_', 'WARNING', null, null, null, message); 
+    // ^ This would require passing sheet name or making logToHygieneSheet_ more flexible for generic warnings.
+  }
+
   return mapping;
 }
 
 /**
- * Extract provider name from spreadsheet name - SIMPLE VERSION
- * @param {string} sheetName - The spreadsheet name
- * @return {string} The provider name (e.g., "Adriane")
+ * Parses a single row of hygiene data based on predefined mapping.
+ *
+ * @param {Array<any>} row The row data from the sheet.
+ * @param {object} mapping The column mapping object.
+ * @param {string} monthTab The name of the month tab being processed.
+ * @param {string} clinicId The ID of the clinic.
+ * @param {string} providerId The ID of the provider.
+ * @param {number} rowIndex The index of the row being processed.
+ * @return {object|null} A structured object for the hygiene record or null if key data is missing.
  */
-function extractProviderNameFromSheet_(sheetName) {
-  // Remove common words and get the first name
-  const cleanName = sheetName
-    .replace(/hygiene/gi, '')
-    .replace(/production/gi, '')
-    .replace(/tracker/gi, '')
-    .replace(/data/gi, '')
-    .replace(/sheet/gi, '')
-    .replace(/dashboard/gi, '')
-    .replace(/dr\./gi, '')
-    .replace(/\s*-\s*/g, ' ')
-    .trim();
-  
-  // Get first word as provider name
-  const words = cleanName.split(/\s+/).filter(word => word.length > 0);
-  return words.length > 0 ? words[0] : 'Unknown';
-}
-
-/**
- * Parse a row of hygiene data into a record object
- * @param {array} row - Array of cell values from the sheet
- * @param {object} mapping - Column mapping from mapHeaders_
- * @param {string} monthTab - Name of the month tab (e.g., "Dec-23")
- * @param {string} clinicId - Clinic ID
- * @return {object|null} Hygiene record object or null if invalid
- */
-function parseHygieneRow_(row, mapping, monthTab, clinicId) {
+function parseHygieneRow_(row, mapping, monthTab, clinicId, providerId, rowIndex) {
   try {
-    // Extract date
-    const dateValue = mapping.date !== -1 ? row[mapping.date] : null;
-    if (!dateValue) return null;
+    const record = {};
+    let hasEssentialData = false; // Flag to check if core financial data is present
 
-    const date = parseDateForSupabase_(dateValue, Session.getScriptTimeZone());
-    if (!date) return null;
-
-    // Extract numeric values, cleaning currency formatting
-    const hoursWorked = mapping.hoursWorked !== -1 ? parseFloat(cleanNumeric_(row[mapping.hoursWorked])) || null : null;
-    const estimatedProduction = mapping.estimatedProduction !== -1 ? parseFloat(cleanNumeric_(row[mapping.estimatedProduction])) || null : null;
-    const verifiedProduction = mapping.verifiedProduction !== -1 ? parseFloat(cleanNumeric_(row[mapping.verifiedProduction])) || null : null;
-    const productionGoal = mapping.productionGoal !== -1 ? parseFloat(cleanNumeric_(row[mapping.productionGoal])) || null : null;
-    const bonus = mapping.bonus !== -1 ? parseFloat(cleanNumeric_(row[mapping.bonus])) || null : null;
-
-    // Extract UUID or generate one
-    let uuid = mapping.uuid !== -1 ? row[mapping.uuid] : null;
-    if (!uuid || String(uuid).trim() === '') {
-      uuid = Utilities.getUuid();
+    // Date parsing - use lowercase 'date' key from the mapping object
+    const dateColumnIndex = mapping.date !== undefined ? mapping.date : -1; // Access with lowercase 'date'
+    if (dateColumnIndex === -1) {
+        Logger.log(`parseHygieneRow_: CRITICAL - 'date' column not found in mapping for '${monthTab}'. Row ${rowIndex + 1} will be skipped.`);
+        return null;
     }
+    const dateValue = row[dateColumnIndex];
+    const date = parseDateForSupabase_(dateValue, SpreadsheetApp.getActiveSpreadsheet().getSpreadsheetTimeZone());
+    if (!date) {
+      Logger.log(`parseHygieneRow_: Skipped row ${rowIndex !== undefined ? '#' + (rowIndex + 1) : '(unknown_row)'} in '${monthTab}' due to invalid or missing date. Value: '${dateValue}'`);
+      return null; 
+    }
+    
+    // Validate that the date is not in the future (beyond today)
+    const today = new Date();
+    const todayString = Utilities.formatDate(today, SpreadsheetApp.getActiveSpreadsheet().getSpreadsheetTimeZone(), "yyyy-MM-dd");
+    if (date > todayString) {
+      Logger.log(`parseHygieneRow_: Skipped row ${rowIndex !== undefined ? '#' + (rowIndex + 1) : '(unknown_row)'} in '${monthTab}' due to future date. Date: '${date}' is after today: '${todayString}'`);
+      return null;
+    }
+    
+    record.date = date;
 
-    // Calculate variance if not provided directly
-    let variancePercentage = null;
-    if (mapping.variance !== -1) {
-      const varianceValue = cleanNumeric_(row[mapping.variance]);
-      variancePercentage = parseFloat(varianceValue) || null;
-      // Convert percentage values like 85 to 0.85 if they seem to be in percentage format
-      if (variancePercentage !== null && variancePercentage > 1) {
-        variancePercentage = variancePercentage / 100;
+    // Process other mapped columns using their expected keys from HYGIENE_COLUMN_HEADERS (which map to lowercase in the mapping object)
+    // The `mapping` object created by `mapHeaders_` has lowercase keys like `hoursWorked`, `estimatedProduction` etc.
+    // The loop `for (const key in mapping)` will iterate over these lowercase keys.
+
+    for (const mappedKey in mapping) { // e.g., mappedKey could be 'hoursWorked', 'uuid' etc.
+      if (mapping.hasOwnProperty(mappedKey) && mappedKey !== 'date') { // Skip date as it's handled, and it's already lowercase
+        const columnIndex = mapping[mappedKey]; // This is the index from the sheet
+        
+        if (columnIndex !== undefined && columnIndex !== -1 && columnIndex < row.length) {
+          let value = row[columnIndex];
+          if (typeof value === 'string') {
+            value = value.trim();
+          }
+
+          // Determine the Supabase field name (snake_case) from the mappedKey
+          // This assumes mappedKey (e.g., 'hoursWorked') needs to become 'hours_worked'
+          const supabaseFieldKey = mappedKey.replace(/([A-Z])/g, '_$1').toLowerCase(); 
+
+          // Logic based on the original HYGIENE_COLUMN_HEADERS keys is tricky here directly
+          // We should standardize based on the lowercase mappedKey
+          if (['hoursWorked', 'estimatedProduction', 'verifiedProduction', 'productionGoal', 'variancePercentage', 'bonusAmount'].includes(mappedKey)) {
+            let numericValue = parseFloat(cleanNumeric_(value));
+            if (Number.isNaN(numericValue)) {
+              numericValue = null;
+            }
+            record[supabaseFieldKey] = numericValue;
+            if (numericValue === null && (mappedKey === 'verifiedProduction' || mappedKey === 'estimatedProduction')) {
+              Logger.log(`parseHygieneRow_: Null numeric value for critical field '${mappedKey}' in '${monthTab}', row ${rowIndex !== undefined ? '#' + (rowIndex + 1) : '(unknown_row)'}. Original value: '${value}'`);
+            }
+            if (numericValue !== null && (mappedKey === 'estimatedProduction' || mappedKey === 'verifiedProduction')) {
+              hasEssentialData = true; 
+            }
+          } else if (mappedKey === 'uuid') {
+            record.id = String(value || Utilities.getUuid()); 
+          } else {
+            // For any other direct string fields if necessary (currently none in HYGIENE_COLUMN_HEADERS requiring special handling this way)
+            // This part might need review based on actual HYGIENE_COLUMN_HEADERS
+            record[supabaseFieldKey] = value;
+          }
+        } else {
+          // Initialize field as null if column is not present, out of bounds, or not mapped (-1)
+          const supabaseFieldKey = mappedKey.replace(/([A-Z])/g, '_$1').toLowerCase();
+          record[supabaseFieldKey] = null;
+          if (columnIndex === -1){
+            Logger.log(`parseHygieneRow_: Column for '${mappedKey}' was not found in sheet headers (mapping index -1) for '${monthTab}'. Setting to null.`);
+          }
+        }
       }
-    } else if (productionGoal && productionGoal > 0 && verifiedProduction !== null) {
-      variancePercentage = ((verifiedProduction - productionGoal) / productionGoal);
     }
 
-    // Extract provider name from spreadsheet name
-    const ss = SpreadsheetApp.openById(HYGIENE_SHEET_ID);
-    const spreadsheetName = ss.getName();
-    const providerName = extractProviderNameFromSheet_(spreadsheetName);
+    // If no essential financial data was found beyond the date, consider it a row to skip
+    // This helps avoid syncing rows that only have a date and nothing else of value.
+    if (!hasEssentialData && !record.id) { // if no financial data and no pre-existing UUID
+      Logger.log(`parseHygieneRow_: Skipped row ${rowIndex !== undefined ? '#' + (rowIndex + 1) : '(unknown_row)' } in '${monthTab}' due to no essential financial data (and no existing UUID).`);
+      return null; 
+    }
+    
+    // Add common fields
+    record.clinic_id = clinicId;
+    record.provider_id = providerId; // Use the passed providerId
+    record.month_tab = monthTab;
+    record.created_at = new Date().toISOString();
+    record.updated_at = new Date().toISOString();
 
-    return {
-      id: String(uuid),
-      clinic_id: clinicId,
-      date: date,
-      month_tab: monthTab,
-      hours_worked: hoursWorked,
-      estimated_production: estimatedProduction,
-      verified_production: verifiedProduction,
-      production_goal: productionGoal,
-      variance_percentage: variancePercentage !== null ? Number(variancePercentage.toFixed(4)) : null,
-      bonus_amount: bonus,
-      provider_name: providerName,
-      created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString()
-    };
+    // Ensure 'id' is present, generate if it was not in the sheet
+    if (!record.id) {
+      record.id = Utilities.getUuid();
+    }
+    
+    // Remove provider_name as it's no longer used
+    // delete record.provider_name; // Ensure this field is not present
+
+    return record;
 
   } catch (error) {
-    Logger.log(`Error parsing hygiene row: ${error.message}`);
+    Logger.log(`Error in parseHygieneRow_ for month tab "${monthTab}", providerId "${providerId}", row ${rowIndex !== undefined ? '#' + (rowIndex + 1) : '(unknown_row)'}, data "${row.join(',')}": ${error.message} (Stack: ${error.stack})`);
     return null;
   }
 }

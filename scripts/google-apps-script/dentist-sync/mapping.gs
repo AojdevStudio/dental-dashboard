@@ -100,29 +100,30 @@ function mapHeaders_(headers) {
 /**
  * Extract provider name from spreadsheet name - DENTIST VERSION
  * @param {string} sheetName - The spreadsheet name
- * @return {string} The provider name (e.g., "Dr. Obi")
+ * @return {string} The provider name (e.g., "Obinna Ezeji")
  */
 function extractProviderNameFromSheet_(sheetName) {
-  // Look for "Dr. [Name]" pattern first
-  const drMatch = sheetName.match(/Dr\.?\s+(\w+)/i);
+  // Look for "Dr. [FirstName LastName]" pattern first
+  const drMatch = sheetName.match(/Dr\.?\s+([A-Za-z]+(?:\s+[A-Za-z]+)?)/i);
   if (drMatch) {
-    return `Dr. ${drMatch[1]}`;
+    return drMatch[1].trim(); // Return just the name part without "Dr."
   }
   
-  // Fallback: Remove common words and get the first name
+  // Fallback: Extract first and last name before common words
   const cleanName = sheetName
-    .replace(/associate/gi, '')
-    .replace(/production/gi, '')
-    .replace(/tracker/gi, '')
-    .replace(/data/gi, '')
-    .replace(/sheet/gi, '')
-    .replace(/dashboard/gi, '')
-    .replace(/\s*-\s*/g, ' ')
+    .replace(/\s*-\s*(associate|production|tracker|data|sheet|dashboard).*$/gi, '') // Remove everything after dash + common words
+    .replace(/(associate|production|tracker|data|sheet|dashboard)/gi, '') // Remove common words
     .trim();
   
-  // Get first word as provider name
+  // Extract first two words as provider name (First Last)
   const words = cleanName.split(/\s+/).filter(word => word.length > 0);
-  return words.length > 0 ? words[0] : 'Unknown';
+  if (words.length >= 2) {
+    return `${words[0]} ${words[1]}`;
+  } else if (words.length === 1) {
+    return words[0];
+  }
+  
+  return 'Unknown';
 }
 
 /**
@@ -131,9 +132,10 @@ function extractProviderNameFromSheet_(sheetName) {
  * @param {object} mapping - Column mapping from mapHeaders_
  * @param {string} monthTab - Name of the month tab (e.g., "Nov-24")
  * @param {string} clinicId - Clinic ID
+ * @param {object} credentials - Supabase credentials for provider lookup
  * @return {object|null} Dentist record object or null if invalid
  */
-function parseDentistRow_(row, mapping, monthTab, clinicId) {
+function parseDentistRow_(row, mapping, monthTab, clinicId, credentials = null) {
   try {
     // Extract date
     const dateValue = mapping.date !== -1 ? row[mapping.date] : null;
@@ -141,6 +143,14 @@ function parseDentistRow_(row, mapping, monthTab, clinicId) {
 
     const date = parseDateForSupabase_(dateValue, Session.getScriptTimeZone());
     if (!date) return null;
+
+    // Validate date is not in the future
+    const today = new Date();
+    const recordDate = new Date(date);
+    if (recordDate > today) {
+      Logger.log(`Skipping future date: ${date}`);
+      return null;
+    }
 
     // Extract production values - dual locations
     const verifiedProductionHumble = mapping.verifiedProductionHumble !== -1 ? 
@@ -173,6 +183,12 @@ function parseDentistRow_(row, mapping, monthTab, clinicId) {
     const spreadsheetName = ss.getName();
     const providerName = extractProviderNameFromSheet_(spreadsheetName);
 
+    // Lookup provider ID if credentials are provided
+    let providerId = null;
+    if (credentials && providerName) {
+      providerId = lookupProviderId_(providerName, credentials);
+    }
+
     return {
       id: String(uuid),
       clinic_id: clinicId,
@@ -185,6 +201,7 @@ function parseDentistRow_(row, mapping, monthTab, clinicId) {
       production_per_hour: productionPerHour,
       avg_daily_production: avgDailyProduction,
       provider_name: providerName,
+      provider_id: providerId, // Include provider ID
       created_at: new Date().toISOString(),
       updated_at: new Date().toISOString()
     };

@@ -5,62 +5,148 @@ const prisma = new PrismaClient()
 async function main() {
   console.log('🌱 Starting database seeding...')
 
-  // Create the two KamDental clinics
+  // Upsert the two KamDental clinics (idempotent)
   const clinics = await Promise.all([
     prisma.clinic.upsert({
       where: { registrationCode: 'KAMDENTAL-HUMBLE' },
-      update: {},
+      update: {
+        name: 'KamDental Humble',
+        location: 'Humble, TX',
+        status: 'active',
+      },
       create: {
         name: 'KamDental Humble',
         location: 'Humble, TX',
         status: 'active',
         registrationCode: 'KAMDENTAL-HUMBLE',
-        uuidId: 'clinic-humble-uuid-001' // Stable UUID for development
+        uuidId: 'clinic-humble-uuid-001'
       }
     }),
     prisma.clinic.upsert({
       where: { registrationCode: 'KAMDENTAL-BAYTOWN' },
-      update: {},
+      update: {
+        name: 'KamDental Baytown', 
+        location: 'Baytown, TX',
+        status: 'active',
+      },
       create: {
         name: 'KamDental Baytown', 
         location: 'Baytown, TX',
         status: 'active',
         registrationCode: 'KAMDENTAL-BAYTOWN',
-        uuidId: 'clinic-baytown-uuid-001' // Stable UUID for development
+        uuidId: 'clinic-baytown-uuid-001'
       }
     })
   ])
 
-  console.log('✅ Created clinics:', clinics.map(c => `${c.name} (${c.id})`))
+  console.log('✅ Upserted clinics:', clinics.map(c => `${c.name} (${c.id})`))
 
-  // Create system admin user with access to all clinics (not tied to specific clinic)
+  // Upsert system admin user (idempotent)
   const adminUser = await prisma.user.upsert({
     where: { email: 'admin@kamdental.com' },
-    update: {},
+    update: {
+      name: 'KamDental System Admin',
+      role: 'system_admin',
+    },
     create: {
       email: 'admin@kamdental.com',
       name: 'KamDental System Admin',
       role: 'system_admin',
-      authId: 'e48f8f72-542f-4d1d-9674-6b59d5855996', // Supabase auth UID
+      authId: 'e48f8f72-542f-4d1d-9674-6b59d5855996', 
       uuidId: 'user-admin-uuid-001'
-      // clinicId omitted - system admin not tied to any specific clinic
-    } as any // Type assertion to bypass Prisma's strict typing for this system admin case
+    } as any 
   })
 
-  console.log('✅ Created admin user:', adminUser.email)
+  console.log('✅ Upserted admin user:', adminUser.email)
 
-  // Providers will be created through the Google Apps Script setup process
-  // when real users connect their spreadsheets with their actual names
-  console.log('✅ Clinic structure ready for provider setup through Apps Script')
+  // Provider data derived from "Provider table - Sheet1 (1).csv"
+  // Fixed to create one provider per person with primary clinic assignment
+  const providersFromCSV = [
+    { firstName: 'Kamdi', lastName: 'Irondi', email: 'k.irondi@kamdental.com', providerType: 'dentist', primaryClinic: 'Humble' }, // Primary at Humble, works at both
+    { firstName: 'Chinyere', lastName: 'Enih', email: 'cc.enihdds@gmail.com', providerType: 'dentist', primaryClinic: 'Humble' },
+    { firstName: 'Obinna', lastName: 'Ezeji', email: 'obinna.ezeji.dds@gmail.com', providerType: 'dentist', primaryClinic: 'Baytown' },
+    { firstName: 'Adriane', lastName: 'Fontenot', email: 'adrianesmile@gmail.com', providerType: 'hygienist', primaryClinic: 'Baytown' },
+    { firstName: 'Kia', lastName: 'Redfearn', email: null, providerType: 'hygienist', primaryClinic: 'Humble' },
+  ];
 
-  console.log('⚙️ Applying service_role permissions...')
+  const humbleClinic = clinics.find(c => c.name === 'KamDental Humble');
+  const baytownClinic = clinics.find(c => c.name === 'KamDental Baytown');
 
-  // Grant usage on public schema to service_role
+  if (!humbleClinic || !baytownClinic) {
+    console.error('❌ KamDental Humble or KamDental Baytown clinic not found. Cannot seed providers based on CSV data.');
+  } else {
+    console.log(`ℹ️ Seeding providers with primary clinic assignments (one record per provider)...`);
+
+    for (const providerCsvData of providersFromCSV) {
+      const { firstName, lastName, email, providerType, primaryClinic } = providerCsvData;
+      const fullName = `${firstName} ${lastName}`;
+
+      // Determine primary clinic ID
+      let primaryClinicId;
+      if (primaryClinic === 'Humble') {
+        primaryClinicId = humbleClinic.id;
+      } else if (primaryClinic === 'Baytown') {
+        primaryClinicId = baytownClinic.id;
+      } else {
+        console.warn(`⚠️ Provider ${fullName} has an unrecognized primary clinic: '${primaryClinic}'. Skipping this provider.`);
+        continue;
+      }
+
+      const providerDataPayload = {
+        name: fullName,
+        firstName: firstName,
+        lastName: lastName,
+        email: email,
+        providerType: providerType,
+        status: 'active',
+        clinicId: primaryClinicId,
+      };
+
+      try {
+        // Use email as unique identifier to prevent duplicates
+        const existingProvider = email 
+          ? await prisma.provider.findUnique({ where: { email: email } })
+          : await prisma.provider.findFirst({
+              where: {
+                firstName: firstName,
+                lastName: lastName,
+                providerType: providerType,
+              },
+            });
+
+        if (existingProvider) {
+          // Provider exists, update them
+          const updated = await prisma.provider.update({
+            where: { id: existingProvider.id },
+            data: {
+              name: fullName,
+              email: email,
+              clinicId: primaryClinicId, // Update primary clinic if needed
+            },
+          });
+          console.log(`✅ Updated provider: ${updated.name} (Primary: ${primaryClinic}, ID: ${updated.id})`);
+        } else {
+          // Provider does not exist, create them
+          const created = await prisma.provider.create({
+            data: providerDataPayload,
+          });
+          console.log(`✅ Created provider: ${created.name} (Primary: ${primaryClinic}, ID: ${created.id})`);
+        }
+      } catch (error) {
+        console.error(`❌ Error processing provider "${fullName}":`, error);
+        console.error(`Data payload was:`, JSON.stringify(providerDataPayload, null, 2));
+      }
+    }
+  }
+
+  console.log('✅ Provider seeding process based on CSV data completed.');
+  console.log('ℹ️ Note: Further provider management may occur through other system processes.');
+
+  console.log('⚙️ Applying service_role permissions...');
+
   await prisma.$executeRawUnsafe(`GRANT USAGE ON SCHEMA public TO service_role;`);
   console.log('Granted USAGE ON SCHEMA public TO service_role.');
 
-  // List all tables that service_role needs access to
-  // Ensure this list is kept up-to-date with your schema.prisma
   const tablesToGrantPermissions = [
     "clinics", "users", "providers", "metric_definitions", 
     "data_sources", "column_mappings", "metric_values", "goals",
@@ -69,7 +155,6 @@ async function main() {
     "patient_metrics", "metric_aggregations", "google_credentials",
     "spreadsheet_connections", "column_mappings_v2",
     "hygiene_production", "dentist_production", "id_mappings"
-    // Add any new table names here as your schema evolves
   ];
 
   for (const table of tablesToGrantPermissions) {
@@ -81,8 +166,6 @@ async function main() {
     }
   }
   
-  // Grant permissions on all sequences in the public schema to service_role.
-  // This is important if service_role interacts with tables that use auto-incrementing IDs.
   try {
     await prisma.$executeRawUnsafe(`GRANT USAGE, SELECT, UPDATE ON ALL SEQUENCES IN SCHEMA public TO service_role;`);
     console.log('Granted USAGE, SELECT, UPDATE ON ALL SEQUENCES in public schema to service_role.');
@@ -91,7 +174,6 @@ async function main() {
   }
 
   console.log('✅ Service_role permissions application step completed.')
-
   console.log('🎉 Database seeding completed!')
 }
 

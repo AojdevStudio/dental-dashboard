@@ -114,7 +114,7 @@ function syncSheetData_(sheet, monthTab) {
           continue;
         }
 
-        const record = parseDentistRow_(row, mapping, monthTab, credentials.clinicId);
+        const record = parseDentistRow_(row, mapping, monthTab, credentials.clinicId, credentials);
         if (record) {
           records.push(record);
         }
@@ -170,7 +170,7 @@ function syncSingleRow_(sheet, rowNumber) {
       return false;
     }
 
-    const record = parseDentistRow_(rowValues, mapping, sheetName, credentials.clinicId);
+    const record = parseDentistRow_(rowValues, mapping, sheetName, credentials.clinicId, credentials);
     if (!record) {
       Logger.log(`Could not parse row ${rowNumber} from ${sheetName}.`);
       return false;

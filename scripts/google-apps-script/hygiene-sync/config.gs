@@ -1,7 +1,7 @@
 // --- Hygiene Production Sync Configuration ---
 
 /** @const {string} ID of the Google Spreadsheet containing hygiene data. CHANGE THIS! */
-const HYGIENE_SHEET_ID = '1iSJSgVlRJytiW4kuxEmxJmA-m7meVYa2f6SdZ0-SJYU';
+const HYGIENE_SHEET_ID = '1wQF832sOD-5qIrjdBnLANXtbmrnYWRBb_q5FaUuDUAE';
 
 /** @const {string} Name of the sheet tab for logging sync operations. */
 const HYGIENE_LOG_TAB_NAME = 'Hygiene-Sync-Log';
@@ -27,13 +27,20 @@ const SUPABASE_KEY_PROPERTY_KEY = 'HYGIENE_SUPABASE_KEY';
 /** @const {string} Key for storing Clinic ID in Script Properties. */
 const CLINIC_ID_PROPERTY_KEY = 'HYGIENE_CLINIC_ID';
 
-
+/** @const {string} Key for storing Provider ID in Script Properties. */
+const HYGIENE_PROVIDER_ID_PROPERTY_KEY = 'HYGIENE_PROVIDER_ID';
 
 /** @const {string} Name of the time-based sync function for trigger management. */
 const SYNC_FUNCTION_NAME = 'syncAllHygieneData';
 
 /** @const {string} Name of the on-edit sync function for trigger management. */
 const ON_EDIT_FUNCTION_NAME = 'onEditHygieneSync';
+
+/** @const {string} Key for storing Dashboard API URL (optional). */
+const DASHBOARD_API_URL_PROPERTY_KEY = 'HYGIENE_DASHBOARD_API_URL';
+
+/** @const {string} Key for storing whether the welcome message has been shown. */
+const HYGIENE_WELCOME_SHOWN_PROPERTY_KEY = 'HYGIENE_WELCOME_SHOWN';
 
 /** @const {array} Month tab patterns to sync (MMM-YY format). */
 const MONTH_TAB_PATTERNS = [

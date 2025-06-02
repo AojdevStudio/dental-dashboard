@@ -144,7 +144,7 @@ function testColumnMapping() {
         debugInfo += `Sample Row: ${JSON.stringify(testRow)}\n`;
         
         const parsed = parseDentistRow_(testRow, mapping, tabName, 'test-clinic-id');
-        debugInfo += `Parsed: ${JSON.stringify(parsed, null, 2)}\n\n`;
+        debugInfo += `Parsed (without provider lookup): ${JSON.stringify(parsed, null, 2)}\n\n`;
       }
       break; // Just test first found tab
     }
@@ -152,6 +152,80 @@ function testColumnMapping() {
   
   SpreadsheetApp.getUi().alert(debugInfo);
   Logger.log(debugInfo);
+}
+
+/**
+ * Lookup provider ID by name from Supabase
+ * @param {string} providerName - The provider name to lookup (e.g., "Dr. Obi")
+ * @param {object} credentials - Supabase credentials
+ * @return {string|null} Provider ID or null if not found
+ */
+function lookupProviderId_(providerName, credentials) {
+  if (!providerName || !credentials) {
+    return null;
+  }
+
+  try {
+    // Query providers table for matching name
+    const url = `${credentials.url}/rest/v1/providers?name=ilike.*${encodeURIComponent(providerName)}*&select=id,name`;
+    const options = {
+      method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${credentials.key}`,
+        'apikey': credentials.key,
+        'Content-Type': 'application/json'
+      },
+      muteHttpExceptions: true
+    };
+    
+    const response = UrlFetchApp.fetch(url, options);
+    const responseCode = response.getResponseCode();
+    
+    if (responseCode === 200) {
+      const providers = JSON.parse(response.getContentText());
+      
+      if (providers && providers.length > 0) {
+        // Return the first matching provider ID
+        Logger.log(`Found provider: ${providers[0].name} (ID: ${providers[0].id}) for search: ${providerName}`);
+        return providers[0].id;
+      } else {
+        Logger.log(`No provider found for name: ${providerName}`);
+        return null;
+      }
+    } else {
+      Logger.log(`Provider lookup failed. Response code: ${responseCode}`);
+      return null;
+    }
+  } catch (error) {
+    Logger.log(`Error looking up provider ID for ${providerName}: ${error.message}`);
+    return null;
+  }
+}
+
+/**
+ * Test provider lookup functionality
+ */
+function testProviderLookup() {
+  const credentials = getSupabaseCredentials_();
+  if (!credentials) {
+    SpreadsheetApp.getUi().alert('❌ No credentials found. Please run setup first.');
+    return;
+  }
+
+  // Test with extracted provider name
+  const ss = SpreadsheetApp.openById(DENTIST_SHEET_ID);
+  const spreadsheetName = ss.getName();
+  const providerName = extractProviderNameFromSheet_(spreadsheetName);
+  
+  const providerId = lookupProviderId_(providerName, credentials);
+  
+  SpreadsheetApp.getUi().alert(
+    '🔍 Provider Lookup Test\n\n' +
+    `Spreadsheet: "${spreadsheetName}"\n\n` +
+    `Extracted Name: "${providerName}"\n\n` +
+    `Found Provider ID: ${providerId || 'Not found'}\n\n` +
+    'This provider ID will be included in dentist production records.'
+  );
 }
 
 /**

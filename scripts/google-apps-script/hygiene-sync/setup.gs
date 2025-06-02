@@ -41,17 +41,18 @@ function setupHygieneSync() {
       Logger.log('Credentials successfully set.');
     }
 
-    // Ensure provider information is set
-    const providerInfo = getProviderInfo_();
-    if (!providerInfo) {
-      Logger.log('Provider information not found, attempting to set it...');
-      if (!setProviderInfo_()) {
-        Logger.log('Provider setup cancelled or failed.');
-        logToHygieneSheet_(functionName, 'ERROR', null, null, null, 'Provider setup cancelled or failed.');
-        return;
-      }
-      Logger.log('Provider information successfully set.');
-    }
+    // Ensure provider information is set - This section seems to be legacy 
+    // as Provider ID is handled by setSupabaseCredentials_ and getSupabaseCredentials_.
+    // const providerInfo = getProviderInfo_();
+    // if (!providerInfo) {
+    //   Logger.log('Provider information not found, attempting to set it...');
+    //   if (!setProviderInfo_()) {
+    //     Logger.log('Provider setup cancelled or failed.');
+    //     logToHygieneSheet_(functionName, 'ERROR', null, null, null, 'Provider setup cancelled or failed.');
+    //     return;
+    //   }
+    //   Logger.log('Provider information successfully set.');
+    // }
 
     // Test connection
     try {
@@ -119,7 +120,7 @@ function clearAllTriggers() {
  * @param {string} functionName - Name of the function to delete triggers for
  * @param {Spreadsheet} ss - The spreadsheet object
  */
-function deleteTriggersByHandler_(functionName, ss) {
+function deleteTriggersByHandler_(functionName /*, ss */) { // ss parameter is unused
   const triggers = ScriptApp.getProjectTriggers();
   let deletedCount = 0;
   

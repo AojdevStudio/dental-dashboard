@@ -57,25 +57,28 @@ model User {
   @@map("users")
 }
 
-// Providers
+// Providers - Global provider identity
 model Provider {
   id           String   @id @default(cuid())
   name         String // Full name (generated from firstName + lastName)
   firstName    String?  @map("first_name") // Captured during Google Apps Script setup
   lastName     String?  @map("last_name") // Captured during Google Apps Script setup
-  email        String? // Optional contact info
+  email        String?  @unique // Unique identifier across all locations
   providerType String   @map("provider_type") // dentist, hygienist, specialist
   position     String? // More detailed position info from setup
   status       String // active/inactive
   createdAt    DateTime @default(now()) @map("created_at")
   updatedAt    DateTime @updatedAt @map("updated_at")
 
-  clinicId          String              @map("clinic_id")
-  clinic            Clinic              @relation(fields: [clinicId], references: [id])
+  // Primary clinic relationship - most providers work primarily at one location
+  clinicId String @map("clinic_id")
+  clinic   Clinic @relation(fields: [clinicId], references: [id])
+
   metrics           MetricValue[]
   goals             Goal[]
   dataSources       DataSource[] // Link providers to their data sources
   hygieneProduction HygieneProduction[]
+  dentistProduction DentistProduction[]
 
   @@map("providers")
 }
@@ -497,7 +500,7 @@ model DentistProduction {
   monthlyGoal               Decimal? @map("monthly_goal") @db.Decimal(10, 2)
   productionPerHour         Decimal? @map("production_per_hour") @db.Decimal(8, 2)
   avgDailyProduction        Decimal? @map("avg_daily_production") @db.Decimal(10, 2)
-  providerName              String?  @map("provider_name") // e.g., "Dr. Obi"
+  providerName              String?  @map("provider_name") // e.g., "Dr. Obi" - kept for legacy data
   createdAt                 DateTime @default(now()) @map("created_at")
   updatedAt                 DateTime @updatedAt @map("updated_at")
 
@@ -505,12 +508,17 @@ model DentistProduction {
   clinicId String @map("clinic_id")
   clinic   Clinic @relation(fields: [clinicId], references: [id])
 
+  // Links to provider (proper foreign key relationship)
+  providerId String?   @map("provider_id")
+  provider   Provider? @relation(fields: [providerId], references: [id])
+
   // For tracking sync source
   dataSourceId String?     @map("data_source_id")
   dataSource   DataSource? @relation(fields: [dataSourceId], references: [id])
 
   @@index([clinicId, date])
-  @@index([providerName, date])
+  @@index([providerId, date])
+  @@index([providerName, date]) // Keep for legacy data
   @@index([dataSourceId])
   @@map("dentist_production")
 }

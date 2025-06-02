@@ -38,18 +38,18 @@ function syncAllHygieneData() {
       // Skip sheets that don't look like month tabs
       const isMonthTab = MONTH_TAB_PATTERNS.some(pattern => pattern.test(sheetName));
       if (!isMonthTab) {
-        Logger.log(`Skipping sheet: ${sheetName} (not month format)`);
+        Logger.log(`syncAllHygieneData: Skipping sheet '${sheetName}' because it does not match MONTH_TAB_PATTERNS.`);
         continue;
       }
 
-      Logger.log(`Processing sheet: ${sheetName}`);
-      const rowsProcessed = syncSheetData_(sheet, sheetName);
-      totalRowsProcessed += rowsProcessed;
+      Logger.log(`syncAllHygieneData: Processing sheet: ${sheetName}`);
+      const sheetSyncResult = syncSheetData_(sheet, sheetName);
+      totalRowsProcessed += (sheetSyncResult.recordsSynced || 0);
       totalSheets++;
     }
 
     const duration = Math.round((Date.now() - startTime) / 1000);
-    const successMsg = `Sync complete! Processed ${totalRowsProcessed} rows across ${totalSheets} sheets in ${duration}s.`;
+    const successMsg = `Full sync complete. Processed ${totalRowsProcessed} rows across ${totalSheets} sheets in ${duration}s. See individual sheet logs for details.`;
     
     Logger.log(successMsg);
     logToHygieneSheet_(functionName, 'SUCCESS', totalRowsProcessed, totalSheets, duration, successMsg);
@@ -66,27 +66,36 @@ function syncAllHygieneData() {
  * Sync data from a specific sheet
  * @param {Sheet} sheet - The Google Sheet to sync
  * @param {string} monthTab - Name of the month tab
- * @return {number} Number of rows processed
+ * @return {object} Result object containing sync details
  */
 function syncSheetData_(sheet, monthTab) {
   const credentials = getSupabaseCredentials_();
+  let recordsAttempted = 0;
+  let recordsParsedAndBatched = 0;
+  let recordsUpserted = 0;
+  let recordsSkippedOrFailedParse = 0;
+
   if (!credentials) {
-    throw new Error('No credentials available');
+    const message = 'Supabase credentials or Provider ID are missing. Please configure them in Script Properties or run setup.';
+    Logger.log(`SYNC_SHEET_DATA: Credentials (including Provider ID) not available for sheet '${monthTab}'. ${message}`);
+    SpreadsheetApp.getUi().alert('Sync Error', message);
+    logToHygieneSheet_('syncSheetData', 'ERROR', 0, 0, null, `Sheet '${monthTab}': ${message}`);
+    return { success: false, message: message, recordsAttempted: 0, recordsParsed: 0, recordsSynced: 0, recordsFailedOrSkipped: 0 };
   }
 
   try {
+    Logger.log(`syncSheetData_: Starting for sheet '${monthTab}'.`);
     const headers = getSheetHeaders_(sheet);
     const mapping = mapHeaders_(headers);
     
-    // Check if we have the required date column
     if (mapping.date === -1) {
-      Logger.log(`Warning: No date column found in sheet ${monthTab}`);
-      return 0;
+      const message = `No date column found or mapped in sheet '${monthTab}'. Cannot process.`;
+      Logger.log(`syncSheetData_: ${message}`);
+      logToHygieneSheet_('syncSheetData', 'WARNING', 0, 1, null, message);
+      return { success: true, message: message, recordsAttempted: 0, recordsParsed: 0, recordsSynced: 0, recordsFailedOrSkipped: 0 }; // true because the function itself didn't fail, but 0 rows processed
     }
 
     const data = sheet.getDataRange().getValues();
-    
-    // Find header row index
     let headerRowIndex = -1;
     for (let i = 0; i < Math.min(5, data.length); i++) {
       if (data[i].some(cell => String(cell).toLowerCase().includes('date'))) {
@@ -96,44 +105,67 @@ function syncSheetData_(sheet, monthTab) {
     }
 
     if (headerRowIndex === -1) {
-      Logger.log(`No header row found in sheet: ${monthTab}`);
-      return 0;
+      const message = `No header row containing "date" found in sheet '${monthTab}'. Cannot process.`;
+      Logger.log(`syncSheetData_: ${message}`);
+      logToHygieneSheet_('syncSheetData', 'WARNING', 0, 1, null, message);
+      return { success: true, message: message, recordsAttempted: 0, recordsParsed: 0, recordsSynced: 0, recordsFailedOrSkipped: 0 };
     }
 
     const dataRows = data.slice(headerRowIndex + 1);
-    let processedRows = 0;
+    recordsAttempted = dataRows.length;
+    Logger.log(`syncSheetData_: Found ${recordsAttempted} data rows (after header) in sheet '${monthTab}'.`);
 
-    // Process rows in batches
+    if (recordsAttempted === 0) {
+      const message = `No data rows found after header in sheet '${monthTab}'.`;
+      Logger.log(`syncSheetData_: ${message}`);
+      logToHygieneSheet_('syncSheetData', 'INFO', 0, 1, null, message);
+      return { success: true, message: message, recordsAttempted: 0, recordsParsed: 0, recordsSynced: 0, recordsFailedOrSkipped: 0 };
+    }
+
     for (let i = 0; i < dataRows.length; i += SUPABASE_BATCH_SIZE) {
       const batch = dataRows.slice(i, i + SUPABASE_BATCH_SIZE);
-      const records = [];
+      const recordsToUpsert = [];
 
-      for (const row of batch) {
-        // Skip empty rows (no date)
-        if (!row[mapping.date] || String(row[mapping.date]).trim() === '') {
+      for (let j = 0; j < batch.length; j++) {
+        const currentRowInSheet = batch[j];
+        const originalRowIndex = headerRowIndex + 1 + i + j; // 0-based index from original data array
+        
+        if (!currentRowInSheet[mapping.date] || String(currentRowInSheet[mapping.date]).trim() === '') {
+          Logger.log(`syncSheetData_: Row ${originalRowIndex + 1} in '${monthTab}' skipped (empty date before parsing).`);
+          recordsSkippedOrFailedParse++;
           continue;
         }
 
-        const record = parseHygieneRow_(row, mapping, monthTab, credentials.clinicId);
+        const record = parseHygieneRow_(currentRowInSheet, mapping, monthTab, credentials.clinicId, credentials.providerId, originalRowIndex);
         if (record) {
-          records.push(record);
+          recordsToUpsert.push(record);
+        } else {
+          Logger.log(`syncSheetData_: Row ${originalRowIndex + 1} in '${monthTab}' returned null from parseHygieneRow_ (check detailed parse logs).`);
+          recordsSkippedOrFailedParse++;
         }
       }
 
-      if (records.length > 0) {
-        const success = upsertBatchToSupabase_(records, credentials);
+      if (recordsToUpsert.length > 0) {
+        recordsParsedAndBatched += recordsToUpsert.length;
+        const success = upsertBatchToSupabase_(recordsToUpsert, credentials);
         if (success) {
-          processedRows += records.length;
+          recordsUpserted += recordsToUpsert.length;
         }
+      } else {
+        Logger.log(`syncSheetData_: No records to upsert in current batch for '${monthTab}' (Rows ${i + 1} to ${Math.min(i + SUPABASE_BATCH_SIZE, dataRows.length) +1}).`);
       }
     }
 
-    Logger.log(`Processed ${processedRows} rows from ${monthTab}`);
-    return processedRows;
+    const summaryMessage = `Sheet '${monthTab}': Attempted: ${recordsAttempted}, Parsed for batching: ${recordsParsedAndBatched}, Upserted: ${recordsUpserted}, Skipped/FailedParse: ${recordsSkippedOrFailedParse}.`;
+    Logger.log(`syncSheetData_: ${summaryMessage}`);
+    logToHygieneSheet_('syncSheetData', recordsUpserted > 0 ? 'SUCCESS' : 'INFO', recordsUpserted, 1, null, summaryMessage);
+    return { success: true, message: summaryMessage, recordsAttempted, recordsParsed: recordsParsedAndBatched, recordsSynced: recordsUpserted, recordsFailedOrSkipped: recordsSkippedOrFailedParse };
 
   } catch (error) {
-    Logger.log(`Error processing sheet ${monthTab}: ${error.message}`);
-    return 0;
+    const errorMessage = `Error processing sheet '${monthTab}': ${error.message} Stack: ${error.stack ? error.stack : 'N/A'}`;
+    Logger.log(`syncSheetData_: ${errorMessage}`);
+    logToHygieneSheet_('syncSheetData', 'ERROR', recordsUpserted, 1, null, errorMessage);
+    return { success: false, message: errorMessage, recordsAttempted, recordsParsed: recordsParsedAndBatched, recordsSynced: recordsUpserted, recordsFailedOrSkipped: recordsSkippedOrFailedParse };
   }
 }
 
@@ -143,250 +175,111 @@ function syncSheetData_(sheet, monthTab) {
  * @param {number} rowNumber - 1-based row number
  * @return {boolean} Success status
  */
-function syncSingleRow_(sheet, rowNumber) {
+function syncSingleRow_(sheet, rowNumber, monthTab) {
   const credentials = getSupabaseCredentials_();
   if (!credentials) {
-    throw new Error('No credentials available');
+    Logger.log('SYNC_SINGLE_ROW: Credentials (including Provider ID) not available. Halting sync for row: ' + rowNumber);
+    return { success: false, error: 'Credentials or Provider ID missing' };
   }
 
-  try {
-    const sheetName = sheet.getName();
-    const headers = getSheetHeaders_(sheet);
-    const mapping = mapHeaders_(headers);
-    
-    if (mapping.date === -1) {
-      throw new Error('No date column found in this sheet');
-    }
+  const headers = sheet.getRange(1, 1, 1, sheet.getLastColumn()).getValues()[0];
+  const headerMapping = mapHeaders_(headers);
+  
+  const rowData = sheet.getRange(rowNumber, 1, 1, sheet.getLastColumn()).getValues()[0];
 
-    const row = sheet.getRange(rowNumber, 1, 1, sheet.getLastColumn()).getValues()[0];
-    
-    // Skip empty rows
-    if (!row[mapping.date] || String(row[mapping.date]).trim() === '') {
-      throw new Error('Row has no date value');
-    }
+  // Pass rowNumber - 1 for 0-based rowIndex expected by parseHygieneRow_
+  const parsedRecord = parseHygieneRow_(rowData, headerMapping, monthTab, credentials.clinicId, credentials.providerId, rowNumber - 1);
 
-    const record = parseHygieneRow_(row, mapping, sheetName, credentials.clinicId);
-    if (!record) {
-      throw new Error('Could not parse row data');
-    }
+  if (!parsedRecord) {
+    logToHygieneSheet_('syncSingleRow', 'ERROR', 0, 0, null, `Failed to sync row ${rowNumber} from ${monthTab}`);
+    return { success: false, error: 'Failed to parse row data' };
+  }
 
-    const success = upsertToSupabase_(record, credentials);
-    
-    if (success) {
-      logToHygieneSheet_('syncSingleRow', 'SUCCESS', 1, 0, null, `Row ${rowNumber} from ${sheetName} synced`);
-    } else {
-      logToHygieneSheet_('syncSingleRow', 'ERROR', 0, 0, null, `Failed to sync row ${rowNumber} from ${sheetName}`);
-    }
-
-    return success;
-
-  } catch (error) {
-    logToHygieneSheet_('syncSingleRow', 'ERROR', 0, 0, null, `Error syncing row ${rowNumber}: ${error.message}`);
-    throw error;
+  const success = upsertToSupabase_(parsedRecord, credentials);
+  
+  if (success) {
+    logToHygieneSheet_('syncSingleRow', 'SUCCESS', 1, 0, null, `Row ${rowNumber} from ${monthTab} synced`);
+    return { success: true, error: null };
+  } else {
+    logToHygieneSheet_('syncSingleRow', 'ERROR', 0, 0, null, `Failed to sync row ${rowNumber} from ${monthTab}`);
+    return { success: false, error: 'Failed to sync to Supabase' };
   }
 }
 
 /**
- * Upsert a batch of records to the dental dashboard API
+ * Upsert a batch of records directly to Supabase.
  * @param {array} records - Array of hygiene records
  * @param {object} credentials - Supabase credentials
  * @return {boolean} Success status
  */
 function upsertBatchToSupabase_(records, credentials) {
+  const functionName = 'upsertBatchToSupabase_'; // For logging consistency
+
+  if (!records || records.length === 0) {
+    Logger.log(`${functionName}: Called with no records.`);
+    return true; // No records to process is a form of success
+  }
+
   try {
-    // Try to get dashboard API URL from script properties
-    const scriptProperties = PropertiesService.getScriptProperties();
-    const dashboardApiUrl = scriptProperties.getProperty(DASHBOARD_API_URL_PROPERTY_KEY);
+    if (!credentials || !credentials.url || !credentials.key) {
+      Logger.log(`${functionName}: Invalid credentials provided.`);
+      // It might be better to throw an error or log to sheet if credentials are truly missing
+      // For now, maintaining return false as per original hygiene-sync logic for this specific check
+      return false;
+    }
     
-    if (dashboardApiUrl) {
-      // Use the new hygiene production sync API endpoint
-      const url = `${dashboardApiUrl}/api/hygiene-production/sync`;
-      
-      const payload = {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        payload: JSON.stringify({
-          records: records,
-          supabase_key: credentials.key
-        })
-      };
-
-      const response = UrlFetchApp.fetch(url, payload);
-      const responseData = response.getContentText();
-
-      if (response.getResponseCode() >= 200 && response.getResponseCode() < 300) {
-        try {
-          const result = JSON.parse(responseData);
-          Logger.log(`Successfully synced batch of ${records.length} records via dashboard API. Results: ${JSON.stringify(result)}`);
-          return true;
-        } catch (parseError) {
-          Logger.log(`Sync successful but could not parse response: ${responseData}`);
-          return true;
-        }
-      } else {
-        Logger.log(`Failed to sync batch via dashboard API: ${response.getResponseCode()} - ${responseData}`);
-        
-        // Fall back to direct Supabase API
-        Logger.log('Falling back to direct Supabase API...');
-        return upsertBatchToSupabaseDirect_(records, credentials);
-      }
-    } else {
-      // No dashboard API URL configured, use direct Supabase API
-      Logger.log('No dashboard API URL configured, using direct Supabase API...');
-      return upsertBatchToSupabaseDirect_(records, credentials);
+    if (typeof SUPABASE_TABLE_NAME === 'undefined' || !SUPABASE_TABLE_NAME) {
+        Logger.log(`${functionName}: SUPABASE_TABLE_NAME is not defined or empty.`);
+        logToHygieneSheet_(functionName, 'ERROR', 0, 0, null, 'SUPABASE_TABLE_NAME is not configured.');
+        return false;
     }
 
-  } catch (error) {
-    Logger.log(`Error upserting batch to dashboard API: ${error.message}`);
+    const url = `${credentials.url}/rest/v1/${SUPABASE_TABLE_NAME}`;
     
-    // Fall back to direct Supabase API
-    Logger.log('Falling back to direct Supabase API due to error...');
-    return upsertBatchToSupabaseDirect_(records, credentials);
-  }
-}
-
-/**
- * Fallback: Direct upsert to Supabase (original implementation)
- * @param {array} records - Array of hygiene records
- * @param {object} credentials - Supabase credentials
- * @return {boolean} Success status
- */
-function upsertBatchToSupabaseDirect_(records, credentials) {
-  try {
-    // Try different upsert strategies
-    return upsertBatchWithRetry_(records, credentials, 0);
-  } catch (error) {
-    Logger.log(`Error upserting batch to Supabase directly: ${error.message}`);
-    return false;
-  }
-}
-
-/**
- * Retry upsert with different strategies
- */
-function upsertBatchWithRetry_(records, credentials, retryCount) {
-  const maxRetries = 3;
-  const strategies = [
-    'resolution=merge-duplicates',
-    'resolution=ignore-duplicates', 
-    'return=minimal'
-  ];
-  
-  for (let i = 0; i < strategies.length; i++) {
-    try {
-      const url = `${credentials.url}/rest/v1/${SUPABASE_TABLE_NAME}`;
-      
-      const payload = {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${credentials.key}`,
-          'apikey': credentials.key,
-          'Prefer': strategies[i]
-        },
-        payload: JSON.stringify(records),
-        muteHttpExceptions: true // Get full error details
-      };
-
-      const response = UrlFetchApp.fetch(url, payload);
-      const responseCode = response.getResponseCode();
-      const responseText = response.getContentText();
-
-      if (responseCode >= 200 && responseCode < 300) {
-        Logger.log(`Successfully synced batch of ${records.length} records via direct Supabase (strategy: ${strategies[i]})`);
-        return true;
-      } else if (responseCode === 409 || responseCode === 500) {
-        // Conflict or server error - try individual record upserts
-        Logger.log(`Batch failed with ${responseCode}, trying individual upserts...`);
-        return upsertRecordsIndividually_(records, credentials);
-      } else {
-        Logger.log(`Strategy ${strategies[i]} failed: ${responseCode} - ${responseText}`);
-        // Continue to next strategy
-      }
-    } catch (error) {
-      Logger.log(`Strategy ${strategies[i]} error: ${error.message}`);
-      // Continue to next strategy
-    }
-  }
-  
-  // All strategies failed
-  Logger.log(`All upsert strategies failed for batch of ${records.length} records`);
-  return false;
-}
-
-/**
- * Fallback: Upsert records one by one
- */
-function upsertRecordsIndividually_(records, credentials) {
-  let successCount = 0;
-  
-  for (let i = 0; i < records.length; i++) {
-    try {
-      const record = records[i];
-      const success = upsertSingleRecord_(record, credentials);
-      if (success) {
-        successCount++;
-      } else {
-        Logger.log(`Failed to upsert record ${i + 1}: ${record.id}`);
-      }
-    } catch (error) {
-      Logger.log(`Error upserting individual record ${i + 1}: ${error.message}`);
-    }
-  }
-  
-  Logger.log(`Individual upsert completed: ${successCount}/${records.length} records successful`);
-  return successCount > 0;
-}
-
-/**
- * Upsert a single record with conflict handling
- */
-function upsertSingleRecord_(record, credentials) {
-  try {
-    const url = `${credentials.url}/rest/v1/${SUPABASE_TABLE_NAME}?id=eq.${record.id}`;
-    
-    // Try update first
-    let payload = {
-      method: 'PATCH',
+    const payload = {
+      method: 'POST',
       headers: {
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${credentials.key}`,
         'apikey': credentials.key,
-        'Prefer': 'return=minimal'
+        'Prefer': 'resolution=merge-duplicates' // Simplified strategy
       },
-      payload: JSON.stringify(record),
-      muteHttpExceptions: true
+      payload: JSON.stringify(records),
+      muteHttpExceptions: true // Get full error details
     };
 
-    let response = UrlFetchApp.fetch(url, payload);
-    
-    if (response.getResponseCode() === 200 || response.getResponseCode() === 204) {
+    Logger.log(`${functionName}: Attempting to sync batch of ${records.length} records to ${url} with Prefer: resolution=merge-duplicates`);
+    const response = UrlFetchApp.fetch(url, payload);
+    const responseCode = response.getResponseCode();
+    const responseText = response.getContentText();
+
+    if (responseCode >= 200 && responseCode < 300) {
+      Logger.log(`${functionName}: Successfully synced batch of ${records.length} records. Response code: ${responseCode}`);
       return true;
+    } else {
+      const errorLogMsg = `Failed to sync batch. Response Code: ${responseCode}. Response Text: ${responseText}`;
+      Logger.log(`${functionName}: ${errorLogMsg}`);
+      if (responseText) {
+        try {
+          const errorDetails = JSON.parse(responseText);
+          Logger.log(`${functionName}: Error details from Supabase: ${JSON.stringify(errorDetails)}`);
+        } catch (e) {
+          // Not JSON, or some other issue parsing, already logged responseText
+        }
+      }
+      logToHygieneSheet_(functionName, 'ERROR', 0, records.length, null, `Supabase upsert failed. Code: ${responseCode}. Response: ${responseText ? responseText.substring(0,200) : 'N/A'}`);
+      return false;
     }
-    
-    // If update failed, try insert
-    const insertUrl = `${credentials.url}/rest/v1/${SUPABASE_TABLE_NAME}`;
-    payload.method = 'POST';
-    
-    response = UrlFetchApp.fetch(insertUrl, payload);
-    
-    if (response.getResponseCode() === 201) {
-      return true;
-    }
-    
-    Logger.log(`Single record upsert failed: ${response.getResponseCode()} - ${response.getContentText()}`);
-    return false;
-    
   } catch (error) {
-    Logger.log(`Single record error: ${error.message}`);
+    const exceptionLogMsg = `Error during upsert: ${error.message}. Stack: ${error.stack ? error.stack : 'N/A'}`;
+    Logger.log(`${functionName}: ${exceptionLogMsg}`);
+    logToHygieneSheet_(functionName, 'ERROR', 0, records.length, null, `Exception: ${error.message}`);
     return false;
   }
 }
 
 /**
- * Upsert single record to Supabase
+ * Upsert a single record to Supabase
  * @param {object} record - Hygiene record
  * @param {object} credentials - Supabase credentials
  * @return {boolean} Success status

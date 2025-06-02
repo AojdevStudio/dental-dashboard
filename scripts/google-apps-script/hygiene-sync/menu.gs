@@ -14,7 +14,7 @@ function onOpen() {
   const ui = SpreadsheetApp.getUi();
   
   ui.createMenu('🦷 Hygiene Sync')
-    .addItem('🔧 1. First Time Setup', 'menuSetupHygieneSync')
+    .addItem('🔧 1. Setup Credentials & IDs', 'menuSetupHygieneSync')
     .addSeparator()
     .addItem('▶️ 2. Sync All Data Now', 'menuSyncAllData')
     .addItem('🔍 3. Test Connection', 'menuTestConnection')
@@ -48,7 +48,7 @@ function onOpen() {
  */
 function showWelcomeMessage() {
   const scriptProperties = PropertiesService.getScriptProperties();
-  const hasShownWelcome = scriptProperties.getProperty('HYGIENE_WELCOME_SHOWN');
+  const hasShownWelcome = scriptProperties.getProperty(HYGIENE_WELCOME_SHOWN_PROPERTY_KEY);
   
   if (!hasShownWelcome) {
     const ui = SpreadsheetApp.getUi();
@@ -58,7 +58,7 @@ function showWelcomeMessage() {
       'I see this is your first time using Hygiene Sync.\n\n' +
       '📋 Quick Start:\n' +
       '1. Click "Hygiene Sync" menu above\n' +
-      '2. Select "🔧 1. First Time Setup"\n' +
+      '2. Select "🔧 1. Setup Credentials & IDs"\n' +
       '3. Follow the setup wizard\n\n' +
       'Would you like to run setup now?',
       ui.ButtonSet.YES_NO
@@ -69,7 +69,7 @@ function showWelcomeMessage() {
     }
     
     // Mark welcome as shown
-    scriptProperties.setProperty('HYGIENE_WELCOME_SHOWN', 'true');
+    scriptProperties.setProperty(HYGIENE_WELCOME_SHOWN_PROPERTY_KEY, 'true');
   }
 }
 
@@ -93,90 +93,16 @@ function createClassicMenu() {
  */
 function menuSetupHygieneSync() {
   try {
-    // Call the actual setupHygieneSync function from setup.gs
-    const functionName = 'setupHygieneSync';
-    const ss = SpreadsheetApp.openById(HYGIENE_SHEET_ID);
-    const ui = SpreadsheetApp.getUi();
-    let totalRowsProcessed = 0;
-    let totalSheets = 0;
-    const startTime = Date.now();
-
-    logToHygieneSheet_(functionName, 'START', 0, 0, null, 'Full sync initiated.');
-    Logger.log(`Starting ${functionName} for Sheet ID: ${HYGIENE_SHEET_ID}...`);
-
-    // Check configuration
-    if (!HYGIENE_SHEET_ID || HYGIENE_SHEET_ID === 'YOUR_HYGIENE_SHEET_ID_HERE') {
-      const errMsg = 'Error: HYGIENE_SHEET_ID constant is not set in config.gs';
-      Logger.log(errMsg);
-      logToHygieneSheet_(functionName, 'ERROR', 0, 0, null, errMsg);
-      ui.alert(errMsg);
-      return;
-    }
-
-    // Ensure Log Sheet exists
-    ensureLogSheet_();
-
-    // Ensure credentials are set
-    const credentials = getSupabaseCredentials_();
-    if (!credentials) {
-      Logger.log('Credentials not found, attempting to set them...');
-      if (!setSupabaseCredentials_()) {
-        Logger.log('Credential setup cancelled or failed.');
-        logToHygieneSheet_(functionName, 'ERROR', null, null, null, 'Credential setup cancelled or failed.');
-        return;
-      }
-      // Re-fetch credentials if they were just set
-      if (!getSupabaseCredentials_()) {
-        const errMsg = '❌ Setup failed: Could not retrieve credentials after setting them.';
-        Logger.log(errMsg);
-        logToHygieneSheet_(functionName, 'ERROR', null, null, null, errMsg);
-        ui.alert(errMsg);
-        return;
-      }
-      Logger.log('Credentials successfully set.');
-    }
-
-    // Provider names are now automatically extracted from sheet names - no setup needed!
-
-    // Test connection
-    try {
-      testSupabaseConnection();
-    } catch (testErr) {
-      Logger.log(`Warning: Connection test failed: ${testErr.message}`);
-      // Continue with setup - user will see the test results
-    }
-
-    // Setup triggers
-    Logger.log('Setting up triggers...');
-    
-    // 1. Time-Driven Trigger (runs every 6 hours)
-    deleteTriggersByHandler_(SYNC_FUNCTION_NAME, ss);
-    ScriptApp.newTrigger(SYNC_FUNCTION_NAME)
-      .timeBased()
-      .everyHours(6)
-      .create();
-    Logger.log('Time-driven trigger created.');
-
-    // 2. onEdit Trigger
-    deleteTriggersByHandler_(ON_EDIT_FUNCTION_NAME, ss);
-    ScriptApp.newTrigger(ON_EDIT_FUNCTION_NAME)
-      .forSpreadsheet(ss)
-      .onEdit()
-      .create();
-    Logger.log('onEdit trigger created.');
-
-    // Seed Missing UUIDs
-    seedMissingUuids();
-
-    Logger.log(`${functionName} completed successfully. Triggers created for Sheet ID: ${HYGIENE_SHEET_ID}.`);
-    logToHygieneSheet_(functionName, 'SUCCESS', null, null, null, 'Setup complete. Triggers created.');
-    
-    ui.alert('🎉 Hygiene Sync Setup Successful!\n\n✅ Credentials stored\n✅ Provider name auto-detection enabled\n✅ Log sheet created\n✅ Triggers set up\n✅ UUIDs seeded\n\nYour hygiene data will now sync automatically with provider names!');
-
+    // Call the actual setupHygieneSync function (expected to be in setup.gs)
+    // Ensure setupHygieneSync is globally unique or correctly referenced if namespacing were strict.
+    // In Apps Script, top-level functions in .gs files are typically in the global scope.
+    setupHygieneSync(); 
   } catch (error) {
     const errorMsg = `Setup failed: ${error.message}`;
     Logger.log(`${errorMsg}\n${error.stack}`);
-    logToHygieneSheet_('menuSetupHygieneSync', 'ERROR', null, null, null, errorMsg);
+    // It might be redundant to log here if setupHygieneSync already logs comprehensively.
+    // However, keeping a specific log for the menu invocation can be useful.
+    logToHygieneSheet_('menuSetupHygieneSync', 'ERROR', null, null, null, errorMsg); 
     SpreadsheetApp.getUi().alert('❌ Hygiene Sync Setup FAILED!\n\nCheck Execution Logs and Hygiene-Sync-Log tab for details.');
   }
 }
@@ -217,8 +143,6 @@ function menuViewStatistics() {
   }
 }
 
-
-
 /**
  * Shows help information about the sync system
  */
@@ -228,7 +152,7 @@ function showHelpInfo() {
   ui.alert(
     '🦷 Hygiene Sync Help',
     '📋 Setup Process:\n' +
-    '• Run "First Time Setup" to configure credentials and provider info\n' +
+    '• Run "Setup Credentials & IDs" to configure credentials and provider info\n' +
     '• Optionally set Dashboard URL for enhanced features\n' +
     '• Use "Sync All Data Now" for manual syncing\n\n' +
     '🔄 Automatic Sync:\n' +

@@ -436,6 +436,7 @@ exports.Prisma.DentistProductionScalarFieldEnum = {
   createdAt: 'createdAt',
   updatedAt: 'updatedAt',
   clinicId: 'clinicId',
+  providerId: 'providerId',
   dataSourceId: 'dataSourceId'
 };
 

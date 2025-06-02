@@ -1,18 +1,25 @@
 /**
  * Retrieves Supabase credentials from Script Properties.
- * @return {object|null} An object containing { url, key, clinicId } or null if not set.
+ * @return {object|null} An object containing { url, key, clinicId, providerId } or null if not set.
  */
 function getSupabaseCredentials_() {
+  const userProperties = PropertiesService.getUserProperties();
   const scriptProperties = PropertiesService.getScriptProperties();
-  const url = scriptProperties.getProperty(SUPABASE_URL_PROPERTY_KEY);
-  const key = scriptProperties.getProperty(SUPABASE_KEY_PROPERTY_KEY);
-  const clinicId = scriptProperties.getProperty(CLINIC_ID_PROPERTY_KEY);
 
-  if (!url || !key || !clinicId) {
-    Logger.log('Supabase credentials not complete in Script Properties. Run Setup.');
+  // Try user properties first, then script properties for URL and Key
+  const url = userProperties.getProperty(SUPABASE_URL_PROPERTY_KEY) || scriptProperties.getProperty(SUPABASE_URL_PROPERTY_KEY);
+  const key = userProperties.getProperty(SUPABASE_KEY_PROPERTY_KEY) || scriptProperties.getProperty(SUPABASE_KEY_PROPERTY_KEY);
+  
+  // Clinic ID and Provider ID are expected to be in Script Properties primarily
+  const clinicId = scriptProperties.getProperty(CLINIC_ID_PROPERTY_KEY);
+  const providerId = scriptProperties.getProperty(HYGIENE_PROVIDER_ID_PROPERTY_KEY);
+
+  if (!url || !key || !clinicId || !providerId) {
+    Logger.log('Supabase URL, Key, Clinic ID, or Provider ID is not fully set. URL set: ' + !!url + ', Key set: ' + !!key + ', ClinicID set: ' + !!clinicId + ', ProviderID set: ' + !!providerId);
+    SpreadsheetApp.getUi().alert('Configuration Error', 'Supabase URL, Key, Clinic ID, or Provider ID is missing. Please run "Set/Update Supabase Credentials & Clinic ID" from the Hygiene Sync menu or check Script Properties.', SpreadsheetApp.getUi().ButtonSet.OK);
     return null;
   }
-  return { url: url, key: key, clinicId: clinicId };
+  return { url, key, clinicId, providerId };
 }
 
 
@@ -26,8 +33,8 @@ function setSupabaseCredentials_() {
 
   // Step 1: Supabase Project URL
   const urlResponse = ui.prompt(
-    '🔧 Hygiene Sync Setup - Step 1/3', 
-    `Enter your Supabase Project URL:\n(e.g., https://your-project.supabase.co)`, 
+    '🔧 Hygiene Sync Setup - Step 1/4',
+    `Enter your Supabase Project URL:\n(e.g., https://your-project.supabase.co)`,
     ui.ButtonSet.OK_CANCEL
   );
   if (urlResponse.getSelectedButton() !== ui.Button.OK) {
@@ -42,8 +49,8 @@ function setSupabaseCredentials_() {
 
   // Step 2: Service Role Key
   const keyResponse = ui.prompt(
-    '🔧 Hygiene Sync Setup - Step 2/3', 
-    'Enter your Supabase Service Role Key:\n(This is SECRET - keep confidential!)', 
+    '🔧 Hygiene Sync Setup - Step 2/4',
+    'Enter your Supabase Service Role Key:\n(This is SECRET - keep confidential!)',
     ui.ButtonSet.OK_CANCEL
   );
   if (keyResponse.getSelectedButton() !== ui.Button.OK) {
@@ -58,8 +65,8 @@ function setSupabaseCredentials_() {
 
   // Step 3: Clinic ID
   const clinicResponse = ui.prompt(
-    '🔧 Hygiene Sync Setup - Step 3/3', 
-    'Enter your Clinic ID from Supabase:\n(Found in your clinics table)', 
+    '🔧 Hygiene Sync Setup - Step 3/4',
+    'Enter your Clinic ID from Supabase:\n(Found in your clinics table)',
     ui.ButtonSet.OK_CANCEL
   );
   if (clinicResponse.getSelectedButton() !== ui.Button.OK) {
@@ -72,14 +79,31 @@ function setSupabaseCredentials_() {
     return false;
   }
 
+  // Step 4: Provider ID
+  const providerResponse = ui.prompt(
+    '🔧 Hygiene Sync Setup - Step 4/4',
+    'Enter the Provider ID for this sheet:\n(From your Providers table in Supabase, after seeding)',
+    ui.ButtonSet.OK_CANCEL
+  );
+  if (providerResponse.getSelectedButton() !== ui.Button.OK) {
+    ui.alert('Setup cancelled.');
+    return false;
+  }
+  const tempProviderId = providerResponse.getResponseText().trim();
+  if (!tempProviderId) {
+    ui.alert('❌ Provider ID cannot be empty. Please try setup again.');
+    return false;
+  }
+
   // Store credentials
   const scriptProperties = PropertiesService.getScriptProperties();
   scriptProperties.setProperty(SUPABASE_URL_PROPERTY_KEY, tempUrl);
   scriptProperties.setProperty(SUPABASE_KEY_PROPERTY_KEY, tempKey);
   scriptProperties.setProperty(CLINIC_ID_PROPERTY_KEY, tempClinicId);
+  scriptProperties.setProperty(HYGIENE_PROVIDER_ID_PROPERTY_KEY, tempProviderId);
 
-  Logger.log('Hygiene sync credentials stored successfully.');
-  ui.alert('✅ Credentials stored successfully!\n\nNext: Provider information will be collected.');
+  Logger.log('Hygiene sync credentials (including Provider ID) stored successfully.');
+  ui.alert('✅ Credentials & IDs stored successfully!\n\nAll necessary information for this sheet (URL, Key, Clinic ID, and Provider ID) has been saved.');
   return true;
 }
 

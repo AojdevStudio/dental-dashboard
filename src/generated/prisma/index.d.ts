@@ -2991,6 +2991,7 @@ export namespace Prisma {
     goals: number
     dataSources: number
     hygieneProduction: number
+    dentistProduction: number
   }
 
   export type ProviderCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -2998,6 +2999,7 @@ export namespace Prisma {
     goals?: boolean | ProviderCountOutputTypeCountGoalsArgs
     dataSources?: boolean | ProviderCountOutputTypeCountDataSourcesArgs
     hygieneProduction?: boolean | ProviderCountOutputTypeCountHygieneProductionArgs
+    dentistProduction?: boolean | ProviderCountOutputTypeCountDentistProductionArgs
   }
 
   // Custom InputTypes
@@ -3037,6 +3039,13 @@ export namespace Prisma {
    */
   export type ProviderCountOutputTypeCountHygieneProductionArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     where?: HygieneProductionWhereInput
+  }
+
+  /**
+   * ProviderCountOutputType without action
+   */
+  export type ProviderCountOutputTypeCountDentistProductionArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: DentistProductionWhereInput
   }
 
 
@@ -5857,6 +5866,7 @@ export namespace Prisma {
     goals?: boolean | Provider$goalsArgs<ExtArgs>
     dataSources?: boolean | Provider$dataSourcesArgs<ExtArgs>
     hygieneProduction?: boolean | Provider$hygieneProductionArgs<ExtArgs>
+    dentistProduction?: boolean | Provider$dentistProductionArgs<ExtArgs>
     _count?: boolean | ProviderCountOutputTypeDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["provider"]>
 
@@ -5911,6 +5921,7 @@ export namespace Prisma {
     goals?: boolean | Provider$goalsArgs<ExtArgs>
     dataSources?: boolean | Provider$dataSourcesArgs<ExtArgs>
     hygieneProduction?: boolean | Provider$hygieneProductionArgs<ExtArgs>
+    dentistProduction?: boolean | Provider$dentistProductionArgs<ExtArgs>
     _count?: boolean | ProviderCountOutputTypeDefaultArgs<ExtArgs>
   }
   export type ProviderIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -5928,6 +5939,7 @@ export namespace Prisma {
       goals: Prisma.$GoalPayload<ExtArgs>[]
       dataSources: Prisma.$DataSourcePayload<ExtArgs>[]
       hygieneProduction: Prisma.$HygieneProductionPayload<ExtArgs>[]
+      dentistProduction: Prisma.$DentistProductionPayload<ExtArgs>[]
     }
     scalars: $Extensions.GetPayloadResult<{
       id: string
@@ -6340,6 +6352,7 @@ export namespace Prisma {
     goals<T extends Provider$goalsArgs<ExtArgs> = {}>(args?: Subset<T, Provider$goalsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$GoalPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     dataSources<T extends Provider$dataSourcesArgs<ExtArgs> = {}>(args?: Subset<T, Provider$dataSourcesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$DataSourcePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     hygieneProduction<T extends Provider$hygieneProductionArgs<ExtArgs> = {}>(args?: Subset<T, Provider$hygieneProductionArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$HygieneProductionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    dentistProduction<T extends Provider$dentistProductionArgs<ExtArgs> = {}>(args?: Subset<T, Provider$dentistProductionArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$DentistProductionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
      * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -6869,6 +6882,30 @@ export namespace Prisma {
     take?: number
     skip?: number
     distinct?: HygieneProductionScalarFieldEnum | HygieneProductionScalarFieldEnum[]
+  }
+
+  /**
+   * Provider.dentistProduction
+   */
+  export type Provider$dentistProductionArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the DentistProduction
+     */
+    select?: DentistProductionSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the DentistProduction
+     */
+    omit?: DentistProductionOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: DentistProductionInclude<ExtArgs> | null
+    where?: DentistProductionWhereInput
+    orderBy?: DentistProductionOrderByWithRelationInput | DentistProductionOrderByWithRelationInput[]
+    cursor?: DentistProductionWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: DentistProductionScalarFieldEnum | DentistProductionScalarFieldEnum[]
   }
 
   /**
@@ -27771,6 +27808,7 @@ export namespace Prisma {
     createdAt: Date | null
     updatedAt: Date | null
     clinicId: string | null
+    providerId: string | null
     dataSourceId: string | null
   }
 
@@ -27788,6 +27826,7 @@ export namespace Prisma {
     createdAt: Date | null
     updatedAt: Date | null
     clinicId: string | null
+    providerId: string | null
     dataSourceId: string | null
   }
 
@@ -27805,6 +27844,7 @@ export namespace Prisma {
     createdAt: number
     updatedAt: number
     clinicId: number
+    providerId: number
     dataSourceId: number
     _all: number
   }
@@ -27842,6 +27882,7 @@ export namespace Prisma {
     createdAt?: true
     updatedAt?: true
     clinicId?: true
+    providerId?: true
     dataSourceId?: true
   }
 
@@ -27859,6 +27900,7 @@ export namespace Prisma {
     createdAt?: true
     updatedAt?: true
     clinicId?: true
+    providerId?: true
     dataSourceId?: true
   }
 
@@ -27876,6 +27918,7 @@ export namespace Prisma {
     createdAt?: true
     updatedAt?: true
     clinicId?: true
+    providerId?: true
     dataSourceId?: true
     _all?: true
   }
@@ -27980,6 +28023,7 @@ export namespace Prisma {
     createdAt: Date
     updatedAt: Date
     clinicId: string
+    providerId: string | null
     dataSourceId: string | null
     _count: DentistProductionCountAggregateOutputType | null
     _avg: DentistProductionAvgAggregateOutputType | null
@@ -28016,8 +28060,10 @@ export namespace Prisma {
     createdAt?: boolean
     updatedAt?: boolean
     clinicId?: boolean
+    providerId?: boolean
     dataSourceId?: boolean
     clinic?: boolean | ClinicDefaultArgs<ExtArgs>
+    provider?: boolean | DentistProduction$providerArgs<ExtArgs>
     dataSource?: boolean | DentistProduction$dataSourceArgs<ExtArgs>
   }, ExtArgs["result"]["dentistProduction"]>
 
@@ -28035,8 +28081,10 @@ export namespace Prisma {
     createdAt?: boolean
     updatedAt?: boolean
     clinicId?: boolean
+    providerId?: boolean
     dataSourceId?: boolean
     clinic?: boolean | ClinicDefaultArgs<ExtArgs>
+    provider?: boolean | DentistProduction$providerArgs<ExtArgs>
     dataSource?: boolean | DentistProduction$dataSourceArgs<ExtArgs>
   }, ExtArgs["result"]["dentistProduction"]>
 
@@ -28054,8 +28102,10 @@ export namespace Prisma {
     createdAt?: boolean
     updatedAt?: boolean
     clinicId?: boolean
+    providerId?: boolean
     dataSourceId?: boolean
     clinic?: boolean | ClinicDefaultArgs<ExtArgs>
+    provider?: boolean | DentistProduction$providerArgs<ExtArgs>
     dataSource?: boolean | DentistProduction$dataSourceArgs<ExtArgs>
   }, ExtArgs["result"]["dentistProduction"]>
 
@@ -28073,20 +28123,24 @@ export namespace Prisma {
     createdAt?: boolean
     updatedAt?: boolean
     clinicId?: boolean
+    providerId?: boolean
     dataSourceId?: boolean
   }
 
-  export type DentistProductionOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "date" | "monthTab" | "verifiedProductionHumble" | "verifiedProductionBaytown" | "totalProduction" | "monthlyGoal" | "productionPerHour" | "avgDailyProduction" | "providerName" | "createdAt" | "updatedAt" | "clinicId" | "dataSourceId", ExtArgs["result"]["dentistProduction"]>
+  export type DentistProductionOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "date" | "monthTab" | "verifiedProductionHumble" | "verifiedProductionBaytown" | "totalProduction" | "monthlyGoal" | "productionPerHour" | "avgDailyProduction" | "providerName" | "createdAt" | "updatedAt" | "clinicId" | "providerId" | "dataSourceId", ExtArgs["result"]["dentistProduction"]>
   export type DentistProductionInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     clinic?: boolean | ClinicDefaultArgs<ExtArgs>
+    provider?: boolean | DentistProduction$providerArgs<ExtArgs>
     dataSource?: boolean | DentistProduction$dataSourceArgs<ExtArgs>
   }
   export type DentistProductionIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     clinic?: boolean | ClinicDefaultArgs<ExtArgs>
+    provider?: boolean | DentistProduction$providerArgs<ExtArgs>
     dataSource?: boolean | DentistProduction$dataSourceArgs<ExtArgs>
   }
   export type DentistProductionIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     clinic?: boolean | ClinicDefaultArgs<ExtArgs>
+    provider?: boolean | DentistProduction$providerArgs<ExtArgs>
     dataSource?: boolean | DentistProduction$dataSourceArgs<ExtArgs>
   }
 
@@ -28094,6 +28148,7 @@ export namespace Prisma {
     name: "DentistProduction"
     objects: {
       clinic: Prisma.$ClinicPayload<ExtArgs>
+      provider: Prisma.$ProviderPayload<ExtArgs> | null
       dataSource: Prisma.$DataSourcePayload<ExtArgs> | null
     }
     scalars: $Extensions.GetPayloadResult<{
@@ -28110,6 +28165,7 @@ export namespace Prisma {
       createdAt: Date
       updatedAt: Date
       clinicId: string
+      providerId: string | null
       dataSourceId: string | null
     }, ExtArgs["result"]["dentistProduction"]>
     composites: {}
@@ -28506,6 +28562,7 @@ export namespace Prisma {
   export interface Prisma__DentistProductionClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
     readonly [Symbol.toStringTag]: "PrismaPromise"
     clinic<T extends ClinicDefaultArgs<ExtArgs> = {}>(args?: Subset<T, ClinicDefaultArgs<ExtArgs>>): Prisma__ClinicClient<$Result.GetResult<Prisma.$ClinicPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    provider<T extends DentistProduction$providerArgs<ExtArgs> = {}>(args?: Subset<T, DentistProduction$providerArgs<ExtArgs>>): Prisma__ProviderClient<$Result.GetResult<Prisma.$ProviderPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
     dataSource<T extends DentistProduction$dataSourceArgs<ExtArgs> = {}>(args?: Subset<T, DentistProduction$dataSourceArgs<ExtArgs>>): Prisma__DataSourceClient<$Result.GetResult<Prisma.$DataSourcePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
@@ -28549,6 +28606,7 @@ export namespace Prisma {
     readonly createdAt: FieldRef<"DentistProduction", 'DateTime'>
     readonly updatedAt: FieldRef<"DentistProduction", 'DateTime'>
     readonly clinicId: FieldRef<"DentistProduction", 'String'>
+    readonly providerId: FieldRef<"DentistProduction", 'String'>
     readonly dataSourceId: FieldRef<"DentistProduction", 'String'>
   }
     
@@ -28943,6 +29001,25 @@ export namespace Prisma {
      * Limit how many DentistProductions to delete.
      */
     limit?: number
+  }
+
+  /**
+   * DentistProduction.provider
+   */
+  export type DentistProduction$providerArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Provider
+     */
+    select?: ProviderSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Provider
+     */
+    omit?: ProviderOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ProviderInclude<ExtArgs> | null
+    where?: ProviderWhereInput
   }
 
   /**
@@ -30371,6 +30448,7 @@ export namespace Prisma {
     createdAt: 'createdAt',
     updatedAt: 'updatedAt',
     clinicId: 'clinicId',
+    providerId: 'providerId',
     dataSourceId: 'dataSourceId'
   };
 
@@ -30726,6 +30804,7 @@ export namespace Prisma {
     goals?: GoalListRelationFilter
     dataSources?: DataSourceListRelationFilter
     hygieneProduction?: HygieneProductionListRelationFilter
+    dentistProduction?: DentistProductionListRelationFilter
   }
 
   export type ProviderOrderByWithRelationInput = {
@@ -30745,17 +30824,18 @@ export namespace Prisma {
     goals?: GoalOrderByRelationAggregateInput
     dataSources?: DataSourceOrderByRelationAggregateInput
     hygieneProduction?: HygieneProductionOrderByRelationAggregateInput
+    dentistProduction?: DentistProductionOrderByRelationAggregateInput
   }
 
   export type ProviderWhereUniqueInput = Prisma.AtLeast<{
     id?: string
+    email?: string
     AND?: ProviderWhereInput | ProviderWhereInput[]
     OR?: ProviderWhereInput[]
     NOT?: ProviderWhereInput | ProviderWhereInput[]
     name?: StringFilter<"Provider"> | string
     firstName?: StringNullableFilter<"Provider"> | string | null
     lastName?: StringNullableFilter<"Provider"> | string | null
-    email?: StringNullableFilter<"Provider"> | string | null
     providerType?: StringFilter<"Provider"> | string
     position?: StringNullableFilter<"Provider"> | string | null
     status?: StringFilter<"Provider"> | string
@@ -30767,7 +30847,8 @@ export namespace Prisma {
     goals?: GoalListRelationFilter
     dataSources?: DataSourceListRelationFilter
     hygieneProduction?: HygieneProductionListRelationFilter
-  }, "id">
+    dentistProduction?: DentistProductionListRelationFilter
+  }, "id" | "email">
 
   export type ProviderOrderByWithAggregationInput = {
     id?: SortOrder
@@ -32454,8 +32535,10 @@ export namespace Prisma {
     createdAt?: DateTimeFilter<"DentistProduction"> | Date | string
     updatedAt?: DateTimeFilter<"DentistProduction"> | Date | string
     clinicId?: StringFilter<"DentistProduction"> | string
+    providerId?: StringNullableFilter<"DentistProduction"> | string | null
     dataSourceId?: StringNullableFilter<"DentistProduction"> | string | null
     clinic?: XOR<ClinicScalarRelationFilter, ClinicWhereInput>
+    provider?: XOR<ProviderNullableScalarRelationFilter, ProviderWhereInput> | null
     dataSource?: XOR<DataSourceNullableScalarRelationFilter, DataSourceWhereInput> | null
   }
 
@@ -32473,8 +32556,10 @@ export namespace Prisma {
     createdAt?: SortOrder
     updatedAt?: SortOrder
     clinicId?: SortOrder
+    providerId?: SortOrderInput | SortOrder
     dataSourceId?: SortOrderInput | SortOrder
     clinic?: ClinicOrderByWithRelationInput
+    provider?: ProviderOrderByWithRelationInput
     dataSource?: DataSourceOrderByWithRelationInput
   }
 
@@ -32495,8 +32580,10 @@ export namespace Prisma {
     createdAt?: DateTimeFilter<"DentistProduction"> | Date | string
     updatedAt?: DateTimeFilter<"DentistProduction"> | Date | string
     clinicId?: StringFilter<"DentistProduction"> | string
+    providerId?: StringNullableFilter<"DentistProduction"> | string | null
     dataSourceId?: StringNullableFilter<"DentistProduction"> | string | null
     clinic?: XOR<ClinicScalarRelationFilter, ClinicWhereInput>
+    provider?: XOR<ProviderNullableScalarRelationFilter, ProviderWhereInput> | null
     dataSource?: XOR<DataSourceNullableScalarRelationFilter, DataSourceWhereInput> | null
   }, "id">
 
@@ -32514,6 +32601,7 @@ export namespace Prisma {
     createdAt?: SortOrder
     updatedAt?: SortOrder
     clinicId?: SortOrder
+    providerId?: SortOrderInput | SortOrder
     dataSourceId?: SortOrderInput | SortOrder
     _count?: DentistProductionCountOrderByAggregateInput
     _avg?: DentistProductionAvgOrderByAggregateInput
@@ -32539,6 +32627,7 @@ export namespace Prisma {
     createdAt?: DateTimeWithAggregatesFilter<"DentistProduction"> | Date | string
     updatedAt?: DateTimeWithAggregatesFilter<"DentistProduction"> | Date | string
     clinicId?: StringWithAggregatesFilter<"DentistProduction"> | string
+    providerId?: StringNullableWithAggregatesFilter<"DentistProduction"> | string | null
     dataSourceId?: StringNullableWithAggregatesFilter<"DentistProduction"> | string | null
   }
 
@@ -32810,6 +32899,7 @@ export namespace Prisma {
     goals?: GoalCreateNestedManyWithoutProviderInput
     dataSources?: DataSourceCreateNestedManyWithoutProviderInput
     hygieneProduction?: HygieneProductionCreateNestedManyWithoutProviderInput
+    dentistProduction?: DentistProductionCreateNestedManyWithoutProviderInput
   }
 
   export type ProviderUncheckedCreateInput = {
@@ -32828,6 +32918,7 @@ export namespace Prisma {
     goals?: GoalUncheckedCreateNestedManyWithoutProviderInput
     dataSources?: DataSourceUncheckedCreateNestedManyWithoutProviderInput
     hygieneProduction?: HygieneProductionUncheckedCreateNestedManyWithoutProviderInput
+    dentistProduction?: DentistProductionUncheckedCreateNestedManyWithoutProviderInput
   }
 
   export type ProviderUpdateInput = {
@@ -32846,6 +32937,7 @@ export namespace Prisma {
     goals?: GoalUpdateManyWithoutProviderNestedInput
     dataSources?: DataSourceUpdateManyWithoutProviderNestedInput
     hygieneProduction?: HygieneProductionUpdateManyWithoutProviderNestedInput
+    dentistProduction?: DentistProductionUpdateManyWithoutProviderNestedInput
   }
 
   export type ProviderUncheckedUpdateInput = {
@@ -32864,6 +32956,7 @@ export namespace Prisma {
     goals?: GoalUncheckedUpdateManyWithoutProviderNestedInput
     dataSources?: DataSourceUncheckedUpdateManyWithoutProviderNestedInput
     hygieneProduction?: HygieneProductionUncheckedUpdateManyWithoutProviderNestedInput
+    dentistProduction?: DentistProductionUncheckedUpdateManyWithoutProviderNestedInput
   }
 
   export type ProviderCreateManyInput = {
@@ -34788,6 +34881,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     clinic: ClinicCreateNestedOneWithoutDentistProductionInput
+    provider?: ProviderCreateNestedOneWithoutDentistProductionInput
     dataSource?: DataSourceCreateNestedOneWithoutDentistProductionInput
   }
 
@@ -34805,6 +34899,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     clinicId: string
+    providerId?: string | null
     dataSourceId?: string | null
   }
 
@@ -34822,6 +34917,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     clinic?: ClinicUpdateOneRequiredWithoutDentistProductionNestedInput
+    provider?: ProviderUpdateOneWithoutDentistProductionNestedInput
     dataSource?: DataSourceUpdateOneWithoutDentistProductionNestedInput
   }
 
@@ -34839,6 +34935,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     clinicId?: StringFieldUpdateOperationsInput | string
+    providerId?: NullableStringFieldUpdateOperationsInput | string | null
     dataSourceId?: NullableStringFieldUpdateOperationsInput | string | null
   }
 
@@ -34856,6 +34953,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     clinicId: string
+    providerId?: string | null
     dataSourceId?: string | null
   }
 
@@ -34888,6 +34986,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     clinicId?: StringFieldUpdateOperationsInput | string
+    providerId?: NullableStringFieldUpdateOperationsInput | string | null
     dataSourceId?: NullableStringFieldUpdateOperationsInput | string | null
   }
 
@@ -36497,6 +36596,7 @@ export namespace Prisma {
     createdAt?: SortOrder
     updatedAt?: SortOrder
     clinicId?: SortOrder
+    providerId?: SortOrder
     dataSourceId?: SortOrder
   }
 
@@ -36523,6 +36623,7 @@ export namespace Prisma {
     createdAt?: SortOrder
     updatedAt?: SortOrder
     clinicId?: SortOrder
+    providerId?: SortOrder
     dataSourceId?: SortOrder
   }
 
@@ -36540,6 +36641,7 @@ export namespace Prisma {
     createdAt?: SortOrder
     updatedAt?: SortOrder
     clinicId?: SortOrder
+    providerId?: SortOrder
     dataSourceId?: SortOrder
   }
 
@@ -36983,6 +37085,13 @@ export namespace Prisma {
     connect?: HygieneProductionWhereUniqueInput | HygieneProductionWhereUniqueInput[]
   }
 
+  export type DentistProductionCreateNestedManyWithoutProviderInput = {
+    create?: XOR<DentistProductionCreateWithoutProviderInput, DentistProductionUncheckedCreateWithoutProviderInput> | DentistProductionCreateWithoutProviderInput[] | DentistProductionUncheckedCreateWithoutProviderInput[]
+    connectOrCreate?: DentistProductionCreateOrConnectWithoutProviderInput | DentistProductionCreateOrConnectWithoutProviderInput[]
+    createMany?: DentistProductionCreateManyProviderInputEnvelope
+    connect?: DentistProductionWhereUniqueInput | DentistProductionWhereUniqueInput[]
+  }
+
   export type MetricValueUncheckedCreateNestedManyWithoutProviderInput = {
     create?: XOR<MetricValueCreateWithoutProviderInput, MetricValueUncheckedCreateWithoutProviderInput> | MetricValueCreateWithoutProviderInput[] | MetricValueUncheckedCreateWithoutProviderInput[]
     connectOrCreate?: MetricValueCreateOrConnectWithoutProviderInput | MetricValueCreateOrConnectWithoutProviderInput[]
@@ -37009,6 +37118,13 @@ export namespace Prisma {
     connectOrCreate?: HygieneProductionCreateOrConnectWithoutProviderInput | HygieneProductionCreateOrConnectWithoutProviderInput[]
     createMany?: HygieneProductionCreateManyProviderInputEnvelope
     connect?: HygieneProductionWhereUniqueInput | HygieneProductionWhereUniqueInput[]
+  }
+
+  export type DentistProductionUncheckedCreateNestedManyWithoutProviderInput = {
+    create?: XOR<DentistProductionCreateWithoutProviderInput, DentistProductionUncheckedCreateWithoutProviderInput> | DentistProductionCreateWithoutProviderInput[] | DentistProductionUncheckedCreateWithoutProviderInput[]
+    connectOrCreate?: DentistProductionCreateOrConnectWithoutProviderInput | DentistProductionCreateOrConnectWithoutProviderInput[]
+    createMany?: DentistProductionCreateManyProviderInputEnvelope
+    connect?: DentistProductionWhereUniqueInput | DentistProductionWhereUniqueInput[]
   }
 
   export type ClinicUpdateOneRequiredWithoutProvidersNestedInput = {
@@ -37075,6 +37191,20 @@ export namespace Prisma {
     deleteMany?: HygieneProductionScalarWhereInput | HygieneProductionScalarWhereInput[]
   }
 
+  export type DentistProductionUpdateManyWithoutProviderNestedInput = {
+    create?: XOR<DentistProductionCreateWithoutProviderInput, DentistProductionUncheckedCreateWithoutProviderInput> | DentistProductionCreateWithoutProviderInput[] | DentistProductionUncheckedCreateWithoutProviderInput[]
+    connectOrCreate?: DentistProductionCreateOrConnectWithoutProviderInput | DentistProductionCreateOrConnectWithoutProviderInput[]
+    upsert?: DentistProductionUpsertWithWhereUniqueWithoutProviderInput | DentistProductionUpsertWithWhereUniqueWithoutProviderInput[]
+    createMany?: DentistProductionCreateManyProviderInputEnvelope
+    set?: DentistProductionWhereUniqueInput | DentistProductionWhereUniqueInput[]
+    disconnect?: DentistProductionWhereUniqueInput | DentistProductionWhereUniqueInput[]
+    delete?: DentistProductionWhereUniqueInput | DentistProductionWhereUniqueInput[]
+    connect?: DentistProductionWhereUniqueInput | DentistProductionWhereUniqueInput[]
+    update?: DentistProductionUpdateWithWhereUniqueWithoutProviderInput | DentistProductionUpdateWithWhereUniqueWithoutProviderInput[]
+    updateMany?: DentistProductionUpdateManyWithWhereWithoutProviderInput | DentistProductionUpdateManyWithWhereWithoutProviderInput[]
+    deleteMany?: DentistProductionScalarWhereInput | DentistProductionScalarWhereInput[]
+  }
+
   export type MetricValueUncheckedUpdateManyWithoutProviderNestedInput = {
     create?: XOR<MetricValueCreateWithoutProviderInput, MetricValueUncheckedCreateWithoutProviderInput> | MetricValueCreateWithoutProviderInput[] | MetricValueUncheckedCreateWithoutProviderInput[]
     connectOrCreate?: MetricValueCreateOrConnectWithoutProviderInput | MetricValueCreateOrConnectWithoutProviderInput[]
@@ -37129,6 +37259,20 @@ export namespace Prisma {
     update?: HygieneProductionUpdateWithWhereUniqueWithoutProviderInput | HygieneProductionUpdateWithWhereUniqueWithoutProviderInput[]
     updateMany?: HygieneProductionUpdateManyWithWhereWithoutProviderInput | HygieneProductionUpdateManyWithWhereWithoutProviderInput[]
     deleteMany?: HygieneProductionScalarWhereInput | HygieneProductionScalarWhereInput[]
+  }
+
+  export type DentistProductionUncheckedUpdateManyWithoutProviderNestedInput = {
+    create?: XOR<DentistProductionCreateWithoutProviderInput, DentistProductionUncheckedCreateWithoutProviderInput> | DentistProductionCreateWithoutProviderInput[] | DentistProductionUncheckedCreateWithoutProviderInput[]
+    connectOrCreate?: DentistProductionCreateOrConnectWithoutProviderInput | DentistProductionCreateOrConnectWithoutProviderInput[]
+    upsert?: DentistProductionUpsertWithWhereUniqueWithoutProviderInput | DentistProductionUpsertWithWhereUniqueWithoutProviderInput[]
+    createMany?: DentistProductionCreateManyProviderInputEnvelope
+    set?: DentistProductionWhereUniqueInput | DentistProductionWhereUniqueInput[]
+    disconnect?: DentistProductionWhereUniqueInput | DentistProductionWhereUniqueInput[]
+    delete?: DentistProductionWhereUniqueInput | DentistProductionWhereUniqueInput[]
+    connect?: DentistProductionWhereUniqueInput | DentistProductionWhereUniqueInput[]
+    update?: DentistProductionUpdateWithWhereUniqueWithoutProviderInput | DentistProductionUpdateWithWhereUniqueWithoutProviderInput[]
+    updateMany?: DentistProductionUpdateManyWithWhereWithoutProviderInput | DentistProductionUpdateManyWithWhereWithoutProviderInput[]
+    deleteMany?: DentistProductionScalarWhereInput | DentistProductionScalarWhereInput[]
   }
 
   export type MetricValueCreateNestedManyWithoutMetricDefinitionInput = {
@@ -37825,6 +37969,12 @@ export namespace Prisma {
     connect?: ClinicWhereUniqueInput
   }
 
+  export type ProviderCreateNestedOneWithoutDentistProductionInput = {
+    create?: XOR<ProviderCreateWithoutDentistProductionInput, ProviderUncheckedCreateWithoutDentistProductionInput>
+    connectOrCreate?: ProviderCreateOrConnectWithoutDentistProductionInput
+    connect?: ProviderWhereUniqueInput
+  }
+
   export type DataSourceCreateNestedOneWithoutDentistProductionInput = {
     create?: XOR<DataSourceCreateWithoutDentistProductionInput, DataSourceUncheckedCreateWithoutDentistProductionInput>
     connectOrCreate?: DataSourceCreateOrConnectWithoutDentistProductionInput
@@ -37837,6 +37987,16 @@ export namespace Prisma {
     upsert?: ClinicUpsertWithoutDentistProductionInput
     connect?: ClinicWhereUniqueInput
     update?: XOR<XOR<ClinicUpdateToOneWithWhereWithoutDentistProductionInput, ClinicUpdateWithoutDentistProductionInput>, ClinicUncheckedUpdateWithoutDentistProductionInput>
+  }
+
+  export type ProviderUpdateOneWithoutDentistProductionNestedInput = {
+    create?: XOR<ProviderCreateWithoutDentistProductionInput, ProviderUncheckedCreateWithoutDentistProductionInput>
+    connectOrCreate?: ProviderCreateOrConnectWithoutDentistProductionInput
+    upsert?: ProviderUpsertWithoutDentistProductionInput
+    disconnect?: ProviderWhereInput | boolean
+    delete?: ProviderWhereInput | boolean
+    connect?: ProviderWhereUniqueInput
+    update?: XOR<XOR<ProviderUpdateToOneWithWhereWithoutDentistProductionInput, ProviderUpdateWithoutDentistProductionInput>, ProviderUncheckedUpdateWithoutDentistProductionInput>
   }
 
   export type DataSourceUpdateOneWithoutDentistProductionNestedInput = {
@@ -38201,6 +38361,7 @@ export namespace Prisma {
     goals?: GoalCreateNestedManyWithoutProviderInput
     dataSources?: DataSourceCreateNestedManyWithoutProviderInput
     hygieneProduction?: HygieneProductionCreateNestedManyWithoutProviderInput
+    dentistProduction?: DentistProductionCreateNestedManyWithoutProviderInput
   }
 
   export type ProviderUncheckedCreateWithoutClinicInput = {
@@ -38218,6 +38379,7 @@ export namespace Prisma {
     goals?: GoalUncheckedCreateNestedManyWithoutProviderInput
     dataSources?: DataSourceUncheckedCreateNestedManyWithoutProviderInput
     hygieneProduction?: HygieneProductionUncheckedCreateNestedManyWithoutProviderInput
+    dentistProduction?: DentistProductionUncheckedCreateNestedManyWithoutProviderInput
   }
 
   export type ProviderCreateOrConnectWithoutClinicInput = {
@@ -38409,6 +38571,7 @@ export namespace Prisma {
     providerName?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
+    provider?: ProviderCreateNestedOneWithoutDentistProductionInput
     dataSource?: DataSourceCreateNestedOneWithoutDentistProductionInput
   }
 
@@ -38425,6 +38588,7 @@ export namespace Prisma {
     providerName?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
+    providerId?: string | null
     dataSourceId?: string | null
   }
 
@@ -38675,6 +38839,7 @@ export namespace Prisma {
     createdAt?: DateTimeFilter<"DentistProduction"> | Date | string
     updatedAt?: DateTimeFilter<"DentistProduction"> | Date | string
     clinicId?: StringFilter<"DentistProduction"> | string
+    providerId?: StringNullableFilter<"DentistProduction"> | string | null
     dataSourceId?: StringNullableFilter<"DentistProduction"> | string | null
   }
 
@@ -39032,6 +39197,50 @@ export namespace Prisma {
     skipDuplicates?: boolean
   }
 
+  export type DentistProductionCreateWithoutProviderInput = {
+    id?: string
+    date: Date | string
+    monthTab: string
+    verifiedProductionHumble?: Decimal | DecimalJsLike | number | string | null
+    verifiedProductionBaytown?: Decimal | DecimalJsLike | number | string | null
+    totalProduction?: Decimal | DecimalJsLike | number | string | null
+    monthlyGoal?: Decimal | DecimalJsLike | number | string | null
+    productionPerHour?: Decimal | DecimalJsLike | number | string | null
+    avgDailyProduction?: Decimal | DecimalJsLike | number | string | null
+    providerName?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    clinic: ClinicCreateNestedOneWithoutDentistProductionInput
+    dataSource?: DataSourceCreateNestedOneWithoutDentistProductionInput
+  }
+
+  export type DentistProductionUncheckedCreateWithoutProviderInput = {
+    id?: string
+    date: Date | string
+    monthTab: string
+    verifiedProductionHumble?: Decimal | DecimalJsLike | number | string | null
+    verifiedProductionBaytown?: Decimal | DecimalJsLike | number | string | null
+    totalProduction?: Decimal | DecimalJsLike | number | string | null
+    monthlyGoal?: Decimal | DecimalJsLike | number | string | null
+    productionPerHour?: Decimal | DecimalJsLike | number | string | null
+    avgDailyProduction?: Decimal | DecimalJsLike | number | string | null
+    providerName?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    clinicId: string
+    dataSourceId?: string | null
+  }
+
+  export type DentistProductionCreateOrConnectWithoutProviderInput = {
+    where: DentistProductionWhereUniqueInput
+    create: XOR<DentistProductionCreateWithoutProviderInput, DentistProductionUncheckedCreateWithoutProviderInput>
+  }
+
+  export type DentistProductionCreateManyProviderInputEnvelope = {
+    data: DentistProductionCreateManyProviderInput | DentistProductionCreateManyProviderInput[]
+    skipDuplicates?: boolean
+  }
+
   export type ClinicUpsertWithoutProvidersInput = {
     update: XOR<ClinicUpdateWithoutProvidersInput, ClinicUncheckedUpdateWithoutProvidersInput>
     create: XOR<ClinicCreateWithoutProvidersInput, ClinicUncheckedCreateWithoutProvidersInput>
@@ -39139,6 +39348,22 @@ export namespace Prisma {
   export type HygieneProductionUpdateManyWithWhereWithoutProviderInput = {
     where: HygieneProductionScalarWhereInput
     data: XOR<HygieneProductionUpdateManyMutationInput, HygieneProductionUncheckedUpdateManyWithoutProviderInput>
+  }
+
+  export type DentistProductionUpsertWithWhereUniqueWithoutProviderInput = {
+    where: DentistProductionWhereUniqueInput
+    update: XOR<DentistProductionUpdateWithoutProviderInput, DentistProductionUncheckedUpdateWithoutProviderInput>
+    create: XOR<DentistProductionCreateWithoutProviderInput, DentistProductionUncheckedCreateWithoutProviderInput>
+  }
+
+  export type DentistProductionUpdateWithWhereUniqueWithoutProviderInput = {
+    where: DentistProductionWhereUniqueInput
+    data: XOR<DentistProductionUpdateWithoutProviderInput, DentistProductionUncheckedUpdateWithoutProviderInput>
+  }
+
+  export type DentistProductionUpdateManyWithWhereWithoutProviderInput = {
+    where: DentistProductionScalarWhereInput
+    data: XOR<DentistProductionUpdateManyMutationInput, DentistProductionUncheckedUpdateManyWithoutProviderInput>
   }
 
   export type MetricValueCreateWithoutMetricDefinitionInput = {
@@ -39496,6 +39721,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     clinic: ClinicCreateNestedOneWithoutDentistProductionInput
+    provider?: ProviderCreateNestedOneWithoutDentistProductionInput
   }
 
   export type DentistProductionUncheckedCreateWithoutDataSourceInput = {
@@ -39512,6 +39738,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     clinicId: string
+    providerId?: string | null
   }
 
   export type DentistProductionCreateOrConnectWithoutDataSourceInput = {
@@ -39578,6 +39805,7 @@ export namespace Prisma {
     metrics?: MetricValueCreateNestedManyWithoutProviderInput
     goals?: GoalCreateNestedManyWithoutProviderInput
     hygieneProduction?: HygieneProductionCreateNestedManyWithoutProviderInput
+    dentistProduction?: DentistProductionCreateNestedManyWithoutProviderInput
   }
 
   export type ProviderUncheckedCreateWithoutDataSourcesInput = {
@@ -39595,6 +39823,7 @@ export namespace Prisma {
     metrics?: MetricValueUncheckedCreateNestedManyWithoutProviderInput
     goals?: GoalUncheckedCreateNestedManyWithoutProviderInput
     hygieneProduction?: HygieneProductionUncheckedCreateNestedManyWithoutProviderInput
+    dentistProduction?: DentistProductionUncheckedCreateNestedManyWithoutProviderInput
   }
 
   export type ProviderCreateOrConnectWithoutDataSourcesInput = {
@@ -39737,6 +39966,7 @@ export namespace Prisma {
     metrics?: MetricValueUpdateManyWithoutProviderNestedInput
     goals?: GoalUpdateManyWithoutProviderNestedInput
     hygieneProduction?: HygieneProductionUpdateManyWithoutProviderNestedInput
+    dentistProduction?: DentistProductionUpdateManyWithoutProviderNestedInput
   }
 
   export type ProviderUncheckedUpdateWithoutDataSourcesInput = {
@@ -39754,6 +39984,7 @@ export namespace Prisma {
     metrics?: MetricValueUncheckedUpdateManyWithoutProviderNestedInput
     goals?: GoalUncheckedUpdateManyWithoutProviderNestedInput
     hygieneProduction?: HygieneProductionUncheckedUpdateManyWithoutProviderNestedInput
+    dentistProduction?: DentistProductionUncheckedUpdateManyWithoutProviderNestedInput
   }
 
   export type DataSourceCreateWithoutColumnMappingsInput = {
@@ -40021,6 +40252,7 @@ export namespace Prisma {
     goals?: GoalCreateNestedManyWithoutProviderInput
     dataSources?: DataSourceCreateNestedManyWithoutProviderInput
     hygieneProduction?: HygieneProductionCreateNestedManyWithoutProviderInput
+    dentistProduction?: DentistProductionCreateNestedManyWithoutProviderInput
   }
 
   export type ProviderUncheckedCreateWithoutMetricsInput = {
@@ -40038,6 +40270,7 @@ export namespace Prisma {
     goals?: GoalUncheckedCreateNestedManyWithoutProviderInput
     dataSources?: DataSourceUncheckedCreateNestedManyWithoutProviderInput
     hygieneProduction?: HygieneProductionUncheckedCreateNestedManyWithoutProviderInput
+    dentistProduction?: DentistProductionUncheckedCreateNestedManyWithoutProviderInput
   }
 
   export type ProviderCreateOrConnectWithoutMetricsInput = {
@@ -40204,6 +40437,7 @@ export namespace Prisma {
     goals?: GoalUpdateManyWithoutProviderNestedInput
     dataSources?: DataSourceUpdateManyWithoutProviderNestedInput
     hygieneProduction?: HygieneProductionUpdateManyWithoutProviderNestedInput
+    dentistProduction?: DentistProductionUpdateManyWithoutProviderNestedInput
   }
 
   export type ProviderUncheckedUpdateWithoutMetricsInput = {
@@ -40221,6 +40455,7 @@ export namespace Prisma {
     goals?: GoalUncheckedUpdateManyWithoutProviderNestedInput
     dataSources?: DataSourceUncheckedUpdateManyWithoutProviderNestedInput
     hygieneProduction?: HygieneProductionUncheckedUpdateManyWithoutProviderNestedInput
+    dentistProduction?: DentistProductionUncheckedUpdateManyWithoutProviderNestedInput
   }
 
   export type DataSourceUpsertWithoutMetricsInput = {
@@ -40365,6 +40600,7 @@ export namespace Prisma {
     metrics?: MetricValueCreateNestedManyWithoutProviderInput
     dataSources?: DataSourceCreateNestedManyWithoutProviderInput
     hygieneProduction?: HygieneProductionCreateNestedManyWithoutProviderInput
+    dentistProduction?: DentistProductionCreateNestedManyWithoutProviderInput
   }
 
   export type ProviderUncheckedCreateWithoutGoalsInput = {
@@ -40382,6 +40618,7 @@ export namespace Prisma {
     metrics?: MetricValueUncheckedCreateNestedManyWithoutProviderInput
     dataSources?: DataSourceUncheckedCreateNestedManyWithoutProviderInput
     hygieneProduction?: HygieneProductionUncheckedCreateNestedManyWithoutProviderInput
+    dentistProduction?: DentistProductionUncheckedCreateNestedManyWithoutProviderInput
   }
 
   export type ProviderCreateOrConnectWithoutGoalsInput = {
@@ -40501,6 +40738,7 @@ export namespace Prisma {
     metrics?: MetricValueUpdateManyWithoutProviderNestedInput
     dataSources?: DataSourceUpdateManyWithoutProviderNestedInput
     hygieneProduction?: HygieneProductionUpdateManyWithoutProviderNestedInput
+    dentistProduction?: DentistProductionUpdateManyWithoutProviderNestedInput
   }
 
   export type ProviderUncheckedUpdateWithoutGoalsInput = {
@@ -40518,6 +40756,7 @@ export namespace Prisma {
     metrics?: MetricValueUncheckedUpdateManyWithoutProviderNestedInput
     dataSources?: DataSourceUncheckedUpdateManyWithoutProviderNestedInput
     hygieneProduction?: HygieneProductionUncheckedUpdateManyWithoutProviderNestedInput
+    dentistProduction?: DentistProductionUncheckedUpdateManyWithoutProviderNestedInput
   }
 
   export type UserCreateWithoutDashboardsInput = {
@@ -40836,6 +41075,7 @@ export namespace Prisma {
     metrics?: MetricValueCreateNestedManyWithoutProviderInput
     goals?: GoalCreateNestedManyWithoutProviderInput
     dataSources?: DataSourceCreateNestedManyWithoutProviderInput
+    dentistProduction?: DentistProductionCreateNestedManyWithoutProviderInput
   }
 
   export type ProviderUncheckedCreateWithoutHygieneProductionInput = {
@@ -40853,6 +41093,7 @@ export namespace Prisma {
     metrics?: MetricValueUncheckedCreateNestedManyWithoutProviderInput
     goals?: GoalUncheckedCreateNestedManyWithoutProviderInput
     dataSources?: DataSourceUncheckedCreateNestedManyWithoutProviderInput
+    dentistProduction?: DentistProductionUncheckedCreateNestedManyWithoutProviderInput
   }
 
   export type ProviderCreateOrConnectWithoutHygieneProductionInput = {
@@ -40978,6 +41219,7 @@ export namespace Prisma {
     metrics?: MetricValueUpdateManyWithoutProviderNestedInput
     goals?: GoalUpdateManyWithoutProviderNestedInput
     dataSources?: DataSourceUpdateManyWithoutProviderNestedInput
+    dentistProduction?: DentistProductionUpdateManyWithoutProviderNestedInput
   }
 
   export type ProviderUncheckedUpdateWithoutHygieneProductionInput = {
@@ -40995,6 +41237,7 @@ export namespace Prisma {
     metrics?: MetricValueUncheckedUpdateManyWithoutProviderNestedInput
     goals?: GoalUncheckedUpdateManyWithoutProviderNestedInput
     dataSources?: DataSourceUncheckedUpdateManyWithoutProviderNestedInput
+    dentistProduction?: DentistProductionUncheckedUpdateManyWithoutProviderNestedInput
   }
 
   export type DataSourceUpsertWithoutHygieneProductionInput = {
@@ -41089,6 +41332,47 @@ export namespace Prisma {
     create: XOR<ClinicCreateWithoutDentistProductionInput, ClinicUncheckedCreateWithoutDentistProductionInput>
   }
 
+  export type ProviderCreateWithoutDentistProductionInput = {
+    id?: string
+    name: string
+    firstName?: string | null
+    lastName?: string | null
+    email?: string | null
+    providerType: string
+    position?: string | null
+    status: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    clinic: ClinicCreateNestedOneWithoutProvidersInput
+    metrics?: MetricValueCreateNestedManyWithoutProviderInput
+    goals?: GoalCreateNestedManyWithoutProviderInput
+    dataSources?: DataSourceCreateNestedManyWithoutProviderInput
+    hygieneProduction?: HygieneProductionCreateNestedManyWithoutProviderInput
+  }
+
+  export type ProviderUncheckedCreateWithoutDentistProductionInput = {
+    id?: string
+    name: string
+    firstName?: string | null
+    lastName?: string | null
+    email?: string | null
+    providerType: string
+    position?: string | null
+    status: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    clinicId: string
+    metrics?: MetricValueUncheckedCreateNestedManyWithoutProviderInput
+    goals?: GoalUncheckedCreateNestedManyWithoutProviderInput
+    dataSources?: DataSourceUncheckedCreateNestedManyWithoutProviderInput
+    hygieneProduction?: HygieneProductionUncheckedCreateNestedManyWithoutProviderInput
+  }
+
+  export type ProviderCreateOrConnectWithoutDentistProductionInput = {
+    where: ProviderWhereUniqueInput
+    create: XOR<ProviderCreateWithoutDentistProductionInput, ProviderUncheckedCreateWithoutDentistProductionInput>
+  }
+
   export type DataSourceCreateWithoutDentistProductionInput = {
     id?: string
     name: string
@@ -41179,6 +41463,53 @@ export namespace Prisma {
     goals?: GoalUncheckedUpdateManyWithoutClinicNestedInput
     dataSources?: DataSourceUncheckedUpdateManyWithoutClinicNestedInput
     hygieneProduction?: HygieneProductionUncheckedUpdateManyWithoutClinicNestedInput
+  }
+
+  export type ProviderUpsertWithoutDentistProductionInput = {
+    update: XOR<ProviderUpdateWithoutDentistProductionInput, ProviderUncheckedUpdateWithoutDentistProductionInput>
+    create: XOR<ProviderCreateWithoutDentistProductionInput, ProviderUncheckedCreateWithoutDentistProductionInput>
+    where?: ProviderWhereInput
+  }
+
+  export type ProviderUpdateToOneWithWhereWithoutDentistProductionInput = {
+    where?: ProviderWhereInput
+    data: XOR<ProviderUpdateWithoutDentistProductionInput, ProviderUncheckedUpdateWithoutDentistProductionInput>
+  }
+
+  export type ProviderUpdateWithoutDentistProductionInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    firstName?: NullableStringFieldUpdateOperationsInput | string | null
+    lastName?: NullableStringFieldUpdateOperationsInput | string | null
+    email?: NullableStringFieldUpdateOperationsInput | string | null
+    providerType?: StringFieldUpdateOperationsInput | string
+    position?: NullableStringFieldUpdateOperationsInput | string | null
+    status?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    clinic?: ClinicUpdateOneRequiredWithoutProvidersNestedInput
+    metrics?: MetricValueUpdateManyWithoutProviderNestedInput
+    goals?: GoalUpdateManyWithoutProviderNestedInput
+    dataSources?: DataSourceUpdateManyWithoutProviderNestedInput
+    hygieneProduction?: HygieneProductionUpdateManyWithoutProviderNestedInput
+  }
+
+  export type ProviderUncheckedUpdateWithoutDentistProductionInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    firstName?: NullableStringFieldUpdateOperationsInput | string | null
+    lastName?: NullableStringFieldUpdateOperationsInput | string | null
+    email?: NullableStringFieldUpdateOperationsInput | string | null
+    providerType?: StringFieldUpdateOperationsInput | string
+    position?: NullableStringFieldUpdateOperationsInput | string | null
+    status?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    clinicId?: StringFieldUpdateOperationsInput | string
+    metrics?: MetricValueUncheckedUpdateManyWithoutProviderNestedInput
+    goals?: GoalUncheckedUpdateManyWithoutProviderNestedInput
+    dataSources?: DataSourceUncheckedUpdateManyWithoutProviderNestedInput
+    hygieneProduction?: HygieneProductionUncheckedUpdateManyWithoutProviderNestedInput
   }
 
   export type DataSourceUpsertWithoutDentistProductionInput = {
@@ -41331,6 +41662,7 @@ export namespace Prisma {
     providerName?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
+    providerId?: string | null
     dataSourceId?: string | null
   }
 
@@ -41387,6 +41719,7 @@ export namespace Prisma {
     goals?: GoalUpdateManyWithoutProviderNestedInput
     dataSources?: DataSourceUpdateManyWithoutProviderNestedInput
     hygieneProduction?: HygieneProductionUpdateManyWithoutProviderNestedInput
+    dentistProduction?: DentistProductionUpdateManyWithoutProviderNestedInput
   }
 
   export type ProviderUncheckedUpdateWithoutClinicInput = {
@@ -41404,6 +41737,7 @@ export namespace Prisma {
     goals?: GoalUncheckedUpdateManyWithoutProviderNestedInput
     dataSources?: DataSourceUncheckedUpdateManyWithoutProviderNestedInput
     hygieneProduction?: HygieneProductionUncheckedUpdateManyWithoutProviderNestedInput
+    dentistProduction?: DentistProductionUncheckedUpdateManyWithoutProviderNestedInput
   }
 
   export type ProviderUncheckedUpdateManyWithoutClinicInput = {
@@ -41617,6 +41951,7 @@ export namespace Prisma {
     providerName?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    provider?: ProviderUpdateOneWithoutDentistProductionNestedInput
     dataSource?: DataSourceUpdateOneWithoutDentistProductionNestedInput
   }
 
@@ -41633,6 +41968,7 @@ export namespace Prisma {
     providerName?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    providerId?: NullableStringFieldUpdateOperationsInput | string | null
     dataSourceId?: NullableStringFieldUpdateOperationsInput | string | null
   }
 
@@ -41649,6 +41985,7 @@ export namespace Prisma {
     providerName?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    providerId?: NullableStringFieldUpdateOperationsInput | string | null
     dataSourceId?: NullableStringFieldUpdateOperationsInput | string | null
   }
 
@@ -41751,6 +42088,23 @@ export namespace Prisma {
     productionGoal?: Decimal | DecimalJsLike | number | string | null
     variancePercentage?: Decimal | DecimalJsLike | number | string | null
     bonusAmount?: Decimal | DecimalJsLike | number | string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    clinicId: string
+    dataSourceId?: string | null
+  }
+
+  export type DentistProductionCreateManyProviderInput = {
+    id?: string
+    date: Date | string
+    monthTab: string
+    verifiedProductionHumble?: Decimal | DecimalJsLike | number | string | null
+    verifiedProductionBaytown?: Decimal | DecimalJsLike | number | string | null
+    totalProduction?: Decimal | DecimalJsLike | number | string | null
+    monthlyGoal?: Decimal | DecimalJsLike | number | string | null
+    productionPerHour?: Decimal | DecimalJsLike | number | string | null
+    avgDailyProduction?: Decimal | DecimalJsLike | number | string | null
+    providerName?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     clinicId: string
@@ -41936,6 +42290,57 @@ export namespace Prisma {
     productionGoal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     variancePercentage?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     bonusAmount?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    clinicId?: StringFieldUpdateOperationsInput | string
+    dataSourceId?: NullableStringFieldUpdateOperationsInput | string | null
+  }
+
+  export type DentistProductionUpdateWithoutProviderInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    date?: DateTimeFieldUpdateOperationsInput | Date | string
+    monthTab?: StringFieldUpdateOperationsInput | string
+    verifiedProductionHumble?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    verifiedProductionBaytown?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    totalProduction?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    monthlyGoal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    productionPerHour?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    avgDailyProduction?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    providerName?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    clinic?: ClinicUpdateOneRequiredWithoutDentistProductionNestedInput
+    dataSource?: DataSourceUpdateOneWithoutDentistProductionNestedInput
+  }
+
+  export type DentistProductionUncheckedUpdateWithoutProviderInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    date?: DateTimeFieldUpdateOperationsInput | Date | string
+    monthTab?: StringFieldUpdateOperationsInput | string
+    verifiedProductionHumble?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    verifiedProductionBaytown?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    totalProduction?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    monthlyGoal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    productionPerHour?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    avgDailyProduction?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    providerName?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    clinicId?: StringFieldUpdateOperationsInput | string
+    dataSourceId?: NullableStringFieldUpdateOperationsInput | string | null
+  }
+
+  export type DentistProductionUncheckedUpdateManyWithoutProviderInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    date?: DateTimeFieldUpdateOperationsInput | Date | string
+    monthTab?: StringFieldUpdateOperationsInput | string
+    verifiedProductionHumble?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    verifiedProductionBaytown?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    totalProduction?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    monthlyGoal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    productionPerHour?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    avgDailyProduction?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    providerName?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     clinicId?: StringFieldUpdateOperationsInput | string
@@ -42191,6 +42596,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     clinicId: string
+    providerId?: string | null
   }
 
   export type ColumnMappingUpdateWithoutDataSourceInput = {
@@ -42324,6 +42730,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     clinic?: ClinicUpdateOneRequiredWithoutDentistProductionNestedInput
+    provider?: ProviderUpdateOneWithoutDentistProductionNestedInput
   }
 
   export type DentistProductionUncheckedUpdateWithoutDataSourceInput = {
@@ -42340,6 +42747,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     clinicId?: StringFieldUpdateOperationsInput | string
+    providerId?: NullableStringFieldUpdateOperationsInput | string | null
   }
 
   export type DentistProductionUncheckedUpdateManyWithoutDataSourceInput = {
@@ -42356,6 +42764,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     clinicId?: StringFieldUpdateOperationsInput | string
+    providerId?: NullableStringFieldUpdateOperationsInput | string | null
   }
 
   export type WidgetCreateManyDashboardInput = {
