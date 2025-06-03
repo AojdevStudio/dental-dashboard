@@ -10,6 +10,18 @@ import { createClient } from "@/lib/supabase/client";
 import { useEffect, useState } from "react";
 
 /**
+ * Database user information from the session API
+ */
+interface DatabaseUser {
+  id: string;
+  email: string;
+  name: string;
+  role: string;
+  clinicId: string;
+  isSystemAdmin: boolean;
+}
+
+/**
  * Interface for authentication state and methods
  *
  * @interface AuthState
@@ -21,11 +33,17 @@ interface AuthState {
   /** Current session data or null if no active session */
   session: Session | null;
 
+  /** Database user information */
+  dbUser: DatabaseUser | null;
+
   /** Whether auth state is still loading */
   isLoading: boolean;
 
   /** Whether user is authenticated */
   isAuthenticated: boolean;
+
+  /** Whether user is a system admin */
+  isSystemAdmin: boolean;
 
   /**
    * Signs out the current user and redirects to login page
@@ -40,6 +58,7 @@ interface AuthState {
  *
  * This hook:
  * - Tracks the current user and session state
+ * - Fetches database user information including role
  * - Provides a method to sign out
  * - Handles authentication state changes
  * - Exposes whether auth is still loading
@@ -51,7 +70,7 @@ interface AuthState {
  * import { useAuth } from '@/hooks/use-auth'; // MODIFIED
  *
  * function Profile() {
- *   const { user, isLoading, signOut } = useAuth();
+ *   const { user, dbUser, isLoading, signOut, isSystemAdmin } = useAuth();
  *
  *   if (isLoading) return <LoadingSpinner />;
  *
@@ -60,6 +79,7 @@ interface AuthState {
  *   return (
  *     <div>
  *       <h1>Welcome, {user.email}</h1>
+ *       {isSystemAdmin && <p>System Administrator</p>}
  *       <button onClick={signOut}>Sign Out</button>
  *     </div>
  *   );
@@ -74,7 +94,32 @@ export function useAuth(): AuthState {
 
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
+  const [dbUser, setDbUser] = useState<DatabaseUser | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+
+  /**
+   * Fetch database user information from the session API
+   */
+  const fetchDbUser = async (authUser: User | null) => {
+    if (!authUser) {
+      setDbUser(null);
+      return;
+    }
+
+    try {
+      const response = await fetch("/api/auth/session");
+      const data = await response.json();
+
+      if (data.authenticated && data.user?.dbUser) {
+        setDbUser(data.user.dbUser);
+      } else {
+        setDbUser(null);
+      }
+    } catch (error) {
+      console.error("Error fetching database user:", error);
+      setDbUser(null);
+    }
+  };
 
   useEffect(() => {
     // Get initial session
@@ -86,6 +131,9 @@ export function useAuth(): AuthState {
         } = await supabase.auth.getSession();
         setSession(session);
         setUser(session?.user ?? null);
+        
+        // Fetch database user information
+        await fetchDbUser(session?.user ?? null);
       } catch (error) {
         console.error("Error getting initial session:", error);
       } finally {
@@ -99,9 +147,12 @@ export function useAuth(): AuthState {
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange(
-      (event: AuthChangeEvent, currentSession: Session | null) => {
+      async (event: AuthChangeEvent, currentSession: Session | null) => {
         setSession(currentSession);
         setUser(currentSession?.user ?? null);
+        
+        // Fetch database user information when auth state changes
+        await fetchDbUser(currentSession?.user ?? null);
         setIsLoading(false);
       }
     );
@@ -120,6 +171,7 @@ export function useAuth(): AuthState {
   const signOut = async (): Promise<void> => {
     try {
       await supabase.auth.signOut();
+      setDbUser(null);
 
       // Redirect to login page after sign out
       router.push("/login");
@@ -131,8 +183,10 @@ export function useAuth(): AuthState {
   return {
     user,
     session,
+    dbUser,
     isLoading,
     isAuthenticated: !!user,
+    isSystemAdmin: dbUser?.isSystemAdmin || false,
     signOut,
   };
 }

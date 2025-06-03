@@ -6,6 +6,7 @@
 import { NextRequest } from "next/server";
 import { withAuth } from "@/lib/api/middleware";
 import { ApiResponse, ApiError, getPaginationParams } from "@/lib/api/utils";
+import { cachedJson } from "@/lib/api/cache-headers";
 import * as clinicQueries from "@/lib/database/queries/clinics";
 import { z } from "zod";
 
@@ -42,7 +43,18 @@ export const GET = withAuth(async (request, { authContext }) => {
     offset,
   });
 
-  return ApiResponse.paginated(result.clinics, result.total, Math.floor(offset / limit) + 1, limit);
+  // Clinic data is relatively static, cache for 10 minutes
+  return cachedJson(
+    {
+      clinics: result.clinics,
+      pagination: {
+        total: result.total,
+        page: Math.floor(offset / limit) + 1,
+        limit,
+      },
+    },
+    "PRIVATE"
+  );
 });
 
 /**

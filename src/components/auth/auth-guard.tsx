@@ -27,7 +27,7 @@ export function AuthGuard({
   fallbackUrl = "/login",
   requireDatabaseUser = true,
 }: AuthGuardProps) {
-  const { user, isAuthenticated, isLoading } = useAuth();
+  const { user, dbUser, isAuthenticated, isLoading, isSystemAdmin } = useAuth();
   const router = useRouter();
 
   useEffect(() => {
@@ -54,28 +54,40 @@ export function AuthGuard({
     return null;
   }
 
-  // If we require database user verification, check for user metadata
-  if (requireDatabaseUser && user && !user.user_metadata?.role) {
-    console.warn("AuthGuard: User authenticated but missing database metadata");
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="text-center space-y-4 max-w-md mx-auto p-6">
-          <h2 className="text-lg font-semibold text-destructive">Account Setup Incomplete</h2>
-          <p className="text-sm text-muted-foreground">
-            Your account setup is incomplete. Please contact your administrator or try logging in
-            again.
-          </p>
-          <button
-            onClick={() => router.push("/login")}
-            className="text-sm text-primary hover:underline"
-          >
-            Return to Login
-          </button>
+  // If we require database user verification, check for database user or valid metadata
+  if (requireDatabaseUser && user) {
+    // System admins bypass metadata requirements since they're validated server-side
+    if (isSystemAdmin && dbUser) {
+      console.log("AuthGuard: System admin authenticated with database user");
+      return <>{children}</>;
+    }
+
+    // For regular users, check if they have database user info OR user metadata role
+    const hasDbUser = !!dbUser;
+    const hasMetadataRole = !!user.user_metadata?.role;
+
+    if (!hasDbUser && !hasMetadataRole) {
+      console.warn("AuthGuard: User authenticated but missing database user and metadata");
+      return (
+        <div className="flex items-center justify-center min-h-screen">
+          <div className="text-center space-y-4 max-w-md mx-auto p-6">
+            <h2 className="text-lg font-semibold text-destructive">Account Setup Incomplete</h2>
+            <p className="text-sm text-muted-foreground">
+              Your account setup is incomplete. Please contact your administrator or try logging in
+              again.
+            </p>
+            <button
+              onClick={() => router.push("/login")}
+              className="text-sm text-primary hover:underline"
+            >
+              Return to Login
+            </button>
+          </div>
         </div>
-      </div>
-    );
+      );
+    }
   }
 
-  // User is authenticated, render children
+  // User is authenticated and has proper setup, render children
   return <>{children}</>;
 }

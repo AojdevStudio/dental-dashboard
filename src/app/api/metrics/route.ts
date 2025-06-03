@@ -5,6 +5,7 @@
 
 import { withAuth } from "@/lib/api/middleware";
 import { ApiResponse, ApiError, getPaginationParams, getDateRangeParams } from "@/lib/api/utils";
+import { cachedJson } from "@/lib/api/cache-headers";
 import * as metricQueries from "@/lib/database/queries/metrics";
 import { z } from "zod";
 
@@ -69,7 +70,18 @@ export const GET = withAuth(async (request, { authContext }) => {
     }
   );
 
-  return ApiResponse.paginated(result.metrics, result.total, Math.floor(offset / limit) + 1, limit);
+  // Metrics data is frequently updated, use shorter cache time
+  return cachedJson(
+    {
+      metrics: result.metrics,
+      pagination: {
+        total: result.total,
+        page: Math.floor(offset / limit) + 1,
+        limit,
+      },
+    },
+    "DYNAMIC"
+  );
 });
 
 /**

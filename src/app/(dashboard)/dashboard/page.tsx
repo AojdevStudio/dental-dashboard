@@ -12,6 +12,7 @@
 
 import { Skeleton } from "@/components/ui/skeleton";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { DashboardSkeleton } from "@/components/ui/skeleton-loaders";
 import { getAuthContext } from "@/lib/database/auth-context";
 import { prisma } from "@/lib/database/prisma";
 import { Suspense } from "react";
@@ -210,40 +211,3 @@ async function AllClinicsOverview() {
   );
 }
 
-/**
- * Dashboard Skeleton Component
- *
- * Provides a loading placeholder UI that mimics the structure of the actual dashboard.
- * This component is shown while the dashboard data is being fetched, giving users
- * visual feedback about the loading state without jarring layout shifts when data arrives.
- *
- * The skeleton includes placeholders for:
- * - Dashboard title
- * - Summary metrics panel
- * - Main chart or visualization
- * - Grid of metric cards
- *
- * @returns {JSX.Element} The rendered skeleton UI for the dashboard
- */
-function DashboardSkeleton() {
-  return (
-    <div className="w-full space-y-6">
-      {/* Title placeholder */}
-      <div className="space-y-2">
-        <Skeleton className="h-8 w-64" />
-        <Skeleton className="h-4 w-96" />
-      </div>
-
-      {/* Summary cards */}
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        <Skeleton className="h-32 w-full" />
-        <Skeleton className="h-32 w-full" />
-        <Skeleton className="h-32 w-full" />
-        <Skeleton className="h-32 w-full" />
-      </div>
-
-      {/* Main content area */}
-      <Skeleton className="h-[200px] w-full" />
-    </div>
-  );
-}
