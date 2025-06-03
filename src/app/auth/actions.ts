@@ -82,8 +82,8 @@ export async function signInWithVerification(
       };
     }
 
-    // Verify user has a clinic assignment
-    if (!dbUser.clinicId || !dbUser.clinic) {
+    // Verify user has a clinic assignment (skip for system admins)
+    if (dbUser.role !== "system_admin" && (!dbUser.clinicId || !dbUser.clinic)) {
       console.error("User has no clinic assignment:", dbUser.id);
 
       await supabase.auth.signOut();
@@ -94,8 +94,8 @@ export async function signInWithVerification(
       };
     }
 
-    // Verify user has role assignments
-    if (!userRoles || userRoles.length === 0) {
+    // Verify user has role assignments (skip for system admins)
+    if (dbUser.role !== "system_admin" && (!userRoles || userRoles.length === 0)) {
       console.error("User has no clinic roles:", dbUser.id);
 
       // Try to create a default role

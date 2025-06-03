@@ -26,8 +26,8 @@ export function withAuth(
     requireAdmin?: boolean;
     requireClinicAdmin?: boolean;
   }
-): (request: NextRequest, context: any) => Promise<NextResponse> {
-  return async (request: NextRequest, context: any) => {
+): (request: NextRequest, context: { params?: Record<string, string> | Promise<Record<string, string>> }) => Promise<NextResponse> {
+  return async (request: NextRequest, context: { params?: Record<string, string> | Promise<Record<string, string>> }) => {
     try {
       // Get auth context
       const authContext = await getAuthContext();

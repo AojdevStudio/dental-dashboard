@@ -2,54 +2,48 @@
 
 ### Google Sheets Integration Core
 
-**Feature Goal**: Establish secure, reliable connection to Google Sheets API with automated data extraction and standardized metric mapping for essential dental practice KPIs, supporting multiple spreadsheets per clinic with comprehensive error handling and retry mechanisms.
+**Feature Goal**: Provide Google Apps Script templates and monitoring capabilities for dental practices to automatically sync their spreadsheet data directly to the Supabase database, with comprehensive error tracking and sync status monitoring.
 
 **API Relationships**:
-- Google Sheets API v4 for spreadsheet operations
-- Supabase Auth API for credential storage
-- Next.js API routes for frontend integration
-- Supabase Edge Functions for background processing
-- Prisma ORM for data source configuration management
+- Google Apps Script runtime with built-in cron scheduling
+- Supabase REST API for direct database operations via service key
+- Supabase Edge Functions for background processing and metric calculations
+- Prisma ORM for data storage and retrieval
+- Winston logging for operation tracking
 
 #### Detailed Feature Requirements
 
-**Authentication & Authorization**:
-- Implement OAuth 2.0 flow with Google Sheets API using server-side authorization code flow
-- Store encrypted Google API credentials in Supabase with automatic token refresh
-- Support multiple Google accounts per clinic with account switching capability
-- Implement scope validation to ensure minimum required permissions (spreadsheets.readonly)
-- Handle OAuth errors including expired tokens, revoked access, and insufficient permissions
-
-**Spreadsheet Discovery & Selection**:
-- Retrieve and display all accessible spreadsheets from connected Google accounts
-- Implement spreadsheet filtering by name, last modified date, and ownership
-- Support folder-based organization display matching Google Drive structure
-- Cache spreadsheet metadata with 1-hour TTL to reduce API calls
-- Handle large spreadsheet lists with pagination (100 spreadsheets per page)
-
-**Column Mapping & Templates**:
-- Provide pre-defined mapping templates for common dental practice formats:
+**Google Apps Script Templates**:
+- Provide pre-built Google Apps Script templates for common dental practice spreadsheet formats:
   - Production tracking (Date, Provider, Procedure Code, Amount, Patient)
   - Collection reports (Date, Payment Type, Amount, Insurance vs Patient Portion)
   - Appointment logs (Date, Time, Provider, Patient, Status, Type)
   - Patient demographics (Name, Phone, Email, Insurance, Last Visit)
-- Support custom column mapping with drag-and-drop interface
-- Validate column data types against expected KPI requirements
-- Save mapping configurations per spreadsheet with versioning support
-- Detect and suggest mapping changes when spreadsheet structure changes
+- Include data transformation functions for standardizing formats before database upsert
+- Implement built-in data validation using Google Apps Script utilities
+- Support configurable sync schedules using Google Apps Script triggers
+- Include error handling and retry logic within the script templates
+- Integrate Google Apps Script's built-in error notifications for sync failures
 
-**Data Extraction & Transformation**:
-- Extract data using batch operations with 1000-row chunks to respect API limits
-- Implement real-time data validation using Zod schemas during extraction
-- Transform extracted data to standardized internal format with type coercion
-- Handle missing data with configurable default values or skip rules
-- Support date format standardization across different spreadsheet formats
-- Implement data deduplication based on configurable key combinations
+**Script Deployment & Configuration**:
+- Provide step-by-step deployment guides for each template type
+- Include secure Supabase service key configuration instructions
+- Support multiple clinic configurations through script parameters
+- Implement clinic and data source identification in upsert operations
+- Provide script versioning and update mechanisms
 
-**Synchronization Management**:
-- Support both manual and scheduled synchronization with cron-based scheduling
-- Implement incremental sync using last-modified timestamps when available
-- Provide detailed sync status tracking with progress indicators
-- Store sync history with timestamp, record counts, and error details
-- Support sync rollback for failed operations with data integrity protection
+**Data Processing & Upserts**:
+- Extract data using Google Apps Script's built-in spreadsheet reading methods
+- Transform data to match Supabase database schema requirements
+- Implement direct upserts to Supabase via REST API with conflict resolution
+- Handle data type conversion and validation within the script
+- Support batch operations for efficient database updates
+- Include data deduplication logic based on configurable key combinations
+
+**Background Processing & Calculations**:
+- Use Supabase Edge Functions for all metric calculations and data aggregations
+- Trigger calculations automatically after data upserts from Google Apps Script
+- Handle complex KPI computations that cannot be done in real-time
+- Implement data consistency checks and validation via Edge Functions
+- Process historical data imports and transformations through background functions
 

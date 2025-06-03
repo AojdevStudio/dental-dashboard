@@ -12,7 +12,9 @@ export interface AuthContext {
   authId: string;
   clinicIds: string[];
   currentClinicId?: string;
+  selectedClinicId?: string; // For multi-clinic users to switch context
   role?: string;
+  isSystemAdmin?: boolean;
 }
 
 /**
@@ -54,24 +56,45 @@ export async function getAuthContext(): Promise<AuthContext | null> {
       return null;
     }
 
-    // Get all clinic access for the user
-    const clinicAccess = await prisma.userClinicRole.findMany({
-      where: {
-        userId: dbUser.id,
-        isActive: true,
-      },
-      select: {
-        clinicId: true,
-        role: true,
-      },
-    });
+    const isSystemAdmin = dbUser.role === "system_admin";
+    let clinicIds: string[] = [];
+    let selectedClinicId: string | undefined;
+
+    if (isSystemAdmin) {
+      // System admins have access to all clinics
+      const allClinics = await prisma.clinic.findMany({
+        where: { status: "active" },
+        select: { id: true },
+      });
+      clinicIds = allClinics.map((c) => c.id);
+      
+      // Check for selected clinic in cookies/session
+      const selectedClinic = cookieStore.get("selectedClinicId");
+      selectedClinicId = selectedClinic?.value || clinicIds[0];
+    } else {
+      // Regular users get clinic access from UserClinicRole
+      const clinicAccess = await prisma.userClinicRole.findMany({
+        where: {
+          userId: dbUser.id,
+          isActive: true,
+        },
+        select: {
+          clinicId: true,
+          role: true,
+        },
+      });
+      clinicIds = clinicAccess.map((ca) => ca.clinicId);
+      selectedClinicId = dbUser.clinicId; // Use primary clinic for regular users
+    }
 
     return {
       userId: dbUser.id,
       authId: user.id,
-      clinicIds: clinicAccess.map((ca) => ca.clinicId),
+      clinicIds,
       currentClinicId: dbUser.clinicId, // Primary clinic
+      selectedClinicId,
       role: dbUser.role,
+      isSystemAdmin,
     };
   } catch (error) {
     console.error("Error getting auth context:", error);
@@ -137,29 +160,65 @@ export async function getAuthContextByAuthId(authId: string): Promise<AuthContex
       return null;
     }
 
-    // Get all clinic access for the user
-    const clinicAccess = await prisma.userClinicRole.findMany({
-      where: {
-        userId: dbUser.id,
-        isActive: true,
-      },
-      select: {
-        clinicId: true,
-        role: true,
-      },
-    });
+    const isSystemAdmin = dbUser.role === "system_admin";
+    let clinicIds: string[] = [];
+
+    if (isSystemAdmin) {
+      // System admins have access to all clinics
+      const allClinics = await prisma.clinic.findMany({
+        where: { status: "active" },
+        select: { id: true },
+      });
+      clinicIds = allClinics.map((c) => c.id);
+    } else {
+      // Regular users get clinic access from UserClinicRole
+      const clinicAccess = await prisma.userClinicRole.findMany({
+        where: {
+          userId: dbUser.id,
+          isActive: true,
+        },
+        select: {
+          clinicId: true,
+          role: true,
+        },
+      });
+      clinicIds = clinicAccess.map((ca) => ca.clinicId);
+    }
 
     return {
       userId: dbUser.id,
       authId,
-      clinicIds: clinicAccess.map((ca) => ca.clinicId),
+      clinicIds,
       currentClinicId: dbUser.clinicId, // Primary clinic
+      selectedClinicId: dbUser.clinicId, // Default to primary clinic
       role: dbUser.role,
+      isSystemAdmin,
     };
   } catch (error) {
     console.error("Error getting auth context by ID:", error);
     return null;
   }
+}
+
+/**
+ * Update the selected clinic for the current user
+ */
+export async function updateSelectedClinic(clinicId: string): Promise<void> {
+  const cookieStore = await cookies();
+  cookieStore.set("selectedClinicId", clinicId, {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "lax",
+    maxAge: 60 * 60 * 24 * 30, // 30 days
+  });
+}
+
+/**
+ * Get the selected clinic ID from cookies
+ */
+export async function getSelectedClinicId(): Promise<string | undefined> {
+  const cookieStore = await cookies();
+  return cookieStore.get("selectedClinicId")?.value;
 }
 
 /**
@@ -171,5 +230,6 @@ export function getServiceContext(): AuthContext {
     authId: "system",
     clinicIds: ["*"], // Access to all clinics
     role: "system",
+    isSystemAdmin: true,
   };
 }

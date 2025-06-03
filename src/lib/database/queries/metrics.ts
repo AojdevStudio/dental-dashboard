@@ -5,6 +5,7 @@
 
 import { prisma } from "../client";
 import { type AuthContext, validateClinicAccess, getUserClinicRole } from "../auth-context";
+import { buildClinicWhereClause } from "./utils";
 import type { Prisma } from "@/generated/prisma";
 
 export interface CreateMetricInput {
@@ -76,20 +77,8 @@ export async function getMetrics(
 ) {
   // Build where clause with clinic access validation
   const where: Prisma.MetricValueWhereInput = {
-    clinicId: {
-      in: filter.clinicId
-        ? [filter.clinicId] // Specific clinic if provided
-        : authContext.clinicIds, // All accessible clinics
-    },
+    ...buildClinicWhereClause(authContext, filter.clinicId),
   };
-
-  // Validate specific clinic access if requested
-  if (filter.clinicId) {
-    const hasAccess = await validateClinicAccess(authContext, filter.clinicId);
-    if (!hasAccess) {
-      throw new Error("Access denied to this clinic");
-    }
-  }
 
   // Apply additional filters
   if (filter.providerId) {
@@ -146,14 +135,8 @@ export async function getAggregatedMetrics(
     dateRange: { start: Date; end: Date };
   }
 ) {
-  // Validate clinic access
-  const hasAccess = await validateClinicAccess(authContext, clinicId);
-  if (!hasAccess) {
-    throw new Error("Access denied to this clinic");
-  }
-
   const where: Prisma.MetricAggregationWhereInput = {
-    clinicId,
+    ...buildClinicWhereClause(authContext, clinicId),
     aggregationType: options.aggregationType,
     periodStart: {
       gte: options.dateRange.start,
