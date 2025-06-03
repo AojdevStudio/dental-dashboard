@@ -116,7 +116,15 @@ Core entities managed by Prisma:
 
 - Use the Supabase MCP as much as possible to handle simple transactions
 
+## PRD Completion Workflow
+
+- Upon starting a feature implementation PRD from the docs/prds/backlog folder move the md file to the /docs/prds/doing folder
+- Once completed then move the file to the docs/prds/done folder
+- Document completion summary in the PROJECT_ROOT/.claude/completed folder in markdown format
+- **Important**: Always use the project-specific path: `/path/to/project/.claude/completed/` NOT the global user path
+
 ## Memories
 
 - Use Prisma for the schema changes since this is a significant structural update that should be tracked.
 - Use pnpm commands always, npm or npx is not allowed in this project.
+- **Completion summaries belong in PROJECT_ROOT/.claude/completed/ not ~/.claude/completed/**
