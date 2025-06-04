@@ -4,7 +4,7 @@
  */
 
 import { withAuth } from "@/lib/api/middleware";
-import { ApiResponse, ApiError, getDateRangeParams } from "@/lib/api/utils";
+import { ApiError, ApiResponse, getDateRangeParams } from "@/lib/api/utils";
 import * as metricQueries from "@/lib/database/queries/metrics";
 import { z } from "zod";
 

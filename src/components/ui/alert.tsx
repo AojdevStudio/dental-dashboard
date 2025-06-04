@@ -1,3 +1,4 @@
+import { type VariantProps, cva } from "class-variance-authority";
 /**
  * @file Alert Component
  * @description This file defines the Alert, AlertTitle, and AlertDescription components,
@@ -6,7 +7,6 @@
  * They are built using React's forwardRef for proper ref handling.
  */
 import * as React from "react";
-import { cva, type VariantProps } from "class-variance-authority";
 
 import { cn } from "@/lib/utils";
 

@@ -1,13 +1,13 @@
 /**
  * @vitest-environment node
  */
-import { describe, it, expect, beforeEach, vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { AuthContext } from "../auth-context";
-import * as userQueries from "../queries/users";
 import * as clinicQueries from "../queries/clinics";
-import * as metricQueries from "../queries/metrics";
 import * as goalQueries from "../queries/goals";
 import * as googleSheetsQueries from "../queries/google-sheets";
+import * as metricQueries from "../queries/metrics";
+import * as userQueries from "../queries/users";
 
 // Mock Prisma client
 vi.mock("../client", () => ({

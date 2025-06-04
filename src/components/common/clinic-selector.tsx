@@ -1,7 +1,5 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
 import {
   Select,
   SelectContent,
@@ -9,8 +7,10 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Building2 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { Building2 } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
 
 interface Clinic {
   id: string;
@@ -92,9 +92,7 @@ export function ClinicSelector({
             {selectedClinic ? (
               <div className="flex flex-col items-start">
                 <span className="text-sm font-medium">{selectedClinic.name}</span>
-                <span className="text-xs text-muted-foreground">
-                  {selectedClinic.location}
-                </span>
+                <span className="text-xs text-muted-foreground">{selectedClinic.location}</span>
               </div>
             ) : (
               "Select clinic..."
@@ -110,9 +108,7 @@ export function ClinicSelector({
             <SelectItem key={clinic.id} value={clinic.id}>
               <div className="flex flex-col items-start">
                 <span className="text-sm font-medium">{clinic.name}</span>
-                <span className="text-xs text-muted-foreground">
-                  {clinic.location}
-                </span>
+                <span className="text-xs text-muted-foreground">{clinic.location}</span>
               </div>
             </SelectItem>
           ))}

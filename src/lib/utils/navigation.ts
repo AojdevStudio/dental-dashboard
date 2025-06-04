@@ -1,7 +1,7 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
-import { type NavigationState } from "@/lib/types/navigation";
+import type { NavigationState } from "@/lib/types/navigation";
+import { useCallback, useEffect, useState } from "react";
 
 const STORAGE_KEY = "dashboard-navigation-state";
 

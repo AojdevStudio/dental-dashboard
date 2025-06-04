@@ -1,11 +1,11 @@
+import { DataMigration } from "@/scripts/data-migration/migrate-to-uuid";
+import { MigrationValidator } from "@/scripts/data-migration/validate-migration";
+import { PrismaClient } from "@prisma/client";
+import { v4 as uuidv4 } from "uuid";
 /**
  * @vitest-environment node
  */
-import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
-import { PrismaClient } from "@prisma/client";
-import { DataMigration } from "@/scripts/data-migration/migrate-to-uuid";
-import { MigrationValidator } from "@/scripts/data-migration/validate-migration";
-import { v4 as uuidv4 } from "uuid";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 // Mock Prisma Client
 vi.mock("@prisma/client", () => ({

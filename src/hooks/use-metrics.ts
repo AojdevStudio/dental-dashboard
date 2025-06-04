@@ -36,13 +36,13 @@ interface MetricFilters {
 
 /**
  * Custom hook for managing metrics data with React Query caching
- * 
+ *
  * This hook provides:
  * - Automatic caching of metrics data
  * - Intelligent cache invalidation based on filters
  * - Support for aggregated and raw metrics
  * - Type-safe metric operations
- * 
+ *
  * @example
  * const { metrics, aggregatedMetrics, isLoading } = useMetrics({
  *   startDate: '2024-01-01',
@@ -63,17 +63,17 @@ export function useMetrics(filters: MetricFilters = {}) {
    */
   const fetchMetrics = async (): Promise<MetricValue[]> => {
     const params = new URLSearchParams();
-    
+
     if (selectedClinicId) params.append("clinicId", selectedClinicId);
     if (filters.startDate) params.append("startDate", filters.startDate);
     if (filters.endDate) params.append("endDate", filters.endDate);
     if (filters.providerId) params.append("providerId", filters.providerId);
     if (filters.metricIds?.length) {
-      filters.metricIds.forEach(id => params.append("metricIds", id));
+      filters.metricIds.forEach((id) => params.append("metricIds", id));
     }
 
     const response = await fetch(`/api/metrics?${params.toString()}`);
-    
+
     if (!response.ok) {
       throw new Error("Failed to fetch metrics");
     }
@@ -87,14 +87,14 @@ export function useMetrics(filters: MetricFilters = {}) {
    */
   const fetchAggregatedMetrics = async (): Promise<AggregatedMetrics> => {
     const params = new URLSearchParams();
-    
+
     if (selectedClinicId) params.append("clinicId", selectedClinicId);
     if (filters.startDate) params.append("startDate", filters.startDate);
     if (filters.endDate) params.append("endDate", filters.endDate);
     if (filters.providerId) params.append("providerId", filters.providerId);
 
     const response = await fetch(`/api/metrics/aggregated?${params.toString()}`);
-    
+
     if (!response.ok) {
       throw new Error("Failed to fetch aggregated metrics");
     }

@@ -3,9 +3,9 @@
  * Multi-tenant aware user operations
  */
 
-import { prisma } from "../client";
-import { type AuthContext, validateClinicAccess } from "../auth-context";
 import type { Prisma } from "@/generated/prisma";
+import { type AuthContext, validateClinicAccess } from "../auth-context";
+import { prisma } from "../client";
 
 export interface CreateUserInput {
   email: string;

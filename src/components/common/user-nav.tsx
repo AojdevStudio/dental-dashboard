@@ -1,7 +1,5 @@
 "use client";
 
-import React from "react";
-import { useAuth } from "@/hooks/use-auth";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -9,7 +7,9 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { useAuth } from "@/hooks/use-auth";
 import { LogOut, User as UserIcon } from "lucide-react";
+import React from "react";
 
 import { signOutWithCleanup } from "@/app/auth/actions";
 

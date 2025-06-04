@@ -1,17 +1,17 @@
 "use client";
 
-import { useAuth } from "@/hooks/use-auth";
-import { cn } from "@/lib/utils";
-import { type TopNavProps } from "@/lib/types/layout";
-import { UserNav } from "./user-nav";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Calendar } from "@/components/ui/calendar";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { Bell, Calendar as CalendarIcon, Search, Settings } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Calendar } from "@/components/ui/calendar";
+import { Input } from "@/components/ui/input";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { useAuth } from "@/hooks/use-auth";
+import type { TopNavProps } from "@/lib/types/layout";
+import { cn } from "@/lib/utils";
 import { format } from "date-fns";
+import { Bell, Calendar as CalendarIcon, Search, Settings } from "lucide-react";
 import * as React from "react";
+import { UserNav } from "./user-nav";
 
 export function TopNav({
   className,
@@ -20,7 +20,7 @@ export function TopNav({
   showNotifications = true,
 }: TopNavProps) {
   const { user, isAuthenticated } = useAuth();
-  
+
   // Date range state
   const [dateRange, setDateRange] = React.useState<{
     from: Date;
@@ -29,7 +29,7 @@ export function TopNav({
     from: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000), // 30 days ago
     to: new Date(), // today
   });
-  
+
   const [isDatePickerOpen, setIsDatePickerOpen] = React.useState(false);
 
   return (
@@ -52,7 +52,7 @@ export function TopNav({
             />
           </div>
         )}
-        
+
         {showDateRangePicker && (
           <Popover open={isDatePickerOpen} onOpenChange={setIsDatePickerOpen}>
             <PopoverTrigger asChild>
@@ -109,12 +109,7 @@ export function TopNav({
       {/* Right section - Actions and User */}
       <div className="flex items-center gap-2">
         {showNotifications && (
-          <Button
-            variant="ghost"
-            size="icon"
-            className="relative"
-            aria-label="Notifications"
-          >
+          <Button variant="ghost" size="icon" className="relative" aria-label="Notifications">
             <Bell className="h-5 w-5 text-destructive" />
             <span className="absolute -right-1 -top-1 text-xs font-semibold text-destructive">
               3
@@ -122,11 +117,7 @@ export function TopNav({
           </Button>
         )}
 
-        <Button
-          variant="ghost"
-          size="icon"
-          aria-label="Settings"
-        >
+        <Button variant="ghost" size="icon" aria-label="Settings">
           <Settings className="h-5 w-5" />
         </Button>
 

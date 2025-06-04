@@ -3,9 +3,9 @@
  * Multi-tenant aware metrics endpoints
  */
 
-import { withAuth } from "@/lib/api/middleware";
-import { ApiResponse, ApiError, getPaginationParams, getDateRangeParams } from "@/lib/api/utils";
 import { cachedJson } from "@/lib/api/cache-headers";
+import { withAuth } from "@/lib/api/middleware";
+import { ApiError, ApiResponse, getDateRangeParams, getPaginationParams } from "@/lib/api/utils";
 import * as metricQueries from "@/lib/database/queries/metrics";
 import { z } from "zod";
 

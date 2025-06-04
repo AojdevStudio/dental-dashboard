@@ -1,6 +1,6 @@
-import { type NextRequest, NextResponse } from "next/server";
-import { getSpreadsheetMetadata } from "@/services/google/sheets";
 import { prisma } from "@/lib/database/prisma";
+import { getSpreadsheetMetadata } from "@/services/google/sheets";
+import { type NextRequest, NextResponse } from "next/server";
 
 export async function GET(
   request: NextRequest,

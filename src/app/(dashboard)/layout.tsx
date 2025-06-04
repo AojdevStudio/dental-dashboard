@@ -8,7 +8,7 @@ export default async function DashboardLayoutServer({
   children: React.ReactNode;
 }) {
   const authContext = await getAuthContext();
-  
+
   // Get user's accessible clinics
   let clinics = [];
   if (authContext) {
@@ -41,7 +41,7 @@ export default async function DashboardLayoutServer({
   }
 
   return (
-    <DashboardLayout 
+    <DashboardLayout
       clinics={clinics}
       currentClinicId={authContext?.selectedClinicId}
       isSystemAdmin={authContext?.isSystemAdmin || false}

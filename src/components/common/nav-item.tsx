@@ -1,11 +1,11 @@
 "use client";
 
+import { Badge } from "@/components/ui/badge";
+import type { NavItem } from "@/lib/types/navigation";
+import { cn } from "@/lib/utils";
+import { ChevronDown } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { cn } from "@/lib/utils";
-import { type NavItem } from "@/lib/types/navigation";
-import { Badge } from "@/components/ui/badge";
-import { ChevronDown } from "lucide-react";
 
 interface NavItemComponentProps {
   item: NavItem;
@@ -51,14 +51,7 @@ export function NavItemComponent({
       )}
       {!isCollapsed && (
         <>
-          <span
-            className={cn(
-              "flex-1 truncate",
-              isNested ? "text-sm" : ""
-            )}
-          >
-            {item.title}
-          </span>
+          <span className={cn("flex-1 truncate", isNested ? "text-sm" : "")}>{item.title}</span>
           {item.badge && (
             <Badge variant="secondary" className="ml-auto">
               {item.badge}
@@ -66,10 +59,7 @@ export function NavItemComponent({
           )}
           {hasChildren && (
             <ChevronDown
-              className={cn(
-                "h-4 w-4 transition-transform",
-                isExpanded && "rotate-180"
-              )}
+              className={cn("h-4 w-4 transition-transform", isExpanded && "rotate-180")}
               aria-hidden="true"
             />
           )}

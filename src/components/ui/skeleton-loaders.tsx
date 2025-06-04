@@ -1,13 +1,13 @@
 /**
  * @fileoverview Pre-built skeleton loading components for common UI patterns
- * 
+ *
  * This file provides ready-to-use skeleton loading components for various
  * sections of the application, ensuring consistent loading states across
  * the dashboard while improving perceived performance.
  */
 
-import { Skeleton } from "./skeleton";
 import { Card, CardContent, CardHeader } from "./card";
+import { Skeleton } from "./skeleton";
 
 /**
  * MetricCardSkeleton - Loading state for metric cards
@@ -69,7 +69,7 @@ export function TableSkeleton({ rows = 5 }: { rows?: number }) {
           <Skeleton className="h-4 w-20 ml-auto" />
         </div>
       </div>
-      
+
       {/* Table rows */}
       {Array.from({ length: rows }).map((_, i) => (
         <div key={i} className="border-b">

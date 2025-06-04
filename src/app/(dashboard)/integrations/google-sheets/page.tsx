@@ -1,11 +1,11 @@
 "use client";
 
-import Link from "next/link";
-import { useSearchParams } from "next/navigation";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Alert, AlertDescription } from "@/components/ui/alert";
 import { CheckCircle } from "lucide-react";
+import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 
 /** Google Sheets Integration Page */
 export default function GoogleSheetsPage() {
@@ -21,7 +21,8 @@ export default function GoogleSheetsPage() {
           <Alert className="border-green-200 bg-green-50">
             <CheckCircle className="h-4 w-4 text-green-600" />
             <AlertDescription className="text-green-800">
-              Column mappings saved successfully! Your Google Sheets data will now be synchronized with your dental metrics.
+              Column mappings saved successfully! Your Google Sheets data will now be synchronized
+              with your dental metrics.
             </AlertDescription>
           </Alert>
         )}

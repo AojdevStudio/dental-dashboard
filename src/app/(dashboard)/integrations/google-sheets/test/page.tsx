@@ -1,12 +1,12 @@
 "use client";
 
-import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
 
 interface DataSource {
   id: string;
@@ -476,13 +476,15 @@ export default function GoogleSheetsTestPage() {
               <div className="mt-4 p-4 bg-gray-50 rounded overflow-auto">
                 <h4 className="font-medium mb-2">Sheet Data:</h4>
                 <pre className="text-xs">{JSON.stringify(sheetData, null, 2)}</pre>
-                
+
                 {/* Add button to test column mapping */}
                 <div className="mt-4 pt-4 border-t">
                   <Button
                     onClick={() => {
-                      const sheetName = testRange.split('!')[0] || 'Sheet1';
-                      router.push(`/integrations/google-sheets/mapping?spreadsheetId=${encodeURIComponent(testSpreadsheetId)}&sheetName=${encodeURIComponent(sheetName)}`);
+                      const sheetName = testRange.split("!")[0] || "Sheet1";
+                      router.push(
+                        `/integrations/google-sheets/mapping?spreadsheetId=${encodeURIComponent(testSpreadsheetId)}&sheetName=${encodeURIComponent(sheetName)}`
+                      );
                     }}
                     className="w-full"
                   >

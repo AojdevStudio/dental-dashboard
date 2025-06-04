@@ -9,15 +9,15 @@
  * - API route integration
  */
 
-import { describe, it, expect, beforeAll, afterAll, beforeEach } from "vitest";
-import { createClient } from "@supabase/supabase-js";
+import { getAuthContext, isClinicAdmin, validateClinicAccess } from "@/lib/database/auth-context";
 import { prisma } from "@/lib/database/client";
-import { getAuthContext, validateClinicAccess, isClinicAdmin } from "@/lib/database/auth-context";
-import * as userQueries from "@/lib/database/queries/users";
 import * as clinicQueries from "@/lib/database/queries/clinics";
-import * as metricQueries from "@/lib/database/queries/metrics";
 import * as goalQueries from "@/lib/database/queries/goals";
+import * as metricQueries from "@/lib/database/queries/metrics";
+import * as userQueries from "@/lib/database/queries/users";
+import { createClient } from "@supabase/supabase-js";
 import { v4 as uuidv4 } from "uuid";
+import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
 
 // Test database connection
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;

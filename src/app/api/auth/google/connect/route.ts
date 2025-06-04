@@ -10,11 +10,11 @@
  * with a specific data source in the application.
  */
 
-import { generateAuthUrl } from "@/services/google/auth";
-import { type NextRequest, NextResponse } from "next/server";
 import { withAuth } from "@/lib/api/middleware";
 import { ApiError, ApiResponse } from "@/lib/api/utils";
 import * as googleSheetsQueries from "@/lib/database/queries/google-sheets";
+import { generateAuthUrl } from "@/services/google/auth";
+import { type NextRequest, NextResponse } from "next/server";
 
 /**
  * Handles GET requests to initiate Google OAuth authentication.

@@ -5,10 +5,10 @@
 
 "use client";
 
-import { useState, useTransition } from "react";
+import { signInWithOAuth } from "@/actions/auth/oauth";
 import { signOut } from "@/app/auth/actions";
 import { signInWithVerification } from "@/app/auth/actions";
-import { signInWithOAuth } from "@/actions/auth/oauth";
+import { useState, useTransition } from "react";
 
 /**
  * LoginPage component.

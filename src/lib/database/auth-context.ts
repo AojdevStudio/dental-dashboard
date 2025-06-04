@@ -3,8 +3,8 @@
  * Provides user and clinic context for database queries
  */
 
-import { createClient } from "@supabase/supabase-js";
 import { cookies } from "next/headers";
+import { createClient } from "../supabase/server";
 import { prisma } from "./client";
 
 export interface AuthContext {
@@ -22,29 +22,26 @@ export interface AuthContext {
  */
 export async function getAuthContext(): Promise<AuthContext | null> {
   try {
+    console.log("🔍 Starting getAuthContext...");
+    // Call cookies() before creating client to opt out of Next.js caching
     const cookieStore = await cookies();
-    const supabase = createClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-      {
-        cookies: {
-          get(name: string) {
-            return cookieStore.get(name)?.value;
-          },
-        },
-      }
-    );
+    const supabase = await createClient();
 
+    console.log("📡 Getting Supabase user...");
     const {
       data: { user },
       error,
     } = await supabase.auth.getUser();
 
     if (error || !user) {
+      console.log("❌ Supabase auth failed:", error?.message || "No user");
       return null;
     }
 
+    console.log("✅ Supabase user found:", user.email, "ID:", user.id);
+
     // Get user details and clinic access
+    console.log("🔍 Looking up database user with authId:", user.id);
     const dbUser = await prisma.user.findUnique({
       where: { authId: user.id },
       include: {
@@ -53,25 +50,33 @@ export async function getAuthContext(): Promise<AuthContext | null> {
     });
 
     if (!dbUser) {
+      console.log("❌ Database user not found for authId:", user.id);
       return null;
     }
+
+    console.log("✅ Database user found:", dbUser.email, "Role:", dbUser.role);
 
     const isSystemAdmin = dbUser.role === "system_admin";
     let clinicIds: string[] = [];
     let selectedClinicId: string | undefined;
 
     if (isSystemAdmin) {
+      console.log("👑 System admin detected, fetching all active clinics...");
       // System admins have access to all clinics
       const allClinics = await prisma.clinic.findMany({
         where: { status: "active" },
         select: { id: true },
       });
+      console.log("🏥 Found clinics:", allClinics);
       clinicIds = allClinics.map((c) => c.id);
-      
+      console.log("🆔 Clinic IDs:", clinicIds);
+
       // Check for selected clinic in cookies/session
       const selectedClinic = cookieStore.get("selectedClinicId");
       selectedClinicId = selectedClinic?.value || clinicIds[0];
+      console.log("🎯 Selected clinic ID:", selectedClinicId);
     } else {
+      console.log("👤 Regular user, fetching clinic roles...");
       // Regular users get clinic access from UserClinicRole
       const clinicAccess = await prisma.userClinicRole.findMany({
         where: {
@@ -83,21 +88,25 @@ export async function getAuthContext(): Promise<AuthContext | null> {
           role: true,
         },
       });
+      console.log("🔑 Clinic access found:", clinicAccess);
       clinicIds = clinicAccess.map((ca) => ca.clinicId);
-      selectedClinicId = dbUser.clinicId; // Use primary clinic for regular users
+      selectedClinicId = dbUser.clinicId || undefined; // Use primary clinic for regular users
     }
 
-    return {
+    const authContext = {
       userId: dbUser.id,
       authId: user.id,
       clinicIds,
-      currentClinicId: dbUser.clinicId, // Primary clinic
+      currentClinicId: dbUser.clinicId || undefined, // Primary clinic
       selectedClinicId,
       role: dbUser.role,
       isSystemAdmin,
     };
+
+    console.log("🎉 Auth context created successfully:", authContext);
+    return authContext;
   } catch (error) {
-    console.error("Error getting auth context:", error);
+    console.error("❌ Error getting auth context:", error);
     return null;
   }
 }
@@ -189,8 +198,8 @@ export async function getAuthContextByAuthId(authId: string): Promise<AuthContex
       userId: dbUser.id,
       authId,
       clinicIds,
-      currentClinicId: dbUser.clinicId, // Primary clinic
-      selectedClinicId: dbUser.clinicId, // Default to primary clinic
+      currentClinicId: dbUser.clinicId || undefined, // Primary clinic
+      selectedClinicId: dbUser.clinicId || undefined, // Default to primary clinic
       role: dbUser.role,
       isSystemAdmin,
     };

@@ -16,8 +16,8 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "@/styles/globals.css";
-import { Providers } from "./(dashboard)/providers";
 import { StagewiseToolbar } from "@stagewise/toolbar-next";
+import { Providers } from "./(dashboard)/providers";
 
 /**
  * Stagewise toolbar configuration

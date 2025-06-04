@@ -1,9 +1,9 @@
+import { Button } from "@/components/ui/button";
 /**
  * Integrations Page
  * Main page for managing data integrations and connections
  */
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
 import { FileSpreadsheet, Plus } from "lucide-react";
 import Link from "next/link";
 
@@ -24,9 +24,7 @@ export default function IntegrationsPage() {
               <FileSpreadsheet className="h-5 w-5" />
               Google Sheets
             </CardTitle>
-            <CardDescription>
-              Connect your Google Sheets for data synchronization
-            </CardDescription>
+            <CardDescription>Connect your Google Sheets for data synchronization</CardDescription>
           </CardHeader>
           <CardContent>
             <Link href="/integrations/google-sheets">
@@ -55,9 +53,7 @@ export default function IntegrationsPage() {
         <Card className="opacity-50">
           <CardHeader>
             <CardTitle>Imaging Systems</CardTitle>
-            <CardDescription>
-              Connect your digital imaging systems (Coming Soon)
-            </CardDescription>
+            <CardDescription>Connect your digital imaging systems (Coming Soon)</CardDescription>
           </CardHeader>
           <CardContent>
             <Button disabled className="w-full">

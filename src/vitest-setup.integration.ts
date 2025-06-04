@@ -4,8 +4,8 @@
  * Configures the test environment for integration tests
  */
 
-import { beforeAll, afterAll } from "vitest";
 import dotenv from "dotenv";
+import { afterAll, beforeAll } from "vitest";
 
 // Load test environment variables
 dotenv.config({ path: ".env.test" });

@@ -1,4 +1,4 @@
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "./use-auth";
 
 /**
@@ -16,13 +16,13 @@ interface Clinic {
 
 /**
  * Custom hook for managing clinic data with React Query caching
- * 
+ *
  * This hook provides:
  * - Automatic caching of clinic data
  * - Background refetching when data becomes stale
  * - Optimistic updates for better UX
  * - Type-safe clinic operations
- * 
+ *
  * @example
  * const { clinics, isLoading, selectedClinic, switchClinic } = useClinics();
  */
@@ -38,7 +38,7 @@ export function useClinics() {
    */
   const fetchClinics = async (): Promise<Clinic[]> => {
     const response = await fetch("/api/clinics");
-    
+
     if (!response.ok) {
       throw new Error("Failed to fetch clinics");
     }
@@ -50,7 +50,12 @@ export function useClinics() {
   /**
    * Query for fetching clinics with caching
    */
-  const { data: clinics = [], isLoading, error, refetch } = useQuery({
+  const {
+    data: clinics = [],
+    isLoading,
+    error,
+    refetch,
+  } = useQuery({
     queryKey: clinicsQueryKey,
     queryFn: fetchClinics,
     enabled: !!user, // Only fetch if user is authenticated
@@ -69,7 +74,7 @@ export function useClinics() {
   /**
    * Get the selected clinic object
    */
-  const selectedClinic = clinics.find(clinic => clinic.id === getSelectedClinicId()) || null;
+  const selectedClinic = clinics.find((clinic) => clinic.id === getSelectedClinicId()) || null;
 
   /**
    * Switch to a different clinic
@@ -93,7 +98,7 @@ export function useClinics() {
     onSuccess: (data, clinicId) => {
       // Update session storage
       sessionStorage.setItem("selectedClinicId", clinicId);
-      
+
       // Invalidate queries that depend on clinic selection
       queryClient.invalidateQueries({ queryKey: ["metrics"] });
       queryClient.invalidateQueries({ queryKey: ["providers"] });

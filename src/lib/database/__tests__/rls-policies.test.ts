@@ -1,9 +1,9 @@
+import { createClient } from "@supabase/supabase-js";
+import { v4 as uuidv4 } from "uuid";
 /**
  * @vitest-environment node
  */
-import { describe, it, expect, beforeEach, afterEach } from "vitest";
-import { createClient } from "@supabase/supabase-js";
-import { v4 as uuidv4 } from "uuid";
+import { afterEach, beforeEach, describe, expect, it } from "vitest";
 
 // Test constants
 const supabaseUrl = process.env.SUPABASE_URL || "http://localhost:54321";

@@ -10,12 +10,13 @@
  * user experience by showing a loading state that matches the final UI structure.
  */
 
-import { Skeleton } from "@/components/ui/skeleton";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Skeleton } from "@/components/ui/skeleton";
 import { DashboardSkeleton } from "@/components/ui/skeleton-loaders";
 import { getAuthContext } from "@/lib/database/auth-context";
 import { prisma } from "@/lib/database/prisma";
 import { Suspense } from "react";
+import DashboardClient from "./dashboard-client";
 
 /**
  * Dashboard Page Component
@@ -27,7 +28,7 @@ import { Suspense } from "react";
  */
 export default async function DashboardPage() {
   const authContext = await getAuthContext();
-  
+
   if (!authContext) {
     return <div>Unauthorized</div>;
   }
@@ -68,81 +69,43 @@ export default async function DashboardPage() {
  *
  * @returns {JSX.Element} The rendered dashboard content
  */
-async function DashboardContent({ 
-  authContext, 
-  clinic 
-}: { 
-  authContext: any; 
+async function DashboardContent({
+  authContext,
+  clinic,
+}: {
+  authContext: any;
   clinic: any;
 }) {
+  // Prepare initial data for client component
+  const initialData = {
+    clinic,
+    isSystemAdmin: authContext.isSystemAdmin,
+    selectedClinicId: authContext.selectedClinicId,
+    userId: authContext.userId,
+  };
+
   return (
     <div className="w-full space-y-6">
       <div>
         <h1 className="text-3xl font-bold">Dashboard</h1>
         <p className="text-muted-foreground mt-2">
-          {authContext.isSystemAdmin && authContext.selectedClinicId === "all" 
-            ? "Viewing all clinics" 
-            : clinic 
+          {authContext.isSystemAdmin && authContext.selectedClinicId === "all"
+            ? "Viewing all clinics"
+            : clinic
               ? `${clinic.name} - ${clinic.location}`
               : "Select a clinic to view metrics"}
         </p>
       </div>
 
-      {/* Summary Cards */}
-      {clinic && (
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Total Users</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{clinic._count.users}</div>
-              <p className="text-xs text-muted-foreground">Active staff members</p>
-            </CardContent>
-          </Card>
-          
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Providers</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{clinic._count.providers}</div>
-              <p className="text-xs text-muted-foreground">Dentists and hygienists</p>
-            </CardContent>
-          </Card>
-          
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Metrics Tracked</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{clinic._count.metrics}</div>
-              <p className="text-xs text-muted-foreground">Data points collected</p>
-            </CardContent>
-          </Card>
-          
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Status</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold capitalize">Active</div>
-              <p className="text-xs text-muted-foreground">Clinic operational status</p>
-            </CardContent>
-          </Card>
-        </div>
-      )}
-
-      {/* All Clinics View for System Admin */}
-      {authContext.isSystemAdmin && authContext.selectedClinicId === "all" && (
+      {/* Main Dashboard Content */}
+      {clinic ? (
+        <DashboardClient initialData={initialData} />
+      ) : authContext.isSystemAdmin && authContext.selectedClinicId === "all" ? (
         <div className="space-y-4">
           <h2 className="text-xl font-semibold">All Clinics Overview</h2>
           <AllClinicsOverview />
         </div>
-      )}
-
-      {/* Empty State */}
-      {!clinic && !authContext.isSystemAdmin && (
+      ) : (
         <Card>
           <CardHeader>
             <CardTitle>No Clinic Selected</CardTitle>
@@ -210,4 +173,3 @@ async function AllClinicsOverview() {
     </div>
   );
 }
-

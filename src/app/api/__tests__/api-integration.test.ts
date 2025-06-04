@@ -8,15 +8,15 @@
  * - Response formats
  */
 
-import { describe, it, expect, beforeAll, afterAll, beforeEach, vi } from "vitest";
-import { NextRequest } from "next/server";
-import { createClient } from "@supabase/supabase-js";
-import { prisma } from "@/lib/database/client";
-import { GET as getUsersRoute, POST as createUserRoute } from "@/app/api/users/route";
 import { GET as getClinicsRoute } from "@/app/api/clinics/route";
-import { GET as getMetricsRoute, POST as createMetricRoute } from "@/app/api/metrics/route";
-import { GET as getGoalsRoute, POST as createGoalRoute } from "@/app/api/goals/route";
+import { POST as createGoalRoute, GET as getGoalsRoute } from "@/app/api/goals/route";
+import { POST as createMetricRoute, GET as getMetricsRoute } from "@/app/api/metrics/route";
+import { POST as createUserRoute, GET as getUsersRoute } from "@/app/api/users/route";
+import { prisma } from "@/lib/database/client";
+import { createClient } from "@supabase/supabase-js";
+import { NextRequest } from "next/server";
 import { v4 as uuidv4 } from "uuid";
+import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 
 // Mock auth context for testing
 vi.mock("@/lib/database/auth-context", () => ({
@@ -26,7 +26,7 @@ vi.mock("@/lib/database/auth-context", () => ({
 }));
 
 // Import mocked functions
-import { getAuthContext, validateClinicAccess, isClinicAdmin } from "@/lib/database/auth-context";
+import { getAuthContext, isClinicAdmin, validateClinicAccess } from "@/lib/database/auth-context";
 
 // Test data
 const testData = {

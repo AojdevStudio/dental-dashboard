@@ -1,7 +1,7 @@
-import { type NextRequest, NextResponse } from "next/server";
-import { createClient } from "@/lib/supabase/server";
-import { prisma } from "@/lib/database/prisma";
 import { randomBytes } from "crypto";
+import { prisma } from "@/lib/database/prisma";
+import { createClient } from "@/lib/supabase/server";
+import { type NextRequest, NextResponse } from "next/server";
 
 // Generate a 6-character alphanumeric clinic code
 function generateClinicCode(): string {
@@ -10,7 +10,7 @@ function generateClinicCode(): string {
 
 export async function POST(request: NextRequest) {
   let data: any;
-  
+
   try {
     data = await request.json();
     const supabase = await createClient();

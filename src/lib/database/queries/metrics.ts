@@ -3,10 +3,10 @@
  * Multi-tenant aware metrics operations
  */
 
-import { prisma } from "../client";
-import { type AuthContext, validateClinicAccess, getUserClinicRole } from "../auth-context";
-import { buildClinicWhereClause } from "./utils";
 import type { Prisma } from "@/generated/prisma";
+import { type AuthContext, getUserClinicRole, validateClinicAccess } from "../auth-context";
+import { prisma } from "../client";
+import { buildClinicWhereClause } from "./utils";
 
 export interface CreateMetricInput {
   metricDefinitionId: string;

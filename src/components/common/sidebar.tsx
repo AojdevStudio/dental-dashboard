@@ -1,23 +1,23 @@
 "use client";
 
-import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { NavItemComponent } from "./nav-item";
-import { type SidebarProps } from "@/lib/types/layout";
-import { type NavSection } from "@/lib/types/navigation";
+import type { SidebarProps } from "@/lib/types/layout";
+import type { NavSection } from "@/lib/types/navigation";
+import { cn } from "@/lib/utils";
+import { useNavigationState } from "@/lib/utils/navigation";
 import {
-  LayoutDashboard,
-  TrendingUp,
-  Users,
-  FileText,
-  Target,
-  Link2,
-  Settings,
   ChevronLeft,
   ChevronRight,
+  FileText,
+  LayoutDashboard,
+  Link2,
+  Settings,
+  Target,
+  TrendingUp,
+  Users,
 } from "lucide-react";
-import { useNavigationState } from "@/lib/utils/navigation";
+import { NavItemComponent } from "./nav-item";
 
 // Define the navigation structure
 const navigation: NavSection[] = [
@@ -106,13 +106,8 @@ const navigation: NavSection[] = [
 ];
 
 export function Sidebar({ className }: SidebarProps) {
-  const {
-    isSidebarCollapsed,
-    expandedSections,
-    toggleSidebar,
-    setActiveItem,
-    toggleSection,
-  } = useNavigationState();
+  const { isSidebarCollapsed, expandedSections, toggleSidebar, setActiveItem, toggleSection } =
+    useNavigationState();
 
   return (
     <aside
@@ -126,9 +121,7 @@ export function Sidebar({ className }: SidebarProps) {
     >
       {/* Logo/Brand */}
       <div className="flex h-16 items-center justify-between border-b px-4">
-        {!isSidebarCollapsed && (
-          <h1 className="text-xl font-semibold">Dental Dashboard</h1>
-        )}
+        {!isSidebarCollapsed && <h1 className="text-xl font-semibold">Dental Dashboard</h1>}
         <Button
           variant="ghost"
           size="icon"
@@ -165,22 +158,20 @@ export function Sidebar({ className }: SidebarProps) {
                       onItemClick={setActiveItem}
                     />
                     {/* Nested items */}
-                    {item.children &&
-                      expandedSections.includes(item.id) &&
-                      !isSidebarCollapsed && (
-                        <ul role="list" className="mt-1 space-y-1">
-                          {item.children.map((child) => (
-                            <li key={child.id}>
-                              <NavItemComponent
-                                item={child}
-                                isCollapsed={isSidebarCollapsed}
-                                isNested
-                                onItemClick={setActiveItem}
-                              />
-                            </li>
-                          ))}
-                        </ul>
-                      )}
+                    {item.children && expandedSections.includes(item.id) && !isSidebarCollapsed && (
+                      <ul role="list" className="mt-1 space-y-1">
+                        {item.children.map((child) => (
+                          <li key={child.id}>
+                            <NavItemComponent
+                              item={child}
+                              isCollapsed={isSidebarCollapsed}
+                              isNested
+                              onItemClick={setActiveItem}
+                            />
+                          </li>
+                        ))}
+                      </ul>
+                    )}
                   </li>
                 ))}
               </ul>

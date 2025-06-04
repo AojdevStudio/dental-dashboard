@@ -3,16 +3,16 @@
  * Provides authentication and auth context for API routes
  */
 
-import { type NextRequest, NextResponse } from "next/server";
-import { createClient } from "@supabase/supabase-js";
-import { getAuthContext, type AuthContext } from "@/lib/database/auth-context";
-import { cookies } from "next/headers";
 import { handleApiError } from "@/lib/api/utils";
+import { type AuthContext, getAuthContext } from "@/lib/database/auth-context";
+import { createClient } from "@supabase/supabase-js";
+import { cookies } from "next/headers";
+import { type NextRequest, NextResponse } from "next/server";
 
 export type ApiHandler = (
   request: NextRequest,
   context: {
-    params?: Record<string, string> | Promise<Record<string, string>>;
+    params?: Promise<Record<string, string>>;
     authContext: AuthContext;
   }
 ) => Promise<NextResponse>;
@@ -26,8 +26,11 @@ export function withAuth(
     requireAdmin?: boolean;
     requireClinicAdmin?: boolean;
   }
-): (request: NextRequest, context: { params?: Record<string, string> | Promise<Record<string, string>> }) => Promise<NextResponse> {
-  return async (request: NextRequest, context: { params?: Record<string, string> | Promise<Record<string, string>> }) => {
+): (
+  request: NextRequest,
+  context: { params?: Promise<Record<string, string>> }
+) => Promise<NextResponse> {
+  return async (request: NextRequest, context: { params?: Promise<Record<string, string>> }) => {
     try {
       // Get auth context
       const authContext = await getAuthContext();

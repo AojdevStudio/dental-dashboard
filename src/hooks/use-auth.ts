@@ -1,6 +1,6 @@
+import { createClient } from "@/lib/supabase/client";
 import type { AuthChangeEvent, Session, User } from "@supabase/supabase-js";
 import { usePathname, useRouter } from "next/navigation";
-import { createClient } from "@/lib/supabase/client";
 /**
  * Authentication hook for managing user authentication state
  *
@@ -131,7 +131,7 @@ export function useAuth(): AuthState {
         } = await supabase.auth.getSession();
         setSession(session);
         setUser(session?.user ?? null);
-        
+
         // Fetch database user information
         await fetchDbUser(session?.user ?? null);
       } catch (error) {
@@ -150,7 +150,7 @@ export function useAuth(): AuthState {
       async (event: AuthChangeEvent, currentSession: Session | null) => {
         setSession(currentSession);
         setUser(currentSession?.user ?? null);
-        
+
         // Fetch database user information when auth state changes
         await fetchDbUser(currentSession?.user ?? null);
         setIsLoading(false);

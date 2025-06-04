@@ -1,8 +1,8 @@
-import { NextRequest } from "next/server";
-import { z } from "zod";
 import { withAuth } from "@/lib/api/middleware";
 import { ApiError, ApiResponse } from "@/lib/api/utils";
 import * as goalQueries from "@/lib/database/queries/goals";
+import { NextRequest } from "next/server";
+import { z } from "zod";
 
 // Schema for goal update
 const updateGoalSchema = z.object({

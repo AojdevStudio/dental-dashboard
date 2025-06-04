@@ -3,10 +3,10 @@
  * Multi-tenant aware user management endpoints
  */
 
-import { NextRequest } from "next/server";
 import { withAuth } from "@/lib/api/middleware";
-import { ApiResponse, ApiError, getPaginationParams } from "@/lib/api/utils";
+import { ApiError, ApiResponse, getPaginationParams } from "@/lib/api/utils";
 import * as userQueries from "@/lib/database/queries/users";
+import { NextRequest } from "next/server";
 import { z } from "zod";
 
 // Request/Response types

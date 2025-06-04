@@ -3,9 +3,9 @@
  * Multi-tenant aware goal operations
  */
 
-import { prisma } from "../client";
-import { type AuthContext, validateClinicAccess, getUserClinicRole } from "../auth-context";
 import type { Prisma } from "@/generated/prisma";
+import { type AuthContext, getUserClinicRole, validateClinicAccess } from "../auth-context";
+import { prisma } from "../client";
 
 export interface CreateGoalInput {
   metricDefinitionId: string;

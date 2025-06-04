@@ -10,12 +10,12 @@
  */
 "use client";
 
-import type * as React from "react";
-import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import {
   Select,
   SelectContent,
@@ -23,11 +23,11 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Checkbox } from "@/components/ui/checkbox";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Building2, Eye, EyeOff, UserPlus } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Eye, EyeOff, Building2, UserPlus } from "lucide-react";
+import type * as React from "react";
+import { useState } from "react";
 
 interface RegistrationFormData {
   // Core fields
@@ -249,47 +249,47 @@ export function RegisterFormComprehensive() {
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div className="space-y-2">
-        <Label htmlFor="password">Password *</Label>
-        <div className="relative">
-          <Input
-            id="password"
-            type={showPassword ? "text" : "password"}
-            value={formData.password}
-            onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-            placeholder="Minimum 8 characters"
-            required
-            disabled={loading}
-          />
-          <button
-            type="button"
-            onClick={() => setShowPassword(!showPassword)}
-            className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
-          >
-            {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
-          </button>
-        </div>
+          <Label htmlFor="password">Password *</Label>
+          <div className="relative">
+            <Input
+              id="password"
+              type={showPassword ? "text" : "password"}
+              value={formData.password}
+              onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+              placeholder="Minimum 8 characters"
+              required
+              disabled={loading}
+            />
+            <button
+              type="button"
+              onClick={() => setShowPassword(!showPassword)}
+              className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
+            >
+              {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+            </button>
+          </div>
         </div>
 
         <div className="space-y-2">
           <Label htmlFor="confirmPassword">Confirm Password *</Label>
           <div className="relative">
-          <Input
-            id="confirmPassword"
-            type={showConfirmPassword ? "text" : "password"}
-            value={formData.confirmPassword}
-            onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })}
-            placeholder="Confirm your password"
-            required
-            disabled={loading}
-          />
-          <button
-            type="button"
-            onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-            className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
-          >
-            {showConfirmPassword ? <EyeOff size={18} /> : <Eye size={18} />}
-          </button>
-        </div>
+            <Input
+              id="confirmPassword"
+              type={showConfirmPassword ? "text" : "password"}
+              value={formData.confirmPassword}
+              onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })}
+              placeholder="Confirm your password"
+              required
+              disabled={loading}
+            />
+            <button
+              type="button"
+              onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+              className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
+            >
+              {showConfirmPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+            </button>
+          </div>
         </div>
       </div>
     </div>
@@ -605,7 +605,7 @@ export function RegisterFormComprehensive() {
           <h1 className="text-3xl font-bold text-gray-900">Dental Analytics Dashboard</h1>
           <p className="mt-2 text-lg text-gray-600">Complete your registration to get started</p>
         </div>
-        
+
         <Card className="w-full shadow-lg">
           <CardHeader className="space-y-1 pb-6">
             <CardTitle className="text-2xl">Create Your Account</CardTitle>
@@ -618,55 +618,55 @@ export function RegisterFormComprehensive() {
                   : "Review & Complete"}
             </CardDescription>
           </CardHeader>
-        <CardContent>
-          <form onSubmit={handleSubmit}>
-            {error && (
-              <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded mb-4">
-                {error}
-              </div>
-            )}
-
-            {currentStep === 1 && renderStep1()}
-            {currentStep === 2 && renderStep2()}
-            {currentStep === 3 && renderStep3()}
-
-            <div className="flex justify-between mt-6">
-              {currentStep > 1 && (
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={handlePreviousStep}
-                  disabled={loading}
-                >
-                  Previous
-                </Button>
+          <CardContent>
+            <form onSubmit={handleSubmit}>
+              {error && (
+                <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded mb-4">
+                  {error}
+                </div>
               )}
 
-              <div className="ml-auto space-x-2">
-                {currentStep < 3 ? (
-                  <Button type="button" onClick={handleNextStep} disabled={loading}>
-                    Next
-                  </Button>
-                ) : (
+              {currentStep === 1 && renderStep1()}
+              {currentStep === 2 && renderStep2()}
+              {currentStep === 3 && renderStep3()}
+
+              <div className="flex justify-between mt-6">
+                {currentStep > 1 && (
                   <Button
-                    type="submit"
-                    disabled={loading || !formData.termsAccepted || !formData.privacyAccepted}
+                    type="button"
+                    variant="outline"
+                    onClick={handlePreviousStep}
+                    disabled={loading}
                   >
-                    {loading ? "Creating Account..." : "Complete Registration"}
+                    Previous
                   </Button>
                 )}
-              </div>
-            </div>
 
-            <div className="text-center text-sm mt-6">
-              Already have an account?{" "}
-              <Link href="/login" className="text-primary hover:underline">
-                Sign in
-              </Link>
-            </div>
-          </form>
-        </CardContent>
-      </Card>
+                <div className="ml-auto space-x-2">
+                  {currentStep < 3 ? (
+                    <Button type="button" onClick={handleNextStep} disabled={loading}>
+                      Next
+                    </Button>
+                  ) : (
+                    <Button
+                      type="submit"
+                      disabled={loading || !formData.termsAccepted || !formData.privacyAccepted}
+                    >
+                      {loading ? "Creating Account..." : "Complete Registration"}
+                    </Button>
+                  )}
+                </div>
+              </div>
+
+              <div className="text-center text-sm mt-6">
+                Already have an account?{" "}
+                <Link href="/login" className="text-primary hover:underline">
+                  Sign in
+                </Link>
+              </div>
+            </form>
+          </CardContent>
+        </Card>
       </div>
     </div>
   );

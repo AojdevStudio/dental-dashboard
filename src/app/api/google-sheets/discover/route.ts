@@ -1,8 +1,8 @@
-import { NextRequest } from "next/server";
-import { z } from "zod";
 import { withAuth } from "@/lib/api/middleware";
 import { ApiError, ApiResponse } from "@/lib/api/utils";
 import * as googleSheetsQueries from "@/lib/database/queries/google-sheets";
+import { NextRequest } from "next/server";
+import { z } from "zod";
 
 // Schema for discover request
 const discoverSchema = z.object({

@@ -20,9 +20,7 @@ export default function DashboardLayout({
   return (
     <Providers>
       <AuthGuard>
-        <Layout>
-          {children}
-        </Layout>
+        <Layout>{children}</Layout>
       </AuthGuard>
     </Providers>
   );

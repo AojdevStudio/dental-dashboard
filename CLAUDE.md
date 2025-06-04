@@ -128,3 +128,5 @@ Core entities managed by Prisma:
 - Use Prisma for the schema changes since this is a significant structural update that should be tracked.
 - Use pnpm commands always, npm or npx is not allowed in this project.
 - **Completion summaries belong in PROJECT_ROOT/.claude/completed/ not ~/.claude/completed/**
+- Username is 'admin@kamdental.com' and password is 'Figther2*'
+- When using Puppeteer MCP, assume the server is already running at localhost:3000. If unsure, use `ss -nltp` to grep and confirm the port is running.

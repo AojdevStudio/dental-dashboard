@@ -1,7 +1,7 @@
+import { prisma } from "@/lib/database/prisma";
+import { createClient } from "@/lib/supabase/server";
 import { generateAuthUrl } from "@/services/google/auth";
 import { type NextRequest, NextResponse } from "next/server";
-import { createClient } from "@/lib/supabase/server";
-import { prisma } from "@/lib/database/prisma";
 
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);

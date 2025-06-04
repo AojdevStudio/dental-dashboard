@@ -20,12 +20,12 @@ export function getClinicFilter(
     if (authContext.isSystemAdmin) {
       return requestedClinicId;
     }
-    
+
     // Regular users must have access to the requested clinic
     if (authContext.clinicIds.includes(requestedClinicId)) {
       return requestedClinicId;
     }
-    
+
     // No access to requested clinic
     throw new Error("Access denied to requested clinic");
   }
@@ -33,7 +33,7 @@ export function getClinicFilter(
   // No specific clinic requested
   if (authContext.isSystemAdmin) {
     // System admin: use selected clinic or show all
-    return authContext.selectedClinicId === "all" 
+    return authContext.selectedClinicId === "all"
       ? undefined // No filter = all clinics
       : authContext.selectedClinicId;
   }
@@ -42,7 +42,7 @@ export function getClinicFilter(
   if (authContext.clinicIds.length === 1) {
     return authContext.clinicIds[0];
   }
-  
+
   return authContext.clinicIds;
 }
 
@@ -54,14 +54,14 @@ export function buildClinicWhereClause(
   requestedClinicId?: string
 ): { clinicId?: string | { in: string[] } } {
   const clinicFilter = getClinicFilter(authContext, requestedClinicId);
-  
+
   if (!clinicFilter) {
     return {}; // No filter for system admins viewing all
   }
-  
+
   if (Array.isArray(clinicFilter)) {
     return { clinicId: { in: clinicFilter } };
   }
-  
+
   return { clinicId: clinicFilter };
 }

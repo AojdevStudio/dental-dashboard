@@ -8,24 +8,24 @@ export const CacheStrategies = {
   STATIC: {
     "Cache-Control": "public, max-age=86400, stale-while-revalidate=604800", // 1 day, stale for 7 days
   },
-  
+
   // User-specific data that should be cached privately
   PRIVATE: {
     "Cache-Control": "private, max-age=300, stale-while-revalidate=600", // 5 minutes, stale for 10 minutes
   },
-  
+
   // Frequently updated data
   DYNAMIC: {
     "Cache-Control": "private, max-age=60, stale-while-revalidate=120", // 1 minute, stale for 2 minutes
   },
-  
+
   // Real-time data that shouldn't be cached
   NO_CACHE: {
     "Cache-Control": "no-cache, no-store, must-revalidate",
-    "Pragma": "no-cache",
-    "Expires": "0",
+    Pragma: "no-cache",
+    Expires: "0",
   },
-  
+
   // Immutable data (with version/hash in URL)
   IMMUTABLE: {
     "Cache-Control": "public, max-age=31536000, immutable", // 1 year
@@ -34,7 +34,7 @@ export const CacheStrategies = {
 
 /**
  * Apply cache headers to a NextResponse
- * 
+ *
  * @param response - The NextResponse object
  * @param strategy - The caching strategy to apply
  * @returns The response with cache headers applied
@@ -44,17 +44,17 @@ export function withCacheHeaders<T extends NextResponse>(
   strategy: keyof typeof CacheStrategies = "PRIVATE"
 ): T {
   const headers = CacheStrategies[strategy];
-  
+
   Object.entries(headers).forEach(([key, value]) => {
     response.headers.set(key, value);
   });
-  
+
   return response;
 }
 
 /**
  * Create a cached JSON response
- * 
+ *
  * @param data - The data to return
  * @param strategy - The caching strategy to apply
  * @param status - HTTP status code (default: 200)
@@ -71,7 +71,7 @@ export function cachedJson(
 
 /**
  * Add ETag support for conditional requests
- * 
+ *
  * @param response - The NextResponse object
  * @param etag - The ETag value
  * @returns The response with ETag header
@@ -83,7 +83,7 @@ export function withETag<T extends NextResponse>(response: T, etag: string): T {
 
 /**
  * Check if request has matching ETag
- * 
+ *
  * @param request - The incoming request
  * @param currentETag - The current ETag value
  * @returns True if ETags match (304 Not Modified should be returned)

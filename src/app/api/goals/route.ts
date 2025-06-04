@@ -4,7 +4,7 @@
  */
 
 import { withAuth } from "@/lib/api/middleware";
-import { ApiResponse, ApiError, getPaginationParams } from "@/lib/api/utils";
+import { ApiError, ApiResponse, getPaginationParams } from "@/lib/api/utils";
 import * as goalQueries from "@/lib/database/queries/goals";
 import { z } from "zod";
 

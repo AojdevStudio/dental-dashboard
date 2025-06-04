@@ -1,25 +1,27 @@
-import { NextRequest } from "next/server";
-import { z } from "zod";
 import { ApiError, ApiResponse } from "@/lib/api/utils";
-import { upsertHygieneProduction } from "@/lib/database/queries/hygiene-production";
 import { prisma } from "@/lib/database/client";
+import { upsertHygieneProduction } from "@/lib/database/queries/hygiene-production";
+import type { NextRequest } from "next/server";
+import { z } from "zod";
 
 // Schema for hygiene production sync data
 const hygieneProductionSyncSchema = z.object({
-  records: z.array(z.object({
-    id: z.string().optional(),
-    date: z.string().transform((str) => new Date(str)),
-    month_tab: z.string(),
-    hours_worked: z.number().optional(),
-    estimated_production: z.number().optional(),
-    verified_production: z.number().optional(),
-    production_goal: z.number().optional(),
-    variance_percentage: z.number().optional(),
-    bonus_amount: z.number().optional(),
-    clinic_id: z.string(),
-    provider_id: z.string().optional(),
-    data_source_id: z.string().optional(),
-  })),
+  records: z.array(
+    z.object({
+      id: z.string().optional(),
+      date: z.string().transform((str) => new Date(str)),
+      month_tab: z.string(),
+      hours_worked: z.number().optional(),
+      estimated_production: z.number().optional(),
+      verified_production: z.number().optional(),
+      production_goal: z.number().optional(),
+      variance_percentage: z.number().optional(),
+      bonus_amount: z.number().optional(),
+      clinic_id: z.string(),
+      provider_id: z.string().optional(),
+      data_source_id: z.string().optional(),
+    })
+  ),
   supabase_key: z.string(), // For authentication from Google Apps Script
 });
 
@@ -41,7 +43,7 @@ export async function POST(request: NextRequest) {
 
     // Group records by clinic for processing
     const recordsByClinic = new Map<string, typeof records>();
-    
+
     for (const record of records) {
       if (!recordsByClinic.has(record.clinic_id)) {
         recordsByClinic.set(record.clinic_id, []);
@@ -57,27 +59,27 @@ export async function POST(request: NextRequest) {
       try {
         // Verify clinic exists
         const clinic = await prisma.clinic.findUnique({
-          where: { id: clinicId }
+          where: { id: clinicId },
         });
 
         if (!clinic) {
           errors.push({
             clinicId,
             error: `Clinic not found: ${clinicId}`,
-            recordCount: clinicRecords.length
+            recordCount: clinicRecords.length,
           });
           continue;
         }
 
         // Create a minimal auth context for the clinic
         const authContext = {
-          user: { id: 'system', email: 'system@sync' },
+          user: { id: "system", email: "system@sync" },
           clinicIds: [clinicId],
-          roles: { [clinicId]: 'system' }
+          roles: { [clinicId]: "system" },
         };
 
         // Transform records to match the expected format
-        const transformedRecords = clinicRecords.map(record => ({
+        const transformedRecords = clinicRecords.map((record) => ({
           id: record.id,
           date: record.date,
           monthTab: record.month_tab,
@@ -101,15 +103,14 @@ export async function POST(request: NextRequest) {
         results.push({
           clinicId,
           recordsProcessed: upsertedRecords.length,
-          success: true
+          success: true,
         });
-
       } catch (error) {
         console.error(`Error processing clinic ${clinicId}:`, error);
         errors.push({
           clinicId,
-          error: error instanceof Error ? error.message : 'Unknown error',
-          recordCount: clinicRecords.length
+          error: error instanceof Error ? error.message : "Unknown error",
+          recordCount: clinicRecords.length,
         });
       }
     }
@@ -122,19 +123,18 @@ export async function POST(request: NextRequest) {
       errors,
       syncedAt: new Date().toISOString(),
     });
-
   } catch (error) {
-    console.error('Hygiene production sync error:', error);
-    
+    console.error("Hygiene production sync error:", error);
+
     if (error instanceof z.ZodError) {
       throw new ApiError(`Validation error: ${error.message}`, 400);
     }
-    
+
     if (error instanceof ApiError) {
       throw error;
     }
-    
-    throw new ApiError('Internal server error during sync', 500);
+
+    throw new ApiError("Internal server error during sync", 500);
   }
 }
 

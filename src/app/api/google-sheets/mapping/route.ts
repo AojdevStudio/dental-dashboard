@@ -1,10 +1,10 @@
-import { NextRequest } from "next/server";
-import { z } from "zod";
 import { withAuth } from "@/lib/api/middleware";
 import { ApiError, ApiResponse, getPaginationParams } from "@/lib/api/utils";
+import { prisma } from "@/lib/database/client";
 import * as googleSheetsQueries from "@/lib/database/queries/google-sheets";
 import { STANDARD_METRICS } from "@/lib/metrics/definitions";
-import { prisma } from "@/lib/database/client";
+import { NextRequest } from "next/server";
+import { z } from "zod";
 
 // Schema for create mapping request
 const createMappingSchema = z.object({
@@ -24,11 +24,13 @@ const updateMappingSchema = z.object({
 const bulkMappingSchema = z.object({
   spreadsheetId: z.string(),
   sheetName: z.string(),
-  mappings: z.array(z.object({
-    sourceColumn: z.string(),
-    targetMetric: z.string(),
-    transformationRule: z.string().optional()
-  }))
+  mappings: z.array(
+    z.object({
+      sourceColumn: z.string(),
+      targetMetric: z.string(),
+      transformationRule: z.string().optional(),
+    })
+  ),
 });
 
 export const GET = withAuth(async (request, { authContext }) => {
@@ -48,11 +50,11 @@ export const POST = withAuth(
   async (request, { authContext }) => {
     // Parse and validate request body
     const body = await request.json();
-    
+
     // Check if this is a bulk operation from the mapping wizard
     if (body.spreadsheetId && body.mappings) {
       const validatedData = bulkMappingSchema.parse(body);
-      
+
       // Get the user's first clinic ID (TODO: handle multiple clinics)
       const clinicId = authContext.clinicIds[0];
       if (!clinicId) {
@@ -66,8 +68,8 @@ export const POST = withAuth(
         const existingDataSource = await tx.dataSource.findFirst({
           where: {
             clinicId,
-            spreadsheetId: validatedData.spreadsheetId
-          }
+            spreadsheetId: validatedData.spreadsheetId,
+          },
         });
 
         let dataSource;
@@ -77,8 +79,8 @@ export const POST = withAuth(
             where: { id: existingDataSource.id },
             data: {
               sheetName: validatedData.sheetName,
-              updatedAt: new Date()
-            }
+              updatedAt: new Date(),
+            },
           });
         } else {
           // Create new
@@ -91,89 +93,89 @@ export const POST = withAuth(
               connectionStatus: "pending", // Will be updated when OAuth is connected
               syncFrequency: "daily",
               accessToken: "", // Will be updated when OAuth is connected
-            }
+            },
           });
         }
 
         // 2. Ensure all metric definitions exist
-        const metricNames = validatedData.mappings.map(m => m.targetMetric);
+        const metricNames = validatedData.mappings.map((m) => m.targetMetric);
         const existingMetrics = await tx.metricDefinition.findMany({
           where: {
             clinicId,
-            name: { in: metricNames }
-          }
+            name: { in: metricNames },
+          },
         });
 
-        const existingMetricNames = new Set(existingMetrics.map(m => m.name));
-        const existingMetricMap = new Map(existingMetrics.map(m => [m.name, m.id]));
-        
+        const existingMetricNames = new Set(existingMetrics.map((m) => m.name));
+        const existingMetricMap = new Map(existingMetrics.map((m) => [m.name, m.id]));
+
         // Create missing metric definitions
-        const metricsToCreate = STANDARD_METRICS
-          .filter(metric => metricNames.includes(metric.name) && !existingMetricNames.has(metric.name))
-          .map(metric => ({
-            clinicId,
-            name: metric.name,
-            description: metric.description,
-            dataType: metric.dataType,
-            category: metric.category,
-            isComposite: metric.isComposite,
-            calculationFormula: metric.calculationFormula || null,
-            unit: metric.unit || null,
-            isActive: true
-          }));
+        const metricsToCreate = STANDARD_METRICS.filter(
+          (metric) => metricNames.includes(metric.name) && !existingMetricNames.has(metric.name)
+        ).map((metric) => ({
+          clinicId,
+          name: metric.name,
+          description: metric.description,
+          dataType: metric.dataType,
+          category: metric.category,
+          isComposite: metric.isComposite,
+          calculationFormula: metric.calculationFormula || null,
+          unit: metric.unit || null,
+          isActive: true,
+        }));
 
         if (metricsToCreate.length > 0) {
           await tx.metricDefinition.createMany({
-            data: metricsToCreate
+            data: metricsToCreate,
           });
-          
+
           // Fetch the newly created metrics to get their IDs
           const newMetrics = await tx.metricDefinition.findMany({
             where: {
               clinicId,
-              name: { in: metricsToCreate.map(m => m.name) }
-            }
+              name: { in: metricsToCreate.map((m) => m.name) },
+            },
           });
-          
-          newMetrics.forEach(m => {
+
+          newMetrics.forEach((m) => {
             existingMetricMap.set(m.name, m.id);
           });
         }
 
         // 3. Delete existing column mappings for this data source
         await tx.columnMapping.deleteMany({
-          where: { dataSourceId: dataSource.id }
+          where: { dataSourceId: dataSource.id },
         });
 
         // 4. Create new column mappings
         const columnMappings = validatedData.mappings
-          .filter(mapping => existingMetricMap.has(mapping.targetMetric))
-          .map(mapping => ({
+          .filter((mapping) => existingMetricMap.has(mapping.targetMetric))
+          .map((mapping) => ({
             dataSourceId: dataSource.id,
             metricDefinitionId: existingMetricMap.get(mapping.targetMetric)!,
             columnName: mapping.sourceColumn,
-            transformationRule: mapping.transformationRule || null
+            transformationRule: mapping.transformationRule || null,
           }));
 
         if (columnMappings.length > 0) {
           await tx.columnMapping.createMany({
-            data: columnMappings
+            data: columnMappings,
           });
         }
 
         // Note: The DataSource model doesn't have a config field in the current schema
         // The column mappings are stored in the dedicated ColumnMapping table
 
-        return { 
-          dataSourceId: dataSource.id, 
+        return {
+          dataSourceId: dataSource.id,
           mappingCount: columnMappings.length,
-          createdMetrics: metricsToCreate.length
+          createdMetrics: metricsToCreate.length,
         };
       });
 
       return ApiResponse.success({
         success: true,
-        ...result
+        ...result,
       });
     } else {
       // Single mapping creation

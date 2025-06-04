@@ -1,13 +1,13 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
 import { ColumnMappingWizard } from "@/components/google-sheets/column-mapping-wizard";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { ArrowLeft, Loader2 } from "lucide-react";
 import Link from "next/link";
+import { useRouter, useSearchParams } from "next/navigation";
+import { useEffect, useState } from "react";
 
 interface SpreadsheetData {
   spreadsheetId: string;
@@ -23,7 +23,7 @@ export default function GoogleSheetsMappingPage() {
   const searchParams = useSearchParams();
   const spreadsheetId = searchParams.get("spreadsheetId");
   const sheetName = searchParams.get("sheetName");
-  
+
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [spreadsheetData, setSpreadsheetData] = useState<SpreadsheetData | null>(null);
@@ -61,7 +61,7 @@ export default function GoogleSheetsMappingPage() {
         throw new Error("Failed to fetch sample data");
       }
       const data = await dataResponse.json();
-      
+
       if (data.values && data.values.length > 0) {
         setColumns(data.values[0]); // First row as headers
         setSampleData(data.values.slice(1)); // Rest as sample data

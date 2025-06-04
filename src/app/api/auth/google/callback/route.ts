@@ -10,11 +10,11 @@
  * not by our authenticated users. The state parameter contains the dataSourceId which we validate.
  */
 
-import { type NextRequest, NextResponse } from "next/server";
-import { handleAuthCallback } from "@/services/google/auth";
-import * as googleSheetsQueries from "@/lib/database/queries/google-sheets";
 import { getAuthContextByAuthId } from "@/lib/database/auth-context";
+import * as googleSheetsQueries from "@/lib/database/queries/google-sheets";
 import { createClient } from "@/lib/supabase/server";
+import { handleAuthCallback } from "@/services/google/auth";
+import { type NextRequest, NextResponse } from "next/server";
 
 /**
  * Handles the OAuth 2.0 callback from Google after user authorization.

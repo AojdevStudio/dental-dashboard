@@ -1,5 +1,5 @@
-import { prisma } from '../client';
-import type { AuthContext } from '@/lib/auth/session';
+import type { AuthContext } from "@/lib/auth/session";
+import { prisma } from "../client";
 
 export interface HygieneProductionData {
   date: Date;
@@ -31,22 +31,22 @@ export async function upsertHygieneProduction(
 ): Promise<HygieneProductionRecord[]> {
   // Use provided clinicId or default to user's first clinic
   const targetClinicId = clinicId || authContext.clinicIds[0];
-  
+
   if (!targetClinicId) {
-    throw new Error('No clinic ID provided or accessible to user');
+    throw new Error("No clinic ID provided or accessible to user");
   }
 
   // Verify user has access to this clinic
   if (!authContext.clinicIds.includes(targetClinicId)) {
-    throw new Error('User does not have access to the specified clinic');
+    throw new Error("User does not have access to the specified clinic");
   }
 
   const results: HygieneProductionRecord[] = [];
 
   for (const record of records) {
-    const existingRecord = record.id 
+    const existingRecord = record.id
       ? await prisma.hygieneProduction.findUnique({
-          where: { id: record.id }
+          where: { id: record.id },
         })
       : null;
 
@@ -105,14 +105,14 @@ export async function getHygieneProduction(
 ): Promise<HygieneProductionRecord[]> {
   // Use provided clinicId or default to user's first clinic
   const targetClinicId = clinicId || authContext.clinicIds[0];
-  
+
   if (!targetClinicId) {
-    throw new Error('No clinic ID provided or accessible to user');
+    throw new Error("No clinic ID provided or accessible to user");
   }
 
   // Verify user has access to this clinic
   if (!authContext.clinicIds.includes(targetClinicId)) {
-    throw new Error('User does not have access to the specified clinic');
+    throw new Error("User does not have access to the specified clinic");
   }
 
   const where: any = {
@@ -139,7 +139,7 @@ export async function getHygieneProduction(
 
   return prisma.hygieneProduction.findMany({
     where,
-    orderBy: { date: 'desc' },
+    orderBy: { date: "desc" },
     take: options.limit,
     skip: options.offset,
     include: {
@@ -183,9 +183,9 @@ export async function getHygieneProductionStats(
   averageProductionPerHour: number;
 }> {
   const targetClinicId = clinicId || authContext.clinicIds[0];
-  
+
   if (!targetClinicId || !authContext.clinicIds.includes(targetClinicId)) {
-    throw new Error('No access to clinic');
+    throw new Error("No access to clinic");
   }
 
   const where: any = {

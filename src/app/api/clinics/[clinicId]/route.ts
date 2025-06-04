@@ -3,10 +3,10 @@
  * Operations on specific clinics
  */
 
-import { NextRequest } from "next/server";
 import { withAuth } from "@/lib/api/middleware";
-import { ApiResponse, ApiError } from "@/lib/api/utils";
+import { ApiError, ApiResponse } from "@/lib/api/utils";
 import * as clinicQueries from "@/lib/database/queries/clinics";
+import { NextRequest } from "next/server";
 import { z } from "zod";
 
 const updateClinicSchema = z.object({

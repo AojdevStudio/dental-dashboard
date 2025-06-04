@@ -8,13 +8,13 @@
  * - Trigger and function performance
  */
 
-import { describe, it, expect, beforeAll, afterAll } from "vitest";
 import { prisma } from "@/lib/database/client";
-import * as userQueries from "@/lib/database/queries/users";
 import * as clinicQueries from "@/lib/database/queries/clinics";
-import * as metricQueries from "@/lib/database/queries/metrics";
 import * as goalQueries from "@/lib/database/queries/goals";
+import * as metricQueries from "@/lib/database/queries/metrics";
+import * as userQueries from "@/lib/database/queries/users";
 import { v4 as uuidv4 } from "uuid";
+import { afterAll, beforeAll, describe, expect, it } from "vitest";
 
 // Performance thresholds (in milliseconds)
 const THRESHOLDS = {

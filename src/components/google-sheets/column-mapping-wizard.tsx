@@ -1,15 +1,28 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Label } from "@/components/ui/label";
-import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { ArrowRight, Check, AlertCircle, Sparkles } from "lucide-react";
-import { STANDARD_METRICS, COLUMN_NAME_MAPPINGS } from "@/lib/metrics/definitions";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { COLUMN_NAME_MAPPINGS, STANDARD_METRICS } from "@/lib/metrics/definitions";
+import { AlertCircle, ArrowRight, Check, Sparkles } from "lucide-react";
+import { useEffect, useState } from "react";
 
 interface ColumnMappingWizardProps {
   spreadsheetId: string;
@@ -32,7 +45,7 @@ export function ColumnMappingWizard({
   columns,
   sampleData = [],
   onComplete,
-  onCancel
+  onCancel,
 }: ColumnMappingWizardProps) {
   const [mappings, setMappings] = useState<Record<string, string>>({});
   const [autoMappedColumns, setAutoMappedColumns] = useState<Set<string>>(new Set());
@@ -43,12 +56,12 @@ export function ColumnMappingWizard({
     const detectedMappings: Record<string, string> = {};
     const autoMapped = new Set<string>();
 
-    columns.forEach(column => {
+    columns.forEach((column) => {
       const normalizedColumn = column.toLowerCase().trim();
-      
+
       // Check each metric's common variations
       for (const [metricName, variations] of Object.entries(COLUMN_NAME_MAPPINGS)) {
-        if (variations.some(variation => normalizedColumn.includes(variation))) {
+        if (variations.some((variation) => normalizedColumn.includes(variation))) {
           detectedMappings[column] = metricName;
           autoMapped.add(column);
           break;
@@ -61,12 +74,12 @@ export function ColumnMappingWizard({
   }, [columns]);
 
   const handleMappingChange = (column: string, metric: string) => {
-    setMappings(prev => ({
+    setMappings((prev) => ({
       ...prev,
-      [column]: metric
+      [column]: metric,
     }));
     // Remove from auto-mapped if manually changed
-    setAutoMappedColumns(prev => {
+    setAutoMappedColumns((prev) => {
       const newSet = new Set(prev);
       newSet.delete(column);
       return newSet;
@@ -78,18 +91,18 @@ export function ColumnMappingWizard({
       .filter(([_, metric]) => metric !== "")
       .map(([column, metric]) => ({
         sourceColumn: column,
-        targetMetric: metric
+        targetMetric: metric,
       }));
 
     onComplete(finalMappings);
   };
 
   const getMappedMetricsCount = () => {
-    return Object.values(mappings).filter(m => m !== "").length;
+    return Object.values(mappings).filter((m) => m !== "").length;
   };
 
   const getMetricInfo = (metricName: string) => {
-    return STANDARD_METRICS.find(m => m.name === metricName);
+    return STANDARD_METRICS.find((m) => m.name === metricName);
   };
 
   return (
@@ -98,7 +111,8 @@ export function ColumnMappingWizard({
         <CardHeader>
           <CardTitle>Map Your Spreadsheet Columns</CardTitle>
           <CardDescription>
-            Match your spreadsheet columns to standard dental metrics. We've auto-detected some mappings for you.
+            Match your spreadsheet columns to standard dental metrics. We've auto-detected some
+            mappings for you.
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -107,11 +121,15 @@ export function ColumnMappingWizard({
             <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
               <div>
                 <p className="text-sm font-medium">Mapping Progress</p>
-                <p className="text-2xl font-bold">{getMappedMetricsCount()} / {columns.length}</p>
+                <p className="text-2xl font-bold">
+                  {getMappedMetricsCount()} / {columns.length}
+                </p>
               </div>
               <div className="text-right">
                 <p className="text-sm text-gray-600">Auto-detected</p>
-                <p className="text-lg font-semibold text-green-600">{autoMappedColumns.size} columns</p>
+                <p className="text-lg font-semibold text-green-600">
+                  {autoMappedColumns.size} columns
+                </p>
               </div>
             </div>
 
@@ -130,7 +148,7 @@ export function ColumnMappingWizard({
                 {columns.map((column, index) => {
                   const metricInfo = mappings[column] ? getMetricInfo(mappings[column]) : null;
                   const sampleValue = sampleData[0]?.[index] || "—";
-                  
+
                   return (
                     <TableRow key={column}>
                       <TableCell className="font-medium">
@@ -144,9 +162,7 @@ export function ColumnMappingWizard({
                           )}
                         </div>
                       </TableCell>
-                      <TableCell className="text-sm text-gray-600">
-                        {sampleValue}
-                      </TableCell>
+                      <TableCell className="text-sm text-gray-600">{sampleValue}</TableCell>
                       <TableCell>
                         <ArrowRight className="w-4 h-4 text-gray-400" />
                       </TableCell>
@@ -163,21 +179,28 @@ export function ColumnMappingWizard({
                               <span className="text-gray-500">Skip this column</span>
                             </SelectItem>
                             {Object.entries(
-                              STANDARD_METRICS.reduce((acc, metric) => {
-                                if (!acc[metric.category]) acc[metric.category] = [];
-                                acc[metric.category].push(metric);
-                                return acc;
-                              }, {} as Record<string, typeof STANDARD_METRICS>)
+                              STANDARD_METRICS.reduce(
+                                (acc, metric) => {
+                                  if (!acc[metric.category]) acc[metric.category] = [];
+                                  acc[metric.category].push(metric);
+                                  return acc;
+                                },
+                                {} as Record<string, typeof STANDARD_METRICS>
+                              )
                             ).map(([category, metrics]) => (
                               <div key={category}>
                                 <div className="px-2 py-1.5 text-xs font-semibold text-gray-500 capitalize">
                                   {category}
                                 </div>
-                                {metrics.map(metric => (
+                                {metrics.map((metric) => (
                                   <SelectItem key={metric.name} value={metric.name}>
                                     <div>
-                                      <div className="font-medium">{metric.name.replace(/_/g, ' ')}</div>
-                                      <div className="text-xs text-gray-500">{metric.description}</div>
+                                      <div className="font-medium">
+                                        {metric.name.replace(/_/g, " ")}
+                                      </div>
+                                      <div className="text-xs text-gray-500">
+                                        {metric.description}
+                                      </div>
                                     </div>
                                   </SelectItem>
                                 ))}
@@ -204,8 +227,8 @@ export function ColumnMappingWizard({
               <Alert>
                 <Sparkles className="h-4 w-4" />
                 <AlertDescription>
-                  We automatically detected {autoMappedColumns.size} column mappings based on common naming patterns. 
-                  You can adjust these if needed.
+                  We automatically detected {autoMappedColumns.size} column mappings based on common
+                  naming patterns. You can adjust these if needed.
                 </AlertDescription>
               </Alert>
             )}
@@ -223,10 +246,7 @@ export function ColumnMappingWizard({
                 >
                   Preview Mapping
                 </Button>
-                <Button
-                  onClick={handleSubmit}
-                  disabled={getMappedMetricsCount() === 0}
-                >
+                <Button onClick={handleSubmit} disabled={getMappedMetricsCount() === 0}>
                   <Check className="w-4 h-4 mr-2" />
                   Save Mapping ({getMappedMetricsCount()} columns)
                 </Button>
@@ -252,15 +272,20 @@ export function ColumnMappingWizard({
                 .map(([column, metric]) => {
                   const metricInfo = getMetricInfo(metric);
                   return (
-                    <div key={column} className="flex items-center justify-between p-3 bg-gray-50 rounded">
+                    <div
+                      key={column}
+                      className="flex items-center justify-between p-3 bg-gray-50 rounded"
+                    >
                       <div>
                         <p className="font-medium">{column}</p>
                         <p className="text-sm text-gray-600">Source column</p>
                       </div>
                       <ArrowRight className="w-5 h-5 text-gray-400" />
                       <div className="text-right">
-                        <p className="font-medium">{metric.replace(/_/g, ' ')}</p>
-                        <p className="text-sm text-gray-600">{metricInfo?.category} • {metricInfo?.dataType}</p>
+                        <p className="font-medium">{metric.replace(/_/g, " ")}</p>
+                        <p className="text-sm text-gray-600">
+                          {metricInfo?.category} • {metricInfo?.dataType}
+                        </p>
                       </div>
                     </div>
                   );

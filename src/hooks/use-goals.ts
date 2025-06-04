@@ -1,4 +1,4 @@
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "./use-auth";
 import { useClinics } from "./use-clinics";
 
@@ -33,13 +33,13 @@ interface GoalProgress {
 
 /**
  * Custom hook for managing goals data with React Query caching
- * 
+ *
  * This hook provides:
  * - Automatic caching of goal data
  * - Goal CRUD operations
  * - Progress tracking
  * - Optimistic updates
- * 
+ *
  * @example
  * const { goals, goalProgress, isLoading, createGoal } = useGoals();
  */
@@ -57,11 +57,11 @@ export function useGoals() {
    */
   const fetchGoals = async (): Promise<Goal[]> => {
     const params = new URLSearchParams();
-    
+
     if (selectedClinicId) params.append("clinicId", selectedClinicId);
 
     const response = await fetch(`/api/goals?${params.toString()}`);
-    
+
     if (!response.ok) {
       throw new Error("Failed to fetch goals");
     }
@@ -75,11 +75,11 @@ export function useGoals() {
    */
   const fetchGoalProgress = async (): Promise<GoalProgress[]> => {
     const params = new URLSearchParams();
-    
+
     if (selectedClinicId) params.append("clinicId", selectedClinicId);
 
     const response = await fetch(`/api/goals/progress?${params.toString()}`);
-    
+
     if (!response.ok) {
       throw new Error("Failed to fetch goal progress");
     }
@@ -169,10 +169,9 @@ export function useGoals() {
 
       // Optimistically update
       if (previousGoals) {
-        queryClient.setQueryData<Goal[]>(goalsQueryKey, old =>
-          old?.map(goal =>
-            goal.id === goalId ? { ...goal, ...data } : goal
-          ) || []
+        queryClient.setQueryData<Goal[]>(
+          goalsQueryKey,
+          (old) => old?.map((goal) => (goal.id === goalId ? { ...goal, ...data } : goal)) || []
         );
       }
 
@@ -218,14 +217,14 @@ export function useGoals() {
    * Get a single goal by ID
    */
   const getGoalById = (goalId: string) => {
-    return goalsQuery.data?.find(goal => goal.id === goalId);
+    return goalsQuery.data?.find((goal) => goal.id === goalId);
   };
 
   /**
    * Get progress for a specific goal
    */
   const getGoalProgress = (goalId: string) => {
-    return progressQuery.data?.find(progress => progress.goalId === goalId);
+    return progressQuery.data?.find((progress) => progress.goalId === goalId);
   };
 
   return {

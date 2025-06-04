@@ -1,9 +1,9 @@
 "use server";
 
+import { prisma } from "@/lib/database/prisma";
+import { createClient } from "@/lib/supabase/server";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
-import { createClient } from "@/lib/supabase/server";
-import { prisma } from "@/lib/database/prisma";
 
 /**
  * Enhanced sign-in that verifies both auth and database user
@@ -115,16 +115,16 @@ export async function signInWithVerification(
 
     // Everything is good - proceed with login
     console.log("Login successful for user:", dbUser.email);
-    
+
     revalidatePath("/", "layout");
-    
+
     // Return success without redirect - let client handle navigation
     return { error: null, success: true };
   } catch (dbError) {
     console.error("Database error during sign-in:", dbError);
     console.error("Error details:", {
-      message: dbError instanceof Error ? dbError.message : 'Unknown error',
-      stack: dbError instanceof Error ? dbError.stack : undefined
+      message: dbError instanceof Error ? dbError.message : "Unknown error",
+      stack: dbError instanceof Error ? dbError.stack : undefined,
     });
 
     // Sign them out to prevent partial access

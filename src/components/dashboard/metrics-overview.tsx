@@ -1,17 +1,17 @@
 "use client";
 
-import { useMetrics } from "@/hooks/use-metrics";
-import { MetricCardSkeleton, ChartSkeleton } from "@/components/ui/skeleton-loaders";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { ChartSkeleton, MetricCardSkeleton } from "@/components/ui/skeleton-loaders";
+import { useMetrics } from "@/hooks/use-metrics";
 import { AlertCircle } from "lucide-react";
 
 /**
  * MetricsOverview Component
- * 
+ *
  * Client-side component that demonstrates using React Query hooks
  * with skeleton loading states for optimal performance.
- * 
+ *
  * Features:
  * - Automatic data caching with React Query
  * - Skeleton loading states
@@ -19,13 +19,7 @@ import { AlertCircle } from "lucide-react";
  * - Responsive grid layout
  */
 export function MetricsOverview() {
-  const { 
-    metrics, 
-    aggregatedMetrics, 
-    isLoading, 
-    metricsError,
-    refetchMetrics 
-  } = useMetrics({
+  const { metrics, aggregatedMetrics, isLoading, metricsError, refetchMetrics } = useMetrics({
     startDate: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString(),
     endDate: new Date().toISOString(),
   });
@@ -37,10 +31,7 @@ export function MetricsOverview() {
         <AlertCircle className="h-4 w-4" />
         <AlertDescription>
           Failed to load metrics. Please try again later.
-          <button 
-            onClick={() => refetchMetrics()}
-            className="ml-2 underline"
-          >
+          <button onClick={() => refetchMetrics()} className="ml-2 underline">
             Retry
           </button>
         </AlertDescription>
@@ -63,20 +54,20 @@ export function MetricsOverview() {
   }
 
   // Calculate summary metrics from aggregated data
-  const totalProduction = aggregatedMetrics.monthly.reduce(
-    (sum, metric) => sum + metric.value, 
-    0
-  );
-  
-  const avgDailyProduction = aggregatedMetrics.daily.length > 0
-    ? aggregatedMetrics.daily.reduce((sum, m) => sum + m.value, 0) / aggregatedMetrics.daily.length
-    : 0;
+  const totalProduction = aggregatedMetrics.monthly.reduce((sum, metric) => sum + metric.value, 0);
+
+  const avgDailyProduction =
+    aggregatedMetrics.daily.length > 0
+      ? aggregatedMetrics.daily.reduce((sum, m) => sum + m.value, 0) /
+        aggregatedMetrics.daily.length
+      : 0;
 
   const latestMetric = metrics[0];
   const previousMetric = metrics[1];
-  const trend = latestMetric && previousMetric 
-    ? ((latestMetric.value - previousMetric.value) / previousMetric.value) * 100
-    : 0;
+  const trend =
+    latestMetric && previousMetric
+      ? ((latestMetric.value - previousMetric.value) / previousMetric.value) * 100
+      : 0;
 
   return (
     <div className="space-y-6">
@@ -87,9 +78,7 @@ export function MetricsOverview() {
             <CardTitle className="text-sm font-medium">Total Production</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">
-              ${totalProduction.toLocaleString()}
-            </div>
+            <div className="text-2xl font-bold">${totalProduction.toLocaleString()}</div>
             <p className="text-xs text-muted-foreground">Last 30 days</p>
           </CardContent>
         </Card>
@@ -99,9 +88,7 @@ export function MetricsOverview() {
             <CardTitle className="text-sm font-medium">Daily Average</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">
-              ${avgDailyProduction.toLocaleString()}
-            </div>
+            <div className="text-2xl font-bold">${avgDailyProduction.toLocaleString()}</div>
             <p className="text-xs text-muted-foreground">Per day</p>
           </CardContent>
         </Card>
@@ -126,7 +113,8 @@ export function MetricsOverview() {
           </CardHeader>
           <CardContent>
             <div className={`text-2xl font-bold ${trend >= 0 ? "text-green-600" : "text-red-600"}`}>
-              {trend >= 0 ? "+" : ""}{trend.toFixed(1)}%
+              {trend >= 0 ? "+" : ""}
+              {trend.toFixed(1)}%
             </div>
             <p className="text-xs text-muted-foreground">vs previous period</p>
           </CardContent>

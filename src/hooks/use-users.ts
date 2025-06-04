@@ -1,4 +1,4 @@
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "./use-auth";
 import { useClinics } from "./use-clinics";
 
@@ -17,13 +17,13 @@ interface User {
 
 /**
  * Custom hook for managing users data with React Query caching
- * 
+ *
  * This hook provides:
  * - Automatic caching of user data
  * - User CRUD operations
  * - Role-based access control
  * - Optimistic updates
- * 
+ *
  * @example
  * const { users, isLoading, createUser, updateUser } = useUsers();
  */
@@ -40,14 +40,14 @@ export function useUsers() {
    */
   const fetchUsers = async (): Promise<User[]> => {
     const params = new URLSearchParams();
-    
+
     // System admins can see all users, others only see their clinic
     if (!isSystemAdmin && selectedClinicId) {
       params.append("clinicId", selectedClinicId);
     }
 
     const response = await fetch(`/api/users?${params.toString()}`);
-    
+
     if (!response.ok) {
       throw new Error("Failed to fetch users");
     }
@@ -59,7 +59,12 @@ export function useUsers() {
   /**
    * Query for fetching users with caching
    */
-  const { data: users = [], isLoading, error, refetch } = useQuery({
+  const {
+    data: users = [],
+    isLoading,
+    error,
+    refetch,
+  } = useQuery({
     queryKey: usersQueryKey,
     queryFn: fetchUsers,
     enabled: !!currentUser && (isSystemAdmin || !!selectedClinicId),
@@ -122,10 +127,9 @@ export function useUsers() {
 
       // Optimistically update the user
       if (previousUsers) {
-        queryClient.setQueryData<User[]>(usersQueryKey, old => 
-          old?.map(user => 
-            user.id === userId ? { ...user, ...data } : user
-          ) || []
+        queryClient.setQueryData<User[]>(
+          usersQueryKey,
+          (old) => old?.map((user) => (user.id === userId ? { ...user, ...data } : user)) || []
         );
       }
 

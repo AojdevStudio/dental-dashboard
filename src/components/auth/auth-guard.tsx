@@ -1,9 +1,9 @@
 "use client";
 
 import { useAuth } from "@/hooks/use-auth";
+import { Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
-import { Loader2 } from "lucide-react";
 
 interface AuthGuardProps {
   children: React.ReactNode;

@@ -9,13 +9,13 @@
  * - Audit trail integrity
  */
 
-import { describe, it, expect, beforeAll, afterAll } from "vitest";
-import { createClient } from "@supabase/supabase-js";
 import { prisma } from "@/lib/database/client";
-import * as userQueries from "@/lib/database/queries/users";
 import * as clinicQueries from "@/lib/database/queries/clinics";
 import * as googleSheetsQueries from "@/lib/database/queries/google-sheets";
+import * as userQueries from "@/lib/database/queries/users";
+import { createClient } from "@supabase/supabase-js";
 import { v4 as uuidv4 } from "uuid";
+import { afterAll, beforeAll, describe, expect, it } from "vitest";
 
 // Test database connection
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
