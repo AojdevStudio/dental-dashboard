@@ -34,8 +34,8 @@
   "files": {
     "maxSize": 2000000,
     "include": [
-      "src/**/*.{ts,tsx,js,jsx}",
-      "./*.{ts,tsx,js,jsx,mjs,cjs}",
+      "src/**/*",
+      "*.{ts,tsx,js,jsx,mjs,cjs}",
       "biome.json",
       "next.config.ts",
       "tailwind.config.js",
@@ -51,7 +51,9 @@
       "**/generated/**",
       "turbo.json",
       "**/*.md",
-      "scripts/"
+      "scripts/**",
+      "**/*.json",
+      "**/*.css"
     ]
   }
 }
