@@ -7,7 +7,7 @@ import { usePathname, useRouter } from "next/navigation";
  * Provides a centralized way to access authentication state and methods throughout the application.
  * This hook wraps around Supabase Auth and provides a simpler API for common authentication operations.
  */
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 
 /**
  * Database user information from the session API
@@ -100,7 +100,7 @@ export function useAuth(): AuthState {
   /**
    * Fetch database user information from the session API
    */
-  const fetchDbUser = async (authUser: User | null) => {
+  const fetchDbUser = useCallback(async (authUser: User | null) => {
     if (!authUser) {
       setDbUser(null);
       return;
@@ -119,7 +119,7 @@ export function useAuth(): AuthState {
       console.error("Error fetching database user:", error);
       setDbUser(null);
     }
-  };
+  }, []);
 
   useEffect(() => {
     // Get initial session
@@ -161,7 +161,7 @@ export function useAuth(): AuthState {
     return () => {
       subscription.unsubscribe();
     };
-  }, [supabase.auth]);
+  }, [supabase.auth, fetchDbUser]);
 
   /**
    * Signs out the current user and redirects to login page

@@ -46,7 +46,7 @@ export const aggregateDataByPeriod = (
 
   const grouped = data.reduce(
     (acc, item) => {
-      const date = item[dateKey];
+      const date = item[dateKey] as string | Date;
       if (!date) return acc;
 
       const key = formatDate(date, formatMap[period]);
@@ -54,12 +54,13 @@ export const aggregateDataByPeriod = (
         acc[key] = { name: key, value: 0, count: 0 };
       }
 
-      acc[key].value += item[valueKey] || 0;
+      const itemValue = Number(item[valueKey]) || 0;
+      acc[key].value += itemValue;
       acc[key].count += 1;
 
       return acc;
     },
-    {} as Record<string, any>
+    {} as Record<string, { name: string; value: number; count: number }>
   );
 
   return Object.values(grouped).map((item) => ({

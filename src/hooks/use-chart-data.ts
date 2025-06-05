@@ -132,15 +132,18 @@ export const chartDataTransformers = {
     valueKey: string,
     dateKey: string
   ): ChartDataPoint[] => {
-    return data.map((item) => ({
-      name: new Date(item[dateKey]).toLocaleDateString("en-US", {
-        month: "short",
-        day: "numeric",
-      }),
-      date: item[dateKey],
-      value: item[valueKey],
-      ...item,
-    }));
+    return data.map((item) => {
+      const dateValue = item[dateKey] as string | Date;
+      return {
+        name: new Date(dateValue).toLocaleDateString("en-US", {
+          month: "short",
+          day: "numeric",
+        }),
+        date: dateValue,
+        value: Number(item[valueKey]) || 0,
+        ...item,
+      };
+    });
   },
 
   categoricalFromArray: (
@@ -149,8 +152,8 @@ export const chartDataTransformers = {
     valueKey: string
   ): ChartDataPoint[] => {
     return data.map((item) => ({
-      name: item[nameKey],
-      value: item[valueKey],
+      name: String(item[nameKey]),
+      value: Number(item[valueKey]) || 0,
       ...item,
     }));
   },
@@ -162,14 +165,15 @@ export const chartDataTransformers = {
   ): ChartDataPoint[] => {
     return data.map((item) => {
       const point: ChartDataPoint = {
-        name: item[nameKey],
+        name: String(item[nameKey]),
         value: 0,
       };
 
-      seriesKeys.forEach((key) => {
-        point[key] = item[key];
-        point.value += item[key] || 0;
-      });
+      for (const key of seriesKeys) {
+        const seriesValue = Number(item[key]) || 0;
+        point[key] = seriesValue;
+        point.value += seriesValue;
+      }
 
       return point;
     });

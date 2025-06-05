@@ -111,9 +111,8 @@ export const getTrendColor = (
 
   if (context === "positive") {
     return direction === "up" ? scheme.success : scheme.error;
-  } else {
-    return direction === "up" ? scheme.error : scheme.success;
   }
+  return direction === "up" ? scheme.error : scheme.success;
 };
 
 export const getContrastColor = (backgroundColor: string): string => {
@@ -137,8 +136,8 @@ export const adjustColorBrightness = (color: string, percent: number): string =>
   const b = Number.parseInt(hex.substring(4, 6), 16);
 
   const adjust = (value: number) => {
-    value = value + (255 - value) * (percent / 100);
-    return Math.min(255, Math.max(0, Math.round(value)));
+    const adjustedValue = value + (255 - value) * (percent / 100);
+    return Math.min(255, Math.max(0, Math.round(adjustedValue)));
   };
 
   const newR = adjust(r).toString(16).padStart(2, "0");

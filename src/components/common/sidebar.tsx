@@ -110,13 +110,12 @@ export function Sidebar({ className }: SidebarProps) {
     useNavigationState();
 
   return (
-    <aside
+    <nav
       className={cn(
         "relative flex h-full flex-col border-r bg-background transition-all duration-300",
         isSidebarCollapsed ? "w-16" : "w-[280px]",
         className
       )}
-      role="navigation"
       aria-label="Main navigation"
     >
       {/* Logo/Brand */}
@@ -147,7 +146,7 @@ export function Sidebar({ className }: SidebarProps) {
                   {section.title}
                 </h2>
               )}
-              <ul role="list" className="space-y-1">
+              <ul className="space-y-1">
                 {section.items.map((item) => (
                   <li key={item.id}>
                     <NavItemComponent
@@ -159,7 +158,7 @@ export function Sidebar({ className }: SidebarProps) {
                     />
                     {/* Nested items */}
                     {item.children && expandedSections.includes(item.id) && !isSidebarCollapsed && (
-                      <ul role="list" className="mt-1 space-y-1">
+                      <ul className="mt-1 space-y-1">
                         {item.children.map((child) => (
                           <li key={child.id}>
                             <NavItemComponent
@@ -187,6 +186,6 @@ export function Sidebar({ className }: SidebarProps) {
       >
         Skip to main content
       </a>
-    </aside>
+    </nav>
   );
 }

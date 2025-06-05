@@ -66,7 +66,7 @@ export function DashboardGrid({
 
     const componentContent = () => {
       switch (component.type) {
-        case "chart":
+        case "chart": {
           const chartConfig = component.data;
           if (!chartConfig) return null;
 
@@ -108,20 +108,24 @@ export function DashboardGrid({
             default:
               return null;
           }
+        }
 
-        case "kpi":
+        case "kpi": {
           return <KPICard data={component.data} />;
+        }
 
-        case "custom":
+        case "custom": {
           // Placeholder for custom components
           return (
             <div className="flex items-center justify-center h-full bg-muted/10 rounded-lg">
               <p className="text-muted-foreground">Custom Component</p>
             </div>
           );
+        }
 
-        default:
+        default: {
           return null;
+        }
       }
     };
 

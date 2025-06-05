@@ -3,14 +3,13 @@
 import { DashboardGrid } from "@/components/dashboard/dashboard-grid";
 import { Button } from "@/components/ui/button";
 import type { Prisma } from "@/generated/prisma";
-import { generateMockChartData, useChartData } from "@/hooks/use-chart-data";
+import { useDashboardKPI } from "@/hooks/use-dashboard-kpi";
 import { useDashboardLayout } from "@/hooks/use-dashboard-layout";
 import type { ChartConfig } from "@/lib/types/charts";
 import type { DashboardComponent } from "@/lib/types/dashboard";
-import type { KPIData } from "@/lib/types/kpi";
-import { calculateTrend, formatCurrency } from "@/lib/utils/chart-helpers";
+import { generateDashboardMockData } from "@/lib/utils/mock-dashboard-data";
 import { Plus, RefreshCw, Settings } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
 // Type for clinic with counts
 type ClinicWithCounts = Prisma.ClinicGetPayload<{
@@ -41,96 +40,20 @@ export default function DashboardClient({ initialData }: DashboardClientProps) {
   const { clinic } = initialData;
   const [refreshing, setRefreshing] = useState(false);
 
-  // Mock data generation for demonstration
-  const revenueData = generateMockChartData("revenue", 30);
-  const appointmentsData = generateMockChartData("appointments", 30);
-  const patientsData = generateMockChartData("patients", 30);
-  const treatmentsData = generateMockChartData("treatments", 7);
+  // Generate mock data
+  const { revenueData, appointmentsData, patientsData, treatmentsData } =
+    generateDashboardMockData();
 
-  // Calculate KPI values from mock data
-  const currentRevenue = revenueData.slice(-7).reduce((sum, d) => sum + d.value, 0);
-  const previousRevenue = revenueData.slice(-14, -7).reduce((sum, d) => sum + d.value, 0);
-  const revenueTrend = calculateTrend(currentRevenue, previousRevenue);
-
-  const currentAppointments = appointmentsData.slice(-7).reduce((sum, d) => sum + d.value, 0);
-  const previousAppointments = appointmentsData.slice(-14, -7).reduce((sum, d) => sum + d.value, 0);
-  const appointmentsTrend = calculateTrend(currentAppointments, previousAppointments);
-
-  const currentPatients = patientsData.slice(-7).reduce((sum, d) => sum + d.value, 0);
-  const previousPatients = patientsData.slice(-14, -7).reduce((sum, d) => sum + d.value, 0);
-  const patientsTrend = calculateTrend(currentPatients, previousPatients);
-
-  // KPI Data
-  const kpiData: KPIData[] = [
-    {
-      id: "revenue",
-      title: "Weekly Revenue",
-      value: formatCurrency(currentRevenue),
-      trend: {
-        direction: revenueTrend.direction,
-        value: currentRevenue - previousRevenue,
-        percentage: revenueTrend.percentage,
-      },
-      comparison: {
-        period: "week",
-        previousValue: formatCurrency(previousRevenue),
-      },
-      goal: {
-        value: 100000,
-        progress: Math.min((currentRevenue / 100000) * 100, 100),
-        label: "Weekly Target",
-      },
+  // Calculate KPI data using custom hook
+  const kpiData = useDashboardKPI({
+    revenueData,
+    appointmentsData,
+    patientsData,
+    goals: {
+      weeklyRevenue: 100000,
+      weeklyPatients: 150,
     },
-    {
-      id: "appointments",
-      title: "Weekly Appointments",
-      value: currentAppointments,
-      unit: "appointments",
-      trend: {
-        direction: appointmentsTrend.direction,
-        value: currentAppointments - previousAppointments,
-        percentage: appointmentsTrend.percentage,
-      },
-      comparison: {
-        period: "week",
-        previousValue: previousAppointments,
-      },
-    },
-    {
-      id: "patients",
-      title: "New Patients",
-      value: currentPatients,
-      unit: "patients",
-      trend: {
-        direction: patientsTrend.direction,
-        value: currentPatients - previousPatients,
-        percentage: patientsTrend.percentage,
-      },
-      comparison: {
-        period: "week",
-        previousValue: previousPatients,
-      },
-      goal: {
-        value: 150,
-        progress: Math.min((currentPatients / 150) * 100, 100),
-        label: "Weekly Target",
-      },
-    },
-    {
-      id: "utilization",
-      title: "Chair Utilization",
-      value: "78%",
-      trend: {
-        direction: "up",
-        value: 5,
-        percentage: 6.8,
-      },
-      comparison: {
-        period: "week",
-        previousValue: "73%",
-      },
-    },
-  ];
+  });
 
   // Chart configurations
   const revenueChartConfig: ChartConfig = {

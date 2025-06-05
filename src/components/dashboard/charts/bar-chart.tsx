@@ -31,6 +31,11 @@ interface BarChartProps {
   horizontal?: boolean;
 }
 
+const safeFormatNumber = (value: string | number): string => {
+  const numValue = typeof value === "string" ? Number.parseFloat(value) || 0 : value;
+  return formatNumber(numValue);
+};
+
 export function BarChart({
   config,
   title,
@@ -38,8 +43,8 @@ export function BarChart({
   loading,
   error,
   className,
-  formatYAxis = (value) => formatNumber(value),
-  formatTooltip = (value) => formatNumber(value),
+  formatYAxis = safeFormatNumber,
+  formatTooltip = safeFormatNumber,
   onDataPointClick,
   stacked = false,
   horizontal = false,
@@ -77,7 +82,7 @@ export function BarChart({
     return (
       <div style={chartTheme.tooltip.container}>
         <p style={chartTheme.tooltip.label}>
-          {config.xAxisKey === "date" ? formatDate(label) : label}
+          {config.xAxisKey === "date" ? formatDate(label || "") : label}
         </p>
         {payload.map((entry, index: number) => (
           <p key={index} style={{ ...chartTheme.tooltip.value, color: entry.color }}>

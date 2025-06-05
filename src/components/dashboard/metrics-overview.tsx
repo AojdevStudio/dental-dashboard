@@ -31,7 +31,7 @@ export function MetricsOverview() {
         <AlertCircle className="h-4 w-4" />
         <AlertDescription>
           Failed to load metrics. Please try again later.
-          <button onClick={() => refetchMetrics()} className="ml-2 underline">
+          <button type="button" onClick={() => refetchMetrics()} className="ml-2 underline">
             Retry
           </button>
         </AlertDescription>

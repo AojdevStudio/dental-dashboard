@@ -391,15 +391,22 @@ export async function createGoalFromTemplate(
  * Calculate goal progress
  */
 async function calculateGoalProgress(goal: Record<string, unknown>) {
+  // Define typed properties to ensure type safety
+  const clinicId = goal.clinicId as string;
+  const metricDefinitionId = goal.metricDefinitionId as string;
+  const providerId = goal.providerId as string | undefined;
+  const startDate = goal.startDate as Date;
+  const endDate = goal.endDate as Date;
+  const targetValueStr = goal.targetValue as string;
   // Get actual metrics for the goal period
   const metrics = await prisma.metricValue.findMany({
     where: {
-      clinicId: goal.clinicId,
-      metricDefinitionId: goal.metricDefinitionId,
-      providerId: goal.providerId,
+      clinicId,
+      metricDefinitionId,
+      providerId,
       date: {
-        gte: goal.startDate,
-        lte: goal.endDate,
+        gte: startDate,
+        lte: endDate,
       },
     },
     select: {
@@ -411,18 +418,18 @@ async function calculateGoalProgress(goal: Record<string, unknown>) {
   if (metrics.length === 0) {
     return {
       currentValue: 0,
-      targetValue: Number.parseFloat(goal.targetValue),
+      targetValue: Number.parseFloat(targetValueStr),
       percentage: 0,
       trend: "neutral" as const,
-      daysRemaining: Math.ceil((goal.endDate.getTime() - Date.now()) / (1000 * 60 * 60 * 24)),
+      daysRemaining: Math.ceil((endDate.getTime() - Date.now()) / (1000 * 60 * 60 * 24)),
     };
   }
 
   // Calculate current value based on metric type
-  const values = metrics.map((m) => Number.parseFloat(m.value)).filter((v) => !isNaN(v));
+  const values = metrics.map((m) => Number.parseFloat(m.value)).filter((v) => !Number.isNaN(v));
   const currentValue = values.reduce((acc, val) => acc + val, 0); // Sum for now, could be avg
 
-  const targetValue = Number.parseFloat(goal.targetValue);
+  const targetValue = Number.parseFloat(targetValueStr);
   const percentage = targetValue > 0 ? (currentValue / targetValue) * 100 : 0;
 
   // Calculate trend
@@ -437,7 +444,7 @@ async function calculateGoalProgress(goal: Record<string, unknown>) {
 
   const daysRemaining = Math.max(
     0,
-    Math.ceil((goal.endDate.getTime() - Date.now()) / (1000 * 60 * 60 * 24))
+    Math.ceil((endDate.getTime() - Date.now()) / (1000 * 60 * 60 * 24))
   );
 
   return {
@@ -483,7 +490,7 @@ async function calculateTargetFromFormula(
 
     const previousSum = previousMetrics
       .map((m) => Number.parseFloat(m.value))
-      .filter((v) => !isNaN(v))
+      .filter((v) => !Number.isNaN(v))
       .reduce((acc, val) => acc + val, 0);
 
     // Apply formula multiplier

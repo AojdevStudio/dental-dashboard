@@ -45,9 +45,9 @@ export function withCacheHeaders<T extends NextResponse>(
 ): T {
   const headers = CacheStrategies[strategy];
 
-  Object.entries(headers).forEach(([key, value]) => {
+  for (const [key, value] of Object.entries(headers)) {
     response.headers.set(key, value);
-  });
+  }
 
   return response;
 }

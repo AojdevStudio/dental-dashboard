@@ -77,6 +77,7 @@ export function AuthGuard({
               again.
             </p>
             <button
+              type="button"
               onClick={() => router.push("/login")}
               className="text-sm text-primary hover:underline"
             >

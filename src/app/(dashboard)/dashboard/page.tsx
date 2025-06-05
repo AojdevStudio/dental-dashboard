@@ -28,30 +28,77 @@ import DashboardClient from "./dashboard-client";
  * @returns {JSX.Element} The rendered dashboard page with data visualization components
  */
 export default async function DashboardPage() {
-  const authContext = await getAuthContext();
+  let authContext: AuthContext | null;
+
+  try {
+    authContext = await getAuthContext();
+  } catch (error) {
+    return (
+      <Card className="max-w-md mx-auto mt-8">
+        <CardHeader>
+          <CardTitle>Authentication Error</CardTitle>
+          <CardDescription>
+            An error occurred while verifying your authentication. Please try again.
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <p className="text-sm text-muted-foreground">
+            {error instanceof Error ? error.message : "Unknown authentication error"}
+          </p>
+          <div className="flex gap-2">
+            <a href="/login" className="text-primary hover:underline">
+              Return to Login
+            </a>
+            <span className="text-muted-foreground">•</span>
+            <a href="/dashboard" className="text-primary hover:underline">
+              Retry
+            </a>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
 
   if (!authContext) {
-    return <div>Unauthorized</div>;
+    return (
+      <Card className="max-w-md mx-auto mt-8">
+        <CardHeader>
+          <CardTitle>Authentication Required</CardTitle>
+          <CardDescription>Please log in to access the dashboard.</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <a href="/login" className="text-primary hover:underline">
+            Return to Login
+          </a>
+        </CardContent>
+      </Card>
+    );
   }
 
   // Get the current clinic information
   let currentClinic = null;
   if (authContext.selectedClinicId && authContext.selectedClinicId !== "all") {
-    currentClinic = await prisma.clinic.findUnique({
-      where: { id: authContext.selectedClinicId },
-      select: {
-        id: true,
-        name: true,
-        location: true,
-        _count: {
-          select: {
-            users: true,
-            providers: true,
-            metrics: true,
+    try {
+      currentClinic = await prisma.clinic.findUnique({
+        where: { id: authContext.selectedClinicId },
+        select: {
+          id: true,
+          name: true,
+          location: true,
+          _count: {
+            select: {
+              users: true,
+              providers: true,
+              metrics: true,
+            },
           },
         },
-      },
-    });
+      });
+    } catch (error) {
+      console.error("Error fetching clinic data:", error);
+      // Continue with currentClinic as null - the UI will handle the fallback
+      // This ensures the app remains stable even if the clinic query fails
+    }
   }
 
   return (
@@ -96,8 +143,8 @@ async function DashboardContent({
   // Prepare initial data for client component
   const initialData = {
     clinic,
-    isSystemAdmin: authContext.isSystemAdmin,
-    selectedClinicId: authContext.selectedClinicId,
+    isSystemAdmin: authContext.isSystemAdmin ?? false,
+    selectedClinicId: authContext.selectedClinicId ?? "all",
     userId: authContext.userId,
   };
 
@@ -144,22 +191,44 @@ async function DashboardContent({
  * @returns {JSX.Element} The rendered all clinics overview
  */
 async function AllClinicsOverview() {
-  const clinics = await prisma.clinic.findMany({
-    where: { status: "active" },
-    select: {
-      id: true,
-      name: true,
-      location: true,
-      _count: {
-        select: {
-          users: true,
-          providers: true,
-          metrics: true,
+  let clinics: ClinicWithCounts[];
+
+  try {
+    clinics = await prisma.clinic.findMany({
+      where: { status: "active" },
+      select: {
+        id: true,
+        name: true,
+        location: true,
+        _count: {
+          select: {
+            users: true,
+            providers: true,
+            metrics: true,
+          },
         },
       },
-    },
-    orderBy: { name: "asc" },
-  });
+      orderBy: { name: "asc" },
+    });
+  } catch (error) {
+    console.error("Error fetching clinics data:", error);
+    // Return error state when clinic data cannot be fetched
+    return (
+      <Card className="max-w-md mx-auto">
+        <CardHeader>
+          <CardTitle>Data Loading Error</CardTitle>
+          <CardDescription>
+            Unable to load clinics data. Please try refreshing the page.
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <p className="text-sm text-muted-foreground">
+            {error instanceof Error ? error.message : "Unknown database error"}
+          </p>
+        </CardContent>
+      </Card>
+    );
+  }
 
   return (
     <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
