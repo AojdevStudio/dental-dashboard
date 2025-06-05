@@ -69,7 +69,9 @@ export function useMetrics(filters: MetricFilters = {}) {
     if (filters.endDate) params.append("endDate", filters.endDate);
     if (filters.providerId) params.append("providerId", filters.providerId);
     if (filters.metricIds?.length) {
-      filters.metricIds.forEach((id) => params.append("metricIds", id));
+      for (const id of filters.metricIds) {
+        params.append("metricIds", id);
+      }
     }
 
     const response = await fetch(`/api/metrics?${params.toString()}`);

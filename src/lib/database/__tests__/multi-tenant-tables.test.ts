@@ -61,7 +61,7 @@ describe("Multi-Tenant Tables Migration", () => {
         AND schemaname = 'public'
       `;
 
-      const indexNames = (indexes as any[]).map((idx) => idx.indexname);
+      const indexNames = (indexes as Array<{ indexname: string }>).map((idx) => idx.indexname);
       expect(indexNames).toContain("user_clinic_roles_pkey");
       expect(indexNames).toContain("user_clinic_roles_clinic_id_idx");
       expect(indexNames).toContain("user_clinic_roles_user_id_idx");
@@ -77,7 +77,7 @@ describe("Multi-Tenant Tables Migration", () => {
       `;
 
       expect(Array.isArray(compositeIndexes)).toBe(true);
-      expect((compositeIndexes as any[]).length).toBeGreaterThan(0);
+      expect((compositeIndexes as unknown[]).length).toBeGreaterThan(0);
     });
   });
 
@@ -91,7 +91,7 @@ describe("Multi-Tenant Tables Migration", () => {
         AND column_name = 'amount'
       `;
 
-      const column = (columnInfo as any[])[0];
+      const column = (columnInfo as Array<{ numeric_precision: number; numeric_scale: number }>)[0];
       expect(column.numeric_precision).toBe(10);
       expect(column.numeric_scale).toBe(2);
     });
@@ -105,7 +105,7 @@ describe("Multi-Tenant Tables Migration", () => {
         AND column_name = 'mapping_config'
       `;
 
-      const column = (columnInfo as any[])[0];
+      const column = (columnInfo as Array<{ data_type: string }>)[0];
       expect(column.data_type).toBe("jsonb");
     });
   });
@@ -121,7 +121,7 @@ describe("Multi-Tenant Tables Migration", () => {
       `;
 
       expect(Array.isArray(constraints)).toBe(true);
-      expect((constraints as any[]).length).toBeGreaterThan(0);
+      expect((constraints as unknown[]).length).toBeGreaterThan(0);
     });
   });
 
@@ -129,8 +129,8 @@ describe("Multi-Tenant Tables Migration", () => {
     it("should be able to create and query UserClinicRole", async () => {
       const testRole = await prisma.userClinicRole.create({
         data: {
-          userId: "test-user-" + Date.now(),
-          clinicId: "test-clinic-" + Date.now(),
+          userId: `test-user-${Date.now()}`,
+          clinicId: `test-clinic-${Date.now()}`,
           role: "clinic_admin",
           isActive: true,
           createdBy: "migration-test",
@@ -147,7 +147,7 @@ describe("Multi-Tenant Tables Migration", () => {
     it("should be able to create financial metrics with proper decimal handling", async () => {
       const testMetric = await prisma.financialMetric.create({
         data: {
-          clinicId: "test-clinic-" + Date.now(),
+          clinicId: `test-clinic-${Date.now()}`,
           date: new Date(),
           metricType: "production",
           category: "test",
@@ -164,7 +164,7 @@ describe("Multi-Tenant Tables Migration", () => {
     it("should be able to store JSONB configuration in column mappings", async () => {
       const testMapping = await prisma.columnMappingV2.create({
         data: {
-          connectionId: "test-connection-" + Date.now(),
+          connectionId: `test-connection-${Date.now()}`,
           sheetName: "TestSheet",
           mappingConfig: {
             mappings: [
@@ -177,7 +177,7 @@ describe("Multi-Tenant Tables Migration", () => {
       });
 
       expect(testMapping.mappingConfig).toHaveProperty("mappings");
-      expect((testMapping.mappingConfig as any).mappings).toHaveLength(2);
+      expect((testMapping.mappingConfig as { mappings: unknown[] }).mappings).toHaveLength(2);
 
       // Clean up
       await prisma.columnMappingV2.delete({ where: { id: testMapping.id } });
