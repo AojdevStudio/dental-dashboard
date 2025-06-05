@@ -7,7 +7,7 @@ export interface ChartDataPoint {
   value: number;
   category?: string;
   date?: Date | string;
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 export interface ChartSeries {
@@ -54,14 +54,22 @@ export interface ChartContainerProps {
 
 export interface TooltipProps {
   active?: boolean;
-  payload?: any[];
+  payload?: Array<{
+    name: string;
+    value: number | string;
+    color: string;
+  }>;
   label?: string;
   formatter?: (value: number, name: string) => string;
 }
 
 export interface LegendProps {
   value?: string;
-  payload?: any[];
+  payload?: Array<{
+    value: string;
+    type?: string;
+    color?: string;
+  }>;
 }
 
 export type ChartTheme = {

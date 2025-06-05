@@ -89,7 +89,7 @@ describe("Phase 2: UUID Migration", () => {
         ORDER BY conname
       `;
 
-      const constraintNames = (constraints as any[]).map((c) => c.conname);
+      const constraintNames = (constraints as Array<{ conname: string }>).map((c) => c.conname);
       expect(constraintNames).toContain("users_auth_id_key");
       expect(constraintNames).toContain("users_uuid_id_key");
       expect(constraintNames).toContain("clinics_uuid_id_key");

@@ -1,11 +1,10 @@
-import { Button } from "@/components/ui/button";
 /**
  * Integrations Page
  * Main page for managing data integrations and connections
  */
+import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { FileSpreadsheet, Plus } from "lucide-react";
-import Link from "next/link";
+import { FileSpreadsheet } from "lucide-react";
 
 export default function IntegrationsPage() {
   return (
@@ -18,21 +17,18 @@ export default function IntegrationsPage() {
       </div>
 
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-        <Card>
+        <Card className="opacity-50">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <FileSpreadsheet className="h-5 w-5" />
               Google Sheets
             </CardTitle>
-            <CardDescription>Connect your Google Sheets for data synchronization</CardDescription>
+            <CardDescription>Data synchronization handled via automated scripts</CardDescription>
           </CardHeader>
           <CardContent>
-            <Link href="/integrations/google-sheets">
-              <Button className="w-full">
-                <Plus className="h-4 w-4 mr-2" />
-                Configure Integration
-              </Button>
-            </Link>
+            <Button disabled className="w-full">
+              Managed by Admin
+            </Button>
           </CardContent>
         </Card>
 

@@ -1,7 +1,7 @@
 ---
-trigger: always_on
+trigger: model_decision
 description: 
-globs: 
+globs: *.ts,*.tsx,*.js
 ---
 # Winston Logging Guidelines
 

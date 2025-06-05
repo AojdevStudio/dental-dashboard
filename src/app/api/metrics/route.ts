@@ -65,8 +65,8 @@ export const GET = withAuth(async (request, { authContext }) => {
     {
       limit,
       offset,
-      orderBy: (searchParams.get("orderBy") as any) || "date",
-      orderDir: (searchParams.get("orderDir") as any) || "desc",
+      orderBy: (searchParams.get("orderBy") as "date" | "value" | "createdAt") || "date",
+      orderDir: (searchParams.get("orderDir") as "asc" | "desc") || "desc",
     }
   );
 

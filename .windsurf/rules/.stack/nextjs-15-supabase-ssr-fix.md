@@ -1,7 +1,7 @@
 ---
-description: Supabase SSR authentication
+trigger: model_decision
+description: 
 globs: 
-alwaysApply: false
 ---
 # Next.js 15 + Supabase SSR Cookie Error Fix
 

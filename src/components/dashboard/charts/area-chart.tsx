@@ -23,9 +23,9 @@ interface AreaChartProps {
   loading?: boolean;
   error?: Error | null;
   className?: string;
-  formatYAxis?: (value: any) => string;
-  formatTooltip?: (value: any, name: string) => string;
-  onDataPointClick?: (data: any) => void;
+  formatYAxis?: (value: number | string) => string;
+  formatTooltip?: (value: number | string, name: string) => string;
+  onDataPointClick?: (data: Record<string, unknown>) => void;
   stacked?: boolean;
   gradient?: boolean;
 }
@@ -58,7 +58,19 @@ export function AreaChart({
     animationDuration: config.animationDuration || 750,
   };
 
-  const CustomTooltip = ({ active, payload, label }: any) => {
+  const CustomTooltip = ({
+    active,
+    payload,
+    label,
+  }: {
+    active?: boolean;
+    payload?: Array<{
+      name: string;
+      value: number | string;
+      color: string;
+    }>;
+    label?: string;
+  }) => {
     if (!active || !payload || !payload.length) return null;
 
     return (
@@ -66,7 +78,7 @@ export function AreaChart({
         <p style={chartTheme.tooltip.label}>
           {config.xAxisKey === "date" ? formatDate(label) : label}
         </p>
-        {payload.map((entry: any, index: number) => (
+        {payload.map((entry, index: number) => (
           <p key={index} style={{ ...chartTheme.tooltip.value, color: entry.color }}>
             {entry.name}: {formatTooltip(entry.value, entry.name)}
           </p>
@@ -91,7 +103,7 @@ export function AreaChart({
           onClick={
             onDataPointClick
               ? (data) => {
-                  if (data && data.activePayload) {
+                  if (data?.activePayload) {
                     onDataPointClick(data.activePayload[0].payload);
                   }
                 }
@@ -172,7 +184,7 @@ export function AreaChart({
               dataKey="value"
               stroke={colors[0]}
               strokeWidth={2}
-              fill={gradient ? `url(#gradient-value)` : colors[0]}
+              fill={gradient ? "url(#gradient-value)" : colors[0]}
               fillOpacity={gradient ? 1 : 0.6}
               animationDuration={defaultConfig.animationDuration}
             />

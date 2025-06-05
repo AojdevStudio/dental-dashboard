@@ -24,9 +24,9 @@ interface BarChartProps {
   loading?: boolean;
   error?: Error | null;
   className?: string;
-  formatYAxis?: (value: any) => string;
-  formatTooltip?: (value: any, name: string) => string;
-  onDataPointClick?: (data: any) => void;
+  formatYAxis?: (value: number | string) => string;
+  formatTooltip?: (value: number | string, name: string) => string;
+  onDataPointClick?: (data: Record<string, unknown>) => void;
   stacked?: boolean;
   horizontal?: boolean;
 }
@@ -59,7 +59,19 @@ export function BarChart({
     animationDuration: config.animationDuration || 750,
   };
 
-  const CustomTooltip = ({ active, payload, label }: any) => {
+  const CustomTooltip = ({
+    active,
+    payload,
+    label,
+  }: {
+    active?: boolean;
+    payload?: Array<{
+      name: string;
+      value: number | string;
+      color: string;
+    }>;
+    label?: string;
+  }) => {
     if (!active || !payload || !payload.length) return null;
 
     return (
@@ -67,7 +79,7 @@ export function BarChart({
         <p style={chartTheme.tooltip.label}>
           {config.xAxisKey === "date" ? formatDate(label) : label}
         </p>
-        {payload.map((entry: any, index: number) => (
+        {payload.map((entry, index: number) => (
           <p key={index} style={{ ...chartTheme.tooltip.value, color: entry.color }}>
             {entry.name}: {formatTooltip(entry.value, entry.name)}
           </p>
@@ -85,7 +97,7 @@ export function BarChart({
         onClick={
           onDataPointClick
             ? (data) => {
-                if (data && data.activePayload) {
+                if (data?.activePayload) {
                   onDataPointClick(data.activePayload[0].payload);
                 }
               }
@@ -142,7 +154,7 @@ export function BarChart({
         onClick={
           onDataPointClick
             ? (data) => {
-                if (data && data.activePayload) {
+                if (data?.activePayload) {
                   onDataPointClick(data.activePayload[0].payload);
                 }
               }

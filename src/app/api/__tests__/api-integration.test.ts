@@ -12,6 +12,7 @@ import { GET as getClinicsRoute } from "@/app/api/clinics/route";
 import { POST as createGoalRoute, GET as getGoalsRoute } from "@/app/api/goals/route";
 import { POST as createMetricRoute, GET as getMetricsRoute } from "@/app/api/metrics/route";
 import { POST as createUserRoute, GET as getUsersRoute } from "@/app/api/users/route";
+import type { Clinic, MetricDefinition, User } from "@/generated/prisma";
 import { prisma } from "@/lib/database/client";
 import { createClient } from "@supabase/supabase-js";
 import { NextRequest } from "next/server";
@@ -26,7 +27,12 @@ vi.mock("@/lib/database/auth-context", () => ({
 }));
 
 // Import mocked functions
-import { getAuthContext, isClinicAdmin, validateClinicAccess } from "@/lib/database/auth-context";
+import {
+  type AuthContext,
+  getAuthContext,
+  isClinicAdmin,
+  validateClinicAccess,
+} from "@/lib/database/auth-context";
 
 // Test data
 const testData = {
@@ -52,7 +58,7 @@ const testData = {
       clinicId: "", // Will be set to clinic A
     },
   ],
-  authContexts: {} as Record<string, any>,
+  authContexts: {} as Record<string, AuthContext>,
 };
 
 describe("API Route Integration Tests", () => {
@@ -155,7 +161,7 @@ describe("API Route Integration Tests", () => {
       expect(response.status).toBe(200);
       const data = await response.json();
       expect(data.data).toBeDefined();
-      expect(data.data.every((u: any) => u.clinicId === testData.clinics[0].id)).toBe(true);
+      expect(data.data.every((u: User) => u.clinicId === testData.clinics[0].id)).toBe(true);
       expect(data.pagination).toBeDefined();
     });
 
@@ -257,7 +263,7 @@ describe("API Route Integration Tests", () => {
   });
 
   describe("Metrics API", () => {
-    let metricDefinition: any;
+    let metricDefinition: MetricDefinition;
 
     beforeAll(async () => {
       // Create metric definition
@@ -305,8 +311,10 @@ describe("API Route Integration Tests", () => {
 
       expect(response.status).toBe(200);
       const data = await response.json();
-      expect(data.data.every((m: any) => m.clinicId === testData.clinics[0].id)).toBe(true);
-      expect(data.data.some((m: any) => m.value === 200)).toBe(false);
+      expect(
+        data.data.every((m: { clinicId: string }) => m.clinicId === testData.clinics[0].id)
+      ).toBe(true);
+      expect(data.data.some((m: { value: number }) => m.value === 200)).toBe(false);
     });
 
     it("should create metric with valid data", async () => {
@@ -380,7 +388,7 @@ describe("API Route Integration Tests", () => {
 
       expect(getResponse.status).toBe(200);
       const data = await getResponse.json();
-      expect(data.data.some((g: any) => g.id === createdGoal.id)).toBe(true);
+      expect(data.data.some((g: { id: string }) => g.id === createdGoal.id)).toBe(true);
     });
 
     it("should filter goals by status", async () => {
@@ -391,7 +399,7 @@ describe("API Route Integration Tests", () => {
 
       expect(response.status).toBe(200);
       const data = await response.json();
-      expect(data.data.every((g: any) => g.status === "active")).toBe(true);
+      expect(data.data.every((g: { status: string }) => g.status === "active")).toBe(true);
     });
 
     it("should reject goal creation for non-admin users", async () => {
@@ -492,7 +500,7 @@ describe("API Route Integration Tests", () => {
       expect(response.status).toBe(200);
       const data = await response.json();
       expect(data.pagination.limit).toBe(5);
-      expect(data.data.every((u: any) => u.role === "provider")).toBe(true);
+      expect(data.data.every((u: { role: string }) => u.role === "provider")).toBe(true);
     });
 
     it("should enforce maximum pagination limit", async () => {

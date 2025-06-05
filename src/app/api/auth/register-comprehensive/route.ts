@@ -1,7 +1,25 @@
-import { randomBytes } from "crypto";
+import { randomBytes } from "node:crypto";
 import { prisma } from "@/lib/database/prisma";
 import { createClient } from "@/lib/supabase/server";
 import { type NextRequest, NextResponse } from "next/server";
+
+// Type for registration request data
+interface RegistrationData {
+  email: string;
+  password: string;
+  fullName: string;
+  role: string;
+  phone?: string;
+  clinicMode: "join" | "create";
+  clinicRegistrationCode?: string;
+  newClinic?: {
+    name: string;
+    location: string;
+  };
+  providerInfo?: {
+    providerType?: string;
+  };
+}
 
 // Generate a 6-character alphanumeric clinic code
 function generateClinicCode(): string {
@@ -9,7 +27,7 @@ function generateClinicCode(): string {
 }
 
 export async function POST(request: NextRequest) {
-  let data: any;
+  let data: RegistrationData;
 
   try {
     data = await request.json();

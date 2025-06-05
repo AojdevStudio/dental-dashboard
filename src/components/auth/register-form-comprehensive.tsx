@@ -185,7 +185,7 @@ export function RegisterFormComprehensive() {
         setError(result.error || "Registration failed");
       } else {
         // Success - redirect to login with success message
-        router.push("/login?registered=true&email=" + encodeURIComponent(formData.email));
+        router.push(`/login?registered=true&email=${encodeURIComponent(formData.email)}`);
       }
     } catch (err) {
       setError("An unexpected error occurred. Please try again.");
@@ -311,7 +311,9 @@ export function RegisterFormComprehensive() {
         <Label htmlFor="role">Your Role *</Label>
         <Select
           value={formData.role}
-          onValueChange={(value: any) => setFormData({ ...formData, role: value })}
+          onValueChange={(value: RegistrationFormData["role"]) =>
+            setFormData({ ...formData, role: value })
+          }
           disabled={loading}
         >
           <SelectTrigger>
@@ -330,7 +332,9 @@ export function RegisterFormComprehensive() {
         <Label>Clinic Association *</Label>
         <RadioGroup
           value={formData.clinicMode}
-          onValueChange={(value: any) => setFormData({ ...formData, clinicMode: value })}
+          onValueChange={(value: RegistrationFormData["clinicMode"]) =>
+            setFormData({ ...formData, clinicMode: value })
+          }
         >
           <div className="flex items-center space-x-2">
             <RadioGroupItem value="join" id="join" />
@@ -371,7 +375,11 @@ export function RegisterFormComprehensive() {
               onChange={(e) =>
                 setFormData({
                   ...formData,
-                  newClinic: { ...formData.newClinic, name: e.target.value } as any,
+                  newClinic: {
+                    name: e.target.value,
+                    location: formData.newClinic?.location || "",
+                    practiceType: formData.newClinic?.practiceType || "",
+                  },
                 })
               }
               placeholder="Smith Dental Clinic"
@@ -388,7 +396,11 @@ export function RegisterFormComprehensive() {
               onChange={(e) =>
                 setFormData({
                   ...formData,
-                  newClinic: { ...formData.newClinic, location: e.target.value } as any,
+                  newClinic: {
+                    name: formData.newClinic?.name || "",
+                    location: e.target.value,
+                    practiceType: formData.newClinic?.practiceType || "",
+                  },
                 })
               }
               placeholder="123 Main St, City, State"
@@ -403,7 +415,11 @@ export function RegisterFormComprehensive() {
               onValueChange={(value) =>
                 setFormData({
                   ...formData,
-                  newClinic: { ...formData.newClinic, practiceType: value } as any,
+                  newClinic: {
+                    name: formData.newClinic?.name || "",
+                    location: formData.newClinic?.location || "",
+                    practiceType: value,
+                  },
                 })
               }
               disabled={loading}
@@ -439,7 +455,12 @@ export function RegisterFormComprehensive() {
               onChange={(e) =>
                 setFormData({
                   ...formData,
-                  providerInfo: { ...formData.providerInfo, licenseNumber: e.target.value } as any,
+                  providerInfo: {
+                    licenseNumber: e.target.value,
+                    specialties: formData.providerInfo?.specialties || [],
+                    providerType: formData.providerInfo?.providerType || "",
+                    employmentStatus: formData.providerInfo?.employmentStatus || "",
+                  },
                 })
               }
               placeholder="DDS12345"
@@ -454,7 +475,12 @@ export function RegisterFormComprehensive() {
               onValueChange={(value) =>
                 setFormData({
                   ...formData,
-                  providerInfo: { ...formData.providerInfo, providerType: value } as any,
+                  providerInfo: {
+                    licenseNumber: formData.providerInfo?.licenseNumber || "",
+                    specialties: formData.providerInfo?.specialties || [],
+                    providerType: value,
+                    employmentStatus: formData.providerInfo?.employmentStatus || "",
+                  },
                 })
               }
               disabled={loading}
@@ -477,7 +503,12 @@ export function RegisterFormComprehensive() {
               onValueChange={(value) =>
                 setFormData({
                   ...formData,
-                  providerInfo: { ...formData.providerInfo, employmentStatus: value } as any,
+                  providerInfo: {
+                    licenseNumber: formData.providerInfo?.licenseNumber || "",
+                    specialties: formData.providerInfo?.specialties || [],
+                    providerType: formData.providerInfo?.providerType || "",
+                    employmentStatus: value,
+                  },
                 })
               }
               disabled={loading}

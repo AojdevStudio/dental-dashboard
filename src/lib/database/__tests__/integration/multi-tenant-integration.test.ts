@@ -179,8 +179,8 @@ describe("Multi-Tenant Integration Tests", () => {
   });
 
   describe("Multi-Tenant Data Isolation", () => {
-    let authContextA: any;
-    let authContextB: any;
+    let authContextA: { userId: string; clinicIds: string[]; selectedClinicId: string };
+    let authContextB: { userId: string; clinicIds: string[]; selectedClinicId: string };
 
     beforeEach(async () => {
       // Get auth contexts for testing
@@ -430,7 +430,7 @@ describe("Multi-Tenant Integration Tests", () => {
         AND action = 'INSERT'
         ORDER BY created_at DESC
         LIMIT 1
-      `) as any[];
+      `) as unknown[];
 
       expect(auditLog).toHaveLength(1);
       expect(auditLog[0].table_name).toBe("clinics");
@@ -501,7 +501,7 @@ describe("Multi-Tenant Integration Tests", () => {
     it("should correctly return user clinics", async () => {
       const result = (await prisma.$queryRaw`
         SELECT * FROM get_user_clinics(${testData.authIds[0]})
-      `) as any[];
+      `) as unknown[];
 
       expect(result).toHaveLength(1);
       expect(result[0].clinic_id).toBe(testData.clinics[0].id);
@@ -517,7 +517,7 @@ describe("Multi-Tenant Integration Tests", () => {
           ${testData.clinics[0].id},
           NULL
         ) as has_access
-      `) as any[];
+      `) as unknown[];
 
       expect(hasAccess[0].has_access).toBe(true);
 
@@ -528,7 +528,7 @@ describe("Multi-Tenant Integration Tests", () => {
           ${testData.clinics[1].id},
           NULL
         ) as has_access
-      `) as any[];
+      `) as unknown[];
 
       expect(noAccess[0].has_access).toBe(false);
 
@@ -539,7 +539,7 @@ describe("Multi-Tenant Integration Tests", () => {
           ${testData.clinics[0].id},
           'clinic_admin'
         ) as has_access
-      `) as any[];
+      `) as unknown[];
 
       expect(roleAccess[0].has_access).toBe(false); // Provider doesn't have clinic_admin role
     });

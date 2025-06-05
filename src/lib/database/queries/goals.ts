@@ -136,7 +136,7 @@ export async function getGoalById(
     }
   }
 
-  let result: any = goal;
+  let result: Record<string, unknown> = goal;
 
   // Include progress calculation
   if (options?.includeProgress) {
@@ -390,7 +390,7 @@ export async function createGoalFromTemplate(
 /**
  * Calculate goal progress
  */
-async function calculateGoalProgress(goal: any) {
+async function calculateGoalProgress(goal: Record<string, unknown>) {
   // Get actual metrics for the goal period
   const metrics = await prisma.metricValue.findMany({
     where: {

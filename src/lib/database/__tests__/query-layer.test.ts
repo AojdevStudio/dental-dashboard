@@ -139,7 +139,7 @@ describe("Query Layer - Multi-Tenant Support", () => {
         clinicId: "clinic1",
       };
 
-      vi.mocked(prisma.user.findUnique).mockResolvedValue(mockUser as any);
+      vi.mocked(prisma.user.findUnique).mockResolvedValue(mockUser as unknown);
       vi.mocked(validateClinicAccess).mockResolvedValue(true);
 
       await userQueries.getUserById(mockAuthContext, "user456");
@@ -225,7 +225,7 @@ describe("Query Layer - Multi-Tenant Support", () => {
       vi.mocked(prisma.metricDefinition.findUnique).mockResolvedValue({
         id: "def1",
         name: "Test Metric",
-      } as any);
+      } as unknown);
 
       await expect(
         metricQueries.createMetric(mockAuthContext, {
@@ -255,7 +255,7 @@ describe("Query Layer - Multi-Tenant Support", () => {
           value: "150",
           metricDefinition: { id: "def1", name: "Revenue" },
         },
-      ] as any);
+      ] as unknown);
 
       const result = await metricQueries.getAggregatedMetrics(mockAuthContext, "clinic1", {
         aggregationType: "daily",
@@ -286,12 +286,12 @@ describe("Query Layer - Multi-Tenant Support", () => {
       };
 
       vi.mocked(validateClinicAccess).mockResolvedValue(true);
-      vi.mocked(prisma.goal.findMany).mockResolvedValue([mockGoal] as any);
+      vi.mocked(prisma.goal.findMany).mockResolvedValue([mockGoal] as unknown);
       vi.mocked(prisma.goal.count).mockResolvedValue(1);
       vi.mocked(prisma.metricValue.findMany).mockResolvedValue([
         { value: "250", date: new Date("2024-01-15") },
         { value: "300", date: new Date("2024-02-15") },
-      ] as any);
+      ] as unknown);
 
       const result = await goalQueries.getGoals(
         mockAuthContext,
@@ -317,7 +317,7 @@ describe("Query Layer - Multi-Tenant Support", () => {
       vi.mocked(getUserClinicRole).mockResolvedValue("clinic_admin");
       vi.mocked(prisma.metricDefinition.findUnique).mockResolvedValue({
         id: "def1",
-      } as any);
+      } as unknown);
       vi.mocked(prisma.provider.findFirst).mockResolvedValue(null);
 
       await expect(
@@ -346,7 +346,7 @@ describe("Query Layer - Multi-Tenant Support", () => {
           refreshToken: "secret-refresh",
           clinicId: "clinic1",
         },
-      ] as any);
+      ] as unknown);
       vi.mocked(prisma.dataSource.count).mockResolvedValue(1);
 
       const result = await googleSheetsQueries.getDataSources(mockAuthContext);
@@ -367,7 +367,7 @@ describe("Query Layer - Multi-Tenant Support", () => {
         clinicId: "clinic1",
       };
 
-      vi.mocked(prisma.dataSource.findUnique).mockResolvedValue(mockDataSource as any);
+      vi.mocked(prisma.dataSource.findUnique).mockResolvedValue(mockDataSource as unknown);
       vi.mocked(validateClinicAccess).mockResolvedValue(true);
       vi.mocked(isClinicAdmin).mockResolvedValue(true);
 
@@ -384,7 +384,7 @@ describe("Query Layer - Multi-Tenant Support", () => {
 
       vi.mocked(prisma.dataSource.findUnique).mockResolvedValue({
         clinicId: "clinic3", // Different clinic
-      } as any);
+      } as unknown);
       vi.mocked(validateClinicAccess).mockResolvedValue(false);
 
       await expect(

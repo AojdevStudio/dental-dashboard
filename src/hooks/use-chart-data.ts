@@ -4,7 +4,7 @@ import { useCallback, useEffect, useState } from "react";
 
 interface UseChartDataOptions {
   endpoint?: string;
-  transform?: (data: any) => ChartDataPoint[];
+  transform?: (data: unknown) => ChartDataPoint[];
   aggregation?: {
     enabled: boolean;
     period: "day" | "week" | "month" | "quarter" | "year";
@@ -127,7 +127,11 @@ export function generateMockChartData(
 
 // Transform functions for common data formats
 export const chartDataTransformers = {
-  timeSeriesFromArray: (data: any[], valueKey: string, dateKey: string): ChartDataPoint[] => {
+  timeSeriesFromArray: (
+    data: Record<string, unknown>[],
+    valueKey: string,
+    dateKey: string
+  ): ChartDataPoint[] => {
     return data.map((item) => ({
       name: new Date(item[dateKey]).toLocaleDateString("en-US", {
         month: "short",
@@ -139,7 +143,11 @@ export const chartDataTransformers = {
     }));
   },
 
-  categoricalFromArray: (data: any[], nameKey: string, valueKey: string): ChartDataPoint[] => {
+  categoricalFromArray: (
+    data: Record<string, unknown>[],
+    nameKey: string,
+    valueKey: string
+  ): ChartDataPoint[] => {
     return data.map((item) => ({
       name: item[nameKey],
       value: item[valueKey],
@@ -147,7 +155,11 @@ export const chartDataTransformers = {
     }));
   },
 
-  multiSeriesFromArray: (data: any[], nameKey: string, seriesKeys: string[]): ChartDataPoint[] => {
+  multiSeriesFromArray: (
+    data: Record<string, unknown>[],
+    nameKey: string,
+    seriesKeys: string[]
+  ): ChartDataPoint[] => {
     return data.map((item) => {
       const point: ChartDataPoint = {
         name: item[nameKey],

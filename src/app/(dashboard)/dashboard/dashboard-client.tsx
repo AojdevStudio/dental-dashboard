@@ -2,6 +2,7 @@
 
 import { DashboardGrid } from "@/components/dashboard/dashboard-grid";
 import { Button } from "@/components/ui/button";
+import type { Prisma } from "@/generated/prisma";
 import { generateMockChartData, useChartData } from "@/hooks/use-chart-data";
 import { useDashboardLayout } from "@/hooks/use-dashboard-layout";
 import type { ChartConfig } from "@/lib/types/charts";
@@ -11,9 +12,25 @@ import { calculateTrend, formatCurrency } from "@/lib/utils/chart-helpers";
 import { Plus, RefreshCw, Settings } from "lucide-react";
 import { useEffect, useState } from "react";
 
+// Type for clinic with counts
+type ClinicWithCounts = Prisma.ClinicGetPayload<{
+  select: {
+    id: true;
+    name: true;
+    location: true;
+    _count: {
+      select: {
+        users: true;
+        providers: true;
+        metrics: true;
+      };
+    };
+  };
+}>;
+
 interface DashboardClientProps {
   initialData: {
-    clinic: any;
+    clinic: ClinicWithCounts | null;
     isSystemAdmin: boolean;
     selectedClinicId: string;
     userId: string;

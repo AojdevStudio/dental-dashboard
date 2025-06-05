@@ -28,7 +28,7 @@ const securityTestData = {
     { id: uuidv4(), name: "Secure Clinic A", location: "Secure City A" },
     { id: uuidv4(), name: "Secure Clinic B", location: "Secure City B" },
   ],
-  users: [] as any[],
+  users: [] as unknown[],
   authIds: [] as string[],
   maliciousInputs: [
     "'; DROP TABLE users; --",
@@ -458,7 +458,7 @@ describe("Security Tests", () => {
         AND record_id = ${testClinicId}
         ORDER BY created_at DESC
         LIMIT 1
-      `) as any[];
+      `) as unknown[];
 
       expect(auditLog).toHaveLength(1);
       expect(auditLog[0].action).toBe("INSERT");
@@ -478,7 +478,7 @@ describe("Security Tests", () => {
       // Verify log wasn't modified
       const verifyLog = (await prisma.$queryRaw`
         SELECT * FROM audit_logs WHERE id = ${auditLog[0].id}
-      `) as any[];
+      `) as unknown[];
 
       expect(verifyLog[0].action).toBe("INSERT");
 
@@ -575,9 +575,9 @@ describe("Security Tests", () => {
           data: {
             name: "Type Test",
             clinicId: adminUser.clinicId,
-            targetValue: "not a number" as any, // Should be number
+            targetValue: "not a number" as unknown, // Should be number
             currentValue: 0,
-            targetDate: "not a date" as any, // Should be date
+            targetDate: "not a date" as unknown, // Should be date
             status: "active",
           },
         })

@@ -21,8 +21,8 @@ interface PieChartProps {
   loading?: boolean;
   error?: Error | null;
   className?: string;
-  formatTooltip?: (value: any, name: string) => string;
-  onDataPointClick?: (data: any) => void;
+  formatTooltip?: (value: number | string, name: string) => string;
+  onDataPointClick?: (data: Record<string, unknown>) => void;
   isDoughnut?: boolean;
   showPercentage?: boolean;
   labelLine?: boolean;
@@ -57,7 +57,17 @@ export function PieChart({
   // Calculate total for percentage calculations
   const total = config.data.reduce((sum, entry) => sum + (entry.value || 0), 0);
 
-  const CustomTooltip = ({ active, payload }: any) => {
+  const CustomTooltip = ({
+    active,
+    payload,
+  }: {
+    active?: boolean;
+    payload?: Array<{
+      name: string;
+      value: number;
+      payload: Record<string, unknown>;
+    }>;
+  }) => {
     if (!active || !payload || !payload.length) return null;
 
     const data = payload[0];
@@ -82,7 +92,16 @@ export function PieChart({
     outerRadius,
     value,
     index,
-  }: any) => {
+  }: {
+    cx: number;
+    cy: number;
+    midAngle: number;
+    innerRadius: number;
+    outerRadius: number;
+    percent: number;
+    value: number;
+    index: number;
+  }) => {
     if (mobile) return null;
 
     const RADIAN = Math.PI / 180;
@@ -108,12 +127,18 @@ export function PieChart({
     );
   };
 
-  const CustomLegend = (props: any) => {
+  const CustomLegend = (props: {
+    payload?: Array<{
+      value: string;
+      color: string;
+      payload: { value: number };
+    }>;
+  }) => {
     const { payload } = props;
 
     return (
       <ul className={`flex ${mobile ? "flex-col" : "flex-wrap"} gap-2 justify-center mt-4`}>
-        {payload.map((entry: any, index: number) => {
+        {payload.map((entry, index: number) => {
           const percentage = (entry.payload.value / total) * 100;
           return (
             <li key={`item-${index}`} className="flex items-center gap-2">

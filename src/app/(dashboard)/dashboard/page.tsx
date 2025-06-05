@@ -13,7 +13,8 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { DashboardSkeleton } from "@/components/ui/skeleton-loaders";
-import { getAuthContext } from "@/lib/database/auth-context";
+import type { Prisma } from "@/generated/prisma";
+import { type AuthContext, getAuthContext } from "@/lib/database/auth-context";
 import { prisma } from "@/lib/database/prisma";
 import { Suspense } from "react";
 import DashboardClient from "./dashboard-client";
@@ -62,6 +63,22 @@ export default async function DashboardPage() {
   );
 }
 
+// Type for clinic with counts
+type ClinicWithCounts = Prisma.ClinicGetPayload<{
+  select: {
+    id: true;
+    name: true;
+    location: true;
+    _count: {
+      select: {
+        users: true;
+        providers: true;
+        metrics: true;
+      };
+    };
+  };
+}>;
+
 /**
  * Dashboard Content Component
  *
@@ -73,8 +90,8 @@ async function DashboardContent({
   authContext,
   clinic,
 }: {
-  authContext: any;
-  clinic: any;
+  authContext: AuthContext;
+  clinic: ClinicWithCounts | null;
 }) {
   // Prepare initial data for client component
   const initialData = {

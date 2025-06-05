@@ -24,8 +24,7 @@ beforeAll(() => {
 
   if (missingVars.length > 0) {
     throw new Error(
-      `Missing required environment variables for integration tests: ${missingVars.join(", ")}\n` +
-        "Please create a .env.test file with test database credentials."
+      `Missing required environment variables for integration tests: ${missingVars.join(", ")}\nPlease create a .env.test file with test database credentials.`
     );
   }
 

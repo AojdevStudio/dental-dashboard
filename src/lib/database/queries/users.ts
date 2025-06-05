@@ -114,7 +114,7 @@ export async function getUsersByClinic(authContext: AuthContext, clinicId: strin
   });
 
   return userRoles.map((ur) => ({
-    ...((ur as any).user || {}),
+    ...(ur.user || {}),
     clinicRole: ur.role,
     roleId: ur.id,
   }));

@@ -64,7 +64,7 @@ export async function upsertHygieneProduction(
       dataSourceId: record.dataSourceId,
     };
 
-    let upsertedRecord;
+    let upsertedRecord: unknown;
 
     if (existingRecord) {
       // Update existing record
@@ -115,7 +115,7 @@ export async function getHygieneProduction(
     throw new Error("User does not have access to the specified clinic");
   }
 
-  const where: any = {
+  const where: Record<string, unknown> = {
     clinicId: targetClinicId,
   };
 
@@ -188,7 +188,7 @@ export async function getHygieneProductionStats(
     throw new Error("No access to clinic");
   }
 
-  const where: any = {
+  const where: Record<string, unknown> = {
     clinicId: targetClinicId,
   };
 

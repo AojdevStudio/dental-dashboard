@@ -31,7 +31,7 @@ export interface DashboardComponent {
   title: string;
   description?: string;
   size: ComponentSize;
-  data?: ChartConfig | KPIData | any;
+  data?: ChartConfig | KPIData | Record<string, unknown>;
   layout?: GridItemLayout;
   refreshInterval?: number; // in seconds
   lastRefreshed?: Date | string;

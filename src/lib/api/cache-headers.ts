@@ -61,7 +61,7 @@ export function withCacheHeaders<T extends NextResponse>(
  * @returns NextResponse with cache headers
  */
 export function cachedJson(
-  data: any,
+  data: unknown,
   strategy: keyof typeof CacheStrategies = "PRIVATE",
   status = 200
 ): NextResponse {

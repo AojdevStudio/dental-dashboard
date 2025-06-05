@@ -27,10 +27,10 @@ const THRESHOLDS = {
 
 // Test data
 const perfTestData = {
-  clinics: [] as any[],
-  users: [] as any[],
-  authContexts: [] as any[],
-  metricDefinition: null as any,
+  clinics: [] as unknown[],
+  users: [] as unknown[],
+  authContexts: [] as unknown[],
+  metricDefinition: null as unknown,
 };
 
 describe("Performance Tests", () => {

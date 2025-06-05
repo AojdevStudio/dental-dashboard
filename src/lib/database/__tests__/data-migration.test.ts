@@ -36,7 +36,7 @@ vi.mock("@prisma/client", () => ({
 }));
 
 describe("Data Migration", () => {
-  let prisma: any;
+  let prisma: PrismaClient;
   let migration: DataMigration;
 
   beforeEach(() => {
@@ -59,21 +59,23 @@ describe("Data Migration", () => {
       prisma.user.count.mockResolvedValue(2);
       prisma.user.findMany.mockResolvedValueOnce(testUsers).mockResolvedValueOnce([]);
 
-      prisma.$transaction.mockImplementation(async (callback: any) => {
-        const tx = {
-          user: {
-            update: vi.fn().mockResolvedValue({}),
-          },
-          idMapping: {
-            create: vi.fn().mockResolvedValue({}),
-          },
-        };
-        await callback(tx);
+      prisma.$transaction.mockImplementation(
+        async (callback: (tx: unknown) => Promise<unknown>) => {
+          const tx = {
+            user: {
+              update: vi.fn().mockResolvedValue({}),
+            },
+            idMapping: {
+              create: vi.fn().mockResolvedValue({}),
+            },
+          };
+          await callback(tx);
 
-        // Verify updates were called for each user
-        expect(tx.user.update).toHaveBeenCalledTimes(2);
-        expect(tx.idMapping.create).toHaveBeenCalledTimes(2);
-      });
+          // Verify updates were called for each user
+          expect(tx.user.update).toHaveBeenCalledTimes(2);
+          expect(tx.idMapping.create).toHaveBeenCalledTimes(2);
+        }
+      );
 
       await migration.migrateUsers();
 
@@ -92,21 +94,23 @@ describe("Data Migration", () => {
         .mockResolvedValueOnce([testUsers[1]]) // Only user without UUID
         .mockResolvedValueOnce([]);
 
-      prisma.$transaction.mockImplementation(async (callback: any) => {
-        const tx = {
-          user: {
-            update: vi.fn().mockResolvedValue({}),
-          },
-          idMapping: {
-            create: vi.fn().mockResolvedValue({}),
-          },
-        };
-        await callback(tx);
+      prisma.$transaction.mockImplementation(
+        async (callback: (tx: unknown) => Promise<unknown>) => {
+          const tx = {
+            user: {
+              update: vi.fn().mockResolvedValue({}),
+            },
+            idMapping: {
+              create: vi.fn().mockResolvedValue({}),
+            },
+          };
+          await callback(tx);
 
-        // Should only update the user without UUID
-        expect(tx.user.update).toHaveBeenCalledTimes(1);
-        expect(tx.idMapping.create).toHaveBeenCalledTimes(1);
-      });
+          // Should only update the user without UUID
+          expect(tx.user.update).toHaveBeenCalledTimes(1);
+          expect(tx.idMapping.create).toHaveBeenCalledTimes(1);
+        }
+      );
 
       await migration.migrateUsers();
     });
@@ -133,20 +137,22 @@ describe("Data Migration", () => {
       prisma.clinic.count.mockResolvedValue(2);
       prisma.clinic.findMany.mockResolvedValueOnce(testClinics).mockResolvedValueOnce([]);
 
-      prisma.$transaction.mockImplementation(async (callback: any) => {
-        const tx = {
-          clinic: {
-            update: vi.fn().mockResolvedValue({}),
-          },
-          idMapping: {
-            create: vi.fn().mockResolvedValue({}),
-          },
-        };
-        await callback(tx);
+      prisma.$transaction.mockImplementation(
+        async (callback: (tx: unknown) => Promise<unknown>) => {
+          const tx = {
+            clinic: {
+              update: vi.fn().mockResolvedValue({}),
+            },
+            idMapping: {
+              create: vi.fn().mockResolvedValue({}),
+            },
+          };
+          await callback(tx);
 
-        expect(tx.clinic.update).toHaveBeenCalledTimes(2);
-        expect(tx.idMapping.create).toHaveBeenCalledTimes(2);
-      });
+          expect(tx.clinic.update).toHaveBeenCalledTimes(2);
+          expect(tx.idMapping.create).toHaveBeenCalledTimes(2);
+        }
+      );
 
       await migration.migrateClinics();
 
@@ -171,25 +177,27 @@ describe("Data Migration", () => {
       prisma.dashboard.count.mockResolvedValue(1);
       prisma.dashboard.findMany.mockResolvedValueOnce(testDashboards).mockResolvedValueOnce([]);
 
-      prisma.$transaction.mockImplementation(async (callback: any) => {
-        const tx = {
-          dashboard: {
-            update: vi.fn().mockResolvedValue({}),
-          },
-          idMapping: {
-            create: vi.fn().mockResolvedValue({}),
-          },
-        };
-        await callback(tx);
+      prisma.$transaction.mockImplementation(
+        async (callback: (tx: unknown) => Promise<unknown>) => {
+          const tx = {
+            dashboard: {
+              update: vi.fn().mockResolvedValue({}),
+            },
+            idMapping: {
+              create: vi.fn().mockResolvedValue({}),
+            },
+          };
+          await callback(tx);
 
-        expect(tx.dashboard.update).toHaveBeenCalledWith({
-          where: { id: "dash1" },
-          data: expect.objectContaining({
-            uuidId: expect.any(String),
-            userUuidId: userUuid,
-          }),
-        });
-      });
+          expect(tx.dashboard.update).toHaveBeenCalledWith({
+            where: { id: "dash1" },
+            data: expect.objectContaining({
+              uuidId: expect.any(String),
+              userUuidId: userUuid,
+            }),
+          });
+        }
+      );
 
       await migration.migrateDashboards();
     });
@@ -208,26 +216,28 @@ describe("Data Migration", () => {
       prisma.dashboard.count.mockResolvedValue(1);
       prisma.dashboard.findMany.mockResolvedValueOnce(testDashboards).mockResolvedValueOnce([]);
 
-      prisma.$transaction.mockImplementation(async (callback: any) => {
-        const tx = {
-          dashboard: {
-            update: vi.fn(),
-          },
-          idMapping: {
-            create: vi.fn(),
-          },
-        };
+      prisma.$transaction.mockImplementation(
+        async (callback: (tx: unknown) => Promise<unknown>) => {
+          const tx = {
+            dashboard: {
+              update: vi.fn(),
+            },
+            idMapping: {
+              create: vi.fn(),
+            },
+          };
 
-        // Simulate error handling in transaction
-        try {
-          await callback(tx);
-        } catch (error) {
-          // Expected error
+          // Simulate error handling in transaction
+          try {
+            await callback(tx);
+          } catch (error) {
+            // Expected error
+          }
+
+          // Should not update dashboard with missing user UUID
+          expect(tx.dashboard.update).not.toHaveBeenCalled();
         }
-
-        // Should not update dashboard with missing user UUID
-        expect(tx.dashboard.update).not.toHaveBeenCalled();
-      });
+      );
 
       await migration.migrateDashboards();
     });
@@ -257,18 +267,20 @@ describe("Data Migration", () => {
         .mockResolvedValueOnce([]);
 
       let totalProcessed = 0;
-      prisma.$transaction.mockImplementation(async (callback: any) => {
-        const tx = {
-          user: {
-            update: vi.fn().mockResolvedValue({}),
-          },
-          idMapping: {
-            create: vi.fn().mockResolvedValue({}),
-          },
-        };
-        await callback(tx);
-        totalProcessed += tx.user.update.mock.calls.length;
-      });
+      prisma.$transaction.mockImplementation(
+        async (callback: (tx: unknown) => Promise<unknown>) => {
+          const tx = {
+            user: {
+              update: vi.fn().mockResolvedValue({}),
+            },
+            idMapping: {
+              create: vi.fn().mockResolvedValue({}),
+            },
+          };
+          await callback(tx);
+          totalProcessed += tx.user.update.mock.calls.length;
+        }
+      );
 
       await migration.migrateUsers();
 
@@ -279,7 +291,7 @@ describe("Data Migration", () => {
 });
 
 describe("Migration Validation", () => {
-  let prisma: any;
+  let prisma: PrismaClient;
   let validator: MigrationValidator;
 
   beforeEach(() => {
