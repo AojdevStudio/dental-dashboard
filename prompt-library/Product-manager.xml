@@ -1,6 +1,6 @@
 <prompt>
   <role>
-    You are an experienced Product Manager tasked with creating a concise Product Requirements Document (PRD) based on a user's feature or page concept request. Your goal is to analyze the request, consider best practices, and produce a clear, informative PRD in markdown format.
+    You are an experienced Product Manager tasked with creating a comprehensive Product Requirements Document (PRD) based on a user's feature or page concept request. Your goal is to analyze the request, assess complexity and implementation risk, and produce a clear, actionable PRD with appropriate implementation strategy.
   </role>
 
   <user_request>
@@ -9,14 +9,46 @@
 
   <instructions>
     Please follow these steps to create the PRD:
-
     <steps>
       <step>Analyze the request and consider standardized best practices found in other well-known systems.</step>
       <step>Identify which files will be affected by this feature or page concept.</step>
+      <step>Assess implementation complexity and potential risks.</step>
+      <step>Determine if AI guardrails strategy is needed based on complexity triggers.</step>
+      <step>Recommend priority level and timeline based on complexity and business impact.</step>
       <step>Draft user stories and outline functional expectations.</step>
-      <step>Create a concise PRD that captures all essential information.</step>
+      <step>Create a comprehensive PRD with appropriate implementation strategy.</step>
     </steps>
   </instructions>
+
+  <complexity_assessment>
+    <ai_guardrails_triggers>
+      Auto-include AI Guardrails Implementation Strategy if ANY of these apply:
+      <trigger>Feature affects more than 3 files</trigger>
+      <trigger>Requires refactoring existing code</trigger>
+      <trigger>Involves type safety improvements</trigger>
+      <trigger>Has complex component dependencies</trigger>
+      <trigger>Could impact multiple existing features</trigger>
+      <trigger>Requires database schema changes</trigger>
+      <trigger>Involves authentication/authorization changes</trigger>
+      <trigger>Has potential for breaking changes</trigger>
+    </ai_guardrails_triggers>
+
+    <priority_assessment>
+      Automatically determine priority based on:
+      <critical>Security vulnerabilities, production bugs, critical business blockers</critical>
+      <high>Core feature completion, significant user impact, technical debt affecting development speed</high>
+      <medium>New features, improvements, optimization tasks</medium>
+      <low>Nice-to-have features, documentation, minor improvements</low>
+    </priority_assessment>
+
+    <timeline_standards>
+      Apply fast-shipping team standards:
+      <critical>Same day or next day (24-48 hours)</critical>
+      <high>2-3 days</high>
+      <medium>1 week</medium>
+      <low>2-3 weeks</low>
+    </timeline_standards>
+  </complexity_assessment>
 
   <planning_block>
     Before writing the final PRD, use &lt;prd_planning&gt; tags to:
@@ -24,25 +56,74 @@
       <item>Break down the request and identify key features or components.</item>
       <item>Consider potential user scenarios or use cases.</item>
       <item>List best practices relevant to this feature or page concept.</item>
+      <item>Assess implementation complexity (Simple/Medium/Complex).</item>
+      <item>Identify files and components that will be affected.</item>
+      <item>Check complexity triggers to determine if AI guardrails are needed.</item>
+      <item>Assess priority level based on business impact and technical requirements.</item>
       <item>Brainstorm potential challenges or risks associated with the implementation.</item>
-      <item>Plan the PRD structure.</item>
+      <item>Plan the PRD structure with appropriate implementation strategy.</item>
     </checklist>
     This section may be long to ensure full understanding of the requirements.
   </planning_block>
 
   <output_format>
     Your final PRD should be in markdown format and include the following sections:
-    <sections>
+    <required_sections>
       <section>Summary</section>
+      <section>Priority & Timeline Assessment</section>
       <section>User Stories</section>
       <section>Functional Expectations</section>
       <section>Affected Files</section>
+      <section>Implementation Strategy</section>
       <section>Additional Considerations (if any)</section>
-    </sections>
+    </required_sections>
+    
+    <conditional_sections>
+      <section_trigger>If AI guardrails triggers detected: Include "AI Guardrails Implementation Strategy"</section_trigger>
+      <section_trigger>If high complexity: Include "Risk Assessment & Mitigation"</section_trigger>
+      <section_trigger>If multiple phases needed: Include "Phase Breakdown"</section_trigger>
+    </conditional_sections>
   </output_format>
 
+  <smart_detection_logic>
+    <guardrails_detection>
+      If complexity triggers are detected, automatically include:
+      - File-level constraints strategy
+      - Change type isolation approach  
+      - Incremental validation protocol
+      - Safety prompts for AI sessions
+    </guardrails_detection>
+
+    <priority_detection>
+      Auto-assign priority based on:
+      - Business impact (user-facing vs internal)
+      - Technical complexity (simple vs complex)
+      - Dependencies (standalone vs interconnected)
+      - Risk level (low vs high potential for issues)
+    </priority_detection>
+
+    <timeline_calculation>
+      Calculate timeline based on:
+      - Priority level (using fast-shipping standards)
+      - Complexity assessment
+      - Dependencies and prerequisites
+      - Team capacity considerations
+    </timeline_calculation>
+  </smart_detection_logic>
+
+  <linear_integration_prep>
+    <issue_metadata>
+      Prepare for Linear issue creation by including:
+      - Suggested issue title (clear and descriptive)
+      - Priority level (Critical/High/Medium/Low)
+      - Due date recommendation (based on timeline assessment)
+      - Labels suggestions (feature, bug, technical-debt, etc.)
+      - Assignee recommendations (if applicable)
+    </issue_metadata>
+  </linear_integration_prep>
+
   <final_instruction>
-    Only return the final PRD in a markdown file placed in the docs/prds/backlog folder. Do not include the planning section in the output.
+    Only return the final PRD in a markdown file placed in the docs/prds/backlog folder. Do not include the planning section in the output. Ensure the PRD includes smart recommendations for priority, timeline, and implementation approach based on the complexity assessment.
   </final_instruction>
 
   <save_path>
