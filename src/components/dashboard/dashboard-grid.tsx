@@ -199,10 +199,8 @@ export function DashboardGrid({
     display: "grid",
     gridTemplateColumns: `repeat(${gridCols}, 1fr)`,
     gridAutoRows: `${layout.rowHeight}px`,
-    gap: `${layout.margin?.[0] || 10}px`,
-    padding: layout.containerPadding
-      ? `${layout.containerPadding[1]}px ${layout.containerPadding[0]}px`
-      : "0",
+    gap: "64px",
+    padding: "24px",
   };
 
   return (

@@ -187,7 +187,7 @@ export function KPICard({
   );
 
   const cardClasses = cn(
-    "relative overflow-hidden transition-all duration-200",
+    "relative overflow-hidden transition-all duration-200 h-full",
     {
       "hover:shadow-md cursor-pointer": onClick,
       "border-green-200 bg-green-50/30": colorScheme === "success",
