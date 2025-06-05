@@ -340,7 +340,7 @@ export async function getMetricStatistics(
   }
 
   // Calculate statistics
-  const values = metrics.map((m) => Number.parseFloat(m.value)).filter((v) => !isNaN(v));
+  const values = metrics.map((m) => Number.parseFloat(m.value)).filter((v) => !Number.isNaN(v));
   const sum = values.reduce((acc, val) => acc + val, 0);
   const avg = sum / values.length;
   const min = Math.min(...values);
@@ -399,17 +399,19 @@ async function computeAggregations(
   // Group metrics by period
   const groupedMetrics = new Map<string, typeof metrics>();
 
-  metrics.forEach((metric) => {
+  for (const metric of metrics) {
     const periodKey = getPeriodKey(metric.date, options.aggregationType);
     if (!groupedMetrics.has(periodKey)) {
       groupedMetrics.set(periodKey, []);
     }
     groupedMetrics.get(periodKey)!.push(metric);
-  });
+  }
 
   // Calculate aggregations
   const aggregations = Array.from(groupedMetrics.entries()).map(([periodKey, periodMetrics]) => {
-    const values = periodMetrics.map((m) => Number.parseFloat(m.value)).filter((v) => !isNaN(v));
+    const values = periodMetrics
+      .map((m) => Number.parseFloat(m.value))
+      .filter((v) => !Number.isNaN(v));
     const sum = values.reduce((acc, val) => acc + val, 0);
     const avg = values.length > 0 ? sum / values.length : 0;
     const min = values.length > 0 ? Math.min(...values) : 0;
@@ -441,15 +443,17 @@ function getPeriodKey(date: Date, aggregationType: string): string {
   switch (aggregationType) {
     case "daily":
       return `${year}-${String(month + 1).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
-    case "weekly":
+    case "weekly": {
       const weekStart = new Date(date);
       weekStart.setDate(date.getDate() - date.getDay());
       return weekStart.toISOString().split("T")[0];
+    }
     case "monthly":
       return `${year}-${String(month + 1).padStart(2, "0")}-01`;
-    case "quarterly":
+    case "quarterly": {
       const quarter = Math.floor(month / 3);
       return `${year}-${String(quarter * 3 + 1).padStart(2, "0")}-01`;
+    }
     case "yearly":
       return `${year}-01-01`;
     default:

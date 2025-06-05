@@ -100,11 +100,11 @@ export const normalizeData = (data: ChartDataPoint[], series: ChartSeries[]): Ch
   return data.map((point) => {
     const normalized: ChartDataPoint = { ...point };
 
-    series.forEach((s) => {
+    for (const s of series) {
       if (!(s.dataKey in normalized)) {
         normalized[s.dataKey] = 0;
       }
-    });
+    }
 
     return normalized;
   });
