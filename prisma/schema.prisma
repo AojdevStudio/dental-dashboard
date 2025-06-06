@@ -32,6 +32,8 @@ model Clinic {
   dataSources DataSource[]
   hygieneProduction HygieneProduction[]
   dentistProduction DentistProduction[]
+  locations Location[] // New: clinic can have multiple locations
+  locationFinancials LocationFinancial[] // New: location financial data
 
   @@map("clinics")
 }
@@ -79,8 +81,77 @@ model Provider {
   dataSources  DataSource[] // Link providers to their data sources
   hygieneProduction HygieneProduction[]
   dentistProduction DentistProduction[]
+  providerLocations ProviderLocation[] // New: provider-location relationships
 
   @@map("providers")
+}
+
+// Locations - Specific clinic locations (e.g., Humble, Baytown)
+model Location {
+  id          String   @id @default(cuid())
+  clinicId    String   @map("clinic_id")
+  name        String   // "Baytown", "Humble"
+  address     String?
+  isActive    Boolean  @default(true) @map("is_active")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+  
+  clinic      Clinic   @relation(fields: [clinicId], references: [id])
+  financials  LocationFinancial[]
+  providers   ProviderLocation[]
+  
+  @@index([clinicId])
+  @@unique([clinicId, name]) // Prevent duplicate location names per clinic
+  @@map("locations")
+}
+
+// Provider-Location Relationships - Many-to-many with additional metadata
+model ProviderLocation {
+  id         String   @id @default(cuid())
+  providerId String   @map("provider_id")
+  locationId String   @map("location_id")
+  isActive   Boolean  @default(true) @map("is_active")
+  startDate  DateTime @map("start_date")
+  endDate    DateTime? @map("end_date")
+  isPrimary  Boolean  @default(false) @map("is_primary") // Primary location for reporting
+  
+  provider   Provider @relation(fields: [providerId], references: [id])
+  location   Location @relation(fields: [locationId], references: [id])
+  
+  @@unique([providerId, locationId])
+  @@index([providerId])
+  @@index([locationId])
+  @@map("provider_locations")
+}
+
+// Location Financial Data - Structured financial metrics per location
+model LocationFinancial {
+  id              String   @id @default(cuid())
+  clinicId        String   @map("clinic_id")
+  locationId      String   @map("location_id")  // FK to Location instead of string
+  date            DateTime
+  production      Decimal  @db.Decimal(10, 2)
+  adjustments     Decimal  @db.Decimal(10, 2)
+  writeOffs       Decimal  @db.Decimal(10, 2)
+  netProduction   Decimal  @db.Decimal(10, 2)  // Calculated field
+  patientIncome   Decimal  @db.Decimal(10, 2)
+  insuranceIncome Decimal  @db.Decimal(10, 2)
+  totalCollections Decimal @db.Decimal(10, 2)  // Calculated field
+  unearned        Decimal? @db.Decimal(10, 2)
+  dataSourceId    String?  @map("data_source_id")
+  createdBy       String?  @map("created_by")
+  createdAt       DateTime @default(now()) @map("created_at")
+  updatedAt       DateTime @updatedAt @map("updated_at")
+  
+  clinic          Clinic      @relation(fields: [clinicId], references: [id])
+  location        Location    @relation(fields: [locationId], references: [id])
+  dataSource      DataSource? @relation(fields: [dataSourceId], references: [id])
+  
+  @@index([clinicId, date])
+  @@index([locationId, date])
+  @@index([clinicId, locationId, date])
+  @@unique([clinicId, locationId, date]) // Prevent duplicate entries
+  @@map("location_financial")
 }
 
 // Metric Definitions
@@ -125,6 +196,7 @@ model DataSource {
   metrics         MetricValue[]
   hygieneProduction HygieneProduction[]
   dentistProduction DentistProduction[]
+  locationFinancials LocationFinancial[] // New: location financial data
 
   clinicId        String   @map("clinic_id")
   clinic          Clinic   @relation(fields: [clinicId], references: [id])

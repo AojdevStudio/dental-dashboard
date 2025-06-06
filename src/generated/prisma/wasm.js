@@ -158,6 +158,45 @@ exports.Prisma.ProviderScalarFieldEnum = {
   clinicId: 'clinicId'
 };
 
+exports.Prisma.LocationScalarFieldEnum = {
+  id: 'id',
+  clinicId: 'clinicId',
+  name: 'name',
+  address: 'address',
+  isActive: 'isActive',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
+exports.Prisma.ProviderLocationScalarFieldEnum = {
+  id: 'id',
+  providerId: 'providerId',
+  locationId: 'locationId',
+  isActive: 'isActive',
+  startDate: 'startDate',
+  endDate: 'endDate',
+  isPrimary: 'isPrimary'
+};
+
+exports.Prisma.LocationFinancialScalarFieldEnum = {
+  id: 'id',
+  clinicId: 'clinicId',
+  locationId: 'locationId',
+  date: 'date',
+  production: 'production',
+  adjustments: 'adjustments',
+  writeOffs: 'writeOffs',
+  netProduction: 'netProduction',
+  patientIncome: 'patientIncome',
+  insuranceIncome: 'insuranceIncome',
+  totalCollections: 'totalCollections',
+  unearned: 'unearned',
+  dataSourceId: 'dataSourceId',
+  createdBy: 'createdBy',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
 exports.Prisma.MetricDefinitionScalarFieldEnum = {
   id: 'id',
   name: 'name',
@@ -483,6 +522,9 @@ exports.Prisma.ModelName = {
   Clinic: 'Clinic',
   User: 'User',
   Provider: 'Provider',
+  Location: 'Location',
+  ProviderLocation: 'ProviderLocation',
+  LocationFinancial: 'LocationFinancial',
   MetricDefinition: 'MetricDefinition',
   DataSource: 'DataSource',
   ColumnMapping: 'ColumnMapping',
