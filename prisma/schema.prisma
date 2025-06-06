@@ -23,7 +23,7 @@ model Clinic {
   updatedAt        DateTime @updatedAt @map("updated_at")
   
   // Phase 2: UUID Migration Field
-  uuidId           String?  @unique @map("uuid_id")
+  uuidId           String?  @unique @map("uuid_id") @db.Uuid
   
   users     User[]
   providers Provider[]
@@ -50,7 +50,7 @@ model User {
   
   // Phase 2: Auth Integration Fields
   authId    String?  @unique @map("auth_id") // Supabase auth.users.id
-  uuidId    String?  @unique @map("uuid_id") // Future primary key
+  uuidId    String?  @unique @map("uuid_id") @db.Uuid // Future primary key
   
   clinicId  String?  @map("clinic_id") // Optional for system admins
   clinic    Clinic?  @relation(fields: [clinicId], references: [id])
@@ -282,7 +282,7 @@ model Dashboard {
   updatedAt    DateTime @updatedAt @map("updated_at")
   
   // Phase 2: UUID Migration Fields
-  uuidId       String?  @unique @map("uuid_id")
+  uuidId       String?  @unique @map("uuid_id") @db.Uuid
   userUuidId   String?  @map("user_uuid_id")
   
   userId       String   @map("user_id")

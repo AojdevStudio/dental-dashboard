@@ -523,7 +523,7 @@ function generateLocationFinancialPreviewData() {
           const row = values[i];
           
           try {
-            const record = transformLocationFinancialRow(row, headerInfo.columnMapping, location, i + 1);
+            const record = transformLocationFinancialRow(row, headerInfo.columnMapping, location);
             
             if (record) {
               previewData.push([

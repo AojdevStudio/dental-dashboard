@@ -147,7 +147,7 @@ function processLocationFinancialDataFromSheet(sheet, locationName) {
       const row = values[i];
       
       try {
-        const record = transformLocationFinancialRow(row, headerInfo.columnMapping, locationName, i + 1);
+        const record = transformLocationFinancialRow(row, headerInfo.columnMapping, locationName);
         
         if (record) {
           records.push(record);
@@ -262,7 +262,7 @@ function validateRequiredFinancialColumns(columnMapping) {
  * @param {number} rowNumber - Row number for error reporting
  * @returns {Object|null} Transformed record or null if row should be skipped
  */
-function transformLocationFinancialRow(row, columnMapping, locationName, rowNumber) {
+function transformLocationFinancialRow(row, columnMapping, locationName) {
   // Get date value
   const dateValue = getCellValue(row, columnMapping.DATE);
   if (!dateValue) {
@@ -276,12 +276,12 @@ function transformLocationFinancialRow(row, columnMapping, locationName, rowNumb
   }
   
   // Get financial values with defaults
-  const production = parseLocationFinancialAmount(getCellValue(row, columnMapping.PRODUCTION), 'production');
-  const adjustments = parseLocationFinancialAmount(getCellValue(row, columnMapping.ADJUSTMENTS), 'adjustments') || FINANCIAL_FIELD_DEFAULTS.ADJUSTMENTS;
-  const writeOffs = parseLocationFinancialAmount(getCellValue(row, columnMapping.WRITE_OFFS), 'writeOffs') || FINANCIAL_FIELD_DEFAULTS.WRITE_OFFS;
-  const patientIncome = parseLocationFinancialAmount(getCellValue(row, columnMapping.PATIENT_INCOME), 'patientIncome') || FINANCIAL_FIELD_DEFAULTS.PATIENT_INCOME;
-  const insuranceIncome = parseLocationFinancialAmount(getCellValue(row, columnMapping.INSURANCE_INCOME), 'insuranceIncome') || FINANCIAL_FIELD_DEFAULTS.INSURANCE_INCOME;
-  const unearned = parseLocationFinancialAmount(getCellValue(row, columnMapping.UNEARNED), 'unearned') || FINANCIAL_FIELD_DEFAULTS.UNEARNED;
+  const production = parseLocationFinancialAmount(getCellValue(row, columnMapping.PRODUCTION));
+  const adjustments = parseLocationFinancialAmount(getCellValue(row, columnMapping.ADJUSTMENTS)) || FINANCIAL_FIELD_DEFAULTS.ADJUSTMENTS;
+  const writeOffs = parseLocationFinancialAmount(getCellValue(row, columnMapping.WRITE_OFFS)) || FINANCIAL_FIELD_DEFAULTS.WRITE_OFFS;
+  const patientIncome = parseLocationFinancialAmount(getCellValue(row, columnMapping.PATIENT_INCOME)) || FINANCIAL_FIELD_DEFAULTS.PATIENT_INCOME;
+  const insuranceIncome = parseLocationFinancialAmount(getCellValue(row, columnMapping.INSURANCE_INCOME)) || FINANCIAL_FIELD_DEFAULTS.INSURANCE_INCOME;
+  const unearned = parseLocationFinancialAmount(getCellValue(row, columnMapping.UNEARNED)) || FINANCIAL_FIELD_DEFAULTS.UNEARNED;
   
   // Validate required production value
   if (production === null || production === undefined) {
@@ -361,7 +361,7 @@ function formatLocationFinancialDate(date) {
  * @param {string} fieldName - Field name for error reporting
  * @returns {number|null} Parsed amount or null
  */
-function parseLocationFinancialAmount(value, fieldName) {
+function parseLocationFinancialAmount(value) {
   if (value === null || value === undefined || value === '') {
     return null;
   }
@@ -402,8 +402,6 @@ function validateFinancialAmount(fieldName, amount, min, max) {
  * @returns {string|null} Location name or null if not detected
  */
 function detectLocationFromSheetName(sheetName) {
-  const name = sheetName.toLowerCase().trim();
-  
   // Check against location patterns
   for (const pattern of LOCATION_TAB_PATTERNS) {
     if (pattern.test(sheetName)) {
@@ -471,7 +469,7 @@ function validateLocationFinancialSheetData() {
             const row = values[i];
             
             try {
-              const record = transformLocationFinancialRow(row, headerInfo.columnMapping, location, i + 1);
+              const record = transformLocationFinancialRow(row, headerInfo.columnMapping, location);
               
               if (record) {
                 validation.validRecords++;

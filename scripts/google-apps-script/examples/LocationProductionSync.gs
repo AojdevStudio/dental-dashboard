@@ -10,7 +10,15 @@
 
 // Supabase API configuration
 const SUPABASE_URL = 'https://xdwawepxakwqqetegxda.supabase.co';
-const SUPABASE_KEY = ''; // Add your Supabase API key here
+
+// Keep the key in Script Properties (File ▸ Project properties ▸ Script properties)
+const SUPABASE_KEY = PropertiesService
+  .getScriptProperties()
+  .getProperty('SUPABASE_KEY');
+
+if (!SUPABASE_KEY) {
+  throw new Error('SUPABASE_KEY is not configured in Script Properties. Please add it via File ▸ Project properties ▸ Script properties');
+}
 
 // Location mapping (short_id to location_id)
 const LOCATION_MAP = {

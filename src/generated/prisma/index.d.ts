@@ -34665,7 +34665,7 @@ export namespace Prisma {
     registrationCode?: StringNullableFilter<"Clinic"> | string | null
     createdAt?: DateTimeFilter<"Clinic"> | Date | string
     updatedAt?: DateTimeFilter<"Clinic"> | Date | string
-    uuidId?: StringNullableFilter<"Clinic"> | string | null
+    uuidId?: UuidNullableFilter<"Clinic"> | string | null
     users?: UserListRelationFilter
     providers?: ProviderListRelationFilter
     metrics?: MetricValueListRelationFilter
@@ -34745,7 +34745,7 @@ export namespace Prisma {
     registrationCode?: StringNullableWithAggregatesFilter<"Clinic"> | string | null
     createdAt?: DateTimeWithAggregatesFilter<"Clinic"> | Date | string
     updatedAt?: DateTimeWithAggregatesFilter<"Clinic"> | Date | string
-    uuidId?: StringNullableWithAggregatesFilter<"Clinic"> | string | null
+    uuidId?: UuidNullableWithAggregatesFilter<"Clinic"> | string | null
   }
 
   export type UserWhereInput = {
@@ -34760,7 +34760,7 @@ export namespace Prisma {
     createdAt?: DateTimeFilter<"User"> | Date | string
     updatedAt?: DateTimeFilter<"User"> | Date | string
     authId?: StringNullableFilter<"User"> | string | null
-    uuidId?: StringNullableFilter<"User"> | string | null
+    uuidId?: UuidNullableFilter<"User"> | string | null
     clinicId?: StringNullableFilter<"User"> | string | null
     clinic?: XOR<ClinicNullableScalarRelationFilter, ClinicWhereInput> | null
     dashboards?: DashboardListRelationFilter
@@ -34827,7 +34827,7 @@ export namespace Prisma {
     createdAt?: DateTimeWithAggregatesFilter<"User"> | Date | string
     updatedAt?: DateTimeWithAggregatesFilter<"User"> | Date | string
     authId?: StringNullableWithAggregatesFilter<"User"> | string | null
-    uuidId?: StringNullableWithAggregatesFilter<"User"> | string | null
+    uuidId?: UuidNullableWithAggregatesFilter<"User"> | string | null
     clinicId?: StringNullableWithAggregatesFilter<"User"> | string | null
   }
 
@@ -35664,7 +35664,7 @@ export namespace Prisma {
     layoutConfig?: JsonNullableFilter<"Dashboard">
     createdAt?: DateTimeFilter<"Dashboard"> | Date | string
     updatedAt?: DateTimeFilter<"Dashboard"> | Date | string
-    uuidId?: StringNullableFilter<"Dashboard"> | string | null
+    uuidId?: UuidNullableFilter<"Dashboard"> | string | null
     userUuidId?: StringNullableFilter<"Dashboard"> | string | null
     userId?: StringFilter<"Dashboard"> | string
     user?: XOR<UserScalarRelationFilter, UserWhereInput>
@@ -35727,7 +35727,7 @@ export namespace Prisma {
     layoutConfig?: JsonNullableWithAggregatesFilter<"Dashboard">
     createdAt?: DateTimeWithAggregatesFilter<"Dashboard"> | Date | string
     updatedAt?: DateTimeWithAggregatesFilter<"Dashboard"> | Date | string
-    uuidId?: StringNullableWithAggregatesFilter<"Dashboard"> | string | null
+    uuidId?: UuidNullableWithAggregatesFilter<"Dashboard"> | string | null
     userUuidId?: StringNullableWithAggregatesFilter<"Dashboard"> | string | null
     userId?: StringWithAggregatesFilter<"Dashboard"> | string
   }
@@ -39691,6 +39691,18 @@ export namespace Prisma {
     not?: NestedDateTimeFilter<$PrismaModel> | Date | string
   }
 
+  export type UuidNullableFilter<$PrismaModel = never> = {
+    equals?: string | StringFieldRefInput<$PrismaModel> | null
+    in?: string[] | ListStringFieldRefInput<$PrismaModel> | null
+    notIn?: string[] | ListStringFieldRefInput<$PrismaModel> | null
+    lt?: string | StringFieldRefInput<$PrismaModel>
+    lte?: string | StringFieldRefInput<$PrismaModel>
+    gt?: string | StringFieldRefInput<$PrismaModel>
+    gte?: string | StringFieldRefInput<$PrismaModel>
+    mode?: QueryMode
+    not?: NestedUuidNullableFilter<$PrismaModel> | string | null
+  }
+
   export type UserListRelationFilter = {
     every?: UserWhereInput
     some?: UserWhereInput
@@ -39867,6 +39879,21 @@ export namespace Prisma {
     _count?: NestedIntFilter<$PrismaModel>
     _min?: NestedDateTimeFilter<$PrismaModel>
     _max?: NestedDateTimeFilter<$PrismaModel>
+  }
+
+  export type UuidNullableWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: string | StringFieldRefInput<$PrismaModel> | null
+    in?: string[] | ListStringFieldRefInput<$PrismaModel> | null
+    notIn?: string[] | ListStringFieldRefInput<$PrismaModel> | null
+    lt?: string | StringFieldRefInput<$PrismaModel>
+    lte?: string | StringFieldRefInput<$PrismaModel>
+    gt?: string | StringFieldRefInput<$PrismaModel>
+    gte?: string | StringFieldRefInput<$PrismaModel>
+    mode?: QueryMode
+    not?: NestedUuidNullableWithAggregatesFilter<$PrismaModel> | string | null
+    _count?: NestedIntNullableFilter<$PrismaModel>
+    _min?: NestedStringNullableFilter<$PrismaModel>
+    _max?: NestedStringNullableFilter<$PrismaModel>
   }
 
   export type DateTimeNullableFilter<$PrismaModel = never> = {
@@ -43185,6 +43212,17 @@ export namespace Prisma {
     not?: NestedDateTimeFilter<$PrismaModel> | Date | string
   }
 
+  export type NestedUuidNullableFilter<$PrismaModel = never> = {
+    equals?: string | StringFieldRefInput<$PrismaModel> | null
+    in?: string[] | ListStringFieldRefInput<$PrismaModel> | null
+    notIn?: string[] | ListStringFieldRefInput<$PrismaModel> | null
+    lt?: string | StringFieldRefInput<$PrismaModel>
+    lte?: string | StringFieldRefInput<$PrismaModel>
+    gt?: string | StringFieldRefInput<$PrismaModel>
+    gte?: string | StringFieldRefInput<$PrismaModel>
+    not?: NestedUuidNullableFilter<$PrismaModel> | string | null
+  }
+
   export type NestedStringWithAggregatesFilter<$PrismaModel = never> = {
     equals?: string | StringFieldRefInput<$PrismaModel>
     in?: string[] | ListStringFieldRefInput<$PrismaModel>
@@ -43253,6 +43291,20 @@ export namespace Prisma {
     _count?: NestedIntFilter<$PrismaModel>
     _min?: NestedDateTimeFilter<$PrismaModel>
     _max?: NestedDateTimeFilter<$PrismaModel>
+  }
+
+  export type NestedUuidNullableWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: string | StringFieldRefInput<$PrismaModel> | null
+    in?: string[] | ListStringFieldRefInput<$PrismaModel> | null
+    notIn?: string[] | ListStringFieldRefInput<$PrismaModel> | null
+    lt?: string | StringFieldRefInput<$PrismaModel>
+    lte?: string | StringFieldRefInput<$PrismaModel>
+    gt?: string | StringFieldRefInput<$PrismaModel>
+    gte?: string | StringFieldRefInput<$PrismaModel>
+    not?: NestedUuidNullableWithAggregatesFilter<$PrismaModel> | string | null
+    _count?: NestedIntNullableFilter<$PrismaModel>
+    _min?: NestedStringNullableFilter<$PrismaModel>
+    _max?: NestedStringNullableFilter<$PrismaModel>
   }
 
   export type NestedDateTimeNullableFilter<$PrismaModel = never> = {
@@ -43849,7 +43901,7 @@ export namespace Prisma {
     createdAt?: DateTimeFilter<"User"> | Date | string
     updatedAt?: DateTimeFilter<"User"> | Date | string
     authId?: StringNullableFilter<"User"> | string | null
-    uuidId?: StringNullableFilter<"User"> | string | null
+    uuidId?: UuidNullableFilter<"User"> | string | null
     clinicId?: StringNullableFilter<"User"> | string | null
   }
 
@@ -44281,7 +44333,7 @@ export namespace Prisma {
     layoutConfig?: JsonNullableFilter<"Dashboard">
     createdAt?: DateTimeFilter<"Dashboard"> | Date | string
     updatedAt?: DateTimeFilter<"Dashboard"> | Date | string
-    uuidId?: StringNullableFilter<"Dashboard"> | string | null
+    uuidId?: UuidNullableFilter<"Dashboard"> | string | null
     userUuidId?: StringNullableFilter<"Dashboard"> | string | null
     userId?: StringFilter<"Dashboard"> | string
   }
