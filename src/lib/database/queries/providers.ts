@@ -1,5 +1,5 @@
-import { prisma } from "@/lib/database/client";
 import type { Prisma } from "@/generated/prisma";
+import { prisma } from "@/lib/database/client";
 
 /**
  * Describes the raw row structure from the dentist performance query.
@@ -51,9 +51,9 @@ interface LocationSummaryCounts {
 }
 
 interface LocationSummaryValue {
-  id: string; 
-  name: string; 
-  address: string | null; 
+  id: string;
+  name: string;
+  address: string | null;
   providers: LocationSummaryProvider[];
   counts: LocationSummaryCounts;
 }
@@ -320,7 +320,7 @@ export async function getProviderPerformanceByLocation(params: {
     JOIN provider_locations pl ON p.id = pl.provider_id AND pl.is_active = true
     JOIN locations l ON pl.location_id = l.id
     LEFT JOIN hygiene_production hp ON p.id = hp.provider_id
-    ${whereClause.replace("dp.date", "hp.date")}
+    ${whereClause.replace(/dp\.date/g, "hp.date")}
     AND p.provider_type = 'hygienist'
     GROUP BY p.id, p.name, l.id, l.name
     HAVING COUNT(hp.id) > 0
@@ -330,7 +330,10 @@ export async function getProviderPerformanceByLocation(params: {
     let results: (RawDentistPerformanceRow | RawHygienistPerformanceRow)[] = [];
 
     if (!providerType || providerType === "dentist") {
-      const dentistResults = (await prisma.$queryRawUnsafe(dentistQuery, ...values)) as RawDentistPerformanceRow[];
+      const dentistResults = (await prisma.$queryRawUnsafe(
+        dentistQuery,
+        ...values
+      )) as RawDentistPerformanceRow[];
       results = [...results, ...dentistResults];
     }
 
@@ -354,13 +357,16 @@ export async function getProviderPerformanceByLocation(params: {
       totalProduction: Number.parseFloat(row.total_production || "0"),
       avgDailyProduction: Number.parseFloat(row.avg_daily_production || "0"),
       productionDays: Number.parseInt(String(row.production_days || "0")),
-      productionGoal: row.production_goal ? Number.parseFloat(String(row.production_goal)) : undefined,
-      variancePercentage: row.production_goal
-        ? ((Number.parseFloat(row.total_production || "0") -
-            Number.parseFloat(row.production_goal)) /
-            Number.parseFloat(row.production_goal)) *
-          100
+      productionGoal: row.production_goal
+        ? Number.parseFloat(String(row.production_goal))
         : undefined,
+      variancePercentage:
+        row.production_goal && Number.parseFloat(row.production_goal) !== 0
+          ? ((Number.parseFloat(row.total_production || "0") -
+              Number.parseFloat(row.production_goal)) /
+              Number.parseFloat(row.production_goal)) *
+            100
+          : undefined,
     }));
   } catch (error) {
     console.error("Error fetching provider performance by location:", error);
@@ -387,7 +393,9 @@ export async function getProvidersByLocation(
 /**
  * Get location summary for providers (useful for AOJ-41 dashboard)
  */
-export async function getProviderLocationSummary(clinicId?: string): Promise<LocationSummaryValue[]> {
+export async function getProviderLocationSummary(
+  clinicId?: string
+): Promise<LocationSummaryValue[]> {
   const whereClause: Prisma.ProviderLocationWhereInput = {
     isActive: true,
   };

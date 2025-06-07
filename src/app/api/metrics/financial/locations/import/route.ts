@@ -1,6 +1,6 @@
-import { type NextRequest, NextResponse } from "next/server";
-import { prisma } from "@/lib/database/client";
 import type { Prisma } from "@/generated/prisma"; // Location type might not be needed directly here anymore
+import { prisma } from "@/lib/database/client";
+import { type NextRequest, NextResponse } from "next/server";
 
 interface PartialLocationForMap {
   id: string;
@@ -85,7 +85,9 @@ export async function POST(request: NextRequest) {
     }
 
     // Create location name to ID mapping
-    const locationMap = new Map(clinic.locations.map((loc: PartialLocationForMap) => [loc.name.toLowerCase(), loc]));
+    const locationMap = new Map(
+      clinic.locations.map((loc: PartialLocationForMap) => [loc.name.toLowerCase(), loc])
+    );
 
     // Validate and process records
     const validRecords: ValidatedFinancialData[] = [];
@@ -159,10 +161,10 @@ export async function POST(request: NextRequest) {
         }
 
         validRecords.push({
-          clinicId, 
-          locationId: location.id, 
-          locationName: record.locationName, 
-          date: recordDate, 
+          clinicId,
+          locationId: location.id,
+          locationName: record.locationName,
+          date: recordDate,
           production,
           adjustments,
           writeOffs,
@@ -171,7 +173,7 @@ export async function POST(request: NextRequest) {
           insuranceIncome,
           totalCollections,
           unearned,
-          dataSourceId, 
+          dataSourceId,
         });
       } catch (error) {
         errors.push(
@@ -252,20 +254,13 @@ export async function POST(request: NextRequest) {
             },
           });
 
-          // Check if this was an update or create (Prisma doesn't tell us directly)
-          const existingCheck = await prisma.locationFinancial.findFirst({
-            where: {
-              clinicId: record.clinicId,
-              locationId: record.locationId,
-              date: record.date,
-            },
-            select: { updatedAt: true, createdAt: true },
-          });
-
-          if (existingCheck && existingCheck.updatedAt > existingCheck.createdAt) {
-            results.updated++;
-          } else {
+          // Determine if this was a create or update by comparing timestamps
+          // If createdAt and updatedAt are equal (within 1 second), it was a create
+          const timeDiff = Math.abs(result.updatedAt.getTime() - result.createdAt.getTime());
+          if (timeDiff <= 1000) {
             results.created++;
+          } else {
+            results.updated++;
           }
 
           processedRecords.push({
@@ -275,7 +270,7 @@ export async function POST(request: NextRequest) {
             status: "success",
           });
         } else {
-          const result = await prisma.locationFinancial.create({
+          await prisma.locationFinancial.create({
             data: {
               clinic: { connect: { id: item.clinicId } },
               location: { connect: { id: item.locationId } },

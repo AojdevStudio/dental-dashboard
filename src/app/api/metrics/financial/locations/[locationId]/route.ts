@@ -1,6 +1,6 @@
-import { type NextRequest, NextResponse } from "next/server";
+import type { Clinic, DataSource, Location, LocationFinancial, Prisma } from "@/generated/prisma";
 import { prisma } from "@/lib/database/client";
-import type { Prisma, LocationFinancial, Location, Clinic, DataSource } from "@/generated/prisma";
+import { type NextRequest, NextResponse } from "next/server";
 
 /**
  * @description Represents a `LocationFinancial` record augmented with details about
@@ -152,19 +152,19 @@ export async function GET(request: NextRequest, { params }: { params: { location
       });
     }
     // Return detailed records
-      const financialData = await prisma.locationFinancial.findMany({
-        where,
-        include: {
-          dataSource: {
-            select: {
-              id: true,
-              name: true,
-              lastSyncedAt: true,
-            },
+    const financialData = await prisma.locationFinancial.findMany({
+      where,
+      include: {
+        dataSource: {
+          select: {
+            id: true,
+            name: true,
+            lastSyncedAt: true,
           },
         },
-        orderBy: { date: "desc" },
-      });
+      },
+      orderBy: { date: "desc" },
+    });
 
     return NextResponse.json({
       success: true,

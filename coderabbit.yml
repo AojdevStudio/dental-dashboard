@@ -17,6 +17,9 @@ path_filters: |
   tsconfig.json
   next.config.ts
   middleware.ts
+  HygieneSyncLib/**/*.gs
+  HygieneSyncLib/**/*.gsx
+  HygieneSyncLib/**/*.gsx
   !src/generated/**
   !prisma/migrations/**/*.sql
   !**/*.test.ts

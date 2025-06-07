@@ -1,6 +1,6 @@
-import { type NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/database/client";
 import type { Prisma } from "@/src/generated/prisma";
+import { type NextRequest, NextResponse } from "next/server";
 
 interface ProviderLocationWhereInput {
   providerId: string;

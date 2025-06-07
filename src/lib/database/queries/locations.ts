@@ -1,5 +1,5 @@
-import { prisma } from "@/lib/database/client";
 import type { Prisma } from "@/generated/prisma";
+import { prisma } from "@/lib/database/client";
 
 export interface LocationWithMetrics {
   id: string;
@@ -37,7 +37,7 @@ interface RawLocationFinancialSummaryRow {
   clinic_id: string;
   clinic_name: string;
   period_start: string; // Dates are strings from raw query
-  period_end: string;   // Dates are strings from raw query
+  period_end: string; // Dates are strings from raw query
   total_production: string | null;
   total_adjustments: string | null;
   total_write_offs: string | null;
@@ -156,9 +156,9 @@ export async function getLocationsWithMetrics(params?: {
    * @typedef {object} FinancialSummaryGroup
    * @property {string} locationId - The ID of the location.
    * @property {object} [_sum] - Aggregated sum of specified numeric fields.
-   * @property {number | null} [_sum.production] - Total production amount.
+   * @property {Prisma.Decimal | null} [_sum.production] - Total production amount.
    * @property {object} [_avg] - Aggregated average of specified numeric fields.
-   * @property {number | null} [_avg.production] - Average production amount.
+   * @property {Prisma.Decimal | null} [_avg.production] - Average production amount.
    * @property {object} [_count] - Count of records or specific fields.
    * @property {number} [_count.id] - Count of financial records by their ID.
    * @property {object} [_max] - Maximum value of specified fields.
@@ -167,10 +167,10 @@ export async function getLocationsWithMetrics(params?: {
   type FinancialSummaryGroup = {
     locationId: string; // Assuming Location['id'] is string, adjust if different
     _sum: {
-      production: number | null;
+      production: Prisma.Decimal | null;
     };
     _avg: {
-      production: number | null;
+      production: Prisma.Decimal | null;
     };
     _count: {
       id: number;
@@ -179,6 +179,14 @@ export async function getLocationsWithMetrics(params?: {
       date: Date | null;
     };
   };
+
+  // Helper function to safely convert Prisma.Decimal to number
+  function safeDecimalToNumber(value: Prisma.Decimal | null | undefined): number {
+    if (value && typeof value === "object" && "toNumber" in value) {
+      return value.toNumber();
+    }
+    return 0;
+  }
 
   const summaryMap = new Map(
     financialSummaries.map((fs: FinancialSummaryGroup) => [fs.locationId, fs])
@@ -200,8 +208,8 @@ export async function getLocationsWithMetrics(params?: {
       })),
       financialSummary: {
         totalRecords: summary?._count.id || 0,
-        totalProduction: summary?._sum.production?.toNumber() || 0,
-        avgProduction: summary?._avg.production?.toNumber() || 0,
+        totalProduction: safeDecimalToNumber(summary?._sum.production),
+        avgProduction: safeDecimalToNumber(summary?._avg.production),
         lastRecordDate: summary?._max.date || null,
       },
       _count: location._count,
@@ -273,7 +281,10 @@ export async function getLocationFinancialSummary(params: {
   values.push(startDate, endDate);
 
   try {
-    const results = (await prisma.$queryRawUnsafe(query, ...values)) as RawLocationFinancialSummaryRow[];
+    const results = (await prisma.$queryRawUnsafe(
+      query,
+      ...values
+    )) as RawLocationFinancialSummaryRow[];
 
     return results.map((row) => ({
       locationId: row.location_id,
@@ -288,7 +299,7 @@ export async function getLocationFinancialSummary(params: {
       totalNetProduction: Number.parseFloat(row.total_net_production || "0"),
       totalCollections: Number.parseFloat(row.total_collections || "0"),
       avgDailyProduction: Number.parseFloat(row.avg_daily_production || "0"),
-      recordCount: Number.parseInt(row.record_count || "0"),
+      recordCount: Number.parseInt(String(row.record_count || "0")),
       lastSyncDate: row.last_sync_date ? new Date(row.last_sync_date) : null,
     }));
   } catch (error) {
@@ -406,7 +417,10 @@ export async function getTopPerformingLocations(params: {
   values.push(limit);
 
   try {
-    const results = (await prisma.$queryRawUnsafe(query, ...values)) as RawTopPerformingLocationRow[];
+    const results = (await prisma.$queryRawUnsafe(
+      query,
+      ...values
+    )) as RawTopPerformingLocationRow[];
 
     return results.map((row) => ({
       id: row.id,
@@ -417,8 +431,8 @@ export async function getTopPerformingLocations(params: {
       totalNetProduction: Number.parseFloat(row.total_net_production || "0"),
       totalCollections: Number.parseFloat(row.total_collections || "0"),
       avgDailyProduction: Number.parseFloat(row.avg_daily_production || "0"),
-      productionDays: Number.parseInt(row.production_days || "0"),
-      providerCount: Number.parseInt(row.provider_count || "0"),
+      productionDays: Number.parseInt(String(row.production_days || "0")),
+      providerCount: Number.parseInt(String(row.provider_count || "0")),
     }));
   } catch (error) {
     console.error("Error fetching top performing locations:", error);

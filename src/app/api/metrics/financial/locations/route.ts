@@ -1,6 +1,6 @@
-import { type NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/database/client";
 import type { Prisma } from "@prisma/client";
+import { type NextRequest, NextResponse } from "next/server";
 
 /**
  * @description Defines the shape of the 'where' clause used for filtering
@@ -111,7 +111,34 @@ export async function GET(request: NextRequest) {
           dateGrouping = `DATE_TRUNC('day', date)`;
       }
 
-      const aggregatedData = (await prisma.$queryRaw`
+      // Build parameterized query conditions
+      const conditions = [];
+      const params = [];
+
+      if (where.clinicId) {
+        conditions.push(`clinic_id = ${params.length + 1}`);
+        params.push(where.clinicId);
+      }
+
+      if (where.locationId) {
+        conditions.push(`location_id = ${params.length + 1}`);
+        params.push(where.locationId);
+      }
+
+      if (where.date?.gte) {
+        conditions.push(`date >= ${params.length + 1}`);
+        params.push(where.date.gte);
+      }
+
+      if (where.date?.lte) {
+        conditions.push(`date <= ${params.length + 1}`);
+        params.push(where.date.lte);
+      }
+
+      const whereClause = conditions.length > 0 ? `WHERE ${conditions.join(" AND ")}` : "";
+
+      const aggregatedData = (await prisma.$queryRawUnsafe(
+        `
         SELECT 
           ${dateGrouping} as period,
           clinic_id,
@@ -126,13 +153,15 @@ export async function GET(request: NextRequest) {
           AVG(unearned) as avg_unearned,
           COUNT(*) as record_count
         FROM location_financial 
-        ${where.clinicId ? `WHERE clinic_id = ${where.clinicId}` : ""}
-        ${where.locationId ? `${where.clinicId ? "AND" : "WHERE"} location_id = '${where.locationId}'` : ""}
-        ${where.date ? `${where.clinicId || where.locationId ? "AND" : "WHERE"} date >= '${where.date.gte?.toISOString()}' AND date <= '${where.date.lte?.toISOString()}'` : ""}
+        ${whereClause}
         GROUP BY period, clinic_id, location_id
         ORDER BY period DESC, clinic_id, location_id
-        LIMIT ${limit} OFFSET ${offset}
-      `) as AggregatedFinancialItem[];
+        LIMIT $${params.length + 1} OFFSET $${params.length + 2}
+      `,
+        ...params,
+        limit,
+        offset
+      )) as AggregatedFinancialItem[];
 
       // Get clinic and location details for aggregated data
       const enrichedData = await Promise.all(
