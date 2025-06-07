@@ -1,40 +1,74 @@
-import { type NextRequest, NextResponse } from 'next/server'
-import prisma from '@/lib/database/client'
+import { type NextRequest, NextResponse } from "next/server";
+import { prisma } from "@/lib/database/client";
+import type { Prisma } from "@prisma/client";
+
+/**
+ * @description Defines the shape of the 'where' clause used for filtering
+ * location financial data in Prisma queries.
+ */
+type LocationFinancialWhereInput = {
+  clinicId?: string;
+  locationId?: string;
+  date?: {
+    gte?: Date;
+    lte?: Date;
+  };
+};
+
+/**
+ * @description Represents the structure of an item returned by the raw SQL query
+ * when aggregating financial data. It includes the period, IDs, and various
+ * summed/averaged financial metrics.
+ */
+type AggregatedFinancialItem = {
+  period: Date; // Or string, depending on how DATE_TRUNC is handled by the driver
+  clinic_id: string;
+  location_id: string;
+  total_production: string | null;
+  total_adjustments: string | null;
+  total_write_offs: string | null;
+  total_net_production: string | null;
+  total_patient_income: string | null;
+  total_insurance_income: string | null;
+  total_collections: string | null;
+  avg_unearned: string | null;
+  record_count: bigint; // COUNT(*) typically returns bigint
+};
 
 export async function GET(request: NextRequest) {
   try {
-    const { searchParams } = new URL(request.url)
-    const clinicId = searchParams.get('clinicId')
-    const locationId = searchParams.get('locationId')
-    const startDate = searchParams.get('startDate')
-    const endDate = searchParams.get('endDate')
-    const page = Number.parseInt(searchParams.get('page') || '1')
-    const limit = Number.parseInt(searchParams.get('limit') || '50')
-    const groupBy = searchParams.get('groupBy') // 'day', 'week', 'month'
+    const { searchParams } = new URL(request.url);
+    const clinicId = searchParams.get("clinicId");
+    const locationId = searchParams.get("locationId");
+    const startDate = searchParams.get("startDate");
+    const endDate = searchParams.get("endDate");
+    const page = Number.parseInt(searchParams.get("page") || "1");
+    const limit = Number.parseInt(searchParams.get("limit") || "50");
+    const groupBy = searchParams.get("groupBy"); // 'day', 'week', 'month'
 
     // Build where clause
-    const where: any = {}
-    
+    const where: LocationFinancialWhereInput = {};
+
     if (clinicId) {
-      where.clinicId = clinicId
+      where.clinicId = clinicId;
     }
-    
+
     if (locationId) {
-      where.locationId = locationId
+      where.locationId = locationId;
     }
-    
+
     if (startDate || endDate) {
-      where.date = {}
+      where.date = {};
       if (startDate) {
-        where.date.gte = new Date(startDate)
+        where.date.gte = new Date(startDate);
       }
       if (endDate) {
-        where.date.lte = new Date(endDate)
+        where.date.lte = new Date(endDate);
       }
     }
 
     // Calculate offset for pagination
-    const offset = (page - 1) * limit
+    const offset = (page - 1) * limit;
 
     // Base query options
     const baseOptions = {
@@ -43,41 +77,41 @@ export async function GET(request: NextRequest) {
         clinic: {
           select: {
             id: true,
-            name: true
-          }
+            name: true,
+          },
         },
         location: {
           select: {
             id: true,
             name: true,
-            address: true
-          }
+            address: true,
+          },
         },
         dataSource: {
           select: {
             id: true,
             name: true,
-            lastSyncedAt: true
-          }
-        }
-      }
-    }
+            lastSyncedAt: true,
+          },
+        },
+      },
+    };
 
     if (groupBy) {
       // Return aggregated data
-      let dateGrouping: string
+      let dateGrouping: string;
       switch (groupBy) {
-        case 'week':
-          dateGrouping = `DATE_TRUNC('week', date)`
-          break
-        case 'month':
-          dateGrouping = `DATE_TRUNC('month', date)`
-          break
+        case "week":
+          dateGrouping = `DATE_TRUNC('week', date)`;
+          break;
+        case "month":
+          dateGrouping = `DATE_TRUNC('month', date)`;
+          break;
         default:
-          dateGrouping = `DATE_TRUNC('day', date)`
+          dateGrouping = `DATE_TRUNC('day', date)`;
       }
 
-      const aggregatedData = await prisma.$queryRaw`
+      const aggregatedData = (await prisma.$queryRaw`
         SELECT 
           ${dateGrouping} as period,
           clinic_id,
@@ -92,13 +126,13 @@ export async function GET(request: NextRequest) {
           AVG(unearned) as avg_unearned,
           COUNT(*) as record_count
         FROM location_financial 
-        ${where.clinicId ? `WHERE clinic_id = ${where.clinicId}` : ''}
-        ${where.locationId ? `${where.clinicId ? 'AND' : 'WHERE'} location_id = '${where.locationId}'` : ''}
-        ${where.date ? `${where.clinicId || where.locationId ? 'AND' : 'WHERE'} date >= '${where.date.gte?.toISOString()}' AND date <= '${where.date.lte?.toISOString()}'` : ''}
+        ${where.clinicId ? `WHERE clinic_id = ${where.clinicId}` : ""}
+        ${where.locationId ? `${where.clinicId ? "AND" : "WHERE"} location_id = '${where.locationId}'` : ""}
+        ${where.date ? `${where.clinicId || where.locationId ? "AND" : "WHERE"} date >= '${where.date.gte?.toISOString()}' AND date <= '${where.date.lte?.toISOString()}'` : ""}
         GROUP BY period, clinic_id, location_id
         ORDER BY period DESC, clinic_id, location_id
         LIMIT ${limit} OFFSET ${offset}
-      ` as any[]
+      `) as AggregatedFinancialItem[];
 
       // Get clinic and location details for aggregated data
       const enrichedData = await Promise.all(
@@ -106,32 +140,32 @@ export async function GET(request: NextRequest) {
           const [clinic, location] = await Promise.all([
             prisma.clinic.findUnique({
               where: { id: item.clinic_id },
-              select: { id: true, name: true }
+              select: { id: true, name: true },
             }),
             prisma.location.findUnique({
               where: { id: item.location_id },
-              select: { id: true, name: true, address: true }
-            })
-          ])
+              select: { id: true, name: true, address: true },
+            }),
+          ]);
 
           return {
             period: item.period,
             clinic,
             location,
             metrics: {
-              totalProduction: Number.parseFloat(item.total_production || '0'),
-              totalAdjustments: Number.parseFloat(item.total_adjustments || '0'),
-              totalWriteOffs: Number.parseFloat(item.total_write_offs || '0'),
-              totalNetProduction: Number.parseFloat(item.total_net_production || '0'),
-              totalPatientIncome: Number.parseFloat(item.total_patient_income || '0'),
-              totalInsuranceIncome: Number.parseFloat(item.total_insurance_income || '0'),
-              totalCollections: Number.parseFloat(item.total_collections || '0'),
-              avgUnearned: Number.parseFloat(item.avg_unearned || '0'),
-              recordCount: Number.parseInt(item.record_count || '0')
-            }
-          }
+              totalProduction: Number.parseFloat(item.total_production || "0"),
+              totalAdjustments: Number.parseFloat(item.total_adjustments || "0"),
+              totalWriteOffs: Number.parseFloat(item.total_write_offs || "0"),
+              totalNetProduction: Number.parseFloat(item.total_net_production || "0"),
+              totalPatientIncome: Number.parseFloat(item.total_patient_income || "0"),
+              totalInsuranceIncome: Number.parseFloat(item.total_insurance_income || "0"),
+              totalCollections: Number.parseFloat(item.total_collections || "0"),
+              avgUnearned: Number.parseFloat(item.avg_unearned || "0"),
+              recordCount: Number.parseInt(item.record_count.toString() || "0"),
+            },
+          };
         })
-      )
+      );
 
       return NextResponse.json({
         success: true,
@@ -139,48 +173,54 @@ export async function GET(request: NextRequest) {
         pagination: {
           page,
           limit,
-          hasMore: enrichedData.length === limit
+          hasMore: enrichedData.length === limit,
         },
-        groupBy
-      })
-    } else {
-      // Return individual records
-      const [data, total] = await Promise.all([
-        prisma.locationFinancial.findMany({
-          ...baseOptions,
-          orderBy: { date: 'desc' },
-          skip: offset,
-          take: limit
-        }),
-        prisma.locationFinancial.count({ where })
-      ])
-
-      return NextResponse.json({
-        success: true,
-        data,
-        pagination: {
-          page,
-          limit,
-          total,
-          totalPages: Math.ceil(total / limit),
-          hasMore: offset + data.length < total
-        }
-      })
+        groupBy,
+      });
     }
 
-  } catch (error) {
-    console.error('Error fetching location financial data:', error)
+    // If not grouping, return individual records with pagination
+    const [data, total] = await Promise.all([
+      prisma.locationFinancial.findMany({
+        ...baseOptions,
+        orderBy: { date: "desc" },
+        skip: offset,
+        take: limit,
+      }),
+      prisma.locationFinancial.count({ where }),
+    ]);
+
     return NextResponse.json({
-      success: false,
-      error: 'Failed to fetch location financial data',
-      details: error instanceof Error ? error.message : 'Unknown error'
-    }, { status: 500 })
+      success: true,
+      data,
+      pagination: {
+        page,
+        limit,
+        total,
+        totalPages: Math.ceil(total / limit),
+        hasMore: offset + data.length < total,
+      },
+    });
+  } catch (e: unknown) {
+    console.error("Error fetching location financial data:", e);
+    let errorMessage = "An unknown error occurred";
+    if (e instanceof Error) {
+      errorMessage = e.message;
+    }
+    return NextResponse.json(
+      {
+        success: false,
+        error: "Failed to fetch location financial data",
+        details: errorMessage,
+      },
+      { status: 500 }
+    );
   }
 }
 
 export async function POST(request: NextRequest) {
   try {
-    const body = await request.json()
+    const body = await request.json();
     const {
       clinicId,
       locationId,
@@ -192,62 +232,81 @@ export async function POST(request: NextRequest) {
       insuranceIncome,
       unearned,
       dataSourceId,
-      createdBy
-    } = body
+      createdBy,
+    } = body;
 
     // Validate required fields
     if (!clinicId || !locationId || !date || production === undefined) {
-      return NextResponse.json({
-        success: false,
-        error: 'Missing required fields: clinicId, locationId, date, and production are required'
-      }, { status: 400 })
+      return NextResponse.json(
+        {
+          success: false,
+          error: "Missing required fields: clinicId, locationId, date, and production are required",
+        },
+        { status: 400 }
+      );
     }
 
     // Verify clinic and location exist
     const [clinic, location] = await Promise.all([
       prisma.clinic.findUnique({ where: { id: clinicId } }),
-      prisma.location.findUnique({ where: { id: locationId } })
-    ])
+      prisma.location.findUnique({ where: { id: locationId } }),
+    ]);
 
     if (!clinic) {
-      return NextResponse.json({
-        success: false,
-        error: 'Clinic not found'
-      }, { status: 404 })
+      return NextResponse.json(
+        {
+          success: false,
+          error: "Clinic not found",
+        },
+        { status: 404 }
+      );
     }
 
     if (!location) {
-      return NextResponse.json({
-        success: false,
-        error: 'Location not found'
-      }, { status: 404 })
+      return NextResponse.json(
+        {
+          success: false,
+          error: "Location not found",
+        },
+        { status: 404 }
+      );
     }
 
     if (location.clinicId !== clinicId) {
-      return NextResponse.json({
-        success: false,
-        error: 'Location does not belong to the specified clinic'
-      }, { status: 400 })
+      return NextResponse.json(
+        {
+          success: false,
+          error: "Location does not belong to the specified clinic",
+        },
+        { status: 400 }
+      );
     }
 
     // Calculate derived fields
-    const netProduction = Number.parseFloat(production) - Number.parseFloat(adjustments || '0') - Number.parseFloat(writeOffs || '0')
-    const totalCollections = Number.parseFloat(patientIncome || '0') + Number.parseFloat(insuranceIncome || '0')
+    const netProduction =
+      Number.parseFloat(production) -
+      Number.parseFloat(adjustments || "0") -
+      Number.parseFloat(writeOffs || "0");
+    const totalCollections =
+      Number.parseFloat(patientIncome || "0") + Number.parseFloat(insuranceIncome || "0");
 
     // Check for existing record on same date
     const existingRecord = await prisma.locationFinancial.findFirst({
       where: {
         clinicId,
         locationId,
-        date: new Date(date)
-      }
-    })
+        date: new Date(date),
+      },
+    });
 
     if (existingRecord) {
-      return NextResponse.json({
-        success: false,
-        error: 'Financial data already exists for this location and date. Use PUT to update.'
-      }, { status: 409 })
+      return NextResponse.json(
+        {
+          success: false,
+          error: "Financial data already exists for this location and date. Use PUT to update.",
+        },
+        { status: 409 }
+      );
     }
 
     // Create the financial record
@@ -257,45 +316,50 @@ export async function POST(request: NextRequest) {
         locationId,
         date: new Date(date),
         production: Number.parseFloat(production),
-        adjustments: Number.parseFloat(adjustments || '0'),
-        writeOffs: Number.parseFloat(writeOffs || '0'),
+        adjustments: Number.parseFloat(adjustments || "0"),
+        writeOffs: Number.parseFloat(writeOffs || "0"),
         netProduction,
-        patientIncome: Number.parseFloat(patientIncome || '0'),
-        insuranceIncome: Number.parseFloat(insuranceIncome || '0'),
+        patientIncome: Number.parseFloat(patientIncome || "0"),
+        insuranceIncome: Number.parseFloat(insuranceIncome || "0"),
         totalCollections,
         unearned: unearned ? Number.parseFloat(unearned) : null,
         dataSourceId: dataSourceId || null,
-        createdBy: createdBy || null
+        createdBy: createdBy || null,
       },
       include: {
         clinic: {
           select: {
             id: true,
-            name: true
-          }
+            name: true,
+          },
         },
         location: {
           select: {
             id: true,
             name: true,
-            address: true
-          }
-        }
-      }
-    })
+            address: true,
+          },
+        },
+      },
+    });
 
-    return NextResponse.json({
-      success: true,
-      data: financialRecord,
-      message: 'Financial data created successfully'
-    }, { status: 201 })
-
+    return NextResponse.json(
+      {
+        success: true,
+        data: financialRecord,
+        message: "Financial data created successfully",
+      },
+      { status: 201 }
+    );
   } catch (error) {
-    console.error('Error creating location financial data:', error)
-    return NextResponse.json({
-      success: false,
-      error: 'Failed to create location financial data',
-      details: error instanceof Error ? error.message : 'Unknown error'
-    }, { status: 500 })
+    console.error("Error creating location financial data:", error);
+    return NextResponse.json(
+      {
+        success: false,
+        error: "Failed to create location financial data",
+        details: error instanceof Error ? error.message : "Unknown error",
+      },
+      { status: 500 }
+    );
   }
 }

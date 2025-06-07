@@ -1,4 +1,4 @@
-/**
+  /**
  * ========================================
  * LOCATION FINANCIAL SETUP UTILITIES
  * ========================================
@@ -230,6 +230,7 @@ function setupLocationFinancialTriggers() {
       const spreadsheet = SpreadsheetApp.openById(LOCATION_FINANCIAL_SHEET_ID);
       
       const editTrigger = ScriptApp.newTrigger(LOCATION_FINANCIAL_ON_EDIT_FUNCTION_NAME)
+        .forSpreadsheet(spreadsheet)
         .onEdit()
         .create();
       
@@ -296,16 +297,16 @@ function clearLocationFinancialTriggers() {
 }
 
 /**
- * Ensures the log sheet exists
+ * Ensures that the dedicated log sheet for location financial sync operations exists within the spreadsheet.
+ * If the log sheet does not exist, it will be created.
+ * This function is typically called during setup or before logging operations.
  */
 function ensureLocationFinancialLogSheetExists() {
   try {
     const spreadsheet = SpreadsheetApp.openById(LOCATION_FINANCIAL_SHEET_ID);
     
-    try {
-      spreadsheet.getSheetByName(LOCATION_FINANCIAL_LOG_TAB_NAME);
-      // Sheet exists, no need to create
-    } catch (error) {
+    const logSheet = spreadsheet.getSheetByName(LOCATION_FINANCIAL_LOG_TAB_NAME);
+    if (!logSheet) {
       // Sheet doesn't exist, create it
       createLocationFinancialLogSheet(spreadsheet);
       logLocationFinancialOperation('SETUP', 'Created log sheet');

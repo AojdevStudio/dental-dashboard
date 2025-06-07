@@ -26,6 +26,8 @@ path_filters: |
   !dist/**
   !build/**
   !.next/**
+  !**/*.md
+  !**/*.mdc
 
 # File-specific instructions for different code areas
 file_path_instructions:

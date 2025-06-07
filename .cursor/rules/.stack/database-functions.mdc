@@ -1,6 +1,6 @@
 ---
-description: Guidelines for writing Supabase database functions
-globs: 
+description: 
+globs: *.sql,**/*.sql
 alwaysApply: false
 ---
 ---

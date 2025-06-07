@@ -1,77 +1,143 @@
-import prisma from '@/lib/database/client'
-import type { Prisma } from '@/src/generated/prisma'
+import { prisma } from "@/lib/database/client";
+import type { Prisma } from "@/generated/prisma";
+
+/**
+ * Describes the raw row structure from the dentist performance query.
+ */
+interface RawDentistPerformanceRow {
+  provider_id: string;
+  provider_name: string;
+  location_id: string;
+  location_name: string;
+  period_start: string;
+  period_end: string;
+  total_production: string | null;
+  avg_daily_production: string | null;
+  production_days: string | number;
+  production_goal: string | null;
+}
+
+/**
+ * Describes the raw row structure from the hygienist performance query.
+ */
+interface RawHygienistPerformanceRow {
+  provider_id: string;
+  provider_name: string;
+  location_id: string;
+  location_name: string;
+  period_start: string;
+  period_end: string;
+  total_production: string | null;
+  avg_daily_production: string | null;
+  production_days: string | number;
+  production_goal: string | null;
+}
+
+// For the accumulator in getProvidersWithLocations
+interface LocationSummaryProvider {
+  id: string;
+  name: string;
+  providerType: string;
+  status: string;
+  isPrimary: boolean;
+  startDate: Date;
+}
+
+interface LocationSummaryCounts {
+  total: number;
+  dentists: number;
+  hygienists: number;
+  primary: number;
+}
+
+interface LocationSummaryValue {
+  id: string; 
+  name: string; 
+  address: string | null; 
+  providers: LocationSummaryProvider[];
+  counts: LocationSummaryCounts;
+}
+
+interface LocationSummaryAccumulator {
+  [locationKey: string]: LocationSummaryValue;
+}
 
 export interface ProviderWithLocations {
-  id: string
-  name: string
-  firstName: string | null
-  lastName: string | null
-  email: string | null
-  providerType: string
-  status: string
+  id: string;
+  name: string;
+  firstName: string | null;
+  lastName: string | null;
+  email: string | null;
+  providerType: string;
+  status: string;
   clinic: {
-    id: string
-    name: string
-  }
+    id: string;
+    name: string;
+  };
   locations: {
-    id: string
-    locationId: string
-    locationName: string
-    locationAddress: string | null
-    isPrimary: boolean
-    isActive: boolean
-    startDate: Date
-    endDate: Date | null
-  }[]
+    id: string;
+    locationId: string;
+    locationName: string;
+    locationAddress: string | null;
+    isPrimary: boolean;
+    isActive: boolean;
+    startDate: Date;
+    endDate: Date | null;
+  }[];
   primaryLocation?: {
-    id: string
-    name: string
-    address: string | null
-  }
+    id: string;
+    name: string;
+    address: string | null;
+  };
   _count: {
-    locations: number
-    hygieneProduction: number
-    dentistProduction: number
-  }
+    locations: number;
+    hygieneProduction: number;
+    dentistProduction: number;
+  };
 }
 
 export interface ProviderPerformanceMetrics {
-  providerId: string
-  providerName: string
-  locationId: string
-  locationName: string
-  periodStart: Date
-  periodEnd: Date
-  totalProduction: number
-  avgDailyProduction: number
-  productionDays: number
-  productionGoal?: number
-  variancePercentage?: number
+  providerId: string;
+  providerName: string;
+  locationId: string;
+  locationName: string;
+  periodStart: Date;
+  periodEnd: Date;
+  totalProduction: number;
+  avgDailyProduction: number;
+  productionDays: number;
+  productionGoal?: number;
+  variancePercentage?: number;
 }
 
 /**
  * Get all providers with their location relationships
  */
 export async function getProvidersWithLocations(params?: {
-  clinicId?: string
-  locationId?: string
-  providerType?: string
-  includeInactive?: boolean
+  clinicId?: string;
+  locationId?: string;
+  providerId?: string; // Added providerId
+  providerType?: string;
+  includeInactive?: boolean;
 }): Promise<ProviderWithLocations[]> {
-  const { clinicId, locationId, providerType, includeInactive = false } = params || {}
+  const { clinicId, locationId, providerId, providerType, includeInactive = false } = params || {};
 
-  const whereClause: Prisma.ProviderWhereInput = {}
-  
+  const whereClause: Prisma.ProviderWhereInput = {};
+
+  if (providerId) {
+    whereClause.id = providerId;
+  }
+
   if (clinicId) {
-    whereClause.clinicId = clinicId
+    whereClause.clinicId = clinicId;
   }
-  
+
   if (providerType) {
-    whereClause.providerType = providerType
+    whereClause.providerType = providerType;
   }
-  
+
   if (!includeInactive) {
-    whereClause.status = 'active'
+    whereClause.status = "active";
   }
 
   // If filtering by location, we need to include providers who work at that location
@@ -79,9 +145,9 @@ export async function getProvidersWithLocations(params?: {
     whereClause.providerLocations = {
       some: {
         locationId,
-        isActive: true
-      }
-    }
+        isActive: true,
+      },
+    };
   }
 
   const providers = await prisma.provider.findMany({
@@ -90,44 +156,39 @@ export async function getProvidersWithLocations(params?: {
       clinic: {
         select: {
           id: true,
-          name: true
-        }
+          name: true,
+        },
       },
       providerLocations: {
         where: {
-          isActive: true
+          isActive: true,
         },
         include: {
           location: {
             select: {
               id: true,
               name: true,
-              address: true
-            }
-          }
+              address: true,
+            },
+          },
         },
-        orderBy: [
-          { isPrimary: 'desc' },
-          { location: { name: 'asc' } }
-        ]
+        orderBy: [{ isPrimary: "desc" }, { location: { name: "asc" } }],
       },
       _count: {
         select: {
           providerLocations: {
-            where: { isActive: true }
+            where: { isActive: true },
           },
           hygieneProduction: true,
-          dentistProduction: true
-        }
-      }
+          dentistProduction: true,
+        },
+      },
     },
-    orderBy: [
-      { name: 'asc' }
-    ]
-  })
+    orderBy: [{ name: "asc" }],
+  });
 
-  return providers.map(provider => {
-    const locations = provider.providerLocations.map(pl => ({
+  return providers.map((provider) => {
+    const locations = provider.providerLocations.map((pl) => ({
       id: pl.id,
       locationId: pl.location.id,
       locationName: pl.location.name,
@@ -135,10 +196,10 @@ export async function getProvidersWithLocations(params?: {
       isPrimary: pl.isPrimary,
       isActive: pl.isActive,
       startDate: pl.startDate,
-      endDate: pl.endDate
-    }))
+      endDate: pl.endDate,
+    }));
 
-    const primaryLocation = provider.providerLocations.find(pl => pl.isPrimary)?.location
+    const primaryLocation = provider.providerLocations.find((pl) => pl.isPrimary)?.location;
 
     return {
       id: provider.id,
@@ -154,56 +215,56 @@ export async function getProvidersWithLocations(params?: {
       _count: {
         locations: provider._count.providerLocations,
         hygieneProduction: provider._count.hygieneProduction,
-        dentistProduction: provider._count.dentistProduction
-      }
-    }
-  })
+        dentistProduction: provider._count.dentistProduction,
+      },
+    };
+  });
 }
 
 /**
  * Get provider performance metrics by location
  */
 export async function getProviderPerformanceByLocation(params: {
-  providerId?: string
-  locationId?: string
-  clinicId?: string
-  startDate: Date
-  endDate: Date
-  providerType?: 'dentist' | 'hygienist'
+  providerId?: string;
+  locationId?: string;
+  clinicId?: string;
+  startDate: Date;
+  endDate: Date;
+  providerType?: "dentist" | "hygienist";
 }): Promise<ProviderPerformanceMetrics[]> {
-  const { providerId, locationId, clinicId, startDate, endDate, providerType } = params
+  const { providerId, locationId, clinicId, startDate, endDate, providerType } = params;
 
   // Build the WHERE clause for filtering
-  const whereConditions: string[] = []
-  const values: any[] = []
-  
+  const whereConditions: string[] = [];
+  const values: unknown[] = [];
+
   if (providerId) {
-    whereConditions.push(`p.id = $${values.length + 1}`)
-    values.push(providerId)
+    whereConditions.push(`p.id = $${values.length + 1}`);
+    values.push(providerId);
   }
-  
+
   if (locationId) {
-    whereConditions.push(`pl.location_id = $${values.length + 1}`)
-    values.push(locationId)
+    whereConditions.push(`pl.location_id = $${values.length + 1}`);
+    values.push(locationId);
   }
-  
+
   if (clinicId) {
-    whereConditions.push(`p.clinic_id = $${values.length + 1}`)
-    values.push(clinicId)
+    whereConditions.push(`p.clinic_id = $${values.length + 1}`);
+    values.push(clinicId);
   }
-  
+
   if (providerType) {
-    whereConditions.push(`p.provider_type = $${values.length + 1}`)
-    values.push(providerType)
+    whereConditions.push(`p.provider_type = $${values.length + 1}`);
+    values.push(providerType);
   }
 
   // Add date range
-  whereConditions.push(`dp.date >= $${values.length + 1}`)
-  values.push(startDate)
-  whereConditions.push(`dp.date <= $${values.length + 1}`)
-  values.push(endDate)
+  whereConditions.push(`dp.date >= $${values.length + 1}`);
+  values.push(startDate);
+  whereConditions.push(`dp.date <= $${values.length + 1}`);
+  values.push(endDate);
 
-  const whereClause = whereConditions.length > 0 ? `WHERE ${whereConditions.join(' AND ')}` : ''
+  const whereClause = whereConditions.length > 0 ? `WHERE ${whereConditions.join(" AND ")}` : "";
 
   // Query for dentist performance (has location-specific data)
   const dentistQuery = `
@@ -238,9 +299,9 @@ export async function getProviderPerformanceByLocation(params: {
     AND p.provider_type = 'dentist'
     GROUP BY p.id, p.name, l.id, l.name
     HAVING COUNT(dp.id) > 0
-  `
+  `;
 
-  values.push(startDate, endDate)
+  values.push(startDate, endDate);
 
   // Query for hygienist performance (location needs to be inferred from production records)
   const hygienistQuery = `
@@ -259,72 +320,82 @@ export async function getProviderPerformanceByLocation(params: {
     JOIN provider_locations pl ON p.id = pl.provider_id AND pl.is_active = true
     JOIN locations l ON pl.location_id = l.id
     LEFT JOIN hygiene_production hp ON p.id = hp.provider_id
-    ${whereClause.replace('dp.date', 'hp.date')}
+    ${whereClause.replace("dp.date", "hp.date")}
     AND p.provider_type = 'hygienist'
     GROUP BY p.id, p.name, l.id, l.name
     HAVING COUNT(hp.id) > 0
-  `
+  `;
 
   try {
-    let results: any[] = []
+    let results: (RawDentistPerformanceRow | RawHygienistPerformanceRow)[] = [];
 
-    if (!providerType || providerType === 'dentist') {
-      const dentistResults = await prisma.$queryRawUnsafe(dentistQuery, ...values) as any[]
-      results = [...results, ...dentistResults]
+    if (!providerType || providerType === "dentist") {
+      const dentistResults = (await prisma.$queryRawUnsafe(dentistQuery, ...values)) as RawDentistPerformanceRow[];
+      results = [...results, ...dentistResults];
     }
 
-    if (!providerType || providerType === 'hygienist') {
-      const hygienistResults = await prisma.$queryRawUnsafe(hygienistQuery, ...values, startDate, endDate) as any[]
-      results = [...results, ...hygienistResults]
+    if (!providerType || providerType === "hygienist") {
+      const hygienistResults = (await prisma.$queryRawUnsafe(
+        hygienistQuery,
+        ...values,
+        startDate,
+        endDate
+      )) as RawHygienistPerformanceRow[];
+      results = [...results, ...hygienistResults];
     }
 
-    return results.map(row => ({
+    return results.map((row) => ({
       providerId: row.provider_id,
       providerName: row.provider_name,
       locationId: row.location_id,
       locationName: row.location_name,
       periodStart: new Date(row.period_start),
       periodEnd: new Date(row.period_end),
-      totalProduction: Number.parseFloat(row.total_production || '0'),
-      avgDailyProduction: Number.parseFloat(row.avg_daily_production || '0'),
-      productionDays: Number.parseInt(row.production_days || '0'),
-      productionGoal: row.production_goal ? Number.parseFloat(row.production_goal) : undefined,
-      variancePercentage: row.production_goal ? 
-        ((Number.parseFloat(row.total_production || '0') - Number.parseFloat(row.production_goal)) / Number.parseFloat(row.production_goal)) * 100 : 
-        undefined
-    }))
-
+      totalProduction: Number.parseFloat(row.total_production || "0"),
+      avgDailyProduction: Number.parseFloat(row.avg_daily_production || "0"),
+      productionDays: Number.parseInt(String(row.production_days || "0")),
+      productionGoal: row.production_goal ? Number.parseFloat(String(row.production_goal)) : undefined,
+      variancePercentage: row.production_goal
+        ? ((Number.parseFloat(row.total_production || "0") -
+            Number.parseFloat(row.production_goal)) /
+            Number.parseFloat(row.production_goal)) *
+          100
+        : undefined,
+    }));
   } catch (error) {
-    console.error('Error fetching provider performance by location:', error)
-    throw error
+    console.error("Error fetching provider performance by location:", error);
+    throw error;
   }
 }
 
 /**
  * Get providers for a specific location
  */
-export async function getProvidersByLocation(locationId: string, params?: {
-  providerType?: string
-  includeInactive?: boolean
-}): Promise<ProviderWithLocations[]> {
+export async function getProvidersByLocation(
+  locationId: string,
+  params?: {
+    providerType?: string;
+    includeInactive?: boolean;
+  }
+): Promise<ProviderWithLocations[]> {
   return getProvidersWithLocations({
     locationId,
-    ...params
-  })
+    ...params,
+  });
 }
 
 /**
  * Get location summary for providers (useful for AOJ-41 dashboard)
  */
-export async function getProviderLocationSummary(clinicId?: string) {
+export async function getProviderLocationSummary(clinicId?: string): Promise<LocationSummaryValue[]> {
   const whereClause: Prisma.ProviderLocationWhereInput = {
-    isActive: true
-  }
+    isActive: true,
+  };
 
   if (clinicId) {
     whereClause.provider = {
-      clinicId
-    }
+      clinicId,
+    };
   }
 
   const providerLocations = await prisma.providerLocation.findMany({
@@ -335,8 +406,8 @@ export async function getProviderLocationSummary(clinicId?: string) {
           id: true,
           name: true,
           providerType: true,
-          status: true
-        }
+          status: true,
+        },
       },
       location: {
         select: {
@@ -346,29 +417,31 @@ export async function getProviderLocationSummary(clinicId?: string) {
           clinic: {
             select: {
               id: true,
-              name: true
-            }
-          }
-        }
-      }
-    }
-  })
+              name: true,
+            },
+          },
+        },
+      },
+    },
+  });
 
   // Group by location
   const locationSummary = providerLocations.reduce((acc, pl) => {
-    const locationKey = pl.location.id
-    
+    const locationKey = pl.location.id;
+
     if (!acc[locationKey]) {
       acc[locationKey] = {
-        location: pl.location,
+        id: pl.location.id,
+        name: pl.location.name,
+        address: pl.location.address,
         providers: [],
         counts: {
           total: 0,
           dentists: 0,
           hygienists: 0,
-          primary: 0
-        }
-      }
+          primary: 0,
+        },
+      };
     }
 
     acc[locationKey].providers.push({
@@ -377,24 +450,26 @@ export async function getProviderLocationSummary(clinicId?: string) {
       providerType: pl.provider.providerType,
       status: pl.provider.status,
       isPrimary: pl.isPrimary,
-      startDate: pl.startDate
-    })
+      startDate: pl.startDate,
+    });
 
-    acc[locationKey].counts.total++
-    if (pl.provider.providerType === 'dentist') acc[locationKey].counts.dentists++
-    if (pl.provider.providerType === 'hygienist') acc[locationKey].counts.hygienists++
-    if (pl.isPrimary) acc[locationKey].counts.primary++
+    acc[locationKey].counts.total++;
+    if (pl.provider.providerType === "dentist") acc[locationKey].counts.dentists++;
+    if (pl.provider.providerType === "hygienist") acc[locationKey].counts.hygienists++;
+    if (pl.isPrimary) acc[locationKey].counts.primary++;
 
-    return acc
-  }, {} as any)
+    return acc;
+  }, {} as LocationSummaryAccumulator);
 
-  return Object.values(locationSummary)
+  return Object.values(locationSummary);
 }
 
 /**
  * Get a specific provider with detailed location information
  */
-export async function getProviderWithLocationDetails(providerId: string): Promise<ProviderWithLocations | null> {
-  const providers = await getProvidersWithLocations({ providerId })
-  return providers[0] || null
+export async function getProviderWithLocationDetails(
+  providerId: string
+): Promise<ProviderWithLocations | null> {
+  const providers = await getProvidersWithLocations({ providerId });
+  return providers[0] || null;
 }

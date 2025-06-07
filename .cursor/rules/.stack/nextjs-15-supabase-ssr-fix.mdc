@@ -1,6 +1,6 @@
 ---
-description: Supabase SSR authentication
-globs: 
+description: 
+globs: src/lib/supabase/server.ts,src/lib/supabase/client.ts,middleware.ts
 alwaysApply: false
 ---
 # Next.js 15 + Supabase SSR Cookie Error Fix

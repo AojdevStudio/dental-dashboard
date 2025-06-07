@@ -35,14 +35,14 @@ This document outlines the requirements for developing a Google Apps Script to s
 **LocationFinancialSync.gs - Main Script:**
 ```javascript
 // Configuration
-const SUPABASE_URL = 'https://yovbdmjwrrgardkgrenc.supabase.co';
-const IMPORT_ENDPOINT = '/api/metrics/financial/locations/import';
+const SUPABASE_URL = 'https://your-project.supabase.co';
+ const IMPORT_ENDPOINT = '/api/metrics/financial/locations/import';
 
 // Location mapping (consistent with AOJ-44)
-const LOCATION_MAP = {
-  'BT': 'baytown-location-id',
-  'HM': 'humble-location-id'
-};
+ const LOCATION_MAP = {
+  'BT': 'Baytown',
+  'HM': 'Humble'
+ };
 
 // Financial data column patterns (case-insensitive)
 const FINANCIAL_COLUMNS = {
@@ -98,23 +98,25 @@ function onOpen() {
 **LocationFinancial Import Endpoint Integration:**
 ```javascript
 function syncToLocationFinancialAPI(locationData) {
-  const payload = {
-    clinicId: 'clinic-uuid',
-    locationId: locationData.locationId,
-    financialRecords: locationData.records.map(record => ({
-      date: record.date,
-      production: record.production,
-      adjustments: record.adjustments,
-      writeOffs: record.writeOffs,
-      patientIncome: record.patientIncome,
-      insuranceIncome: record.insuranceIncome,
-      unearned: record.unearned,
-      dataSourceId: 'google-sheets-sync'
-    }))
-  };
-  
-  // API call with proper authentication and error handling
-}
+   const payload = {
+     clinicId: 'clinic-uuid',
+    dataSourceId: 'google-sheets-location-financial-sync',
+    records: locationData.records.map(record => ({
+       date: record.date,
+      locationName: locationData.locationName,
+       production: record.production,
+       adjustments: record.adjustments,
+       writeOffs: record.writeOffs,
+       patientIncome: record.patientIncome,
+       insuranceIncome: record.insuranceIncome,
+      unearned: record.unearned
+    })),
+    upsert: true,
+    dryRun: false
+   };
+   
+   // API call with proper authentication and error handling
+ }
 ```
 
 **Enhanced Error Handling:**
