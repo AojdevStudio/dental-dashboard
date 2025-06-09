@@ -74,3 +74,9 @@ node_modules/
 *.sln
 *.sw?
 # OS specific
+
+# Ignore generated Prisma client files
+src/generated/prisma/
+
+# Ignore specific script with potentially sensitive information
+scripts/apply-migrations-supabase.ts
