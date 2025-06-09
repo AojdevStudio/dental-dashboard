@@ -29,6 +29,11 @@ pnpm test:ui      # Run tests with UI
 pnpm test:integration  # Run integration tests only
 ```
 
+**Utility:**
+```bash
+date              # Run `date` for date-related tasks
+```
+
 ## Architecture Overview
 
 ### Tech Stack
@@ -142,5 +147,9 @@ Provider -> HygieneProduction, DentistProduction
 - **Server-side rendering** by default for better performance
 - **TanStack Query** for client-side data caching
 - **Database indexing** optimized for multi-tenant queries
+
+## Development Notes
+
+- Use the Supabase MCP to handle most tasks
 
 When working with this codebase, always consider the multi-tenant context, use the established authentication patterns, and follow the logging guidelines for maintainability.

@@ -108,10 +108,10 @@ function writeLocationFinancialLogEntry(logEntry) {
     let logSheet = null;
     
     // Try to get existing log sheet
-    try {
-      logSheet = spreadsheet.getSheetByName(LOCATION_FINANCIAL_LOG_TAB_NAME);
-    } catch (error) {
-      // Sheet doesn't exist, create it
+    logSheet = spreadsheet.getSheetByName(LOCATION_FINANCIAL_LOG_TAB_NAME);
+    
+    // If sheet doesn't exist (returns null), create it
+    if (!logSheet) {
       logSheet = createLocationFinancialLogSheet(spreadsheet);
     }
     

@@ -1,0 +1,87 @@
+</recommendation_example>
+</examples>
+
+<input_data>
+{{PROJECT_PATH}} - Root directory of the Dental Dashboard project
+{{ASSESSMENT_TYPE}} - Full assessment or specific area (git|code|tests|deps|db|build|docs)
+{{PREVIOUS_SCORES}} - Optional: Previous health check scores for trend analysis
+</input_data>
+
+<immediate_task>
+Execute comprehensive health assessment for the Dental Dashboard project located at {{PROJECT_PATH}}. Run the specified commands for each assessment area, analyze the outputs, calculate health scores, and generate a complete health dashboard with actionable recommendations.
+</immediate_task>
+
+<precognition>
+<step1>
+Analyze the project structure and identify which assessment areas to evaluate based on {{ASSESSMENT_TYPE}}. If full assessment, prepare to execute all seven areas systematically.
+</step1>
+
+<step2>
+For each assessment area, determine the appropriate commands to run based on the project's tech stack (Next.js 15, TypeScript, Prisma, Biome, etc.).
+</step2>
+
+<step3>
+Execute commands in order, capturing both successful outputs and any error messages. Parse the results to extract relevant metrics and status information.
+</step3>
+
+<step4>
+Calculate health scores for each area using the defined criteria, considering factors like error counts, coverage percentages, build success, and integration status.
+</step4>
+
+<step5>
+Analyze the overall project health, identify trends if previous scores are available, and prioritize recommendations based on impact and urgency.
+</step5>
+
+<step6>
+Generate the comprehensive health dashboard with visual indicators, scores, metrics, and actionable recommendations formatted for immediate use.
+</step6>
+</precognition>
+
+<output_format>
+<health_dashboard>
+🏥 Dental Dashboard Project Health Report
+
+📊 OVERALL HEALTH: [🟢🟡🔴] [STATUS] ([SCORE]/100)
+
+🗂️  GIT REPOSITORY: [🟢🟡🔴] [SCORE]
+[Status details with checkmarks and warnings]
+
+🔍 CODE QUALITY: [🟢🟡🔴] [SCORE]  
+[Linting, TypeScript, formatting status]
+
+🧪 TEST SUITE: [🟢🟡🔴] [SCORE]
+[Test count, coverage, performance metrics]
+
+📦 DEPENDENCIES: [🟢🟡🔴] [SCORE]
+[Security, outdated packages, bundle size]
+
+🗄️  DATABASE & INTEGRATIONS: [🟢🟡🔴] [SCORE]
+[Prisma, database, Google Sheets API status]
+
+🏗️  BUILD HEALTH: [🟢🟡🔴] [SCORE]
+[Build success, performance, optimization]
+
+📖 DOCUMENTATION: [🟢🟡🔴] [SCORE]
+[README, API docs, component documentation]
+
+📈 PROJECT METRICS:
+├── Source code: [X] lines
+├── Components: [X] components  
+├── API routes: [X] endpoints
+├── Test coverage: [X]%
+└── Build time: [X]s
+
+🎯 RECOMMENDATIONS:
+[Prioritized list of actionable items]
+
+🏆 PROJECT STATUS: [Deployment readiness assessment]
+</health_dashboard>
+
+<command_outputs>
+[Detailed command execution results and error messages]
+</command_outputs>
+
+<trend_analysis>
+[If previous scores available, show improvements/regressions]
+</trend_analysis>
+</output_format>

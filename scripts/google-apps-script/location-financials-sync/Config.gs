@@ -5,8 +5,8 @@
  * Configuration settings for location-based financial data synchronization
  */
 
-/** @const {string} ID of the Google Spreadsheet containing location financial data. CHANGE THIS! */
-const LOCATION_FINANCIAL_SHEET_ID = 'your-location-financial-sheet-id-here';
+/** @const {string} ID of the Google Spreadsheet containing location financial data. */
+const LOCATION_FINANCIAL_SHEET_ID = SpreadsheetApp.getActiveSpreadsheet().getId();
 
 /** @const {string} Name of the sheet tab for logging sync operations. */
 const LOCATION_FINANCIAL_LOG_TAB_NAME = 'Location-Financial-Sync-Log';
@@ -14,11 +14,11 @@ const LOCATION_FINANCIAL_LOG_TAB_NAME = 'Location-Financial-Sync-Log';
 /** @const {string} Supabase project URL for API calls. */
 const SUPABASE_URL = 'https://yovbdmjwrrgardkgrenc.supabase.co';
 
-/** @const {string} API endpoint for location financial data import. */
-const LOCATION_FINANCIAL_IMPORT_ENDPOINT = '/api/metrics/financial/locations/import';
+/** @const {string} API endpoint for location financial data import (Edge Function). */
+const LOCATION_FINANCIAL_IMPORT_ENDPOINT = '/functions/v1/location-financial-import';
 
 /** @const {number} Number of records to process in each batch API call. */
-const LOCATION_FINANCIAL_BATCH_SIZE = 100;
+const LOCATION_FINANCIAL_BATCH_SIZE = 25;
 
 /** @const {number} Maximum number of retries for API calls on rate limits (429). */
 const MAX_RETRIES = 3;

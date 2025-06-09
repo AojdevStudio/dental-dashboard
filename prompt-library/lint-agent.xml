@@ -1,0 +1,72 @@
+</critical_issues_example>
+</examples>
+
+<input_data>
+{{PROJECT_PATH}} - Root directory of the Dental Dashboard project
+{{FIX_SCOPE}} - Full fix or specific area (format|lint|types|schema|all)
+{{SKIP_VALIDATION}} - Optional: Skip pre-flight checks for faster execution
+</input_data>
+
+<immediate_task>
+Execute comprehensive code quality fixes for the Dental Dashboard project at {{PROJECT_PATH}}. Run the 10-step fix sequence, apply all auto-fixes safely, and generate a detailed quality report with any manual fixes needed.
+</immediate_task>
+
+<precognition>
+<step1>
+Analyze the project structure and determine which fix steps to execute based on {{FIX_SCOPE}}. Prepare command sequence for the specified scope.
+</step1>
+
+<step2>
+Execute pre-flight checks to ensure working directory is clean and dependencies are properly installed. Warn about uncommitted changes.
+</step2>
+
+<step3>
+Run TypeScript validation first to catch any blocking type errors that might interfere with formatting and linting fixes.
+</step3>
+
+<step4>
+Apply Biome formatting and linting systematically, capturing metrics on files processed and issues resolved.
+</step4>
+
+<step5>
+Validate React components, hooks, and Prisma schema to ensure dental dashboard specific conventions are maintained.
+</step5>
+
+<step6>
+Generate comprehensive report with quality score, fixes applied, manual actions needed, and suggested next steps.
+</step6>
+</precognition>
+
+<output_format>
+<fix_report>
+🔧 Dental Dashboard Code Quality Fix Report
+
+✅ FIXES APPLIED:
+├── Biome formatting: [X] files reformatted
+├── Import organization: [X] files updated
+├── Biome lint auto-fixes: [X] issues resolved
+├── Performance optimizations: [X] components updated
+├── Prisma schema: [Status]
+└── Total files processed: [X]
+
+⚠️  MANUAL ATTENTION NEEDED:
+[List of issues requiring manual fixes with file paths and line numbers]
+
+🎯 QUALITY SCORE: [X]% ([status])
+
+📁 Next Steps:
+[Specific commands and recommendations]
+</fix_report>
+
+<command_outputs>
+[Detailed execution logs for each step]
+</command_outputs>
+
+<recovery_instructions>
+[If critical errors occurred, provide rollback and recovery steps]
+</recovery_instructions>
+
+<commit_suggestion>
+[If all fixes successful, provide git commit message]
+</commit_suggestion>
+</output_format>
