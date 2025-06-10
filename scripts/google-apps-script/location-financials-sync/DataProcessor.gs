@@ -164,7 +164,7 @@ function processLocationFinancialDataFromSheet(sheet, locationName) {
     
     // Send data to API in batches if we have valid records
     if (records.length > 0) {
-      const apiResult = sendLocationFinancialDataToAPI(records);
+      const apiResult = sendLocationFinancialDataToAPI(records, locationName);
       
       if (!apiResult.success) {
         result.errors.push(`API Error: ${apiResult.error}`);

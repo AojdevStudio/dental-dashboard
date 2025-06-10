@@ -23,7 +23,7 @@ This document outlines the requirements for implementing a comprehensive locatio
 
 **US3:** As a Provider, I want my performance metrics to be accurately tracked across multiple locations where I work, so that my contributions to each location are properly recognized and measured.
 
-**US4:** As a Data Manager, I want daily financial data from Google Sheets to be automatically synced into the system for each clinic location via Google Apps Script, so that location-specific financial data is current and accurate.
+**US4:** As a Data Manager, I want daily financial data from Google Sheets to be automatically synced into the system for each clinic location via Google Apps Script with multi-clinic support, so that location-specific financial data is current, accurate, and properly isolated by clinic entity.
 
 **US5:** As a Developer building AOJ-41, I need location-aware provider queries and performance metrics, so that the Providers Main Page can display meaningful location-specific analytics.
 

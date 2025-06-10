@@ -3,6 +3,13 @@
  * LOCATION FINANCIAL SYNC CONFIGURATION
  * ========================================
  * Configuration settings for location-based financial data synchronization
+ * 
+ * MULTI-CLINIC SUPPORT:
+ * This system supports separate clinic IDs for each location:
+ * - Baytown sheets sync to Baytown clinic ID
+ * - Humble sheets sync to Humble clinic ID
+ * - Location detection is automatic based on sheet names
+ * - Each clinic's data remains isolated
  */
 
 /** @const {string} ID of the Google Spreadsheet containing location financial data. */
@@ -32,8 +39,11 @@ const LOCATION_FINANCIAL_SUPABASE_URL_PROPERTY_KEY = 'LOCATION_FINANCIAL_SUPABAS
 /** @const {string} Key for storing Supabase Service Role Key in Script Properties. */
 const LOCATION_FINANCIAL_SUPABASE_KEY_PROPERTY_KEY = 'LOCATION_FINANCIAL_SUPABASE_KEY';
 
-/** @const {string} Key for storing Clinic ID in Script Properties. */
-const LOCATION_FINANCIAL_CLINIC_ID_PROPERTY_KEY = 'LOCATION_FINANCIAL_CLINIC_ID';
+/** @const {string} Key for storing Baytown Clinic ID in Script Properties. */
+const LOCATION_FINANCIAL_BAYTOWN_CLINIC_ID_PROPERTY_KEY = 'LOCATION_FINANCIAL_BAYTOWN_CLINIC_ID';
+
+/** @const {string} Key for storing Humble Clinic ID in Script Properties. */
+const LOCATION_FINANCIAL_HUMBLE_CLINIC_ID_PROPERTY_KEY = 'LOCATION_FINANCIAL_HUMBLE_CLINIC_ID';
 
 /** @const {string} Key for storing Data Source ID in Script Properties. */
 const LOCATION_FINANCIAL_DATA_SOURCE_ID_PROPERTY_KEY = 'LOCATION_FINANCIAL_DATA_SOURCE_ID';
@@ -102,7 +112,8 @@ const FINANCIAL_COLUMN_HEADERS = {
     'write-offs', 
     'insurance writeoffs',
     'write off',
-    'writeoff'
+    'writeoff',
+    'write-off'
   ],
   PATIENT_INCOME: [
     'patient income', 
@@ -110,7 +121,10 @@ const FINANCIAL_COLUMN_HEADERS = {
     'patient pay',
     'patient payments',
     'patient cash',
-    'cash collections'
+    'cash collections',
+    'pt income',
+    'pt collections',
+    'pt pay'
   ],
   INSURANCE_INCOME: [
     'insurance income', 
@@ -118,14 +132,19 @@ const FINANCIAL_COLUMN_HEADERS = {
     'insurance pay',
     'insurance payments',
     'insurance reimb',
-    'insurance reimbursement'
+    'insurance reimbursement',
+    'ins income',
+    'ins collections',
+    'ins pay'
   ],
   UNEARNED: [
     'unearned', 
     'unearned income', 
     'prepaid',
     'prepayment',
-    'advance payment'
+    'advance payment',
+    'unearned pt income',
+    'unearned patient income'
   ],
   NET_PRODUCTION: [
     'net production',
@@ -135,7 +154,8 @@ const FINANCIAL_COLUMN_HEADERS = {
   TOTAL_COLLECTIONS: [
     'total collections',
     'collections total',
-    'total collected'
+    'total collected',
+    'collections'
   ]
 };
 

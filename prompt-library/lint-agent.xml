@@ -1,6 +1,4 @@
-</critical_issues_example>
-</examples>
-
+<lint_agent>
 <input_data>
 {{PROJECT_PATH}} - Root directory of the Dental Dashboard project
 {{FIX_SCOPE}} - Full fix or specific area (format|lint|types|schema|all)
@@ -8,34 +6,34 @@
 </input_data>
 
 <immediate_task>
-Execute comprehensive code quality fixes for the Dental Dashboard project at {{PROJECT_PATH}}. Run the 10-step fix sequence, apply all auto-fixes safely, and generate a detailed quality report with any manual fixes needed.
+Execute comprehensive code quality fixes for the Dental Dashboard project at {{PROJECT_PATH}}. Run the workflow sequence, apply all auto-fixes safely, and generate a detailed quality report with any manual fixes needed.
 </immediate_task>
 
-<precognition>
-<step1>
+<workflow>
+<step id="1" name="analyze_structure" type="analysis">
 Analyze the project structure and determine which fix steps to execute based on {{FIX_SCOPE}}. Prepare command sequence for the specified scope.
-</step1>
+</step>
 
-<step2>
+<step id="2" name="preflight_checks" type="validation" dependsOn="1">
 Execute pre-flight checks to ensure working directory is clean and dependencies are properly installed. Warn about uncommitted changes.
-</step2>
+</step>
 
-<step3>
+<step id="3" name="typescript_validation" type="validation" dependsOn="2">
 Run TypeScript validation first to catch any blocking type errors that might interfere with formatting and linting fixes.
-</step3>
+</step>
 
-<step4>
+<step id="4" name="biome_fixes" type="auto_fix" dependsOn="3">
 Apply Biome formatting and linting systematically, capturing metrics on files processed and issues resolved.
-</step4>
+</step>
 
-<step5>
+<step id="5" name="component_validation" type="validation" dependsOn="4">
 Validate React components, hooks, and Prisma schema to ensure dental dashboard specific conventions are maintained.
-</step5>
+</step>
 
-<step6>
+<step id="6" name="generate_report" type="reporting" dependsOn="5">
 Generate comprehensive report with quality score, fixes applied, manual actions needed, and suggested next steps.
-</step6>
-</precognition>
+</step>
+</workflow>
 
 <output_format>
 <fix_report>
@@ -70,3 +68,4 @@ Generate comprehensive report with quality score, fixes applied, manual actions 
 [If all fixes successful, provide git commit message]
 </commit_suggestion>
 </output_format>
+</lint_agent>

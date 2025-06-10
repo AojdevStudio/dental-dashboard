@@ -50,21 +50,43 @@ const LOCATION_FINANCIAL_SHEET_ID = 'your-actual-sheet-id-here';
    - `APIClient.gs`, `ErrorHandler.gs`, `Setup.gs`
 5. **Copy `appsscript.json`** content to replace the manifest
 6. **Save the project**
+7. **Grant permissions** when prompted (includes trigger management scope)
 
 ### 3. **Run Setup**
 
 1. **Refresh your Google Sheet** (the custom menu should appear)
 2. **💰 Location Financial Sync → 🔧 1. First Time Setup**
-3. **Enter your credentials** when prompted (4 simple steps):
-   - **Step 1/4**: Supabase Project URL (e.g., `https://yovbdmjwrrgardkgrenc.supabase.co`)
-   - **Step 2/4**: Supabase Service Role Key 
-   - **Step 3/4**: Clinic ID from your database
-   - **Step 4/4**: Data Source ID (optional)
+3. **Enter your credentials** when prompted (6 simple steps):
+   - **Step 1/6**: Supabase Project URL (e.g., `https://yovbdmjwrrgardkgrenc.supabase.co`)
+   - **Step 2/6**: Supabase Service Role Key 
+   - **Step 3/6**: Baytown Clinic ID from your database
+   - **Step 4/6**: Humble Clinic ID from your database 
+   - **Step 5/6**: Data Source ID (optional)
 4. **Done!** The setup will automatically:
-   - Test the API connection
+   - Test the API connection for both clinics
    - Create triggers for auto-sync
    - Create a log sheet
    - Validate your data format
+
+## 🏢 **Multi-Clinic Architecture**
+
+This sync system supports **separate clinic entities** for each location:
+
+### **Clinic Mapping**
+- **Baytown Location** → Baytown Clinic ID (e.g., `cmbk373hc0000i2uk8pel5elu`)
+- **Humble Location** → Humble Clinic ID (e.g., `cmbk373qi0001i2ukewr01bvz`)
+
+### **How It Works**
+1. **Sheet Detection**: Script automatically detects location from sheet names
+2. **Clinic Selection**: Uses appropriate clinic ID based on detected location
+3. **Data Isolation**: Each location's data syncs to its own clinic database
+4. **Independent Processing**: Baytown and Humble data are processed separately
+
+### **Benefits**
+- ✅ **Data Isolation**: Each clinic's data remains separate
+- ✅ **Scalable**: Easy to add new locations/clinics
+- ✅ **Automatic**: No manual clinic selection required
+- ✅ **Reliable**: Each location tested independently during setup
 
 ## 📊 **Supported Financial Data**
 
@@ -110,12 +132,14 @@ Automatically detects and processes location-specific sheets:
 ### **Smart Sync Logic**
 
 - **Processes all location tabs** matching patterns
+- **Auto-detects clinic IDs** based on location (Baytown vs Humble)
 - **Skips empty rows** automatically
 - **Handles currency formatting** ($1,234.56 → 1234.56)
 - **Validates data ranges** (prevents impossible values)
 - **Batches requests** for performance (100 records per batch)
 - **Retry logic** for transient API failures
 - **Upsert operations** (updates existing, creates new)
+- **Multi-clinic support** (each location syncs to correct clinic)
 
 ### **Built-in GUI Features**
 
@@ -151,12 +175,12 @@ Integrates with: `/api/metrics/financial/locations/import`
 **Request Format:**
 ```json
 {
-  "clinicId": "clinic-uuid",
+  "clinicId": "location-specific-clinic-uuid",
   "dataSourceId": "google-sheets-location-financial-sync",
   "records": [
     {
       "date": "2024-06-05",
-      "locationName": "Baytown",
+      "locationName": "Baytown", // or "Humble"
       "production": 1234.56,
       "adjustments": 100.00,
       "writeOffs": 50.00,
@@ -293,7 +317,16 @@ FINANCIAL_VALIDATION_RULES = {
    - Ensure the LocationFinancial API endpoint exists
 
 3. **"No credentials found"**
-   - Run "🔧 1. First Time Setup" to enter credentials
+   - Run "🔧 1. First Time Setup" to enter credentials for both clinics
+
+4. **"Specified permissions are not sufficient to call ScriptApp.getProjectTriggers"**
+   - The script needs additional permissions to manage triggers
+   - **Root Cause**: Missing `script.scriptapp` OAuth scope
+   - **Solution Options**:
+     - **Option A**: Re-run any setup function to trigger re-authorization
+     - **Option B**: Go to **Extensions → Apps Script → Run any function → Review permissions**
+     - **Option C**: Delete and recreate the Apps Script project with updated `appsscript.json`
+   - **Note**: The updated `appsscript.json` includes the required scope
 
 ### **Sync Issues**
 
@@ -311,9 +344,10 @@ FINANCIAL_VALIDATION_RULES = {
    - Verify financial amounts are within valid ranges
 
 4. **"API errors"**
-   - Use **🧪 6. Test API Connection** to verify connectivity
+   - Use **🧪 6. Test API Connection** to verify connectivity for both clinics
    - Check Supabase project status and quotas
-   - Verify clinic ID exists in database
+   - Verify both clinic IDs exist in database
+   - Ensure location sheets match correct clinic mappings
 
 ### **Debugging Tools**
 
@@ -321,7 +355,7 @@ FINANCIAL_VALIDATION_RULES = {
 - **📋 View Sync Logs** - Detailed operation history
 - **📈 Get Sync Statistics** - Performance metrics
 - **📤 Export Data Preview** - See exactly what would be synced
-- **🧪 6. Test API Connection** - Verify API accessibility
+- **🧪 6. Test API Connection** - Verify API accessibility for both clinics
 
 ## 💡 **Pro Tips**
 
@@ -329,7 +363,7 @@ FINANCIAL_VALIDATION_RULES = {
 2. **Check logs regularly** - "📋 View Sync Logs" shows what's happening
 3. **Monitor statistics** - "📈 Get Sync Statistics" shows sync health
 4. **Use data preview** - "📤 Export Data Preview" shows transformed data
-5. **Test API connection** - "🧪 6. Test API Connection" for troubleshooting
+5. **Test API connection** - "🧪 6. Test API Connection" verifies both clinic connections
 
 ## 🛠️ **Extending for Other Locations**
 

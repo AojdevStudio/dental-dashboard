@@ -1,6 +1,3 @@
-</recommendation_example>
-</examples>
-
 <input_data>
 {{PROJECT_PATH}} - Root directory of the Dental Dashboard project
 {{ASSESSMENT_TYPE}} - Full assessment or specific area (git|code|tests|deps|db|build|docs)

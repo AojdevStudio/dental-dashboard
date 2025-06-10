@@ -28,17 +28,23 @@ function runLocationFinancialSetupWizard() {
       return false; // User cancelled
     }
     
-    // Step 2: Validate credentials by testing connection
-    ui.alert('🔍 Validating Connection', 'Testing your credentials...', ui.ButtonSet.OK);
+    // Step 2: Validate credentials by testing connection for both locations
+    ui.alert('🔍 Validating Connection', 'Testing your credentials for both Baytown and Humble...', ui.ButtonSet.OK);
     
     const testResult = testLocationFinancialConnectionWithCredentials(credentials);
     if (!testResult.success) {
       ui.alert(
         '❌ Connection Failed', 
-        `Could not connect to the API:\n\n${testResult.error}\n\nPlease check your credentials and try again.`,
+        `Could not connect to the API:\n\n${testResult.error}\n\nPlease check your clinic IDs and try again.`,
         ui.ButtonSet.OK
       );
       return false;
+    } else {
+      ui.alert(
+        '✅ Connection Successful', 
+        `Successfully connected to both locations:\n\n• Baytown: Connected\n• Humble: Connected\n\nYour credentials are valid!`,
+        ui.ButtonSet.OK
+      );
     }
     
     // Step 3: Store credentials
@@ -125,28 +131,49 @@ function collectLocationFinancialCredentials() {
       return null;
     }
     
-    // Step 3: Clinic ID
-    const clinicResponse = ui.prompt(
-      '🏥 Step 3/4: Clinic ID',
-      'Enter your Clinic ID:\n\n' +
-      'This is the unique identifier for your clinic in the database.\n' +
+    // Step 3: Baytown Clinic ID
+    const baytownClinicResponse = ui.prompt(
+      '🏥 Step 3/6: Baytown Clinic ID',
+      'Enter your Baytown Clinic ID:\n\n' +
+      'This is the unique identifier for your Baytown clinic in the database.\n' +
+      'Example: cmbk373hc0000i2uk8pel5elu\n\n' +
       'Contact your system administrator if you don\'t know this.',
       ui.ButtonSet.OK_CANCEL
     );
     
-    if (clinicResponse.getSelectedButton() !== ui.Button.OK) {
+    if (baytownClinicResponse.getSelectedButton() !== ui.Button.OK) {
       return null;
     }
     
-    const clinicId = clinicResponse.getResponseText().trim();
-    if (!clinicId) {
-      ui.alert('❌ Invalid Clinic ID', 'Please enter a valid clinic ID.', ui.ButtonSet.OK);
+    const baytownClinicId = baytownClinicResponse.getResponseText().trim();
+    if (!baytownClinicId) {
+      ui.alert('❌ Invalid Baytown Clinic ID', 'Please enter a valid Baytown clinic ID.', ui.ButtonSet.OK);
       return null;
     }
     
-    // Step 4: Data Source ID (optional)
+    // Step 4: Humble Clinic ID
+    const humbleClinicResponse = ui.prompt(
+      '🏥 Step 4/6: Humble Clinic ID',
+      'Enter your Humble Clinic ID:\n\n' +
+      'This is the unique identifier for your Humble clinic in the database.\n' +
+      'Example: cmbk373qi0001i2ukewr01bvz\n\n' +
+      'Contact your system administrator if you don\'t know this.',
+      ui.ButtonSet.OK_CANCEL
+    );
+    
+    if (humbleClinicResponse.getSelectedButton() !== ui.Button.OK) {
+      return null;
+    }
+    
+    const humbleClinicId = humbleClinicResponse.getResponseText().trim();
+    if (!humbleClinicId) {
+      ui.alert('❌ Invalid Humble Clinic ID', 'Please enter a valid Humble clinic ID.', ui.ButtonSet.OK);
+      return null;
+    }
+    
+    // Step 5: Data Source ID (optional)
     const dataSourceResponse = ui.prompt(
-      '📊 Step 4/4: Data Source ID (Optional)',
+      '📊 Step 5/6: Data Source ID (Optional)',
       'Enter a Data Source ID (optional):\n\n' +
       'This helps track where the data comes from.\n' +
       'Leave blank to use default: "google-sheets-location-financial-sync"',
@@ -162,7 +189,8 @@ function collectLocationFinancialCredentials() {
     return {
       supabaseUrl: supabaseUrl.endsWith('/') ? supabaseUrl.slice(0, -1) : supabaseUrl,
       supabaseKey: supabaseKey,
-      clinicId: clinicId,
+      baytownClinicId: baytownClinicId,
+      humbleClinicId: humbleClinicId,
       dataSourceId: dataSourceId
     };
     
@@ -335,7 +363,8 @@ function showLocationFinancialWelcomeMessage() {
     'Let\'s get you set up! You\'ll need:\n' +
     '• Your Supabase project URL\n' +
     '• Your Supabase service role key\n' +
-    '• Your clinic ID\n\n' +
+    '• Your Baytown clinic ID\n' +
+    '• Your Humble clinic ID\n\n' +
     'Click OK to begin the setup wizard.',
     ui.ButtonSet.OK
   );
