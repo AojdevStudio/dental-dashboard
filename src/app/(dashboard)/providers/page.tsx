@@ -1,30 +1,18 @@
 "use client";
 
 import { useProviders } from "@/hooks/use-providers";
+import ProvidersError from "./error";
+import Loading from "./loading";
 
 export default function ProvidersPage() {
   const { providers, isLoading, isError, pagination } = useProviders();
 
   if (isLoading) {
-    return (
-      <div className="p-6">
-        <h1 className="text-2xl font-bold mb-4">Providers</h1>
-        <div className="animate-pulse">
-          <div className="h-4 bg-gray-200 rounded w-full mb-2"></div>
-          <div className="h-4 bg-gray-200 rounded w-5/6 mb-2"></div>
-          <div className="h-4 bg-gray-200 rounded w-4/6"></div>
-        </div>
-      </div>
-    );
+    return <Loading />;
   }
 
   if (isError) {
-    return (
-      <div className="p-6">
-        <h1 className="text-2xl font-bold mb-4">Providers</h1>
-        <p className="text-red-600">Error loading providers data.</p>
-      </div>
-    );
+    return <ProvidersError />;
   }
 
   return (

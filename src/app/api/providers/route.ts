@@ -39,7 +39,11 @@ async function getProvidersHandler(
     // Fetch providers with locations
     const providers = await getProvidersWithLocations(filters);
 
-    // Simple pagination (since getProvidersWithLocations doesn't support offset)
+    // WARNING: Performance Issue - In-memory pagination
+    // This implementation fetches ALL providers and paginates in-memory which will not scale.
+    // TODO: Update getProvidersWithLocations to accept offset/limit parameters and use 
+    // database-level LIMIT/OFFSET for efficient pagination. Consider enforcing a maximum
+    // limit (e.g., 1000) to prevent excessive memory usage until proper pagination is implemented.
     const offset = (page - 1) * limit;
     const paginatedProviders = providers.slice(offset, offset + limit);
     const total = providers.length;

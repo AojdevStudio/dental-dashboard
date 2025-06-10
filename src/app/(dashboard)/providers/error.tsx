@@ -1,6 +1,6 @@
 "use client";
 
-export default function Error() {
+export default function ProvidersError() {
   return (
     <div className="p-6">
       <h1 className="text-2xl font-bold text-red-600">Error loading providers</h1>
