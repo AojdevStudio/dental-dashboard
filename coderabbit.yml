@@ -2,70 +2,179 @@
 # Only reviews core development files and directories
 
 # Core settings
-system_language: "en-US"
+language: "en-US"
 release_notes: false
 ignore_draft_pr: true
 enable_beta_features: true
 disable_poem: true
 
-# Path filters - Include only core code areas
-path_filters: |
-  src/**
-  prisma/**
-  supabase/**
-  package.json
-  tsconfig.json
-  next.config.ts
-  middleware.ts
-  HygieneSyncLib/**/*.gs
-  HygieneSyncLib/**/*.gsx
-  HygieneSyncLib/**/*.gsx
-  !src/generated/**
-  !prisma/migrations/**/*.sql
-  !**/*.test.ts
-  !**/*.test.tsx
-  !**/__tests__/**
-  !**/node_modules/**
-  !dist/**
-  !build/**
-  !.next/**
-  !**/*.md
-  !**/*.mdc
+# Reviews configuration
+reviews:
+  # Only include essential code files
+  path_filters:
+    # Include core application code
+    - "src/**/*.ts"
+    - "src/**/*.tsx" 
+    - "src/**/*.js"
+    - "src/**/*.jsx"
+    - "prisma/schema.prisma"
+    - "prisma/seed.ts"
+    - "package.json"
+    - "tsconfig.json"
+    - "next.config.ts"
+    - "middleware.ts"
+    - "tailwind.config.js"
+    - "postcss.config.mjs"
+    - "vitest.config.ts"
+    - "vitest.integration.config.ts"
+    - "components.json"
+    - "biome.json"
+    
+    # Include Google Apps Script files
+    - "scripts/**/*.gs"
+    - "scripts/**/*.ts"
+    - "scripts/**/*.js"
+    
+    # Include Supabase functions
+    - "supabase/functions/**/*.ts"
+    - "supabase/migrations/**/*.sql"
+    
+    # Exclude everything else explicitly
+    - "!**/*.md"
+    - "!**/*.mdc" 
+    - "!**/*.xml"
+    - "!**/*.yml"
+    - "!**/*.yaml"
+    - "!**/*.json" # Exclude most JSON except specific ones above
+    - "!**/*.css"
+    - "!**/*.scss"
+    - "!**/*.sass"
+    - "!**/*.html"
+    - "!**/*.svg"
+    - "!**/*.png"
+    - "!**/*.jpg"
+    - "!**/*.jpeg"
+    - "!**/*.gif"
+    - "!**/*.ico"
+    - "!**/*.woff"
+    - "!**/*.woff2"
+    - "!**/*.ttf"
+    - "!**/*.eot"
+    - "!**/*.pdf"
+    - "!**/*.zip"
+    - "!**/*.tar"
+    - "!**/*.gz"
+    
+    # Exclude generated and build files
+    - "!src/generated/**"
+    - "!**/node_modules/**"
+    - "!dist/**"
+    - "!build/**"
+    - "!.next/**"
+    - "!coverage/**"
+    - "!.turbo/**"
+    
+    # Exclude test files (focus on production code)
+    - "!**/*.test.ts"
+    - "!**/*.test.tsx"
+    - "!**/*.spec.ts"
+    - "!**/*.spec.tsx"
+    - "!**/__tests__/**"
+    - "!**/tests/**"
+    
+    # Exclude documentation and config directories
+    - "!docs/**"
+    - "!.github/**"
+    - "!.vscode/**"
+    - "!.cursor/**"
+    - "!memory-bank/**"
+    - "!prompt-library/**"
+    - "!templates/**"
+    - "!upload/**"
+    - "!migrations/**"
+    - "!ai copy/**"
+    
+    # Exclude migration SQL files (auto-generated)
+    - "!prisma/migrations/**/*.sql"
+    
+    # Exclude lock files and logs
+    - "!pnpm-lock.yaml"
+    - "!package-lock.json"
+    - "!yarn.lock"
+    - "!**/*.log"
 
-# File-specific instructions for different code areas
-file_path_instructions:
-  - path: "src/**/*.ts,src/**/*.tsx"
-    instructions: |
-      Focus on TypeScript/React best practices:
-      - Ensure proper type safety and avoid 'any' types
-      - Check for proper error handling and async/await patterns
-      - Verify React hooks usage and component patterns
-      - Review for security vulnerabilities and performance issues
-      - Ensure proper JSDoc comments for functions and complex logic
+  # File-specific review instructions
+  path_instructions:
+    - path: "src/**/*.{ts,tsx}"
+      instructions: |
+        Focus on TypeScript/React code quality:
+        - Ensure proper type safety and avoid 'any' types
+        - Check for proper error handling and async/await patterns
+        - Verify React hooks usage and component patterns
+        - Review for security vulnerabilities and performance issues
+        - Ensure proper JSDoc comments for functions and complex logic
+        - Check for proper imports and exports
+        - Verify proper state management patterns
 
-  - path: "prisma/**"
-    instructions: |
-      Review database schema and Prisma-related code:
-      - Verify schema relationships and constraints are properly defined
-      - Check for proper indexing and performance considerations
-      - Ensure migration files follow best practices
-      - Review seed files for data integrity
+    - path: "prisma/**"
+      instructions: |
+        Review database schema and Prisma code:
+        - Verify schema relationships and constraints are properly defined
+        - Check for proper indexing and performance considerations
+        - Ensure proper data types and field constraints
+        - Review seed files for data integrity and security
+        - Check for proper error handling in database operations
 
-  - path: "supabase/**/*.ts"
-    instructions: |
-      Review Supabase Edge Functions and database code:
-      - Ensure proper error handling and response formatting
-      - Check for security best practices (RLS policies, input validation)
-      - Verify proper async/await patterns and database connections
-      - Review for performance optimizations
+    - path: "supabase/functions/**/*.ts"
+      instructions: |
+        Review Supabase Edge Functions:
+        - Ensure proper error handling and response formatting
+        - Check for security best practices (input validation, sanitization)
+        - Verify proper async/await patterns and database connections
+        - Review for performance optimizations
+        - Ensure proper CORS and authentication handling
 
-  - path: "package.json"
-    instructions: |
-      Review dependency management:
-      - Check for security vulnerabilities in dependencies
-      - Ensure version pinning where appropriate
-      - Verify scripts are properly configured
+    - path: "scripts/**/*.{gs,ts,js}"
+      instructions: |
+        Review Google Apps Script and automation code:
+        - Check for proper error handling and logging
+        - Verify API integration patterns and security
+        - Ensure proper data validation and sanitization
+        - Review for performance and rate limiting considerations
+        - Check for proper credential management
 
-# Ignore specific patterns
-ignored_titles: "WIP,Draft,Test"
-ignored_branch: "dev/test,experimental/*" 
+    - path: "{package.json,tsconfig.json,*.config.*}"
+      instructions: |
+        Review configuration files:
+        - Check for security vulnerabilities in dependencies
+        - Ensure proper version pinning where appropriate
+        - Verify build and script configurations
+        - Review for performance optimizations
+
+# Ignore patterns
+ignore:
+  # Ignore PR titles
+  title_keywords:
+    - "WIP"
+    - "Draft"
+    - "Test"
+    - "Experiment"
+    - "Temp"
+    
+  # Ignore specific branches
+  branches:
+    - "dev/test"
+    - "experimental/*"
+    - "temp/*"
+    - "personal/*"
+    
+  # Ignore specific file patterns (additional safety net)
+  files:
+    - "**/*.md"
+    - "**/*.xml"
+    - "**/*.yml"
+    - "**/*.yaml"
+    - "**/README*"
+    - "**/CHANGELOG*"
+    - "**/.env*"
+    - "**/LICENSE*"
