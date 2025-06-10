@@ -50,10 +50,16 @@
       "public/**",
       "**/generated/**",
       "turbo.json",
-      "**/*.md",
+      "docs/**/*.md",
+      "README.md",
+      "CHANGELOG.md",
       "scripts/**",
-      "**/*.json",
-      "**/*.css"
+      "package-lock.json",
+      "pnpm-lock.yaml",
+      "tsconfig.json",
+      "prisma/migrations/**/*.json",
+      "src/styles/**/*.css",
+      "**/*.module.css"
     ]
   }
 }
