@@ -19,7 +19,6 @@ async function main() {
         location: 'Humble, TX',
         status: 'active',
         registrationCode: 'KAMDENTAL-HUMBLE',
-        uuidId: 'clinic-humble-uuid-001'
       }
     }),
     prisma.clinic.upsert({
@@ -34,12 +33,55 @@ async function main() {
         location: 'Baytown, TX',
         status: 'active',
         registrationCode: 'KAMDENTAL-BAYTOWN',
-        uuidId: 'clinic-baytown-uuid-001'
       }
     })
   ])
 
   console.log('✅ Upserted clinics:', clinics.map(c => `${c.name} (${c.id})`))
+
+  // Create locations for each clinic (idempotent)
+  const locations = await Promise.all([
+    // Humble locations
+    prisma.location.upsert({
+      where: { 
+        clinicId_name: {
+          clinicId: clinics[0].id,
+          name: 'Humble'
+        }
+      },
+      update: {
+        address: 'Humble, TX',
+        isActive: true,
+      },
+      create: {
+        clinicId: clinics[0].id,
+        name: 'Humble',
+        address: 'Humble, TX',
+        isActive: true,
+      }
+    }),
+    // Baytown locations
+    prisma.location.upsert({
+      where: { 
+        clinicId_name: {
+          clinicId: clinics[1].id,
+          name: 'Baytown'
+        }
+      },
+      update: {
+        address: 'Baytown, TX',
+        isActive: true,
+      },
+      create: {
+        clinicId: clinics[1].id,
+        name: 'Baytown',
+        address: 'Baytown, TX',
+        isActive: true,
+      }
+    })
+  ])
+
+  console.log('✅ Upserted locations:', locations.map(l => `${l.name} (${l.id})`))
 
   // Upsert system admin user (idempotent)
   const adminUser = await prisma.user.upsert({
@@ -52,9 +94,8 @@ async function main() {
       email: 'admin@kamdental.com',
       name: 'KamDental System Admin',
       role: 'system_admin',
-      authId: 'e48f8f72-542f-4d1d-9674-6b59d5855996', 
-      uuidId: 'user-admin-uuid-001'
-    } as any 
+      authId: 'e48f8f72-542f-4d1d-9674-6b59d5855996'
+    } 
   })
 
   console.log('✅ Upserted admin user:', adminUser.email)
@@ -154,7 +195,8 @@ async function main() {
     "financial_metrics", "appointment_metrics", "call_metrics",
     "patient_metrics", "metric_aggregations", "google_credentials",
     "spreadsheet_connections", "column_mappings_v2",
-    "hygiene_production", "dentist_production", "id_mappings"
+    "hygiene_production", "dentist_production", "id_mappings",
+    "locations", "location_financial", "provider_locations"
   ];
 
   for (const table of tablesToGrantPermissions) {

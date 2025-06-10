@@ -1,0 +1,22 @@
+name: Automatically create draft pull request
+
+on:
+  push:
+    branches-ignore:
+      - "main"   # This will trigger on all branches except 'main'
+
+jobs:
+  create_draft_pr:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Create draft pull request
+        uses: peter-evans/draft-pull-request@v2
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          destination_branch: "main"   # or your default branch
+          pr_title: "Draft: Changes from ${{ github.ref_name }}"
+          pr_draft: true
+

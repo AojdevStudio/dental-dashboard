@@ -2,6 +2,10 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+## Supabase Project Details
+- **Project ID:** yovbdmjwrrgardkgrenc
+- **Project Name:** dashboard
+
 ## Essential Commands
 
 **Development:**
@@ -151,5 +155,6 @@ Provider -> HygieneProduction, DentistProduction
 ## Development Notes
 
 - Use the Supabase MCP to handle most tasks
+- Always check paths for nested CLAUDE.md files that might be useful for task execution.
 
 When working with this codebase, always consider the multi-tenant context, use the established authentication patterns, and follow the logging guidelines for maintainability.

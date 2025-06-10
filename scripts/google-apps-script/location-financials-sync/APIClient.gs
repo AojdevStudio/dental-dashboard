@@ -7,29 +7,35 @@
  */
 
 /**
- * Sends location financial data to the API endpoint
+ * Sends location financial data to the API endpoint with location-specific clinic ID
  * @param {Array} records - Array of financial records
+ * @param {string} locationName - The location name ('Baytown' or 'Humble')
  * @param {Object} options - Additional options (dryRun, upsert, etc.)
  * @returns {Object} API response result
  */
-function sendLocationFinancialDataToAPI(records, options = {}) {
+function sendLocationFinancialDataToAPI(records, locationName, options = {}) {
   try {
     const credentials = getLocationFinancialCredentials();
     if (!credentials.isValid) {
       throw new Error('Invalid credentials: ' + credentials.error);
     }
     
+    // Get location-specific clinic ID
+    const clinicId = getClinicIdForLocation(locationName);
+    
     // Prepare API payload
     const payload = {
-      clinicId: credentials.clinicId,
+      clinicId: clinicId,
       dataSourceId: credentials.dataSourceId || 'google-sheets-location-financial-sync',
       records: records,
       upsert: options.upsert !== false, // Default to true
       dryRun: options.dryRun === true    // Default to false
     };
     
-    logLocationFinancialOperation('API_CALL', `Sending ${records.length} records to API`, {
+    logLocationFinancialOperation('API_CALL', `Sending ${records.length} records for ${locationName} to API`, {
       recordCount: records.length,
+      locationName: locationName,
+      clinicId: clinicId,
       dryRun: payload.dryRun,
       upsert: payload.upsert
     });
@@ -263,40 +269,69 @@ function testLocationFinancialApiConnection() {
       };
     }
     
-    // Send a dry-run request with minimal test data
-    const testPayload = {
-      clinicId: credentials.clinicId,
-      dataSourceId: 'test-connection',
-      records: [{
-        date: formatLocationFinancialDate(new Date()),
-        locationName: 'Baytown',
-        production: 100.00,
-        adjustments: 0,
-        writeOffs: 0,
-        patientIncome: 50.00,
-        insuranceIncome: 50.00,
-        unearned: null
-      }],
-      dryRun: true
-    };
+    logLocationFinancialOperation('TEST_CONNECTION', 'Testing API connection for both locations');
     
-    logLocationFinancialOperation('TEST_CONNECTION', 'Testing API connection with dry-run request');
+    const testResults = [];
+    const locations = ['Baytown', 'Humble'];
     
-    const result = makeLocationFinancialAPIRequest(testPayload, credentials);
+    // Test both clinic IDs
+    for (const location of locations) {
+      try {
+        const clinicId = getClinicIdForLocation(location);
+        
+        // Send a dry-run request with minimal test data
+        const testPayload = {
+          clinicId: clinicId,
+          dataSourceId: 'test-connection',
+          records: [{
+            date: formatLocationFinancialDate(new Date()),
+            locationName: location,
+            production: 100.00,
+            adjustments: 0,
+            writeOffs: 0,
+            patientIncome: 50.00,
+            insuranceIncome: 50.00,
+            unearned: null
+          }],
+          dryRun: true
+        };
+        
+        logLocationFinancialOperation('TEST_CONNECTION', `Testing ${location} connection with clinic ID: ${clinicId}`);
+        
+        const result = makeLocationFinancialAPIRequest(testPayload, credentials);
+        
+        testResults.push({
+          location: location,
+          clinicId: clinicId,
+          success: result.success,
+          error: result.error,
+          responseTime: result.responseTime
+        });
+        
+      } catch (error) {
+        testResults.push({
+          location: location,
+          success: false,
+          error: error.message
+        });
+      }
+    }
     
-    if (result.success) {
+    // Check if all tests passed
+    const allPassed = testResults.every(result => result.success);
+    const failedTests = testResults.filter(result => !result.success);
+    
+    if (allPassed) {
       return {
         success: true,
-        message: 'API connection successful',
-        responseTime: result.responseTime,
-        apiVersion: result.data?.apiVersion || 'Unknown'
+        message: 'API connection successful for both locations',
+        results: testResults
       };
     } else {
       return {
         success: false,
-        error: result.error,
-        statusCode: result.statusCode,
-        responseTime: result.responseTime
+        error: `Connection failed for: ${failedTests.map(t => `${t.location} (${t.error})`).join(', ')}`,
+        results: testResults
       };
     }
     
@@ -310,6 +345,35 @@ function testLocationFinancialApiConnection() {
 }
 
 /**
+ * Gets the clinic ID for a specific location
+ * @param {string} locationName - The location name ('Baytown' or 'Humble')
+ * @returns {string} The clinic ID for the location
+ * @throws {Error} If location is unknown or clinic ID not configured
+ */
+function getClinicIdForLocation(locationName) {
+  const properties = PropertiesService.getScriptProperties();
+  
+  switch(locationName) {
+    case 'Baytown':
+      const baytownClinicId = properties.getProperty(LOCATION_FINANCIAL_BAYTOWN_CLINIC_ID_PROPERTY_KEY);
+      if (!baytownClinicId) {
+        throw new Error('Baytown clinic ID not configured');
+      }
+      return baytownClinicId;
+      
+    case 'Humble':
+      const humbleClinicId = properties.getProperty(LOCATION_FINANCIAL_HUMBLE_CLINIC_ID_PROPERTY_KEY);
+      if (!humbleClinicId) {
+        throw new Error('Humble clinic ID not configured');
+      }
+      return humbleClinicId;
+      
+    default:
+      throw new Error(`Unknown location: ${locationName}. Supported locations: Baytown, Humble`);
+  }
+}
+
+/**
  * Gets and validates stored credentials
  * @returns {Object} Credentials object with validation status
  */
@@ -319,7 +383,8 @@ function getLocationFinancialCredentials() {
     
     const supabaseUrl = properties.getProperty(LOCATION_FINANCIAL_SUPABASE_URL_PROPERTY_KEY);
     const supabaseKey = properties.getProperty(LOCATION_FINANCIAL_SUPABASE_KEY_PROPERTY_KEY);
-    const clinicId = properties.getProperty(LOCATION_FINANCIAL_CLINIC_ID_PROPERTY_KEY);
+    const baytownClinicId = properties.getProperty(LOCATION_FINANCIAL_BAYTOWN_CLINIC_ID_PROPERTY_KEY);
+    const humbleClinicId = properties.getProperty(LOCATION_FINANCIAL_HUMBLE_CLINIC_ID_PROPERTY_KEY);
     const dataSourceId = properties.getProperty(LOCATION_FINANCIAL_DATA_SOURCE_ID_PROPERTY_KEY);
     
     const errors = [];
@@ -334,8 +399,12 @@ function getLocationFinancialCredentials() {
       errors.push('Supabase API key not configured');
     }
     
-    if (!clinicId) {
-      errors.push('Clinic ID not configured');
+    if (!baytownClinicId) {
+      errors.push('Baytown Clinic ID not configured');
+    }
+    
+    if (!humbleClinicId) {
+      errors.push('Humble Clinic ID not configured');
     }
     
     if (errors.length > 0) {
@@ -349,7 +418,8 @@ function getLocationFinancialCredentials() {
       isValid: true,
       supabaseUrl: supabaseUrl.endsWith('/') ? supabaseUrl.slice(0, -1) : supabaseUrl,
       supabaseKey: supabaseKey,
-      clinicId: clinicId,
+      baytownClinicId: baytownClinicId,
+      humbleClinicId: humbleClinicId,
       dataSourceId: dataSourceId
     };
     
@@ -380,8 +450,12 @@ function storeLocationFinancialCredentials(credentials) {
       propertiesToSet[LOCATION_FINANCIAL_SUPABASE_KEY_PROPERTY_KEY] = credentials.supabaseKey;
     }
     
-    if (credentials.clinicId) {
-      propertiesToSet[LOCATION_FINANCIAL_CLINIC_ID_PROPERTY_KEY] = credentials.clinicId;
+    if (credentials.baytownClinicId) {
+      propertiesToSet[LOCATION_FINANCIAL_BAYTOWN_CLINIC_ID_PROPERTY_KEY] = credentials.baytownClinicId;
+    }
+    
+    if (credentials.humbleClinicId) {
+      propertiesToSet[LOCATION_FINANCIAL_HUMBLE_CLINIC_ID_PROPERTY_KEY] = credentials.humbleClinicId;
     }
     
     if (credentials.dataSourceId) {
@@ -409,7 +483,8 @@ function clearLocationFinancialCredentials() {
     
     properties.deleteProperty(LOCATION_FINANCIAL_SUPABASE_URL_PROPERTY_KEY);
     properties.deleteProperty(LOCATION_FINANCIAL_SUPABASE_KEY_PROPERTY_KEY);
-    properties.deleteProperty(LOCATION_FINANCIAL_CLINIC_ID_PROPERTY_KEY);
+    properties.deleteProperty(LOCATION_FINANCIAL_BAYTOWN_CLINIC_ID_PROPERTY_KEY);
+    properties.deleteProperty(LOCATION_FINANCIAL_HUMBLE_CLINIC_ID_PROPERTY_KEY);
     properties.deleteProperty(LOCATION_FINANCIAL_DATA_SOURCE_ID_PROPERTY_KEY);
     
     logLocationFinancialOperation('CREDENTIALS', 'Credentials cleared successfully');
