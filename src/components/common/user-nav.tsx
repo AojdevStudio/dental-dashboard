@@ -1,7 +1,5 @@
 "use client";
 
-import React from "react";
-import { useAuth } from "@/hooks/use-auth";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -9,31 +7,38 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { useAuth } from "@/hooks/use-auth";
 import { LogOut, User as UserIcon } from "lucide-react";
+import React from "react";
+
+import { signOutWithCleanup } from "@/app/auth/actions";
 
 /**
  * UserNav Component
  *
  * Displays the current user's email and provides a dropdown menu with a sign-out button.
- * Uses the useAuth hook for session state and signOut logic.
+ * Uses the useAuth hook for session state and improved signOut logic for complete cleanup.
  *
  * @returns {React.ReactElement | null} The rendered user navigation dropdown, or null if not authenticated.
  */
 export function UserNav() {
-  const { user, isLoading, isAuthenticated, signOut } = useAuth();
+  const { user, isLoading, isAuthenticated } = useAuth();
 
   // If still loading auth state, show nothing
   if (isLoading) return null;
   if (!isAuthenticated || !user) return null;
 
   /**
-   * Handles the sign-out action
+   * Handles the sign-out action with complete session cleanup
    */
   const handleSignOut = async () => {
     try {
-      await signOut();
+      // Use server action for proper cleanup
+      await signOutWithCleanup();
     } catch (error) {
       console.error("Sign-out error:", error);
+      // Even on error, try to redirect to login
+      window.location.href = "/login";
     }
   };
 

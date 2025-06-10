@@ -20,12 +20,12 @@ exports.Prisma = Prisma
 exports.$Enums = {}
 
 /**
- * Prisma Client JS version: 6.7.0
- * Query Engine version: 3cff47a7f5d65c3ea74883f1d736e41d68ce91ed
+ * Prisma Client JS version: 6.8.2
+ * Query Engine version: 2060c79ba17c6bb9f5823312b6f6b7f4a845738e
  */
 Prisma.prismaVersion = {
-  client: "6.7.0",
-  engine: "3cff47a7f5d65c3ea74883f1d736e41d68ce91ed"
+  client: "6.8.2",
+  engine: "2060c79ba17c6bb9f5823312b6f6b7f4a845738e"
 }
 
 Prisma.PrismaClientKnownRequestError = () => {
@@ -125,6 +125,7 @@ exports.Prisma.ClinicScalarFieldEnum = {
   name: 'name',
   location: 'location',
   status: 'status',
+  registrationCode: 'registrationCode',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt',
   uuidId: 'uuidId'
@@ -146,11 +147,54 @@ exports.Prisma.UserScalarFieldEnum = {
 exports.Prisma.ProviderScalarFieldEnum = {
   id: 'id',
   name: 'name',
+  firstName: 'firstName',
+  lastName: 'lastName',
+  email: 'email',
   providerType: 'providerType',
+  position: 'position',
   status: 'status',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt',
   clinicId: 'clinicId'
+};
+
+exports.Prisma.LocationScalarFieldEnum = {
+  id: 'id',
+  clinicId: 'clinicId',
+  name: 'name',
+  address: 'address',
+  isActive: 'isActive',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
+exports.Prisma.ProviderLocationScalarFieldEnum = {
+  id: 'id',
+  providerId: 'providerId',
+  locationId: 'locationId',
+  isActive: 'isActive',
+  startDate: 'startDate',
+  endDate: 'endDate',
+  isPrimary: 'isPrimary'
+};
+
+exports.Prisma.LocationFinancialScalarFieldEnum = {
+  id: 'id',
+  clinicId: 'clinicId',
+  locationId: 'locationId',
+  date: 'date',
+  production: 'production',
+  adjustments: 'adjustments',
+  writeOffs: 'writeOffs',
+  netProduction: 'netProduction',
+  patientIncome: 'patientIncome',
+  insuranceIncome: 'insuranceIncome',
+  totalCollections: 'totalCollections',
+  unearned: 'unearned',
+  dataSourceId: 'dataSourceId',
+  createdBy: 'createdBy',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
 };
 
 exports.Prisma.MetricDefinitionScalarFieldEnum = {
@@ -179,7 +223,8 @@ exports.Prisma.DataSourceScalarFieldEnum = {
   expiryDate: 'expiryDate',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt',
-  clinicId: 'clinicId'
+  clinicId: 'clinicId',
+  providerId: 'providerId'
 };
 
 exports.Prisma.ColumnMappingScalarFieldEnum = {
@@ -399,6 +444,41 @@ exports.Prisma.ColumnMappingV2ScalarFieldEnum = {
   updatedAt: 'updatedAt'
 };
 
+exports.Prisma.HygieneProductionScalarFieldEnum = {
+  id: 'id',
+  date: 'date',
+  monthTab: 'monthTab',
+  hoursWorked: 'hoursWorked',
+  estimatedProduction: 'estimatedProduction',
+  verifiedProduction: 'verifiedProduction',
+  productionGoal: 'productionGoal',
+  variancePercentage: 'variancePercentage',
+  bonusAmount: 'bonusAmount',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt',
+  clinicId: 'clinicId',
+  providerId: 'providerId',
+  dataSourceId: 'dataSourceId'
+};
+
+exports.Prisma.DentistProductionScalarFieldEnum = {
+  id: 'id',
+  date: 'date',
+  monthTab: 'monthTab',
+  verifiedProductionHumble: 'verifiedProductionHumble',
+  verifiedProductionBaytown: 'verifiedProductionBaytown',
+  totalProduction: 'totalProduction',
+  monthlyGoal: 'monthlyGoal',
+  productionPerHour: 'productionPerHour',
+  avgDailyProduction: 'avgDailyProduction',
+  providerName: 'providerName',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt',
+  clinicId: 'clinicId',
+  providerId: 'providerId',
+  dataSourceId: 'dataSourceId'
+};
+
 exports.Prisma.IdMappingScalarFieldEnum = {
   id: 'id',
   tableName: 'tableName',
@@ -442,6 +522,9 @@ exports.Prisma.ModelName = {
   Clinic: 'Clinic',
   User: 'User',
   Provider: 'Provider',
+  Location: 'Location',
+  ProviderLocation: 'ProviderLocation',
+  LocationFinancial: 'LocationFinancial',
   MetricDefinition: 'MetricDefinition',
   DataSource: 'DataSource',
   ColumnMapping: 'ColumnMapping',
@@ -459,6 +542,8 @@ exports.Prisma.ModelName = {
   GoogleCredential: 'GoogleCredential',
   SpreadsheetConnection: 'SpreadsheetConnection',
   ColumnMappingV2: 'ColumnMappingV2',
+  HygieneProduction: 'HygieneProduction',
+  DentistProduction: 'DentistProduction',
   IdMapping: 'IdMapping'
 };
 

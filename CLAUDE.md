@@ -2,116 +2,154 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
-## Common Development Commands
+## Essential Commands
 
-### Package Management (pnpm required)
+**Development:**
 ```bash
-pnpm install              # Install dependencies
-pnpm dev                  # Start development server with Turbopack
-pnpm build                # Build for production
-pnpm start                # Start production server
+pnpm dev          # Start development server with Turbopack
+pnpm build        # Build for production
+pnpm start        # Start production server
+pnpm lint         # Run Biome linter and formatter
+pnpm lint:fix     # Auto-fix linting issues
 ```
 
-### Code Quality
+**Database:**
 ```bash
-pnpm lint                 # Run Biome linter
-pnpm lint:fix             # Fix linting issues
-pnpm format               # Format code with Biome
+pnpm db:generate  # Generate Prisma client
+pnpm db:push      # Push schema changes to database
+pnpm db:migrate   # Run database migrations
+pnpm db:studio    # Open Prisma Studio
+pnpm db:seed      # Seed database with sample data
 ```
 
-### Testing
+**Testing:**
 ```bash
-pnpm test                 # Run tests once
-pnpm test:watch           # Run tests in watch mode
-pnpm test:coverage        # Run tests with coverage
+pnpm test         # Run all tests with Vitest
+pnpm test:ui      # Run tests with UI
+pnpm test:integration  # Run integration tests only
 ```
 
-### Database (Prisma + Supabase)
+**Utility:**
 ```bash
-pnpm prisma:generate      # Generate Prisma client
-pnpm prisma:push          # Push schema changes to database
-pnpm prisma:studio        # Open Prisma Studio GUI
+date              # Run `date` for date-related tasks
 ```
 
-### Task Management CLI
-```bash
-pnpm list                 # List project tasks
-pnpm generate             # Generate new tasks
-pnpm parse-prd            # Parse PRD to generate tasks
+## Architecture Overview
+
+### Tech Stack
+- **Framework:** Next.js 15 (App Router) with React 19, TypeScript 5.8
+- **Database:** Supabase (PostgreSQL) with Prisma ORM
+- **Authentication:** Supabase Auth with SSR
+- **UI:** Tailwind CSS 4, Shadcn UI, Radix primitives
+- **State:** TanStack Query, Zustand, React Hook Form + Zod
+- **Code Quality:** Biome (linting/formatting), Vitest (testing)
+
+### Multi-Tenant Architecture
+This is a **multi-tenant dental practice management system** with:
+- **Clinic-based isolation** using Row Level Security (RLS)
+- **Role-based access control:** clinic_admin, provider, staff, viewer
+- **Location-based financial tracking** for multi-location clinics
+- **UUID migration support** with dual ID system (CUID + UUID)
+
+### Key Database Models
+```
+Clinic -> User (via UserClinicRole) -> Provider -> DataSource
+Clinic -> Location -> LocationFinancial
+Provider -> HygieneProduction, DentistProduction
 ```
 
-## High-Level Architecture
+### Authentication Flow
+- **Middleware-based route protection** (`middleware.ts`) with comprehensive logging
+- **Separate Supabase clients** for browser vs server contexts
+- **API route protection** using `withAuth` middleware pattern
+- **OAuth integration** for Google Sheets access
 
-### Authentication Architecture
-The project uses a **dual authentication system**:
+## Critical Patterns
 
-1. **Supabase Auth** (Primary): Manages user sessions and application access
-   - Cookie-based sessions with SSR support
-   - Middleware protection at `/middleware.ts`
-   - Server clients created per-request for security
+### 1. Database Queries
+- **All queries in `src/lib/database/queries/`** - centralized data access
+- **Auth context required** - every query must include clinic/user authorization
+- **Zod schemas in `src/lib/database/schemas/`** for validation
+- **Generated Prisma client** located at `src/generated/prisma/` (not standard location)
 
-2. **Google OAuth** (Secondary): For accessing Google Sheets API
-   - OAuth 2.0 flow with offline access
-   - Tokens stored encrypted in `DataSource` table
-   - Per-user Google API access management
-
-### API Architecture (Next.js App Router)
+### 2. API Routes Structure
 ```
-src/app/api/
-├── auth/callback/        # Supabase OAuth callbacks
-└── google/
-    ├── auth/            # Google OAuth flow
-    │   ├── login/       # Initiate OAuth
-    │   └── callback/    # Handle OAuth response
-    └── sheets/          # Google Sheets data access
-        └── [spreadsheetId]/data/
+/api/auth/          # Authentication endpoints
+/api/clinics/       # Clinic management + statistics
+/api/metrics/       # Financial, provider, patient metrics
+/api/providers/     # Provider management + locations
+/api/export/        # CSV/PDF export functionality
 ```
 
-### Service Layer Pattern
-Business logic is separated from API routes:
-- `src/services/google/`: Google API integration services
-- `src/actions/`: Server actions for mutations
-- `src/lib/`: Core utilities and client factories
+### 3. Logging with Winston
+- **Structured logging required** - use `src/lib/utils/logger.ts`
+- **Environment-specific levels:** debug (dev), warn (production)
+- **Include metadata:** userId, clinicId, action for all operations
+- **Avoid PII in logs** - follow guidelines in `/docs/rules/agent/winston-logging-guidelines.mdc`
 
-### Data Flow
-1. **Client Request** → API Route validates auth
-2. **API Route** → Service layer for business logic
-3. **Service** → External API (Google) or Database (Prisma)
-4. **Response** → Structured JSON with proper error handling
-
-### State Management
-- **Server State**: React Query for caching and synchronization
-- **Client State**: Zustand for UI state
-- **Form State**: React Hook Form with Zod validation
-
-### Key Architectural Decisions
-1. **Separation of Concerns**: Routes handle HTTP, services handle logic
-2. **Type Safety**: Full TypeScript with Prisma-generated types
-3. **Error Boundaries**: Consistent error handling across layers
-4. **Security First**: Tokens in database, middleware protection
-5. **Performance**: Parallel operations, efficient caching
-
-### Database Schema Overview
-Core entities managed by Prisma:
-- `User`: Application users
-- `DataSource`: Google Sheets connections with OAuth tokens
-- `Clinic`, `Provider`: Business entities
-- `MetricDefinition`, `MetricValue`: KPI tracking
-- `Dashboard`, `Widget`: Visualization configuration
-
-### Testing Strategy
-- **Unit Tests**: Vitest for services and utilities
-- **Integration Tests**: API route testing with mocked dependencies
-- **Component Tests**: React Testing Library (when applicable)
-
-## Important Notes
-
-1. **Always use pnpm** - The project uses pnpm workspaces and won't work with npm/yarn
-2. **Environment Variables**: Check `.env.example` for required configs
-3. **Authentication Flow**: Always check user session before accessing protected resources
-4. **Google API Limits**: Be mindful of rate limits when fetching spreadsheet data
-5. **Type Generation**: Run `pnpm prisma:generate` after schema changes
+### 4. Error Handling
+- **Use ApiError classes** for consistent error responses
+- **Include correlation IDs** in error logs
+- **Follow error handling patterns** in existing API routes
 
 ## Development Guidelines
 
-- We cannot use npm or npx commands in this repo.. always use pnpm
+### File Organization
+- **`src/` directory structure** (not root-level components)
+- **Absolute imports with `@/`** alias
+- **Component organization:** ui/ (reusable), auth/, dashboard/, common/
+- **Generated files in `src/generated/`** - do not edit manually
+
+### Code Quality
+- **Biome configuration:** 100-char line width, 2-space indentation, strict rules
+- **TypeScript strict mode** with comprehensive type checking
+- **Server Components by default** - only use 'use client' when necessary
+- **Consistent naming:** kebab-case for files, PascalCase for components
+
+### Google Sheets Integration
+- **OAuth flow implemented** but data processing is placeholder
+- **Column mapping system** for transforming spreadsheet data
+- **Sync operations** need implementation in `/api/hygiene-production/sync/` and similar endpoints
+- **Google Apps Scripts** available in `/scripts/google-apps-script/`
+
+## Current State
+
+### Implemented Features
+- Complete Supabase SSR authentication
+- Multi-tenant database schema with RLS
+- API route infrastructure
+- Component library and dashboard layout
+- Google OAuth integration
+
+### Placeholder/Incomplete Features
+- **Google Sheets sync logic** - endpoints exist but core processing is TODO
+- **Metric calculations** - basic structure exists, specific formulas needed
+- **Dashboard data integration** - components ready but data flow incomplete
+- **Export functionality** - PDF/CSV endpoints are placeholders
+
+### Testing Strategy
+- **Unit tests** with Vitest for utilities and components
+- **Integration tests** for multi-tenant database operations
+- **API route testing** with auth context simulation
+- **Test files:** `src/tests/` and `__tests__/` directories
+
+## Security Considerations
+
+- **Row Level Security policies** enforced at database level
+- **Environment variables:** PUBLIC_ prefix for client-accessible vars
+- **API authentication** required on all protected routes
+- **Sensitive data handling** per logging guidelines
+- **Multi-tenant isolation** verified through comprehensive tests
+
+## Performance Notes
+
+- **Prisma client singleton** with global caching in development
+- **Server-side rendering** by default for better performance
+- **TanStack Query** for client-side data caching
+- **Database indexing** optimized for multi-tenant queries
+
+## Development Notes
+
+- Use the Supabase MCP to handle most tasks
+
+When working with this codebase, always consider the multi-tenant context, use the established authentication patterns, and follow the logging guidelines for maintainability.

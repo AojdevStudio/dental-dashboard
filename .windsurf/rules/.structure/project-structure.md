@@ -1,7 +1,8 @@
 ---
 trigger: always_on
+description: 
+globs: 
 ---
-
 # Project Structure Guidelines
 
 ## Target Structure
@@ -58,7 +59,7 @@ dental-analytics-dashboard/src
 │   │   │   │       └── page.tsx
 │   │   │   └── providers/
 │   │   │       ├── page.tsx
-│   │   │       └── [providerId]/
+│   │   │       └── [providerId]/ -- note that this is currently missing**
 │   │   │           └── page.tsx
 │   │   └── layout.tsx
 │   ├── api/

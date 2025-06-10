@@ -1,13 +1,9 @@
 /**
- * @fileoverview Badge Component
- *
- * This file implements a badge component for displaying short status descriptors.
- * Badges are small visual indicators typically used to highlight status, count, or categorize items.
- *
- * The implementation uses class-variance-authority (CVA) to manage style variants,
- * allowing for consistent styling across different badge types (default, secondary, destructive, outline).
- *
- * Badges are designed to be compact, visually distinct, and accessible with appropriate focus states.
+ * @file Badge Component
+ * @description This file implements a badge component used for displaying short status descriptors,
+ * counts, or category indicators. It leverages `class-variance-authority` (CVA) for managing
+ * different visual styles (variants) of the badge, such as default, secondary, destructive, and outline.
+ * The component is designed to be compact, visually distinct, and accessible, including focus states.
  */
 
 import { type VariantProps, cva } from "class-variance-authority";
@@ -16,15 +12,22 @@ import type * as React from "react";
 import { cn } from "@/lib/utils";
 
 /**
- * Style variants for the Badge component
+ * @constant badgeVariants
+ * @description Defines the style variants for the Badge component using `class-variance-authority`.
+ * This function takes variant options and returns the corresponding Tailwind CSS classes.
  *
- * Defines the base styles and variants for badges using class-variance-authority.
- * The base style includes rounded corners, small padding, and focus states for accessibility.
+ * The base style includes properties for inline display, flex alignment, rounded corners,
+ * border, padding, text size, font weight, transition effects, and focus states for accessibility.
  *
- * @type {Function}
- * @param {Object} [props] - Style variant properties
- * @param {string} [props.variant] - The badge style variant
- * @returns {string} The composed class names based on the selected variant
+ * @type {ReturnType<typeof cva>}
+ * @property {object} variants - Defines the available style variants.
+ * @property {object} variants.variant - Specifies different visual styles for the badge.
+ * @property {string} variants.variant.default - Primary style, typically using the application's primary color.
+ * @property {string} variants.variant.secondary - Secondary style, for less prominent badges.
+ * @property {string} variants.variant.destructive - Style for indicating errors or destructive actions.
+ * @property {string} variants.variant.outline - Outline style, typically with a transparent background and colored border/text.
+ * @property {object} defaultVariants - Specifies the default variant to be applied if none is provided.
+ * @property {string} defaultVariants.variant - Sets 'default' as the default badge style.
  */
 const badgeVariants = cva(
   "inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2",
@@ -46,47 +49,56 @@ const badgeVariants = cva(
 );
 
 /**
- * Props for the Badge component
+ * @interface BadgeProps
+ * @description Defines the properties for the `Badge` component.
+ * It extends standard HTML div attributes and variant props from `badgeVariants`.
  *
- * @typedef {Object} BadgeProps
- * @property {string} [variant] - The visual style variant of the badge (default, secondary, destructive, outline)
- * @property {string} [className] - Additional CSS class names to apply to the badge
- * @property {React.ReactNode} children - The content to display inside the badge
+ * @extends {React.HTMLAttributes<HTMLDivElement>} Standard HTML attributes for a div element.
+ * @extends {VariantProps<typeof badgeVariants>} Props for style variants defined by `badgeVariants`.
+ * @property {('default' | 'secondary' | 'destructive' | 'outline')} [variant] - The visual style variant of the badge.
+ *   Determines the background color, text color, and border. Defaults to 'default'.
+ * @property {string} [className] - Additional CSS class names to apply to the badge's root `div` element.
+ *   These are merged with the variant-specific classes.
+ * @property {React.ReactNode} [children] - The content to be displayed inside the badge. This can be text, icons, or other React elements.
  */
 export interface BadgeProps
   extends React.HTMLAttributes<HTMLDivElement>,
     VariantProps<typeof badgeVariants> {}
 
 /**
- * Badge component for displaying status, count, or category indicators
+ * @component Badge
+ * @description A component for displaying status indicators, counts, or category labels.
+ * Badges are small, visually distinct elements typically used in UI elements like navigation items,
+ * notification icons, or within tables and lists to highlight specific information.
+ * The appearance of the badge can be customized using the `variant` prop.
  *
- * Badges are small, visually distinct elements used to draw attention to a status,
- * count, or category. They're typically used in navigation, notifications, and to highlight
- * statuses in tables or lists.
- *
- * @component
- * @param {BadgeProps} props - The component props
- * @param {string} [props.variant="default"] - The visual style variant of the badge
- * @param {string} [props.className] - Additional CSS class names
- * @param {React.ReactNode} props.children - The content to display inside the badge
- * @returns {JSX.Element} The badge element
+ * @param {BadgeProps} props - The properties for the Badge component.
+ * @param {string} [props.className] - Additional CSS class names to be applied to the badge.
+ * @param {('default' | 'secondary' | 'destructive' | 'outline')} [props.variant='default'] - The visual style variant of the badge.
+ * @param {React.ReactNode} [props.children] - The content to display inside the badge.
+ * @param {React.HTMLAttributes<HTMLDivElement>} [props....rest] - Any other standard HTML div attributes.
+ * @returns {JSX.Element} The rendered badge element as a `div`.
  *
  * @example
- * // Default badge
+ * // Default badge displaying 'New'
  * <Badge>New</Badge>
  *
  * @example
- * // Destructive badge
+ * // Destructive badge displaying 'Removed'
  * <Badge variant="destructive">Removed</Badge>
+ *
+ * @example
+ * // Outline badge with custom class
+ * <Badge variant="outline" className="text-blue-500 border-blue-500">Info</Badge>
  */
 function Badge({ className, variant, ...props }: BadgeProps) {
   return <div className={cn(badgeVariants({ variant }), className)} {...props} />;
 }
 
 /**
- * Export the Badge component and its style variants
- *
- * badgeVariants is exported to allow for consistent styling in custom implementations
- * or when badge styles need to be applied to other elements.
+ * @module badge
+ * @description Exports the `Badge` component and its associated `badgeVariants` function.
+ * The `badgeVariants` function is exported to allow consumers to apply consistent badge styling
+ * to other elements or to create custom components that adhere to the same visual language.
  */
 export { Badge, badgeVariants };

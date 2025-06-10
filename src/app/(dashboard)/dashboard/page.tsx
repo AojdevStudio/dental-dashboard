@@ -10,8 +10,14 @@
  * user experience by showing a loading state that matches the final UI structure.
  */
 
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
+import { DashboardSkeleton } from "@/components/ui/skeleton-loaders";
+import type { Prisma } from "@/generated/prisma";
+import { type AuthContext, getAuthContext } from "@/lib/database/auth-context";
+import { prisma } from "@/lib/database/prisma";
 import { Suspense } from "react";
+import DashboardClient from "./dashboard-client";
 
 /**
  * Dashboard Page Component
@@ -21,65 +27,235 @@ import { Suspense } from "react";
  *
  * @returns {JSX.Element} The rendered dashboard page with data visualization components
  */
-export default function DashboardPage() {
+export default async function DashboardPage() {
+  let authContext: AuthContext | null;
+
+  try {
+    authContext = await getAuthContext();
+  } catch (error) {
+    return (
+      <Card className="max-w-md mx-auto mt-8">
+        <CardHeader>
+          <CardTitle>Authentication Error</CardTitle>
+          <CardDescription>
+            An error occurred while verifying your authentication. Please try again.
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <p className="text-sm text-muted-foreground">
+            {error instanceof Error ? error.message : "Unknown authentication error"}
+          </p>
+          <div className="flex gap-2">
+            <a href="/login" className="text-primary hover:underline">
+              Return to Login
+            </a>
+            <span className="text-muted-foreground">•</span>
+            <a href="/dashboard" className="text-primary hover:underline">
+              Retry
+            </a>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  if (!authContext) {
+    return (
+      <Card className="max-w-md mx-auto mt-8">
+        <CardHeader>
+          <CardTitle>Authentication Required</CardTitle>
+          <CardDescription>Please log in to access the dashboard.</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <a href="/login" className="text-primary hover:underline">
+            Return to Login
+          </a>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  // Get the current clinic information
+  let currentClinic = null;
+  if (authContext.selectedClinicId && authContext.selectedClinicId !== "all") {
+    try {
+      currentClinic = await prisma.clinic.findUnique({
+        where: { id: authContext.selectedClinicId },
+        select: {
+          id: true,
+          name: true,
+          location: true,
+          _count: {
+            select: {
+              users: true,
+              providers: true,
+              metrics: true,
+            },
+          },
+        },
+      });
+    } catch (error) {
+      console.error("Error fetching clinic data:", error);
+      // Continue with currentClinic as null - the UI will handle the fallback
+      // This ensures the app remains stable even if the clinic query fails
+    }
+  }
+
   return (
     <div className="w-full space-y-6">
       <Suspense fallback={<DashboardSkeleton />}>
-        <DashboardPlaceholder />
+        <DashboardContent authContext={authContext} clinic={currentClinic} />
       </Suspense>
     </div>
   );
 }
 
+// Type for clinic with counts
+type ClinicWithCounts = Prisma.ClinicGetPayload<{
+  select: {
+    id: true;
+    name: true;
+    location: true;
+    _count: {
+      select: {
+        users: true;
+        providers: true;
+        metrics: true;
+      };
+    };
+  };
+}>;
+
 /**
- * Dashboard Placeholder Component
+ * Dashboard Content Component
  *
- * Temporary placeholder for the dashboard content while components are being implemented.
+ * Displays the main dashboard content with clinic-specific information.
  *
- * @returns {JSX.Element} The rendered placeholder dashboard
+ * @returns {JSX.Element} The rendered dashboard content
  */
-function DashboardPlaceholder() {
+async function DashboardContent({
+  authContext,
+  clinic,
+}: {
+  authContext: AuthContext;
+  clinic: ClinicWithCounts | null;
+}) {
+  // Prepare initial data for client component
+  const initialData = {
+    clinic,
+    isSystemAdmin: authContext.isSystemAdmin ?? false,
+    selectedClinicId: authContext.selectedClinicId ?? "all",
+    userId: authContext.userId,
+  };
+
   return (
     <div className="w-full space-y-6">
-      <h1 className="text-3xl font-bold">Dashboard</h1>
-      <p className="text-muted-foreground">Dashboard components will be implemented here.</p>
+      <div>
+        <h1 className="text-3xl font-bold">Dashboard</h1>
+        <p className="text-muted-foreground mt-2">
+          {authContext.isSystemAdmin && authContext.selectedClinicId === "all"
+            ? "Viewing all clinics"
+            : clinic
+              ? `${clinic.name} - ${clinic.location}`
+              : "Select a clinic to view metrics"}
+        </p>
+      </div>
+
+      {/* Main Dashboard Content */}
+      {clinic ? (
+        <DashboardClient initialData={initialData} />
+      ) : authContext.isSystemAdmin && authContext.selectedClinicId === "all" ? (
+        <div className="space-y-4">
+          <h2 className="text-xl font-semibold">All Clinics Overview</h2>
+          <AllClinicsOverview />
+        </div>
+      ) : (
+        <Card>
+          <CardHeader>
+            <CardTitle>No Clinic Selected</CardTitle>
+            <CardDescription>
+              Please select a clinic from the dropdown above to view metrics and data.
+            </CardDescription>
+          </CardHeader>
+        </Card>
+      )}
     </div>
   );
 }
 
 /**
- * Dashboard Skeleton Component
+ * All Clinics Overview Component
  *
- * Provides a loading placeholder UI that mimics the structure of the actual dashboard.
- * This component is shown while the dashboard data is being fetched, giving users
- * visual feedback about the loading state without jarring layout shifts when data arrives.
+ * Shows a summary of all clinics for system administrators.
  *
- * The skeleton includes placeholders for:
- * - Dashboard title
- * - Summary metrics panel
- * - Main chart or visualization
- * - Grid of metric cards
- *
- * @returns {JSX.Element} The rendered skeleton UI for the dashboard
+ * @returns {JSX.Element} The rendered all clinics overview
  */
-function DashboardSkeleton() {
+async function AllClinicsOverview() {
+  let clinics: ClinicWithCounts[];
+
+  try {
+    clinics = await prisma.clinic.findMany({
+      where: { status: "active" },
+      select: {
+        id: true,
+        name: true,
+        location: true,
+        _count: {
+          select: {
+            users: true,
+            providers: true,
+            metrics: true,
+          },
+        },
+      },
+      orderBy: { name: "asc" },
+    });
+  } catch (error) {
+    console.error("Error fetching clinics data:", error);
+    // Return error state when clinic data cannot be fetched
+    return (
+      <Card className="max-w-md mx-auto">
+        <CardHeader>
+          <CardTitle>Data Loading Error</CardTitle>
+          <CardDescription>
+            Unable to load clinics data. Please try refreshing the page.
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <p className="text-sm text-muted-foreground">
+            {error instanceof Error ? error.message : "Unknown database error"}
+          </p>
+        </CardContent>
+      </Card>
+    );
+  }
+
   return (
-    <div className="w-full space-y-6">
-      {/* Title placeholder */}
-      <Skeleton className="h-8 w-64" />
-
-      {/* Summary metrics placeholder */}
-      <Skeleton className="h-[120px] w-full" />
-
-      {/* Main chart placeholder */}
-      <Skeleton className="h-[200px] w-full" />
-
-      {/* Metric cards grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        <Skeleton className="h-[180px] w-full" />
-        <Skeleton className="h-[180px] w-full" />
-        <Skeleton className="h-[180px] w-full" />
-      </div>
+    <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+      {clinics.map((clinic) => (
+        <Card key={clinic.id}>
+          <CardHeader>
+            <CardTitle className="text-lg">{clinic.name}</CardTitle>
+            <CardDescription>{clinic.location}</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-2 text-sm">
+              <div className="flex justify-between">
+                <span className="text-muted-foreground">Users:</span>
+                <span className="font-medium">{clinic._count.users}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-muted-foreground">Providers:</span>
+                <span className="font-medium">{clinic._count.providers}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-muted-foreground">Metrics:</span>
+                <span className="font-medium">{clinic._count.metrics}</span>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      ))}
     </div>
   );
 }

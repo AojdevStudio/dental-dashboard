@@ -1,3 +1,10 @@
+/**
+ * @file Dropdown Menu Components
+ * @description This file defines a suite of accessible and customizable dropdown menu components.
+ * It is built upon `@radix-ui/react-dropdown-menu` primitives, providing styled versions
+ * for consistent use within the application. Components are client-side rendered.
+ * Includes handling for pointer events to improve focus management.
+ */
 "use client";
 
 import * as DropdownMenuPrimitive from "@radix-ui/react-dropdown-menu";
@@ -6,25 +13,84 @@ import * as React from "react";
 import { cn } from "@/lib/utils";
 import { CheckIcon, ChevronRightIcon, DotFilledIcon } from "@radix-ui/react-icons";
 
+/**
+ * @typedef {Parameters<NonNullable<DropdownMenuPrimitive.DropdownMenuContentProps["onPointerDown"]>>[0]} PointerDownEvent
+ * @description Type definition for the event object passed to `onPointerDown` handlers
+ * within the DropdownMenuContent component. Derived from Radix UI's internal types.
+ */
 type PointerDownEvent = Parameters<
   NonNullable<DropdownMenuPrimitive.DropdownMenuContentProps["onPointerDown"]>
 >[0];
+/**
+ * @typedef {Parameters<NonNullable<DropdownMenuPrimitive.DropdownMenuContentProps["onPointerDownOutside"]>>[0]} PointerDownOutsideEvent
+ * @description Type definition for the event object passed to `onPointerDownOutside` handlers
+ * within the DropdownMenuContent component. Derived from Radix UI's internal types.
+ */
 type PointerDownOutsideEvent = Parameters<
   NonNullable<DropdownMenuPrimitive.DropdownMenuContentProps["onPointerDownOutside"]>
 >[0];
 
+/**
+ * @component DropdownMenu
+ * @description The root component for a dropdown menu. Manages the open/closed state.
+ * Alias for `DropdownMenuPrimitive.Root`.
+ * @see https://www.radix-ui.com/primitives/docs/components/dropdown-menu#root
+ */
 const DropdownMenu = DropdownMenuPrimitive.Root;
 
+/**
+ * @component DropdownMenuTrigger
+ * @description A button that toggles the dropdown menu's open/closed state.
+ * Alias for `DropdownMenuPrimitive.Trigger`.
+ * @see https://www.radix-ui.com/primitives/docs/components/dropdown-menu#trigger
+ */
 const DropdownMenuTrigger = DropdownMenuPrimitive.Trigger;
 
+/**
+ * @component DropdownMenuGroup
+ * @description Used to group related `DropdownMenuItem`s.
+ * Alias for `DropdownMenuPrimitive.Group`.
+ * @see https://www.radix-ui.com/primitives/docs/components/dropdown-menu#group
+ */
 const DropdownMenuGroup = DropdownMenuPrimitive.Group;
 
+/**
+ * @component DropdownMenuPortal
+ * @description Portals its children into the body when the dropdown menu is open.
+ * Alias for `DropdownMenuPrimitive.Portal`.
+ * @see https://www.radix-ui.com/primitives/docs/components/dropdown-menu#portal
+ */
 const DropdownMenuPortal = DropdownMenuPrimitive.Portal;
 
+/**
+ * @component DropdownMenuSub
+ * @description Contains components for a submenu.
+ * Alias for `DropdownMenuPrimitive.Sub`.
+ * @see https://www.radix-ui.com/primitives/docs/components/dropdown-menu#sub
+ */
 const DropdownMenuSub = DropdownMenuPrimitive.Sub;
 
+/**
+ * @component DropdownMenuRadioGroup
+ * @description Used to group `DropdownMenuRadioItem`s, managing their checked state.
+ * Alias for `DropdownMenuPrimitive.RadioGroup`.
+ * @see https://www.radix-ui.com/primitives/docs/components/dropdown-menu#radiogroup
+ */
 const DropdownMenuRadioGroup = DropdownMenuPrimitive.RadioGroup;
 
+/**
+ * @component DropdownMenuSubTrigger
+ * @description A button that opens a submenu.
+ * Forwards its ref to `DropdownMenuPrimitive.SubTrigger`.
+ *
+ * @param {object} props - Props for DropdownMenuSubTrigger.
+ * @param {string} [props.className] - Additional CSS classes.
+ * @param {boolean} [props.inset] - Whether the item should be inset (indented).
+ * @param {React.ReactNode} props.children - The content of the sub-trigger.
+ * @param {React.Ref<React.ElementRef<typeof DropdownMenuPrimitive.SubTrigger>>} ref - Forwarded ref.
+ * @returns {JSX.Element} The rendered DropdownMenuSubTrigger component.
+ * @see https://www.radix-ui.com/primitives/docs/components/dropdown-menu#subtrigger
+ */
 const DropdownMenuSubTrigger = React.forwardRef<
   React.ElementRef<typeof DropdownMenuPrimitive.SubTrigger>,
   React.ComponentPropsWithoutRef<typeof DropdownMenuPrimitive.SubTrigger> & {
@@ -46,6 +112,17 @@ const DropdownMenuSubTrigger = React.forwardRef<
 ));
 DropdownMenuSubTrigger.displayName = DropdownMenuPrimitive.SubTrigger.displayName;
 
+/**
+ * @component DropdownMenuSubContent
+ * @description The content of a submenu, displayed when `DropdownMenuSubTrigger` is activated.
+ * Forwards its ref to `DropdownMenuPrimitive.SubContent`.
+ *
+ * @param {object} props - Props for DropdownMenuSubContent.
+ * @param {string} [props.className] - Additional CSS classes.
+ * @param {React.Ref<React.ElementRef<typeof DropdownMenuPrimitive.SubContent>>} ref - Forwarded ref.
+ * @returns {JSX.Element} The rendered DropdownMenuSubContent component.
+ * @see https://www.radix-ui.com/primitives/docs/components/dropdown-menu#subcontent
+ */
 const DropdownMenuSubContent = React.forwardRef<
   React.ElementRef<typeof DropdownMenuPrimitive.SubContent>,
   React.ComponentPropsWithoutRef<typeof DropdownMenuPrimitive.SubContent>
@@ -61,6 +138,22 @@ const DropdownMenuSubContent = React.forwardRef<
 ));
 DropdownMenuSubContent.displayName = DropdownMenuPrimitive.SubContent.displayName;
 
+/**
+ * @component DropdownMenuContent
+ * @description The main content container for the dropdown menu, displayed when `DropdownMenuTrigger` is activated.
+ * It includes custom logic to handle pointer down events for better focus management on close.
+ * Forwards its ref to `DropdownMenuPrimitive.Content`.
+ *
+ * @param {object} props - Props for DropdownMenuContent.
+ * @param {string} [props.className] - Additional CSS classes.
+ * @param {number} [props.sideOffset=4] - The offset from the trigger along the side.
+ * @param {function(PointerDownEvent): void} [props.onPointerDown] - Event handler for pointer down events.
+ * @param {function(PointerDownOutsideEvent): void} [props.onPointerDownOutside] - Event handler for pointer down outside events.
+ * @param {function(Event): void} [props.onCloseAutoFocus] - Event handler for auto-focus on close.
+ * @param {React.Ref<React.ElementRef<typeof DropdownMenuPrimitive.Content>>} ref - Forwarded ref.
+ * @returns {JSX.Element} The rendered DropdownMenuContent component.
+ * @see https://www.radix-ui.com/primitives/docs/components/dropdown-menu#content
+ */
 const DropdownMenuContent = React.forwardRef<
   React.ElementRef<typeof DropdownMenuPrimitive.Content>,
   React.ComponentPropsWithoutRef<typeof DropdownMenuPrimitive.Content>
@@ -123,6 +216,18 @@ const DropdownMenuContent = React.forwardRef<
 );
 DropdownMenuContent.displayName = DropdownMenuPrimitive.Content.displayName;
 
+/**
+ * @component DropdownMenuItem
+ * @description An individual item within a dropdown menu.
+ * Forwards its ref to `DropdownMenuPrimitive.Item`.
+ *
+ * @param {object} props - Props for DropdownMenuItem.
+ * @param {string} [props.className] - Additional CSS classes.
+ * @param {boolean} [props.inset] - Whether the item should be inset (indented).
+ * @param {React.Ref<React.ElementRef<typeof DropdownMenuPrimitive.Item>>} ref - Forwarded ref.
+ * @returns {JSX.Element} The rendered DropdownMenuItem component.
+ * @see https://www.radix-ui.com/primitives/docs/components/dropdown-menu#item
+ */
 const DropdownMenuItem = React.forwardRef<
   React.ElementRef<typeof DropdownMenuPrimitive.Item>,
   React.ComponentPropsWithoutRef<typeof DropdownMenuPrimitive.Item> & {
@@ -141,6 +246,19 @@ const DropdownMenuItem = React.forwardRef<
 ));
 DropdownMenuItem.displayName = DropdownMenuPrimitive.Item.displayName;
 
+/**
+ * @component DropdownMenuCheckboxItem
+ * @description A dropdown menu item that can be checked or unchecked.
+ * Forwards its ref to `DropdownMenuPrimitive.CheckboxItem`.
+ *
+ * @param {object} props - Props for DropdownMenuCheckboxItem.
+ * @param {string} [props.className] - Additional CSS classes.
+ * @param {React.ReactNode} props.children - The content of the checkbox item.
+ * @param {boolean | 'indeterminate'} [props.checked] - The checked state of the item.
+ * @param {React.Ref<React.ElementRef<typeof DropdownMenuPrimitive.CheckboxItem>>} ref - Forwarded ref.
+ * @returns {JSX.Element} The rendered DropdownMenuCheckboxItem component.
+ * @see https://www.radix-ui.com/primitives/docs/components/dropdown-menu#checkboxitem
+ */
 const DropdownMenuCheckboxItem = React.forwardRef<
   React.ElementRef<typeof DropdownMenuPrimitive.CheckboxItem>,
   React.ComponentPropsWithoutRef<typeof DropdownMenuPrimitive.CheckboxItem>
@@ -164,6 +282,18 @@ const DropdownMenuCheckboxItem = React.forwardRef<
 ));
 DropdownMenuCheckboxItem.displayName = DropdownMenuPrimitive.CheckboxItem.displayName;
 
+/**
+ * @component DropdownMenuRadioItem
+ * @description A dropdown menu item that functions as a radio button, part of a `DropdownMenuRadioGroup`.
+ * Forwards its ref to `DropdownMenuPrimitive.RadioItem`.
+ *
+ * @param {object} props - Props for DropdownMenuRadioItem.
+ * @param {string} [props.className] - Additional CSS classes.
+ * @param {React.ReactNode} props.children - The content of the radio item.
+ * @param {React.Ref<React.ElementRef<typeof DropdownMenuPrimitive.RadioItem>>} ref - Forwarded ref.
+ * @returns {JSX.Element} The rendered DropdownMenuRadioItem component.
+ * @see https://www.radix-ui.com/primitives/docs/components/dropdown-menu#radioitem
+ */
 const DropdownMenuRadioItem = React.forwardRef<
   React.ElementRef<typeof DropdownMenuPrimitive.RadioItem>,
   React.ComponentPropsWithoutRef<typeof DropdownMenuPrimitive.RadioItem>
@@ -186,6 +316,18 @@ const DropdownMenuRadioItem = React.forwardRef<
 ));
 DropdownMenuRadioItem.displayName = DropdownMenuPrimitive.RadioItem.displayName;
 
+/**
+ * @component DropdownMenuLabel
+ * @description A non-interactive label used to title a group of items or provide context.
+ * Forwards its ref to `DropdownMenuPrimitive.Label`.
+ *
+ * @param {object} props - Props for DropdownMenuLabel.
+ * @param {string} [props.className] - Additional CSS classes.
+ * @param {boolean} [props.inset] - Whether the label should be inset (indented).
+ * @param {React.Ref<React.ElementRef<typeof DropdownMenuPrimitive.Label>>} ref - Forwarded ref.
+ * @returns {JSX.Element} The rendered DropdownMenuLabel component.
+ * @see https://www.radix-ui.com/primitives/docs/components/dropdown-menu#label
+ */
 const DropdownMenuLabel = React.forwardRef<
   React.ElementRef<typeof DropdownMenuPrimitive.Label>,
   React.ComponentPropsWithoutRef<typeof DropdownMenuPrimitive.Label> & {
@@ -204,6 +346,17 @@ const DropdownMenuLabel = React.forwardRef<
 ));
 DropdownMenuLabel.displayName = DropdownMenuPrimitive.Label.displayName;
 
+/**
+ * @component DropdownMenuSeparator
+ * @description A visual separator used between items or groups in a dropdown menu.
+ * Forwards its ref to `DropdownMenuPrimitive.Separator`.
+ *
+ * @param {object} props - Props for DropdownMenuSeparator.
+ * @param {string} [props.className] - Additional CSS classes.
+ * @param {React.Ref<React.ElementRef<typeof DropdownMenuPrimitive.Separator>>} ref - Forwarded ref.
+ * @returns {JSX.Element} The rendered DropdownMenuSeparator component.
+ * @see https://www.radix-ui.com/primitives/docs/components/dropdown-menu#separator
+ */
 const DropdownMenuSeparator = React.forwardRef<
   React.ElementRef<typeof DropdownMenuPrimitive.Separator>,
   React.ComponentPropsWithoutRef<typeof DropdownMenuPrimitive.Separator>
@@ -216,6 +369,15 @@ const DropdownMenuSeparator = React.forwardRef<
 ));
 DropdownMenuSeparator.displayName = DropdownMenuPrimitive.Separator.displayName;
 
+/**
+ * @component DropdownMenuShortcut
+ * @description A component to display keyboard shortcuts associated with a `DropdownMenuItem`.
+ * Typically aligned to the right of the item text.
+ *
+ * @param {object} props - Props for DropdownMenuShortcut, extending `React.HTMLAttributes<HTMLSpanElement>`.
+ * @param {string} [props.className] - Additional CSS classes.
+ * @returns {JSX.Element} The rendered DropdownMenuShortcut component.
+ */
 const DropdownMenuShortcut = ({ className, ...props }: React.HTMLAttributes<HTMLSpanElement>) => {
   return (
     <span

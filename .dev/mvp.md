@@ -1,28 +1,28 @@
 ## Launch Features (MVP)
 
 ### Google Sheets Integration Core
-**Secure OAuth connection to Google Sheets with basic data extraction and standardized metric mapping for essential dental practice KPIs.**
+**Simplified data synchronization using Google Apps Script to directly populate the Supabase database with standardized dental practice KPIs.**
 
-* OAuth 2.0 authentication flow with Google Sheets API (free tier limits)
-* Spreadsheet discovery and selection interface
-* Pre-defined column mapping templates for common dental practice spreadsheet formats
-* Automated data extraction with basic transformation rules via Supabase Edge Functions
-* Manual data sync with simple status indicators and Winston logging for error tracking
+* Google Apps Script deployed to practice spreadsheets for automated data processing
+* Scheduled cron jobs within Google Sheets to extract and transform data
+* Direct upserts to Supabase database via REST API with service key authentication
+* Pre-built Google Apps Script templates for common dental practice spreadsheet formats
+* Simple sync status monitoring and Winston logging for error tracking in the Next.js app
 
 #### Tech Involved
-* Google Sheets API v4 with OAuth 2.0 (default rate limits)
-* Supabase Auth for session management
-* Next.js API routes for Google integration
-* Supabase Edge Functions for data processing
-* Prisma for data source configuration storage
-* Winston for structured logging
+* Google Apps Script with built-in cron scheduling (Google Workspace limits)
+* Supabase REST API with service key authentication for direct database access
+* Next.js API routes for sync status monitoring and configuration
+* Prisma for data source status tracking and validation
+* Winston for structured logging of sync operations and errors
 
 #### Main Requirements
-* Secure credential storage in Supabase
-* Error handling with Winston logging for API failures and connection issues
-* Data validation using Zod schemas for extracted spreadsheet data
-* Support for multiple spreadsheets per clinic
-* Retry logic with exponential backoff for API rate limits
+* Secure Supabase service key management in Google Apps Script
+* Error handling and retry logic within Google Apps Script for API failures
+* Data validation using built-in Google Apps Script functions and Supabase database constraints
+* Support for multiple spreadsheets per clinic with unique script deployments
+* Sync status dashboard in Next.js app to monitor Google Apps Script operations
+* Template scripts for easy deployment to different practice spreadsheet formats
 
 ### Essential KPI Dashboard
 **Fixed dashboard layouts displaying core dental practice metrics with basic filtering and time period selection, optimized for up to 50 concurrent users.**

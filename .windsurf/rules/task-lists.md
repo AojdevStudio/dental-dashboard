@@ -3,14 +3,13 @@ trigger: model_decision
 description: This rule explains how to create and manage task lists to track project progress.
 globs: *
 ---
-
 # Task List Management
 
 Guidelines for creating and managing task lists in Markdown files to track project progress
 
 ## Task List Creation
 
-1. Create task lists in a markdown file (in the project root):
+1. Create task lists in a markdown file (in the /.ai directory):
    - Use `TASKS.md` or a descriptive name relevant to the feature (e.g., `ASSISTANT_CHAT.md`)
    - Include a clear title and description of the feature being implemented
 

@@ -10,11 +10,11 @@
  * with a specific data source in the application.
  */
 
-import { generateAuthUrl } from "@/services/google/auth"
-import { type NextRequest, NextResponse } from "next/server"
-import { withAuth } from '@/lib/api/middleware'
-import { ApiError, ApiResponse } from '@/lib/api/utils'
-import * as googleSheetsQueries from '@/lib/database/queries/google-sheets'
+import { withAuth } from "@/lib/api/middleware";
+import { ApiError, ApiResponse } from "@/lib/api/utils";
+import * as googleSheetsQueries from "@/lib/database/queries/google-sheets";
+import { generateAuthUrl } from "@/services/google/auth";
+import { type NextRequest, NextResponse } from "next/server";
 
 /**
  * Handles GET requests to initiate Google OAuth authentication.
@@ -36,38 +36,38 @@ import * as googleSheetsQueries from '@/lib/database/queries/google-sheets'
  *   - 403: Forbidden if user doesn't have access
  *   - 500: Server error if environment is misconfigured or URL generation fails
  */
-export const GET = withAuth(async (request, { authContext }) => {
-  const { searchParams } = new URL(request.url)
-  const dataSourceId = searchParams.get("dataSourceId")
+export const GET = withAuth(
+  async (request, { authContext }) => {
+    const { searchParams } = new URL(request.url);
+    const dataSourceId = searchParams.get("dataSourceId");
 
-  if (!dataSourceId) {
-    throw new ApiError("dataSourceId is required", 400)
+    if (!dataSourceId) {
+      throw new ApiError("dataSourceId is required", 400);
+    }
+
+    // Verify the data source exists and user has access
+    const dataSource = await googleSheetsQueries.getDataSourceById(authContext, dataSourceId);
+
+    if (!dataSource) {
+      throw new ApiError("Data source not found", 404);
+    }
+
+    const googleRedirectUri = process.env.GOOGLE_REDIRECT_URI;
+    if (!googleRedirectUri) {
+      console.error("GOOGLE_REDIRECT_URI is not set in environment variables.");
+      throw new ApiError("Server configuration error", 500);
+    }
+
+    try {
+      // Generate auth URL with dataSourceId in state
+      const authorizationUrl = generateAuthUrl(dataSourceId);
+      return NextResponse.redirect(authorizationUrl);
+    } catch (error) {
+      console.error("Failed to generate Google authorization URL:", error);
+      throw new ApiError("Failed to initiate Google authentication", 500);
+    }
+  },
+  {
+    requireClinicAdmin: true, // Only clinic admins can manage Google auth
   }
-
-  // Verify the data source exists and user has access
-  const dataSource = await googleSheetsQueries.getDataSourceById(
-    authContext,
-    dataSourceId
-  )
-
-  if (!dataSource) {
-    throw new ApiError("Data source not found", 404)
-  }
-
-  const googleRedirectUri = process.env.GOOGLE_REDIRECT_URI
-  if (!googleRedirectUri) {
-    console.error("GOOGLE_REDIRECT_URI is not set in environment variables.")
-    throw new ApiError("Server configuration error", 500)
-  }
-
-  try {
-    // Generate auth URL with dataSourceId in state
-    const authorizationUrl = generateAuthUrl(dataSourceId)
-    return NextResponse.redirect(authorizationUrl)
-  } catch (error) {
-    console.error("Failed to generate Google authorization URL:", error)
-    throw new ApiError("Failed to initiate Google authentication", 500)
-  }
-}, {
-  requireClinicAdmin: true, // Only clinic admins can manage Google auth
-})
+);

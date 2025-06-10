@@ -1,103 +1,350 @@
 # System Patterns: Dental Practice Analytics Dashboard
-*Version: 1.0*
+*Version: 1.2*
 *Created: 2025-05-17*
-*Last Updated: {{Current Date}}*
+*Last Updated: 2025-06-03*
 
-## Architecture Overview
-The Dental Practice Analytics Dashboard (MVP) adopts a layered architecture. It leverages Next.js (App Router) for frontend and API Routes. **Supabase Edge Functions will be the primary location for complex calculations, data transformations, and business logic, augmented by Next.js API Routes where appropriate.** Supabase (PostgreSQL) serves as the database with Prisma as the ORM. The system is designed for modularity across its Data Layer, Business Logic Layer (primarily in Edge Functions), API Layer, and Presentation Layer. State management uses React Query (TanStack Query) for server state and Zustand for minimal global UI state.
+## Core System Architecture
 
-## Key Components
+### **Enhanced Dashboard Architecture (Updated 2025-06-03)**
 
-### 1. Data Layer
-- **Responsibilities:** Database schema management (Prisma as per `.dev/database-schema-design.md` and `.dev/database-schema-metrics.md`), data access (Repositories), Google Sheets API integration for data extraction (OAuth, discovery, pre-defined mapping templates as per `.dev/feature-spec.md`), MVP-scoped data transformation (Edge Functions), and caching.
-- **Key Sub-Components:**
-    - `Prisma Models & Migrations`: Defines and evolves the database schema according to MVP specifications.
-    - `Repositories`: Abstract data access logic (e.g., `ClinicRepository`, `MetricRepository`).
-    - `Google Sheets Connector Services`: Handles authentication, discovery, and data extraction from Google Sheets (MVP scope: basic extraction, pre-defined templates).
-    - `Data Transformation Services (Primarily Supabase Edge Functions)`: Cleans, standardizes, and prepares raw data for storage and use, focusing on MVP KPis.
-    - `Caching Mechanisms`: (To be implemented, e.g., React Query for client-side, potential for server-side caching with Edge Functions).
+The dashboard system now implements a comprehensive layout pattern with optimized performance and user experience:
 
-### 2. Business Logic Layer (Primarily Supabase Edge Functions)
-- **Responsibilities:** Implementing MVP-scoped business rules and calculations (e.g., for essential KPIs), authorization (RLS via Supabase), metric computation and aggregation for fixed dashboards, basic goal tracking logic, and data validation (Zod).
-- **Key Sub-Components:**
-    - `Supabase Edge Functions`: Grouped by domain (e.g., financial calculations, patient metric aggregation, Google Sheets sync processing, basic goal calculations). These functions will house the majority of complex business logic for the MVP.
-    - `Next.js API Routes/Services (Minimal for MVP)`: May contain simpler business logic or act as a pass-through to Edge Functions if needed.
-    - `Validation Libraries/Utilities (Zod)`: For validating input data and business rules within Edge Functions or API Routes.
-    - `Authorization Logic (Supabase RLS)`: Primary mechanism for data isolation and access control.
-    - `Calculation Engines (within Edge Functions)`: For MVP-specific metrics and KPI computations.
+#### **Layout Structure**
+```
+┌─────────────────────────────────────────────────────┐
+│ Top Navigation Bar (Fixed)                         │
+│ [Logo] [Breadcrumb] [Search] [Notifications] [User]│
+├─────────────────────┬───────────────────────────────┤
+│ Collapsible Sidebar │ Main Content Area             │
+│                     │                               │
+│ [Navigation Items]  │ [Page Content]                │
+│ [Role-based Menu]   │ [Widgets/Forms/Tables]        │
+│ [Collapse Toggle]   │ [Loading States]              │
+│                     │                               │
+│ [User Profile]      │                               │
+│ [Settings]          │                               │
+└─────────────────────┴───────────────────────────────┘
+```
 
-### 3. API Layer
-- **Responsibilities:** Exposing consistent RESTful endpoints (via Next.js API Routes) that often trigger Supabase Edge Functions for data fetching and processing, request validation, response formatting, error handling, and security. **No Server Actions for data mutation in MVP as it's read-only.**
-- **Key Sub-Components:**
-    - `Next.js API Routes` (e.g., `src/app/api/[domain]/route.ts`): For data fetching operations initiated by the client, often acting as an interface to Supabase Edge Functions.
-    - `Middleware`: For common concerns like authentication (Supabase Auth), logging, and error handling.
+#### **Performance Pattern**
+- **React Query Integration**: Aggressive caching with 24-42ms subsequent load times
+- **API Response Caching**: Appropriate headers for optimized data retrieval
+- **Skeleton Loading**: Improved perceived performance during data fetching
+- **Optimistic Updates**: Better user experience with background synchronization
 
-### 4. Presentation Layer (UI)
-- **Responsibilities:** User interface rendering (Next.js React Server Components and Client Components), data visualization for **fixed dashboards** (Recharts), user interaction handling, layout, and responsive design (Tailwind CSS, shadcn/ui).
-- **Key Sub-Components:**
-    - `Next.js Pages/Views`: Located in `src/app/`, structured using the App Router conventions, adhering to the file structure in `.dev/file-system.md`.
-    - `Reusable UI Components`: Located in `src/components/`, built with shadcn/ui and Tailwind CSS, styled according to `.dev/design-brief.md`.
-    - `Chart Components`: Specific Recharts implementations in `src/components/charts/` for MVP KPIs.
-    - `Layout Components`: In `src/components/layout/` for consistent page structure (fixed layouts for MVP).
-    - `Forms`: **Out of scope for MVP.**
-    - `Navigation Structure`: The dashboard employs a sidebar navigation pattern (`src/components/ui/sidebar.tsx`) that organizes access to key areas as per PRD/MVP focus:
-        - **Dashboard Section**: Overview (main dashboard with MVP KPI summary), Clinics (basic clinic views), Providers (basic provider views).
-        - **Metrics Section**: Financial, Patients, Appointments, Call Tracking (displaying MVP-defined core metrics).
-        - **Data & Reports Section**: Google Sheets (connection and status), Goals (basic MVP goal display).
-        - **Administration**: Settings, User Profile.
+#### **Navigation State Management**
+- Persistent sidebar state across sessions using local storage
+- Type-safe navigation components with proper TypeScript definitions
+- Dynamic navigation based on user roles and clinic permissions
+- Responsive design for mobile, tablet, and desktop experiences
 
-### 5. State Management
-- **Responsibilities:** Managing UI state, handling server data caching and synchronization (via React Query).
-- **Key Sub-Components:**
-    - `React Query (TanStack Query)`: For managing server state, caching, and data fetching operations.
-    - `Zustand`: For managing minimal global or complex local UI state, if necessary.
+### **Multi-Tenant Data Architecture**
 
-## Design Patterns
-- **Repository Pattern:** To abstract data access logic.
-- **Service Layer Pattern (Primarily within Edge Functions):** To encapsulate business logic.
-- **Adapter Pattern:** For Google Sheets API integration.
-- **Layered Architecture:** As described.
-- **Server Components & Client Components (Next.js):** To optimize rendering.
+The system implements a comprehensive multi-tenant architecture with UUID-based identifiers:
 
-## Data Flow (MVP Focus)
-1.  **Data Ingestion (Google Sheets - Read Only):**
-    *   User authenticates via Google OAuth.
-    *   System lists available spreadsheets.
-    *   User selects spreadsheet; pre-defined mapping template applied (details in `.dev/feature-spec.md`). Mapping stored in `column_mappings`.
-    *   Scheduled sync (Supabase cron job) triggers a **Supabase Edge Function**.
-    *   Edge Function extracts data, performs MVP-scoped transformations, and stores it in metrics tables (e.g., `financial_metrics`, `patient_metrics` as per `.dev/database-schema-metrics.md`).
-2.  **Data Display (Fixed Dashboards):**
-    *   User navigates to a dashboard page.
-    *   Page/Component (Client Component with React Query) fetches data from a Next.js `API Route`.
-    *   The `API Route` may call a **Supabase Edge Function** for data aggregation/computation.
-    *   Edge Function/API Route uses `Repository` (Prisma) to get data from Supabase.
-    *   Data is returned to the Presentation Layer.
-    *   `Recharts` components visualize the data on fixed dashboards.
-3.  **Data Mutation:** **Out of scope for MVP.**
+#### **Core Entity Relationships**
+```
+Organizations (Root Level)
+├── Clinics (Tenant Level)
+│   ├── Users (Clinic Members with Roles)
+│   ├── Providers (Staff/Dentists)
+│   ├── Patients (Per Clinic)
+│   ├── Appointments (Per Clinic)
+│   ├── Metrics (Per Clinic)
+│   ├── Goals (Per Clinic)
+│   ├── Data Sources (Per Clinic)
+│   └── Audit Logs (Per Clinic)
+└── Scheduled Jobs (Cross-Tenant)
+```
 
-## Dashboard Navigation & User Experience
-The dashboard implements a consistent navigation experience:
-1. **Collapsible Sidebar**: As previously defined, responsive for mobile and desktop.
-2. **Navigation Structure**: Aligned with MVP core features: Dashboard (Overview, Clinics, Providers), Metrics (Financial, Patients, Appointments, Call Tracking), Data (Google Sheets, Goals), Admin (Settings, Profile).
-3. **Responsive Design**: Adapts to different screen sizes.
-4. **Context Awareness**: Active route highlighting, breadcrumbs.
+#### **Row Level Security (RLS) Pattern**
+All tables implement comprehensive RLS policies with helper functions:
+- `get_user_clinics()`: Returns clinics accessible to current user
+- `has_clinic_access()`: Validates user access to specific clinic
+- `is_clinic_admin()`: Checks administrative permissions
+- `get_user_role()`: Returns user role within clinic context
 
-## Key Technical Decisions (MVP Focus)
-- **Next.js App Router:** For modern React features.
-- **Supabase BaaS:** For PostgreSQL, Auth, and critically, **Edge Functions for backend business logic and data processing.**
-- **Prisma as ORM:** For type-safe database interactions.
-- **shadcn/ui with Tailwind CSS:** For UI development.
-- **Focus on Supabase Edge Functions for Backend Logic:** Complex calculations, data transformations, and business logic will primarily reside in Supabase Edge Functions for the MVP. Next.js API routes will often serve as an interface to these functions.
-- **Read-Only System for MVP:** No form-based data entry or direct data mutation by users.
+### **Authentication & Authorization Patterns**
 
-## Component Relationships (High-Level - MVP)
-- **UI Components (`src/components`)** used by **Pages/Views (`src/app`)**.
-- **Pages/Views (Client Components)** interact with **Next.js API Routes** (using React Query).
-- **Server Components** (if used for data fetching) might directly call services that could invoke Edge Functions or simple data retrievals.
-- **Next.js API Routes** primarily trigger or fetch data processed by **Supabase Edge Functions**.
-- **Supabase Edge Functions (Business Logic)** use **Repositories (Data Layer)**.
-- **Repositories** interact with **Supabase DB (Prisma)** and **Google Sheets API**.
+#### **Enhanced Multi-Step Registration**
+```
+Step 1: Account Information
+├── Email validation and uniqueness check
+├── Password strength validation
+├── Name and phone number collection
+└── Real-time validation feedback
+
+Step 2: Role & Clinic Setup
+├── Role selection (Admin, Manager, Staff, Provider)
+├── Clinic association options:
+│   ├── Create new clinic (with auto-generated code)
+│   └── Join existing clinic (via registration code)
+├── Provider-specific fields (for dentist roles)
+└── Clinic verification and validation
+
+Step 3: Terms & Agreements
+├── Legal terms acceptance
+├── Registration summary review
+├── Final confirmation
+└── Transaction-based account creation
+```
+
+#### **Enhanced Login Process**
+```
+Authentication Flow:
+├── Supabase Auth verification
+├── Database user existence check
+├── Clinic association validation
+├── Role verification within clinic
+├── Session establishment
+└── Error handling with user feedback
+```
+
+### **Google Sheets Integration Architecture**
+
+#### **Enhanced OAuth Pattern (Updated 2025-06-03)**
+```
+Google Sheets Integration:
+├── OAuth 2.0 Secure Authentication
+│   ├── Limited scope (Google Sheets read access only)
+│   ├── Secure token storage in data source records
+│   └── Token refresh mechanisms
+├── Provider Name Auto-Extraction
+│   ├── Sheet title parsing for provider identification
+│   ├── Hygiene production tracking enhancement
+│   └── Automated provider association
+├── Data Discovery & Extraction
+│   ├── Spreadsheet metadata fetching
+│   ├── Range-based data extraction (A1 notation)
+│   └── Error handling and validation
+└── Connection Management
+    ├── Status tracking and validation
+    ├── Multi-source support per clinic
+    └── Debugging and testing infrastructure
+```
+
+#### **Data Transformation Pipeline Pattern**
+```
+Google Sheets → Raw Data Extraction → Column Mapping → Data Validation → Metrics Storage
+     ↓                    ↓                  ↓              ↓                ↓
+OAuth Token      Spreadsheet API    Mapping Templates  Business Rules  Database Tables
+Management       Integration        Application        Validation      (Metrics, etc.)
+```
+
+### **Data Flow Architecture**
+
+#### **Metrics Calculation Pattern**
+```
+Data Sources (Google Sheets)
+├── Raw Data Extraction
+├── Column Mapping & Transformation
+├── Business Logic Application
+├── Metrics Calculation (Supabase Edge Functions)
+├── Database Storage (Metrics Tables)
+└── Dashboard Visualization (React Components)
+```
+
+#### **Scheduled Processing Pattern**
+```
+Scheduled Jobs (pg_cron):
+├── Daily Aggregation (2 AM)
+│   ├── Financial metrics rollup
+│   ├── Patient statistics calculation
+│   └── Appointment analytics update
+├── Weekly Reports (3 AM Mondays)
+│   ├── Provider performance analysis
+│   ├── Goal progress calculation
+│   └── Trend analysis updates
+├── Monthly Cleanup (4 AM 1st of month)
+│   ├── Archive old data
+│   ├── Cleanup temporary records
+│   └── Optimize database performance
+└── Hourly Sync Check (15 past each hour)
+    ├── Update last_sync_attempt for active data sources
+    ├── Monitor connection health
+    └── Handle failed synchronizations
+```
+
+### **API Design Patterns**
+
+#### **Enhanced RESTful API Structure**
+```
+/api/
+├── auth/                     # Authentication endpoints
+│   ├── register-comprehensive # Multi-step registration
+│   ├── session              # Session management
+│   └── google/              # OAuth endpoints
+├── clinics/                 # Clinic management
+│   ├── [clinicId]/         # Specific clinic operations
+│   ├── switch/             # Clinic switching
+│   └── statistics/         # Clinic-level analytics
+├── google-sheets/          # Integration endpoints
+│   ├── discover/           # Spreadsheet discovery
+│   ├── mapping/            # Column mapping
+│   ├── sync/               # Data synchronization
+│   └── validate/           # Connection validation
+├── metrics/                # Metrics and analytics
+│   ├── financial/          # Financial KPIs
+│   ├── patients/           # Patient metrics
+│   ├── appointments/       # Appointment analytics
+│   └── providers/          # Provider performance
+└── users/                  # User management
+    ├── [userId]/           # User-specific operations
+    └── invite/             # User invitation system
+```
+
+#### **Response Pattern with Caching**
+```typescript
+// Standard API Response Pattern
+{
+  data: T | null,
+  error: string | null,
+  meta: {
+    timestamp: string,
+    clinic_id: string,
+    user_id: string,
+    cache_hint?: number
+  }
+}
+
+// Caching Headers Pattern
+headers: {
+  'Cache-Control': 'public, max-age=300, stale-while-revalidate=60',
+  'ETag': 'response-hash',
+  'Vary': 'Authorization, X-Clinic-ID'
+}
+```
+
+### **Error Handling Patterns**
+
+#### **Comprehensive Error Boundary Pattern**
+```
+Application Level:
+├── Global Error Boundary (app/error.tsx)
+├── Route-Level Error Boundaries (page-level error.tsx)
+├── Component-Level Error Handling
+├── API Error Response Standardization
+└── User-Friendly Error Messages
+
+Error Types:
+├── Authentication Errors (401, 403)
+├── Validation Errors (400)
+├── Not Found Errors (404)
+├── Integration Errors (Google Sheets API)
+├── Database Errors (RLS, Connection)
+└── Rate Limiting Errors (429)
+```
+
+### **Testing Patterns**
+
+#### **Comprehensive Testing Strategy**
+```
+Testing Levels:
+├── Unit Tests (Components, Utilities)
+│   ├── Component behavior testing
+│   ├── Hook testing with React Testing Library
+│   └── Utility function validation
+├── Integration Tests (API Routes, Database)
+│   ├── API endpoint testing with mock data
+│   ├── Database interaction testing
+│   └── Google Sheets integration testing
+├── End-to-End Tests (User Flows)
+│   ├── Authentication flow testing
+│   ├── Dashboard navigation testing
+│   └── Google Sheets connection testing
+└── Performance Tests
+    ├── Load time optimization validation
+    ├── Cache effectiveness testing
+    └── React Query behavior validation
+```
+
+### **Security Patterns**
+
+#### **Defense in Depth Strategy**
+```
+Security Layers:
+├── Authentication (Supabase Auth + Database Verification)
+├── Authorization (RLS Policies + Role-Based Access)
+├── Data Validation (Input Sanitization + Schema Validation)
+├── API Security (Rate Limiting + Request Validation)
+├── Integration Security (OAuth Scopes + Token Management)
+└── Audit Logging (Comprehensive Activity Tracking)
+```
+
+### **Performance Optimization Patterns**
+
+#### **Caching Strategy**
+```
+Caching Levels:
+├── Browser Cache (Static Assets, API Responses)
+├── React Query Cache (Server State Management)
+│   ├── Automatic background refetching
+│   ├── Optimistic updates
+│   ├── Stale-while-revalidate patterns
+│   └── Cache invalidation strategies
+├── API Response Cache (Next.js API Routes)
+├── Database Query Cache (Supabase Query Optimization)
+└── CDN Cache (Static Assets, Future Implementation)
+```
+
+#### **Loading State Pattern**
+```
+Loading States:
+├── Skeleton UI Components
+│   ├── Dashboard widgets
+│   ├── Data tables
+│   └── Form placeholders
+├── Progressive Loading
+│   ├── Critical content first
+│   ├── Non-critical content lazy loading
+│   └── Image lazy loading
+└── Background Processing
+    ├── React Query background updates
+    ├── Optimistic UI updates
+    └── Silent error recovery
+```
+
+### **Monitoring & Observability Patterns**
+
+#### **Comprehensive Monitoring Strategy**
+```
+Monitoring Layers:
+├── Application Performance Monitoring
+│   ├── Page load times (585-626ms initial, 24-42ms subsequent)
+│   ├── Component render times
+│   ├── API response times
+│   └── Error rates and patterns
+├── Database Performance Monitoring
+│   ├── Query performance tracking
+│   ├── RLS policy effectiveness
+│   ├── Scheduled job execution monitoring
+│   └── Connection pool monitoring
+├── Integration Monitoring
+│   ├── Google Sheets API call success rates
+│   ├── OAuth token refresh success
+│   ├── Data synchronization health
+│   └── Error tracking and recovery
+└── User Experience Monitoring
+    ├── Navigation patterns
+    ├── Feature usage analytics
+    ├── Error recovery success rates
+    └── Performance perception metrics
+```
+
+### **Future Architecture Considerations**
+
+#### **Scalability Patterns**
+- **Horizontal Scaling**: Multi-region deployment strategy
+- **Database Scaling**: Read replicas and connection pooling optimization
+- **Cache Scaling**: Redis implementation for cross-instance caching
+- **API Scaling**: Rate limiting and load balancing strategies
+
+#### **Feature Flag Pattern**
+- **Gradual Rollout**: New feature controlled release
+- **A/B Testing**: User experience optimization testing
+- **Circuit Breaker**: Automatic feature disabling on errors
+- **Environment-Based**: Different features per environment
 
 ---
 
-*This document captures the system architecture and design patterns used in the project.* 
+*This document defines the core architectural patterns and design decisions for the system.* 

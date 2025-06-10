@@ -9,11 +9,11 @@
 
 "use client";
 
+import { FilterBar } from "@/components/common/filters";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { useFilterParams } from "@/hooks/use-filters";
 import React from "react";
-import { FilterBar } from "@/components/common/filters";
 
 /**
  * Dashboard Example Component

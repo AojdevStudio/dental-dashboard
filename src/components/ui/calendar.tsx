@@ -1,3 +1,9 @@
+/**
+ * @file Calendar Component
+ * @description This file defines a customizable Calendar component based on `react-day-picker`.
+ * It provides default styling using Tailwind CSS and allows for customization of class names and internal components.
+ * The component is marked with "use client" as it involves client-side interactivity.
+ */
 "use client";
 
 import { ChevronLeft, ChevronRight } from "lucide-react";
@@ -7,10 +13,25 @@ import { DayPicker } from "react-day-picker";
 import { buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
+/**
+ * @typedef {object} CalendarProps
+ * @description Props for the Calendar component, extending the props of `react-day-picker`'s `DayPicker` component.
+ * This allows the Calendar component to accept all valid props for `DayPicker`.
+ * @see https://react-day-picker.js.org/api/interfaces/DayPickerProps
+ * @type {React.ComponentProps<typeof DayPicker>}
+ */
 export type CalendarProps = React.ComponentProps<typeof DayPicker>;
 
 /**
- * Props type for the Chevron component used in the calendar
+ * @typedef {object} ChevronProps
+ * @description Props for the internal Chevron component used for navigation within the Calendar.
+ * This type is used when overriding the default `Chevron` component via the `components` prop of `DayPicker`.
+ * It extends standard SVG props and adds specific properties for orientation, styling, and state.
+ * @property {("left" | "right" | "up" | "down")} [orientation] - The direction the chevron should point.
+ * @property {string} [className] - Additional CSS classes for styling the chevron.
+ * @property {number} [size] - The size of the chevron icon.
+ * @property {boolean} [disabled] - Whether the chevron navigation is disabled.
+ * @type {object}
  */
 type ChevronProps = {
   orientation?: "left" | "right" | "up" | "down";
@@ -19,6 +40,26 @@ type ChevronProps = {
   disabled?: boolean;
 } & React.SVGProps<SVGSVGElement>;
 
+/**
+ * @component Calendar
+ * @description A customizable calendar component built as a wrapper around `react-day-picker`.
+ * It provides default styling compatible with the project's UI (using Tailwind CSS and `cn` utility)
+ * and allows for extensive customization of appearance and behavior through props.
+ *
+ * @param {CalendarProps} props - The properties for the Calendar component.
+ * @param {string} [props.className] - Additional CSS classes to apply to the root DayPicker container.
+ * @param {Partial<import('react-day-picker').ClassNames>} [props.classNames] - Custom CSS class names to override default styles for various parts of the calendar.
+ * @param {boolean} [props.showOutsideDays=true] - Whether to display days from previous and next months.
+ * @param {Partial<import('react-day-picker').Components>} [props.components] - Custom components to override parts of DayPicker, like the navigation chevrons.
+ * @returns {JSX.Element} The rendered Calendar component.
+ * @example
+ * <Calendar
+ *   mode="single"
+ *   selected={date}
+ *   onSelect={setDate}
+ *   className="rounded-md border"
+ * />
+ */
 function Calendar({
   className,
   classNames,

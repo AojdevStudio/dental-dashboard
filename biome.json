@@ -33,13 +33,27 @@
   },
   "files": {
     "maxSize": 2000000,
+    "include": [
+      "src/**/*",
+      "*.{ts,tsx,js,jsx,mjs,cjs}",
+      "biome.json",
+      "next.config.ts",
+      "tailwind.config.js",
+      "postcss.config.mjs",
+      "vitest.config.ts",
+      "vitest.integration.config.ts",
+      "middleware.ts"
+    ],
     "ignore": [
       ".next/**",
       "node_modules/**",
       "public/**",
       "**/generated/**",
       "turbo.json",
-      "**/*.md"
+      "**/*.md",
+      "scripts/**",
+      "**/*.json",
+      "**/*.css"
     ]
   }
 }

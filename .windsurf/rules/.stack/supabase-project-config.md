@@ -1,0 +1,20 @@
+---
+trigger: always_on
+description: 
+globs: 
+---
+- **Supabase Project ID**: `yovbdmjwrrgardkgrenc`
+  - This is the primary identifier for the Supabase project used in this application.
+  - Always use this ID when interacting with the Supabase Management API (e.g., through MCP tools).
+
+- **Project Name**: `dashboard`
+
+- **Fetching Project URL and Anon Key**:
+  - If you need the Project URL or the `anon` public key for client-side Supabase initialization or direct API calls:
+    1. Use the `mcp_supabase_get_project_url` tool with the Project ID.
+    2. Use the `mcp_supabase_get_anon_key` tool with the Project ID.
+  - Store these securely if used in client-side code, typically as environment variables (e.g., `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`).
+
+- **Usage Reminder**:
+  - When performing operations like listing tables, executing SQL, or managing migrations via tools, ensure you are targeting the correct project ID: `yovbdmjwrrgardkgrenc`.
+  - Double-check the project context if you encounter unexpected errors or empty results from Supabase tools.

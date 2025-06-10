@@ -1,109 +1,191 @@
-/**
- * @fileoverview Sidebar Navigation Component
- *
- * This file implements the sidebar navigation component used in the dashboard layout.
- * It provides the main navigation structure for the application, with links to
- * different sections and features of the dental dashboard.
- */
-
 "use client";
 
+import { Button } from "@/components/ui/button";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import type { SidebarProps } from "@/lib/types/layout";
+import type { NavSection } from "@/lib/types/navigation";
 import { cn } from "@/lib/utils";
-import { BarChart3, FileSpreadsheet, FileText, Home, Settings, Target } from "lucide-react";
-import Link from "next/link";
-import { usePathname } from "next/navigation";
-import type * as React from "react";
+import { useNavigationState } from "@/lib/utils/navigation";
+import {
+  ChevronLeft,
+  ChevronRight,
+  FileText,
+  LayoutDashboard,
+  Link2,
+  Settings,
+  Target,
+  TrendingUp,
+  Users,
+} from "lucide-react";
+import { NavItemComponent } from "./nav-item";
 
-/**
- * Interface for navigation item properties
- *
- * @property {string} title - Display text for the navigation item
- * @property {string} href - URL path for the navigation item
- * @property {React.ReactNode} icon - Icon component to display
- */
-interface NavItem {
-  title: string;
-  href: string;
-  icon: React.ReactNode;
-}
-
-/**
- * Navigation items for the sidebar
- *
- * Each item consists of:
- * - title: The text displayed in the navigation
- * - href: The URL path the item links to
- * - icon: The Lucide icon component to display
- *
- * @type {NavItem[]}
- */
-const navItems: NavItem[] = [
+// Define the navigation structure
+const navigation: NavSection[] = [
   {
-    title: "Dashboard",
-    href: "/dashboard",
-    icon: <Home className="h-5 w-5" />,
+    id: "main",
+    items: [
+      {
+        id: "dashboard",
+        title: "Dashboard",
+        href: "/dashboard",
+        icon: LayoutDashboard,
+      },
+      {
+        id: "production",
+        title: "Production",
+        href: "/production",
+        icon: TrendingUp,
+        children: [
+          {
+            id: "dentist-production",
+            title: "Dentist Production",
+            href: "/production/dentist",
+          },
+          {
+            id: "hygienist-production",
+            title: "Hygienist Production",
+            href: "/production/hygienist",
+          },
+        ],
+      },
+      {
+        id: "providers",
+        title: "Providers",
+        href: "/providers",
+        icon: Users,
+      },
+      {
+        id: "reports",
+        title: "Reports",
+        href: "/reports",
+        icon: FileText,
+      },
+      {
+        id: "goals",
+        title: "Goals",
+        href: "/goals",
+        icon: Target,
+      },
+    ],
   },
   {
-    title: "Integrations",
-    href: "/integrations",
-    icon: <FileSpreadsheet className="h-5 w-5" />,
-  },
-  {
-    title: "Goals",
-    href: "/goals",
-    icon: <Target className="h-5 w-5" />,
-  },
-  {
-    title: "Reports",
-    href: "/reports",
-    icon: <FileText className="h-5 w-5" />,
-  },
-  {
-    title: "Settings",
-    href: "/settings",
-    icon: <Settings className="h-5 w-5" />,
+    id: "system",
+    title: "System",
+    items: [
+      {
+        id: "integrations",
+        title: "Integrations",
+        href: "/integrations",
+        icon: Link2,
+      },
+      {
+        id: "settings",
+        title: "Settings",
+        href: "/settings",
+        icon: Settings,
+        children: [
+          {
+            id: "clinic-settings",
+            title: "Clinic",
+            href: "/settings/clinic",
+          },
+          {
+            id: "user-settings",
+            title: "Users",
+            href: "/settings/users",
+          },
+          {
+            id: "provider-settings",
+            title: "Providers",
+            href: "/settings/providers",
+          },
+        ],
+      },
+    ],
   },
 ];
 
-/**
- * Sidebar Navigation Component
- *
- * Provides the main navigation sidebar for the dashboard interface.
- * Features include:
- * - Icon and text links to main application sections
- * - Visual indication of the current active section
- * - Responsive design that adapts to different screen sizes
- *
- * @returns {JSX.Element} The rendered sidebar navigation component
- */
-export function Sidebar() {
-  const pathname = usePathname();
+export function Sidebar({ className }: SidebarProps) {
+  const { isSidebarCollapsed, expandedSections, toggleSidebar, setActiveItem, toggleSection } =
+    useNavigationState();
 
   return (
-    <nav className="flex flex-col space-y-1 px-2 py-4">
-      {navItems.map((item) => {
-        // Check if the current path matches this item's path
-        const isActive = pathname === item.href || pathname.startsWith(`${item.href}/`);
+    <nav
+      className={cn(
+        "relative flex h-full flex-col border-r bg-background transition-all duration-300",
+        isSidebarCollapsed ? "w-16" : "w-[280px]",
+        className
+      )}
+      aria-label="Main navigation"
+    >
+      {/* Logo/Brand */}
+      <div className="flex h-16 items-center justify-between border-b px-4">
+        {!isSidebarCollapsed && <h1 className="text-xl font-semibold">Dental Dashboard</h1>}
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={toggleSidebar}
+          aria-label={isSidebarCollapsed ? "Expand sidebar" : "Collapse sidebar"}
+          className="h-8 w-8"
+        >
+          {isSidebarCollapsed ? (
+            <ChevronRight className="h-4 w-4" />
+          ) : (
+            <ChevronLeft className="h-4 w-4" />
+          )}
+        </Button>
+      </div>
 
-        return (
-          <Link
-            key={item.href}
-            href={item.href}
-            className={cn(
-              "flex items-center px-3 py-2 text-sm font-medium rounded-md",
-              isActive
-                ? "bg-primary/10 text-primary"
-                : "text-muted-foreground hover:bg-accent hover:text-accent-foreground"
-            )}
-          >
-            {/* Item icon */}
-            <span className="mr-3">{item.icon}</span>
+      {/* Navigation */}
+      <ScrollArea className="flex-1 px-2 py-4">
+        <nav aria-label="Sidebar navigation">
+          {navigation.map((section, sectionIndex) => (
+            <div key={section.id} className={cn(sectionIndex > 0 && "mt-6")}>
+              {section.title && !isSidebarCollapsed && (
+                <h2 className="mb-2 px-3 text-xs font-medium uppercase tracking-wider text-muted-foreground">
+                  {section.title}
+                </h2>
+              )}
+              <ul className="space-y-1">
+                {section.items.map((item) => (
+                  <li key={item.id}>
+                    <NavItemComponent
+                      item={item}
+                      isCollapsed={isSidebarCollapsed}
+                      isExpanded={expandedSections.includes(item.id)}
+                      onToggle={() => toggleSection(item.id)}
+                      onItemClick={setActiveItem}
+                    />
+                    {/* Nested items */}
+                    {item.children && expandedSections.includes(item.id) && !isSidebarCollapsed && (
+                      <ul className="mt-1 space-y-1">
+                        {item.children.map((child) => (
+                          <li key={child.id}>
+                            <NavItemComponent
+                              item={child}
+                              isCollapsed={isSidebarCollapsed}
+                              isNested
+                              onItemClick={setActiveItem}
+                            />
+                          </li>
+                        ))}
+                      </ul>
+                    )}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ))}
+        </nav>
+      </ScrollArea>
 
-            {/* Item title */}
-            <span>{item.title}</span>
-          </Link>
-        );
-      })}
+      {/* Skip to main content link for accessibility */}
+      <a
+        href="#main-content"
+        className="sr-only focus:not-sr-only focus:absolute focus:left-20 focus:top-20 focus:z-50 focus:rounded-md focus:bg-background focus:px-4 focus:py-2 focus:outline-2 focus:outline-primary"
+      >
+        Skip to main content
+      </a>
     </nav>
   );
 }

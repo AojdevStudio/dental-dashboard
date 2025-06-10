@@ -1,0 +1,71 @@
+# CodeRabbit Configuration - Focused Code Review
+# Only reviews core development files and directories
+
+# Core settings
+system_language: "en-US"
+release_notes: false
+ignore_draft_pr: true
+enable_beta_features: true
+disable_poem: true
+
+# Path filters - Include only core code areas
+path_filters: |
+  src/**
+  prisma/**
+  supabase/**
+  package.json
+  tsconfig.json
+  next.config.ts
+  middleware.ts
+  HygieneSyncLib/**/*.gs
+  HygieneSyncLib/**/*.gsx
+  HygieneSyncLib/**/*.gsx
+  !src/generated/**
+  !prisma/migrations/**/*.sql
+  !**/*.test.ts
+  !**/*.test.tsx
+  !**/__tests__/**
+  !**/node_modules/**
+  !dist/**
+  !build/**
+  !.next/**
+  !**/*.md
+  !**/*.mdc
+
+# File-specific instructions for different code areas
+file_path_instructions:
+  - path: "src/**/*.ts,src/**/*.tsx"
+    instructions: |
+      Focus on TypeScript/React best practices:
+      - Ensure proper type safety and avoid 'any' types
+      - Check for proper error handling and async/await patterns
+      - Verify React hooks usage and component patterns
+      - Review for security vulnerabilities and performance issues
+      - Ensure proper JSDoc comments for functions and complex logic
+
+  - path: "prisma/**"
+    instructions: |
+      Review database schema and Prisma-related code:
+      - Verify schema relationships and constraints are properly defined
+      - Check for proper indexing and performance considerations
+      - Ensure migration files follow best practices
+      - Review seed files for data integrity
+
+  - path: "supabase/**/*.ts"
+    instructions: |
+      Review Supabase Edge Functions and database code:
+      - Ensure proper error handling and response formatting
+      - Check for security best practices (RLS policies, input validation)
+      - Verify proper async/await patterns and database connections
+      - Review for performance optimizations
+
+  - path: "package.json"
+    instructions: |
+      Review dependency management:
+      - Check for security vulnerabilities in dependencies
+      - Ensure version pinning where appropriate
+      - Verify scripts are properly configured
+
+# Ignore specific patterns
+ignored_titles: "WIP,Draft,Test"
+ignored_branch: "dev/test,experimental/*" 
