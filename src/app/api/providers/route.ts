@@ -1,7 +1,7 @@
 import { type ApiHandler, withAuth } from "@/lib/api/middleware";
 import { apiError, apiPaginated, getPaginationParams, handleApiError } from "@/lib/api/utils";
 import type { AuthContext } from "@/lib/database/auth-context";
-import { getProvidersWithLocations } from "@/lib/database/queries/providers";
+import { getProvidersWithLocationsPaginated } from "@/lib/database/queries/providers";
 import { type NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 
@@ -47,25 +47,14 @@ const getProvidersHandler: ApiHandler = async (
           : undefined),
     };
 
-    // Fetch providers with locations
-    const providers = await getProvidersWithLocations(filters);
-
-    // Temporary safeguard – remove once DB-level pagination lands
-    if (providers.length > 1000) {
-      return apiError(
-        "Too many providers returned; pagination not yet supported at DB level",
-        413
-      );
-    }
-
-    // WARNING: Performance Issue - In-memory pagination
-    // This implementation fetches ALL providers and paginates in-memory which will not scale.
-    // TODO: Update getProvidersWithLocations to accept offset/limit parameters and use
-    // database-level LIMIT/OFFSET for efficient pagination. Consider enforcing a maximum
-    // limit (e.g., 1000) to prevent excessive memory usage until proper pagination is implemented.
+    // Calculate pagination parameters for database query
     const offset = (page - 1) * limit;
-    const paginatedProviders = providers.slice(offset, offset + limit);
-    const total = providers.length;
+
+    // Fetch providers with database-level pagination
+    const { providers: paginatedProviders, total } = await getProvidersWithLocationsPaginated({
+      ...filters,
+      pagination: { offset, limit },
+    });
 
     return apiPaginated(paginatedProviders, total, page, limit) as NextResponse;
   } catch (error) {

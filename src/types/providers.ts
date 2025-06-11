@@ -28,6 +28,25 @@ export interface ProvidersApiResponse {
 }
 
 /**
+ * Database-level pagination parameters
+ */
+export interface PaginationParams {
+  offset: number;
+  limit: number;
+}
+
+/**
+ * Generic paginated response wrapper
+ */
+export interface PaginatedResponse<T> {
+  data: T[];
+  total: number;
+  offset: number;
+  limit: number;
+  hasMore: boolean;
+}
+
+/**
  * Query parameters for the providers API endpoint
  */
 export interface ProvidersQueryParams {
@@ -38,6 +57,18 @@ export interface ProvidersQueryParams {
   includeInactive?: boolean;
   page?: number;
   limit?: number;
+}
+
+/**
+ * Enhanced provider filters with optional pagination support
+ */
+export interface ProviderFilters {
+  clinicId?: string;
+  locationId?: string;
+  providerId?: string;
+  providerType?: string;
+  includeInactive?: boolean;
+  pagination?: PaginationParams;
 }
 
 /**
