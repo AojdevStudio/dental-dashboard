@@ -29,11 +29,13 @@ type ClinicWithDetails = Prisma.ClinicGetPayload<{
   };
 }>;
 
-const updateClinicSchema = z.object({
-  name: z.string().min(2).optional(),
-  location: z.string().min(2).optional(),
-  status: z.enum(["active", "inactive"]).optional(),
-});
+const updateClinicSchema = z
+  .object({
+    name: z.string().min(2).optional(),
+    location: z.string().min(2).optional(),
+    status: z.enum(["active", "inactive"]).optional(),
+  })
+  .strict();
 
 export type GetClinicResponse = Awaited<ReturnType<typeof clinicQueries.getClinicById>>;
 export type UpdateClinicResponse = Awaited<ReturnType<typeof clinicQueries.updateClinic>>;

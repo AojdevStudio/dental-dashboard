@@ -296,15 +296,58 @@ export async function GET(request: Request) {
 For production environments:
 
 ```typescript
-// ✅ RECOMMENDED - IP validation for sensitive operations
-const ALLOWED_IPS = process.env.ALLOWED_IPS?.split(',') || [];
+// ✅ RECOMMENDED - Enhanced IP validation for sensitive operations
+const ALLOWED_IPS = process.env.ALLOWED_IPS?.split(',').map(ip => ip.trim()).filter(Boolean) || [];
+
+function getClientIP(request: Request): string | null {
+  // Get the real client IP from trusted headers in order of preference
+  const forwardedFor = request.headers.get('x-forwarded-for');
+  const realIP = request.headers.get('x-real-ip');
+  const cfConnectingIP = request.headers.get('cf-connecting-ip'); // Cloudflare
+  const trueClientIP = request.headers.get('true-client-ip'); // Cloudflare Enterprise
+  
+  // x-forwarded-for can contain multiple IPs (client, proxy1, proxy2)
+  // The first IP is typically the original client
+  if (forwardedFor) {
+    const firstIP = forwardedFor.split(',')[0].trim();
+    if (firstIP && isValidIP(firstIP)) {
+      return firstIP;
+    }
+  }
+  
+  // Try other headers
+  if (cfConnectingIP && isValidIP(cfConnectingIP)) return cfConnectingIP;
+  if (trueClientIP && isValidIP(trueClientIP)) return trueClientIP;
+  if (realIP && isValidIP(realIP)) return realIP;
+  
+  return null;
+}
+
+function isValidIP(ip: string): boolean {
+  // Basic IPv4 and IPv6 validation
+  const ipv4Regex = /^(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/;
+  const ipv6Regex = /^(?:[0-9a-fA-F]{1,4}:){7}[0-9a-fA-F]{1,4}$|^::1$|^::$/;
+  
+  return ipv4Regex.test(ip) || ipv6Regex.test(ip);
+}
 
 function validateIPAccess(request: Request) {
-  const clientIP = request.headers.get('x-forwarded-for') || 
-                   request.headers.get('x-real-ip');
+  // Skip IP validation if no IPs are configured
+  if (ALLOWED_IPS.length === 0) {
+    return;
+  }
   
-  if (ALLOWED_IPS.length > 0 && !ALLOWED_IPS.includes(clientIP)) {
-    throw new Error('IP not authorized');
+  const clientIP = getClientIP(request);
+  
+  // Reject if we can't determine the client IP
+  if (!clientIP) {
+    throw new Error('Unable to determine client IP address');
+  }
+  
+  // Check if the client IP is in the allowlist
+  if (!ALLOWED_IPS.includes(clientIP)) {
+    console.warn(`Unauthorized IP access attempt: ${clientIP}`);
+    throw new Error('IP address not authorized');
   }
 }
 ```

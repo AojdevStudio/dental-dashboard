@@ -42,30 +42,10 @@ export interface ApiErrorPayload {
 export type ApiResponse<T = unknown> = ApiSuccessPayload<T> | ApiErrorPayload;
 
 /**
- * ApiResponse utility class with static methods for creating responses
+ * Created response helper function
  */
-export class ApiResponse {
-  static success<T>(data: T, status = 200): NextResponse<ApiSuccessPayload<T>> {
-    return apiSuccess(data, status);
-  }
-
-  static error(message: string, status = 500, code?: string): NextResponse<ApiErrorPayload> {
-    return apiError(message, status, code);
-  }
-
-  static paginated<T>(
-    data: T[],
-    total: number,
-    page: number,
-    limit: number,
-    status = 200
-  ): NextResponse<ApiSuccessPayload<T[]>> {
-    return apiPaginated(data, total, page, limit, status);
-  }
-
-  static created<T>(data: T): NextResponse<ApiSuccessPayload<T>> {
-    return apiSuccess(data, 201);
-  }
+export function apiCreated<T>(data: T): NextResponse<ApiSuccessPayload<T>> {
+  return apiSuccess(data, 201);
 }
 
 /**

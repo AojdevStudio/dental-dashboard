@@ -15,11 +15,13 @@ import * as userQueries from "@/lib/database/queries/users";
 import type { NextResponse } from "next/server";
 import { z } from "zod";
 
-const updateUserSchema = z.object({
-  name: z.string().min(2).optional(),
-  role: z.string().optional(),
-  lastLogin: z.string().datetime().optional(),
-});
+const updateUserSchema = z
+  .object({
+    name: z.string().min(2).optional(),
+    role: z.string().optional(),
+    lastLogin: z.string().datetime().optional(),
+  })
+  .strict();
 
 export type GetUserResponse = Awaited<ReturnType<typeof userQueries.getUserById>>;
 export type UpdateUserResponse = Awaited<ReturnType<typeof userQueries.updateUser>>;

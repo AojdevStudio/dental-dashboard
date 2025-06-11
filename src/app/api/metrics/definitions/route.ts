@@ -32,12 +32,22 @@ export const GET = withAuth<GetMetricDefinitionsResponse>(
     const dataType = searchParams.get("dataType") || undefined;
     const isComposite = searchParams.get("isComposite");
 
-    const definitions = await metricQueries.getMetricDefinitions(authContext, {
-      category,
-      dataType,
-      isComposite: isComposite === null ? undefined : isComposite === "true",
-    });
+    try {
+      const definitions = await metricQueries.getMetricDefinitions(authContext, {
+        category,
+        dataType,
+        isComposite: isComposite === null ? undefined : isComposite === "true",
+      });
 
-    return apiSuccess(definitions);
+      return apiSuccess(definitions);
+    } catch (error) {
+      if (error instanceof ApiErrorClass) {
+        return apiError(error.message, error.statusCode, error.code);
+      }
+      if (error instanceof Error && error.message.includes("Access denied")) {
+        return apiError(error.message, 403);
+      }
+      throw error;
+    }
   }
 );

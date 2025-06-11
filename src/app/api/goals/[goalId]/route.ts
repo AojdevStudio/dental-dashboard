@@ -49,9 +49,9 @@ export const PUT = withAuth<GoalResponse>(
     if (validatedData.description !== undefined)
       updateDataForQuery.description = validatedData.description;
     if (validatedData.targetValue !== undefined)
-      updateDataForQuery.targetValue = String(validatedData.targetValue);
+      updateDataForQuery.targetValue = validatedData.targetValue;
     if (validatedData.currentValue !== undefined)
-      updateDataForQuery.currentValue = String(validatedData.currentValue);
+      updateDataForQuery.currentValue = validatedData.currentValue;
     if (validatedData.targetDate !== undefined)
       updateDataForQuery.endDate = validatedData.targetDate; // Zod's targetDate maps to Prisma's endDate
     if (validatedData.frequency !== undefined)

@@ -18,17 +18,14 @@ import type { User } from "@prisma/client"; // Assuming User type is available
 import { z } from "zod";
 
 // Request/Response types
-const createUserSchema = z.object({
-  email: z.string().email(),
-  name: z.string().min(2),
-  role: z.enum(["office_manager", "dentist", "front_desk", "admin"]),
-  clinicId: z.string().cuid(),
-});
-
-const updateUserSchema = z.object({
-  name: z.string().min(2).optional(),
-  role: z.string().optional(),
-});
+const createUserSchema = z
+  .object({
+    email: z.string().email(),
+    name: z.string().min(2),
+    role: z.enum(["office_manager", "dentist", "front_desk", "admin"]),
+    clinicId: z.string().cuid(),
+  })
+  .strict();
 
 export type GetUsersResponse = Awaited<ReturnType<typeof userQueries.getUsers>>;
 export type CreateUserResponse = Awaited<ReturnType<typeof userQueries.createUser>>;
@@ -97,91 +94,3 @@ export const POST = withAuth<CreateUserResponse>(
   }
 );
 
-/**
- * PATCH /api/users/:userId
- * Update a user (self or clinic admin)
- */
-export const PATCH = withAuth<Awaited<ReturnType<typeof userQueries.updateUser>>>(
-  async (
-    request: Request,
-    { authContext }
-  ): Promise<
-    NextResponse<
-      ApiSuccessPayload<Awaited<ReturnType<typeof userQueries.updateUser>>> | ApiErrorPayload
-    >
-  > => {
-    const nextReq = request as NextRequest;
-    const userId = nextReq.nextUrl.pathname.split("/").pop();
-    if (!userId) {
-      return apiError("User ID required", 400);
-    }
-
-    // Parse and validate request body
-    let body: z.infer<typeof updateUserSchema>;
-    try {
-      const rawBody = await request.json();
-      body = updateUserSchema.parse(rawBody);
-    } catch (error) {
-      return apiError("Invalid request body", 400);
-    }
-
-    // Update user through query layer
-    try {
-      const user = await userQueries.updateUser(authContext, userId, body);
-      return apiSuccess(user);
-    } catch (error) {
-      if (error instanceof ApiErrorClass) {
-        return apiError(error.message, error.statusCode, error.code);
-      }
-      if (error instanceof Error) {
-        if (error.message === "User not found") {
-          return apiError("User not found", 404);
-        }
-        if (error.message === "Permission denied") {
-          return apiError("Permission denied", 403);
-        }
-      }
-      throw error;
-    }
-  }
-);
-
-/**
- * DELETE /api/users/:userId
- * Delete/deactivate a user (clinic admin only)
- */
-export const DELETE = withAuth<Awaited<ReturnType<typeof userQueries.deleteUser>>>(
-  async (
-    request: Request,
-    { authContext }
-  ): Promise<
-    NextResponse<
-      ApiSuccessPayload<Awaited<ReturnType<typeof userQueries.deleteUser>>> | ApiErrorPayload
-    >
-  > => {
-    const nextReq = request as NextRequest;
-    const userId = nextReq.nextUrl.pathname.split("/").pop();
-    if (!userId) {
-      return apiError("User ID required", 400);
-    }
-
-    // Delete user through query layer
-    try {
-      const result = await userQueries.deleteUser(authContext, userId);
-      return apiSuccess(result);
-    } catch (error) {
-      if (error instanceof ApiErrorClass) {
-        return apiError(error.message, error.statusCode, error.code);
-      }
-      if (error instanceof Error) {
-        if (error.message === "User not found") {
-          return apiError("User not found", 404);
-        }
-        if (error.message.includes("Only clinic admins")) {
-          return apiError(error.message, 403);
-        }
-      }
-      throw error;
-    }
-  }
-);

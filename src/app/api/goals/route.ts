@@ -13,7 +13,7 @@ import { z } from "zod";
 // Request schemas
 const createGoalSchema = z.object({
   metricDefinitionId: z.string().cuid(),
-  timePeriod: z.enum(["daily", "weekly", "monthly", "quarterly", "annual"]),
+  timePeriod: z.enum(["daily", "weekly", "monthly", "quarterly", "yearly"]),
   startDate: z.string().datetime(),
   endDate: z.string().datetime(),
   targetValue: z.string(),

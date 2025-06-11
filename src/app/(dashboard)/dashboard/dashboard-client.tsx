@@ -2,7 +2,7 @@
 
 import { DashboardGrid } from "@/components/dashboard/dashboard-grid";
 import { Button } from "@/components/ui/button";
-import type { Prisma } from "@/generated/prisma";
+import type { Prisma } from "@prisma/client";
 import { useDashboardKPI } from "@/hooks/use-dashboard-kpi";
 import { useDashboardLayout } from "@/hooks/use-dashboard-layout";
 import type { ChartConfig } from "@/lib/types/charts";

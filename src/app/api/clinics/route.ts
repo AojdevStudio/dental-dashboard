@@ -33,8 +33,8 @@ export type CreateClinicResponse = Awaited<ReturnType<typeof clinicQueries.creat
  * Get clinics accessible to the user
  */
 export const GET = withAuth<GetClinicsResponse>(async (request: Request, { authContext }) => {
-  // Corrected generic for withAuth
-  const searchParams = (request as NextRequest).nextUrl.searchParams;
+  const url = new URL(request.url);
+  const searchParams = url.searchParams;
   const includeInactive = searchParams.get("includeInactive") === "true";
   const { limit, offset } = getPaginationParams(searchParams);
 
@@ -44,34 +44,7 @@ export const GET = withAuth<GetClinicsResponse>(async (request: Request, { authC
     offset,
   });
 
-  // Clinic data is relatively static, cache for 10 minutes
-  const responsePayload: GetClinicsResponse = {
-    clinics: result.clinics,
-    total: result.total,
-    // pagination can be derived on client or added here if GetClinicsResponse includes it
-  };
-  // Assuming GetClinicsResponse is { clinics: Clinic[], total: number }
-  // and cachedJson is compatible or we adjust what's returned by withAuth
-  // For now, let's align with a simple success response structure if cachedJson is problematic
-  // If cachedJson is essential, its signature or ApiHandler's might need adjustment.
-  // Let's try to make it work with apiSuccess for now to ensure type compatibility.
-  // The original cachedJson might not fit the ApiHandler<TSuccessPayload> structure directly.
-
-  // If GetClinicsResponse is just the array of clinics:
-  // return apiSuccess(result.clinics);
-
-  // If GetClinicsResponse is an object like { clinics: [], total: number } which seems to be the case:
-  // The cachedJson function returns NextResponse<any>, which is the source of the conflict.
-  // We need to ensure the handler returns Promise<NextResponse<ApiResponse<TSuccessPayload>> | NextResponse<ApiErrorResponse>>
-  // For now, bypassing cachedJson to ensure type correctness with apiSuccess.
-  // This might be a temporary measure if caching is critical.
-  return apiSuccess<GetClinicsResponse>({
-    clinics: result.clinics,
-    total: result.total,
-    // Reconstruct pagination if it's part of GetClinicsResponse or handled by apiPaginated
-    // For simplicity, assuming GetClinicsResponse is {clinics: Clinic[], total: number}
-    // and pagination is handled by apiSuccess or client.
-  });
+  return apiSuccess(result);
 });
 
 /**

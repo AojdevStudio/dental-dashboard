@@ -13,7 +13,7 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { DashboardSkeleton } from "@/components/ui/skeleton-loaders";
-import type { Prisma } from "@/generated/prisma";
+import type { Prisma } from "@prisma/client";
 import { type AuthContext, getAuthContext } from "@/lib/database/auth-context";
 import { prisma } from "@/lib/database/prisma";
 import { Suspense } from "react";
