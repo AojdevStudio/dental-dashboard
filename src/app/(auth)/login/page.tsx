@@ -1,9 +1,11 @@
+'use client';
+
 /**
  * @file Login page component.
  * Allows users to sign in or sign out of the application.
  */
 
-'use client';
+import type React from 'react';
 
 import { signInWithOAuth } from '@/actions/auth/oauth';
 import { signInWithVerification } from '@/app/auth/actions';
@@ -34,9 +36,8 @@ export default function LoginPage(): React.ReactElement {
           // Manually redirect since server redirect throws in transitions
           window.location.href = '/dashboard';
         }
-      } catch (error) {
+      } catch (_error) {
         setError('An unexpected error occurred. Please try again.');
-        console.error('Login error:', error);
       }
     });
   };
