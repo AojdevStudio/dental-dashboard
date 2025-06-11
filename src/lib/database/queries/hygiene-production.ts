@@ -1,9 +1,6 @@
 import type { AuthContext } from "../auth-context";
 import { prisma } from "../client";
-import type {
-  Prisma,
-  HygieneProduction as PrismaModelHygieneProduction,
-} from "@prisma/client";
+import type { Prisma, HygieneProduction as PrismaModelHygieneProduction } from "@prisma/client";
 
 // Define a type for the raw result from Prisma, including Decimal fields
 // Use the direct model type for simplicity and to potentially avoid compiler issues
@@ -56,7 +53,7 @@ function mapPrismaRecordToHygieneRecord(
 export async function upsertHygieneProduction(
   authContext: AuthContext,
   records: Array<HygieneProductionData & { id?: string }>,
-  clinicId?: string,
+  clinicId?: string
 ): Promise<HygieneProductionRecord[]> {
   const targetClinicId = clinicId || authContext.clinicIds[0];
 

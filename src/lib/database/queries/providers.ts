@@ -1,5 +1,6 @@
 import type { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/database/client";
+import type { ProviderFilters, PaginationParams } from "@/types/providers";
 
 /**
  * Describes the raw row structure from the dentist performance query.
@@ -115,18 +116,17 @@ export interface ProviderPerformanceMetrics {
  * @param params - Filter and pagination parameters
  * @returns Array of providers with location details
  */
-export async function getProvidersWithLocations(params?: {
-  clinicId?: string;
-  locationId?: string;
-  providerId?: string;
-  providerType?: string;
-  includeInactive?: boolean;
-  pagination?: {
-    offset: number;
-    limit: number;
-  };
-}): Promise<ProviderWithLocations[]> {
-  const { clinicId, locationId, providerId, providerType, includeInactive = false, pagination } = params || {};
+export async function getProvidersWithLocations(
+  params?: ProviderFilters
+): Promise<ProviderWithLocations[]> {
+  const {
+    clinicId,
+    locationId,
+    providerId,
+    providerType,
+    includeInactive = false,
+    pagination,
+  } = params || {};
 
   const whereClause: Prisma.ProviderWhereInput = {};
 
@@ -491,18 +491,17 @@ export async function getProviderLocationSummary(
  * @param params - Filter and pagination parameters
  * @returns Object containing providers array and total count
  */
-export async function getProvidersWithLocationsPaginated(params?: {
-  clinicId?: string;
-  locationId?: string;
-  providerId?: string;
-  providerType?: string;
-  includeInactive?: boolean;
-  pagination?: {
-    offset: number;
-    limit: number;
-  };
-}): Promise<{ providers: ProviderWithLocations[]; total: number }> {
-  const { clinicId, locationId, providerId, providerType, includeInactive = false, pagination } = params || {};
+export async function getProvidersWithLocationsPaginated(
+  params?: ProviderFilters
+): Promise<{ providers: ProviderWithLocations[]; total: number }> {
+  const {
+    clinicId,
+    locationId,
+    providerId,
+    providerType,
+    includeInactive = false,
+    pagination,
+  } = params || {};
 
   const whereClause: Prisma.ProviderWhereInput = {};
 

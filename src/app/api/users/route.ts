@@ -93,4 +93,3 @@ export const POST = withAuth<CreateUserResponse>(
     }
   }
 );
-

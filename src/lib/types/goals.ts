@@ -5,8 +5,14 @@ export const updateGoalSchema = z
   .object({
     name: z.string().min(1).optional(),
     description: z.string().optional(),
-    targetValue: z.coerce.string().regex(/^(?:0|[1-9]\d*)(?:\.\d+)?$/, "Must be a valid positive decimal number").optional(),
-    currentValue: z.coerce.string().regex(/^(?:0|[1-9]\d*)(?:\.\d+)?$/, "Must be a valid non-negative decimal number").optional(),
+    targetValue: z.coerce
+      .string()
+      .regex(/^(?:0|[1-9]\d*)(?:\.\d+)?$/, "Must be a valid positive decimal number")
+      .optional(),
+    currentValue: z.coerce
+      .string()
+      .regex(/^(?:0|[1-9]\d*)(?:\.\d+)?$/, "Must be a valid non-negative decimal number")
+      .optional(),
     targetDate: z.string().datetime().optional(), // Represents endDate in Prisma model
     frequency: z.enum(["daily", "weekly", "monthly", "quarterly", "yearly"]).optional(), // Represents timePeriod in Prisma
     category: z.string().optional(),
@@ -38,7 +44,7 @@ export interface UpdateGoalQueryInput {
  */
 export function mapUpdateGoalData(data: UpdateGoalData): UpdateGoalQueryInput {
   const mapped: UpdateGoalQueryInput = {};
-  
+
   // Direct mappings (same field names)
   if (data.name !== undefined) mapped.name = data.name;
   if (data.description !== undefined) mapped.description = data.description;
@@ -46,12 +52,12 @@ export function mapUpdateGoalData(data: UpdateGoalData): UpdateGoalQueryInput {
   if (data.currentValue !== undefined) mapped.currentValue = data.currentValue;
   if (data.category !== undefined) mapped.category = data.category;
   if (data.status !== undefined) mapped.status = data.status;
-  
+
   // Field name transformations
   if (data.targetDate !== undefined) mapped.endDate = data.targetDate;
   if (data.frequency !== undefined) mapped.timePeriod = data.frequency;
   if (data.metricId !== undefined) mapped.metricDefinitionId = data.metricId;
-  
+
   return mapped;
 }
 

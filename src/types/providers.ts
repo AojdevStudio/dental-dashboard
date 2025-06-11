@@ -66,7 +66,7 @@ export interface ProviderFilters {
   clinicId?: string;
   locationId?: string;
   providerId?: string;
-  providerType?: string;
+  providerType?: "dentist" | "hygienist" | "specialist" | "other";
   includeInactive?: boolean;
   pagination?: PaginationParams;
 }
