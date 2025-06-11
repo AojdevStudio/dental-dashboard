@@ -12,7 +12,7 @@ import { GET as getClinicsRoute } from "@/app/api/clinics/route";
 import { POST as createGoalRoute, GET as getGoalsRoute } from "@/app/api/goals/route";
 import { POST as createMetricRoute, GET as getMetricsRoute } from "@/app/api/metrics/route";
 import { POST as createUserRoute, GET as getUsersRoute } from "@/app/api/users/route";
-import type { Clinic, MetricDefinition, User } from "@/generated/prisma";
+import type { Clinic, MetricDefinition, User } from "@prisma/client";
 import { prisma } from "@/lib/database/client";
 import { createClient } from "@supabase/supabase-js";
 import { NextRequest } from "next/server";

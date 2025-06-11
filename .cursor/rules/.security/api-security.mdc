@@ -1,0 +1,493 @@
+---
+description:
+globs:
+alwaysApply: false
+---
+# API Security and Access Control
+
+## Overview
+
+This rule defines security standards for API endpoints, access control, and permissions management in the dental dashboard. Based on [GitGuardian's API security best practices](https://blog.gitguardian.com/secrets-api-management/) and healthcare data protection requirements.
+
+## Core API Security Principles
+
+### 1. Minimal Permission Scope
+
+**Default to least privilege** for all API operations:
+
+```typescript
+// ✅ CORRECT - Minimal permissions
+const supabaseClient = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!, // Read-only public key
+  {
+    auth: {
+      persistSession: true,
+      autoRefreshToken: true
+    }
+  }
+);
+
+// ❌ WRONG - Using service role key for client operations
+const supabaseClient = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.SUPABASE_SERVICE_ROLE_KEY! // Too much privilege
+);
+```
+
+### 2. Separate Keys for Different Operations
+
+**Use different API keys** for different permission levels:
+
+```typescript
+// ✅ CORRECT - Separate keys by function
+export const supabaseClient = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY! // Client-side operations
+);
+
+export const supabaseAdmin = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.SUPABASE_SERVICE_ROLE_KEY! // Server-side admin operations
+);
+```
+
+### 3. Environment Variable Validation
+
+**Always validate** environment variables in API routes:
+
+```typescript
+// ✅ CORRECT - Validation in API routes
+export async function GET() {
+  const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  
+  if (!serviceRoleKey || !supabaseUrl) {
+    console.error('Missing required environment variables');
+    return NextResponse.json(
+      { error: 'Server configuration error' }, 
+      { status: 500 }
+    );
+  }
+  
+  // Proceed with API logic...
+}
+```
+
+## Project-Specific API Security
+
+### Supabase Row Level Security (RLS)
+
+**All tables MUST have RLS enabled** with clinic-based isolation:
+
+```sql
+-- ✅ REQUIRED - Enable RLS on all tables
+ALTER TABLE location_financial ENABLE ROW LEVEL SECURITY;
+
+-- ✅ REQUIRED - Clinic isolation policy
+CREATE POLICY "Users can only access their clinic data" ON location_financial
+  FOR ALL USING (
+    clinic_id IN (
+      SELECT clinic_id FROM user_clinic_access 
+      WHERE user_id = auth.uid()
+    )
+  );
+
+-- ✅ REQUIRED - Insert policy with clinic validation
+CREATE POLICY "Users can only insert data for their clinic" ON location_financial
+  FOR INSERT WITH CHECK (
+    clinic_id IN (
+      SELECT clinic_id FROM user_clinic_access 
+      WHERE user_id = auth.uid()
+    )
+  );
+```
+
+### API Route Security Patterns
+
+For all routes in [src/app/api/](mdc:src/app/api/):
+
+#### Authentication Check Pattern
+
+```typescript
+// ✅ REQUIRED - Authentication verification
+import { createRouteHandlerClient } from '@supabase/auth-helpers-nextjs';
+import { cookies } from 'next/headers';
+
+export async function GET() {
+  const supabase = createRouteHandlerClient({ cookies });
+  
+  const { data: { session }, error } = await supabase.auth.getSession();
+  
+  if (!session) {
+    return NextResponse.json(
+      { error: 'Unauthorized' }, 
+      { status: 401 }
+    );
+  }
+  
+  // Proceed with authenticated logic...
+}
+```
+
+#### Clinic Access Validation
+
+```typescript
+// ✅ REQUIRED - Clinic access validation
+async function validateClinicAccess(userId: string, clinicId: string) {
+  const { data, error } = await supabase
+    .from('user_clinic_access')
+    .select('clinic_id')
+    .eq('user_id', userId)
+    .eq('clinic_id', clinicId)
+    .single();
+    
+  if (error || !data) {
+    throw new Error('Access denied to clinic');
+  }
+  
+  return true;
+}
+```
+
+#### Input Validation Pattern
+
+```typescript
+// ✅ REQUIRED - Input validation with Zod
+import { z } from 'zod';
+
+const LocationFinancialSchema = z.object({
+  clinicId: z.string().uuid(),
+  locationName: z.enum(['Baytown', 'Humble']),
+  date: z.string().datetime(),
+  production: z.number().min(0),
+  patientIncome: z.number().min(0),
+  insuranceIncome: z.number().min(0)
+});
+
+export async function POST(request: Request) {
+  try {
+    const body = await request.json();
+    const validatedData = LocationFinancialSchema.parse(body);
+    
+    // Proceed with validated data...
+  } catch (error) {
+    return NextResponse.json(
+      { error: 'Invalid input data' }, 
+      { status: 400 }
+    );
+  }
+}
+```
+
+### Google Apps Script API Security
+
+For [scripts/google-apps-script/location-financials-sync/](mdc:scripts/google-apps-script/location-financials-sync/):
+
+#### OAuth Scope Minimization
+
+```json
+// ✅ CORRECT - Minimal OAuth scopes in appsscript.json
+{
+  "oauthScopes": [
+    "https://www.googleapis.com/auth/spreadsheets.readonly",
+    "https://www.googleapis.com/auth/script.external_request"
+  ]
+}
+
+// ❌ WRONG - Excessive permissions
+{
+  "oauthScopes": [
+    "https://www.googleapis.com/auth/spreadsheets",
+    "https://www.googleapis.com/auth/drive",
+    "https://www.googleapis.com/auth/gmail"
+  ]
+}
+```
+
+#### API Key Management
+
+```javascript
+// ✅ CORRECT - Using PropertiesService for secrets
+function getApiCredentials() {
+  const properties = PropertiesService.getScriptProperties();
+  const apiKey = properties.getProperty('SUPABASE_SERVICE_ROLE_KEY');
+  const apiUrl = properties.getProperty('SUPABASE_URL');
+  
+  if (!apiKey || !apiUrl) {
+    throw new Error('Missing API credentials in script properties');
+  }
+  
+  return { apiKey, apiUrl };
+}
+
+// ❌ WRONG - Hard-coded credentials
+const API_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...';
+```
+
+## Access Control Implementation
+
+### Multi-Tenant Security
+
+**Clinic Isolation Requirements**:
+
+1. ✅ **Database Level**: RLS policies enforce clinic boundaries
+2. ✅ **API Level**: All endpoints validate clinic access
+3. ✅ **UI Level**: Components only show authorized clinic data
+4. ✅ **Audit Level**: All actions logged with clinic context
+
+### Role-Based Access Control (RBAC)
+
+```sql
+-- User roles and permissions
+CREATE TYPE user_role AS ENUM ('admin', 'manager', 'staff', 'readonly');
+
+CREATE TABLE user_clinic_access (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id UUID REFERENCES auth.users(id),
+  clinic_id UUID REFERENCES clinics(id),
+  role user_role NOT NULL,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  UNIQUE(user_id, clinic_id)
+);
+
+-- Role-based RLS policy
+CREATE POLICY "Role-based access control" ON location_financial
+  FOR ALL USING (
+    clinic_id IN (
+      SELECT clinic_id FROM user_clinic_access 
+      WHERE user_id = auth.uid()
+      AND role IN ('admin', 'manager', 'staff')
+    )
+  );
+```
+
+### API Rate Limiting
+
+```typescript
+// ✅ RECOMMENDED - Rate limiting middleware
+import { Ratelimit } from '@upstash/ratelimit';
+import { Redis } from '@upstash/redis';
+
+const ratelimit = new Ratelimit({
+  redis: Redis.fromEnv(),
+  limiter: Ratelimit.slidingWindow(10, '10 s'), // 10 requests per 10 seconds
+});
+
+export async function GET(request: Request) {
+  const ip = request.headers.get('x-forwarded-for') ?? 'anonymous';
+  const { success } = await ratelimit.limit(ip);
+  
+  if (!success) {
+    return NextResponse.json(
+      { error: 'Rate limit exceeded' }, 
+      { status: 429 }
+    );
+  }
+  
+  // Proceed with API logic...
+}
+```
+
+## IP Whitelisting and Network Security
+
+### Supabase IP Restrictions
+
+For production environments:
+
+```typescript
+// ✅ RECOMMENDED - Enhanced IP validation for sensitive operations
+const ALLOWED_IPS = process.env.ALLOWED_IPS?.split(',').map(ip => ip.trim()).filter(Boolean) || [];
+
+function getClientIP(request: Request): string | null {
+  // Get the real client IP from trusted headers in order of preference
+  const forwardedFor = request.headers.get('x-forwarded-for');
+  const realIP = request.headers.get('x-real-ip');
+  const cfConnectingIP = request.headers.get('cf-connecting-ip'); // Cloudflare
+  const trueClientIP = request.headers.get('true-client-ip'); // Cloudflare Enterprise
+  
+  // x-forwarded-for can contain multiple IPs (client, proxy1, proxy2)
+  // The first IP is typically the original client
+  if (forwardedFor) {
+    const firstIP = forwardedFor.split(',')[0].trim();
+    if (firstIP && isValidIP(firstIP)) {
+      return firstIP;
+    }
+  }
+  
+  // Try other headers
+  if (cfConnectingIP && isValidIP(cfConnectingIP)) return cfConnectingIP;
+  if (trueClientIP && isValidIP(trueClientIP)) return trueClientIP;
+  if (realIP && isValidIP(realIP)) return realIP;
+  
+  return null;
+}
+
+function isValidIP(ip: string): boolean {
+  // Basic IPv4 and IPv6 validation
+  const ipv4Regex = /^(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/;
+  const ipv6Regex = /^(?:[0-9a-fA-F]{1,4}:){7}[0-9a-fA-F]{1,4}$|^::1$|^::$/;
+  
+  return ipv4Regex.test(ip) || ipv6Regex.test(ip);
+}
+
+function validateIPAccess(request: Request) {
+  // Skip IP validation if no IPs are configured
+  if (ALLOWED_IPS.length === 0) {
+    return;
+  }
+  
+  const clientIP = getClientIP(request);
+  
+  // Reject if we can't determine the client IP
+  if (!clientIP) {
+    throw new Error('Unable to determine client IP address');
+  }
+  
+  // Check if the client IP is in the allowlist
+  if (!ALLOWED_IPS.includes(clientIP)) {
+    console.warn(`Unauthorized IP access attempt: ${clientIP}`);
+    throw new Error('IP address not authorized');
+  }
+}
+```
+
+### Google Apps Script Network Security
+
+```javascript
+// ✅ RECOMMENDED - Validate request origin
+function validateRequestOrigin() {
+  const allowedDomains = ['kamdental.com', 'localhost'];
+  const origin = Session.getActiveUser().getEmail().split('@')[1];
+  
+  if (!allowedDomains.includes(origin)) {
+    throw new Error('Unauthorized domain');
+  }
+}
+```
+
+## Short-Lived Tokens and Rotation
+
+### JWT Token Management
+
+```typescript
+// ✅ RECOMMENDED - Short-lived tokens
+const JWT_EXPIRY = '15m'; // 15 minutes
+
+export function generateAccessToken(userId: string, clinicId: string) {
+  return jwt.sign(
+    { 
+      userId, 
+      clinicId,
+      type: 'access'
+    },
+    process.env.JWT_SECRET!,
+    { 
+      expiresIn: JWT_EXPIRY,
+      issuer: 'dental-dashboard',
+      audience: 'api'
+    }
+  );
+}
+```
+
+### API Key Rotation Schedule
+
+**Required Rotation Intervals**:
+
+- 🔄 **Supabase Service Role Key**: Every 90 days
+- 🔄 **Google OAuth Credentials**: Every 180 days
+- 🔄 **JWT Signing Keys**: Every 30 days
+- 🔄 **Database Passwords**: Every 180 days
+
+## Error Handling Security
+
+### Secure Error Responses
+
+```typescript
+// ✅ CORRECT - Generic error messages
+export async function GET() {
+  try {
+    // API logic...
+  } catch (error) {
+    console.error('API Error:', error); // Log detailed error server-side
+    
+    return NextResponse.json(
+      { error: 'Internal server error' }, // Generic client response
+      { status: 500 }
+    );
+  }
+}
+
+// ❌ WRONG - Exposing internal details
+export async function GET() {
+  try {
+    // API logic...
+  } catch (error) {
+    return NextResponse.json(
+      { error: error.message }, // May expose sensitive information
+      { status: 500 }
+    );
+  }
+}
+```
+
+### Audit Logging
+
+```typescript
+// ✅ REQUIRED - Audit all sensitive operations
+async function auditLog(action: string, userId: string, clinicId: string, details: any) {
+  await supabase
+    .from('audit_logs')
+    .insert({
+      action,
+      user_id: userId,
+      clinic_id: clinicId,
+      details,
+      ip_address: getClientIP(),
+      user_agent: getUserAgent(),
+      timestamp: new Date().toISOString()
+    });
+}
+```
+
+## Security Monitoring and Alerts
+
+### Required Monitoring
+
+- 📊 **Failed authentication attempts** (> 5 per minute)
+- 📊 **Unusual API usage patterns** (> 100 requests per minute)
+- 📊 **Cross-clinic data access attempts**
+- 📊 **Privilege escalation attempts**
+- 📊 **Suspicious IP addresses**
+
+### Alert Thresholds
+
+```typescript
+// ✅ RECOMMENDED - Security monitoring
+const SECURITY_THRESHOLDS = {
+  FAILED_AUTH_ATTEMPTS: 5,
+  API_REQUESTS_PER_MINUTE: 100,
+  CROSS_CLINIC_ATTEMPTS: 1,
+  SUSPICIOUS_IP_REQUESTS: 10
+};
+```
+
+## Compliance Requirements
+
+### HIPAA Compliance
+
+- ✅ **Encryption in transit** (HTTPS only)
+- ✅ **Encryption at rest** (database encryption)
+- ✅ **Access logging** (all data access audited)
+- ✅ **User authentication** (no anonymous access)
+- ✅ **Data minimization** (only necessary data exposed)
+
+### SOC 2 Compliance
+
+- ✅ **Access controls** (role-based permissions)
+- ✅ **Change management** (all API changes reviewed)
+- ✅ **Incident response** (security incident procedures)
+- ✅ **Monitoring** (continuous security monitoring)
+
+Remember: **Security is layered**. No single control is sufficient - implement defense in depth.

@@ -3,7 +3,7 @@
  * Multi-tenant aware user operations
  */
 
-import type { Prisma } from "@/generated/prisma";
+import type { Prisma } from "@prisma/client";
 import { type AuthContext, validateClinicAccess } from "../auth-context";
 import { prisma } from "../client";
 

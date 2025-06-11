@@ -16,9 +16,42 @@ export class ApiError extends Error {
 }
 
 /**
+ * Generic API Response interface for typing the shape of response bodies.
+ * Used to ensure consistency in the data structure returned by API endpoints.
+ * @template T The type of the data payload.
+ */
+export interface ApiSuccessPayload<T = unknown> {
+  success: true;
+  data: T;
+  pagination?: {
+    total: number;
+    page: number;
+    limit: number;
+    totalPages: number;
+  };
+}
+
+export interface ApiErrorPayload {
+  success: false;
+  error: {
+    message: string;
+    code?: string;
+  };
+}
+
+export type ApiResponse<T = unknown> = ApiSuccessPayload<T> | ApiErrorPayload;
+
+/**
+ * Created response helper function
+ */
+export function apiCreated<T>(data: T): NextResponse<ApiSuccessPayload<T>> {
+  return apiSuccess(data, 201);
+}
+
+/**
  * Success response helper function
  */
-export function apiSuccess<T>(data: T, status = 200) {
+export function apiSuccess<T>(data: T, status = 200): NextResponse<ApiSuccessPayload<T>> {
   return NextResponse.json(
     {
       success: true,
@@ -31,8 +64,12 @@ export function apiSuccess<T>(data: T, status = 200) {
 /**
  * Error response helper function
  */
-export function apiError(message: string, status = 500, code?: string) {
-  return NextResponse.json({ error: message, code }, { status });
+export function apiError(
+  message: string,
+  status = 500,
+  code?: string
+): NextResponse<ApiErrorPayload> {
+  return NextResponse.json({ success: false, error: { message, code } }, { status });
 }
 
 /**
@@ -44,7 +81,7 @@ export function apiPaginated<T>(
   page: number,
   limit: number,
   status = 200
-) {
+): NextResponse<ApiSuccessPayload<T[]>> {
   return NextResponse.json(
     {
       success: true,
@@ -74,7 +111,7 @@ export function getPaginationParams(searchParams: URLSearchParams) {
 /**
  * Handle API errors consistently
  */
-export function handleApiError(error: unknown): NextResponse {
+export function handleApiError(error: unknown): NextResponse<ApiErrorPayload> {
   console.error("API Error:", error);
 
   if (error instanceof ApiError) {

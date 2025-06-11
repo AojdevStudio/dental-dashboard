@@ -1,5 +1,13 @@
-import type { AuthContext } from "@/lib/auth/session";
+import type { AuthContext } from "../auth-context";
 import { prisma } from "../client";
+import type {
+  Prisma,
+  HygieneProduction as PrismaModelHygieneProduction,
+} from "@prisma/client";
+
+// Define a type for the raw result from Prisma, including Decimal fields
+// Use the direct model type for simplicity and to potentially avoid compiler issues
+type PrismaHygieneProduction = PrismaModelHygieneProduction;
 
 export interface HygieneProductionData {
   date: Date;
@@ -10,8 +18,8 @@ export interface HygieneProductionData {
   productionGoal?: number;
   variancePercentage?: number;
   bonusAmount?: number;
-  providerId?: string;
-  dataSourceId?: string;
+  providerId?: string | null; // Prisma schema might allow null
+  dataSourceId?: string | null; // Prisma schema might allow null
 }
 
 export interface HygieneProductionRecord extends HygieneProductionData {
@@ -21,22 +29,41 @@ export interface HygieneProductionRecord extends HygieneProductionData {
   updatedAt: Date;
 }
 
+function mapPrismaRecordToHygieneRecord(
+  prismaRecord: PrismaHygieneProduction
+): HygieneProductionRecord {
+  return {
+    id: prismaRecord.id,
+    clinicId: prismaRecord.clinicId,
+    createdAt: prismaRecord.createdAt,
+    updatedAt: prismaRecord.updatedAt,
+    date: prismaRecord.date,
+    monthTab: prismaRecord.monthTab,
+    hoursWorked: prismaRecord.hoursWorked?.toNumber(),
+    estimatedProduction: prismaRecord.estimatedProduction?.toNumber(),
+    verifiedProduction: prismaRecord.verifiedProduction?.toNumber(),
+    productionGoal: prismaRecord.productionGoal?.toNumber(),
+    variancePercentage: prismaRecord.variancePercentage?.toNumber(),
+    bonusAmount: prismaRecord.bonusAmount?.toNumber(),
+    providerId: prismaRecord.providerId,
+    dataSourceId: prismaRecord.dataSourceId,
+  };
+}
+
 /**
  * Upsert hygiene production records (create or update existing)
  */
 export async function upsertHygieneProduction(
   authContext: AuthContext,
   records: Array<HygieneProductionData & { id?: string }>,
-  clinicId?: string
+  clinicId?: string,
 ): Promise<HygieneProductionRecord[]> {
-  // Use provided clinicId or default to user's first clinic
   const targetClinicId = clinicId || authContext.clinicIds[0];
 
   if (!targetClinicId) {
     throw new Error("No clinic ID provided or accessible to user");
   }
 
-  // Verify user has access to this clinic
   if (!authContext.clinicIds.includes(targetClinicId)) {
     throw new Error("User does not have access to the specified clinic");
   }
@@ -44,13 +71,7 @@ export async function upsertHygieneProduction(
   const results: HygieneProductionRecord[] = [];
 
   for (const record of records) {
-    const existingRecord = record.id
-      ? await prisma.hygieneProduction.findUnique({
-          where: { id: record.id },
-        })
-      : null;
-
-    const data = {
+    const dataToUpsert = {
       date: record.date,
       monthTab: record.monthTab,
       hoursWorked: record.hoursWorked,
@@ -64,25 +85,19 @@ export async function upsertHygieneProduction(
       dataSourceId: record.dataSourceId,
     };
 
-    let upsertedRecord: unknown;
+    let upsertedPrismaRecord: PrismaHygieneProduction;
 
-    if (existingRecord) {
-      // Update existing record
-      upsertedRecord = await prisma.hygieneProduction.update({
+    if (record.id) {
+      upsertedPrismaRecord = await prisma.hygieneProduction.update({
         where: { id: record.id },
-        data,
+        data: dataToUpsert,
       });
     } else {
-      // Create new record
-      upsertedRecord = await prisma.hygieneProduction.create({
-        data: {
-          id: record.id || undefined, // Let Prisma generate if not provided
-          ...data,
-        },
+      upsertedPrismaRecord = await prisma.hygieneProduction.create({
+        data: dataToUpsert, // Prisma handles ID generation if `id` is not in dataToUpsert or is undefined
       });
     }
-
-    results.push(upsertedRecord);
+    results.push(mapPrismaRecordToHygieneRecord(upsertedPrismaRecord));
   }
 
   return results;
@@ -103,19 +118,17 @@ export async function getHygieneProduction(
     offset?: number;
   } = {}
 ): Promise<HygieneProductionRecord[]> {
-  // Use provided clinicId or default to user's first clinic
   const targetClinicId = clinicId || authContext.clinicIds[0];
 
   if (!targetClinicId) {
     throw new Error("No clinic ID provided or accessible to user");
   }
 
-  // Verify user has access to this clinic
   if (!authContext.clinicIds.includes(targetClinicId)) {
     throw new Error("User does not have access to the specified clinic");
   }
 
-  const where: Record<string, unknown> = {
+  const where: Prisma.HygieneProductionWhereInput = {
     clinicId: targetClinicId,
   };
 
@@ -126,10 +139,10 @@ export async function getHygieneProduction(
   if (options.startDate || options.endDate) {
     where.date = {};
     if (options.startDate) {
-      where.date.gte = options.startDate;
+      (where.date as Prisma.DateTimeFilter).gte = options.startDate;
     }
     if (options.endDate) {
-      where.date.lte = options.endDate;
+      (where.date as Prisma.DateTimeFilter).lte = options.endDate;
     }
   }
 
@@ -137,31 +150,17 @@ export async function getHygieneProduction(
     where.monthTab = options.monthTab;
   }
 
-  return prisma.hygieneProduction.findMany({
+  // Fetch raw Prisma records without provider/dataSource includes here
+  // as HygieneProductionRecord does not include them.
+  const prismaRecords = await prisma.hygieneProduction.findMany({
     where,
     orderBy: { date: "desc" },
     take: options.limit,
     skip: options.offset,
-    include: {
-      provider: {
-        select: {
-          id: true,
-          name: true,
-          firstName: true,
-          lastName: true,
-          providerType: true,
-        },
-      },
-      dataSource: {
-        select: {
-          id: true,
-          name: true,
-          spreadsheetId: true,
-          sheetName: true,
-        },
-      },
-    },
+    // Do not include relations if HygieneProductionRecord doesn't define them
   });
+
+  return prismaRecords.map(mapPrismaRecordToHygieneRecord);
 }
 
 /**
@@ -188,7 +187,7 @@ export async function getHygieneProductionStats(
     throw new Error("No access to clinic");
   }
 
-  const where: Record<string, unknown> = {
+  const where: Prisma.HygieneProductionWhereInput = {
     clinicId: targetClinicId,
   };
 
@@ -199,10 +198,10 @@ export async function getHygieneProductionStats(
   if (options.startDate || options.endDate) {
     where.date = {};
     if (options.startDate) {
-      where.date.gte = options.startDate;
+      (where.date as Prisma.DateTimeFilter).gte = options.startDate;
     }
     if (options.endDate) {
-      where.date.lte = options.endDate;
+      (where.date as Prisma.DateTimeFilter).lte = options.endDate;
     }
   }
 
@@ -216,12 +215,12 @@ export async function getHygieneProductionStats(
     },
   });
 
-  const totalHours = Number(aggregations._sum.hoursWorked) || 0;
-  const totalProduction = Number(aggregations._sum.verifiedProduction) || 0;
-  const totalBonus = Number(aggregations._sum.bonusAmount) || 0;
+  const totalHours = aggregations._sum.hoursWorked?.toNumber() || 0;
+  const totalProduction = aggregations._sum.verifiedProduction?.toNumber() || 0;
+  const totalBonus = aggregations._sum.bonusAmount?.toNumber() || 0;
 
   return {
-    totalRecords: aggregations._count.id,
+    totalRecords: aggregations._count.id || 0,
     totalHours,
     totalProduction,
     totalBonus,

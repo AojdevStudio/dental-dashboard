@@ -1,4 +1,4 @@
-import type { Prisma } from "@/generated/prisma"; // Location type might not be needed directly here anymore
+import type { Prisma } from "@prisma/client"; // Location type might not be needed directly here anymore
 import { prisma } from "@/lib/database/client";
 import { type NextRequest, NextResponse } from "next/server";
 

@@ -5,9 +5,9 @@
 
 import { cachedJson } from "@/lib/api/cache-headers";
 import { withAuth } from "@/lib/api/middleware";
-import { ApiError, ApiResponse, getPaginationParams } from "@/lib/api/utils";
+import { apiSuccess, apiError, getPaginationParams, type ApiResponse } from "@/lib/api/utils";
 import * as clinicQueries from "@/lib/database/queries/clinics";
-import { NextRequest } from "next/server";
+import type { NextRequest } from "next/server";
 import { z } from "zod";
 
 // Request schemas
@@ -32,10 +32,11 @@ export type CreateClinicResponse = Awaited<ReturnType<typeof clinicQueries.creat
  * GET /api/clinics
  * Get clinics accessible to the user
  */
-export const GET = withAuth(async (request, { authContext }) => {
-  const searchParams = request.nextUrl.searchParams;
+export const GET = withAuth<GetClinicsResponse>(async (request: Request, { authContext }) => {
+  const url = new URL(request.url);
+  const searchParams = url.searchParams;
   const includeInactive = searchParams.get("includeInactive") === "true";
-  const { limit, offset } = getPaginationParams(request);
+  const { limit, offset } = getPaginationParams(searchParams);
 
   const result = await clinicQueries.getClinics(authContext, {
     includeInactive,
@@ -43,43 +44,32 @@ export const GET = withAuth(async (request, { authContext }) => {
     offset,
   });
 
-  // Clinic data is relatively static, cache for 10 minutes
-  return cachedJson(
-    {
-      clinics: result.clinics,
-      pagination: {
-        total: result.total,
-        page: Math.floor(offset / limit) + 1,
-        limit,
-      },
-    },
-    "PRIVATE"
-  );
+  return apiSuccess(result);
 });
 
 /**
  * POST /api/clinics
  * Create a new clinic (super admin only)
  */
-export const POST = withAuth(
-  async (request, { authContext }) => {
+export const POST = withAuth<CreateClinicResponse>(
+  async (request: Request, { authContext }) => {
     // Parse and validate request body
     let body: z.infer<typeof createClinicSchema>;
     try {
       const rawBody = await request.json();
       body = createClinicSchema.parse(rawBody);
     } catch (error) {
-      return ApiError.badRequest("Invalid request body");
+      return apiError("Invalid request body", 400);
     }
 
     // Create clinic through query layer
     try {
       const clinic = await clinicQueries.createClinic(authContext, body);
-      return ApiResponse.created(clinic);
+      return apiSuccess(clinic, 201);
     } catch (error) {
       if (error instanceof Error) {
         if (error.message.includes("Only administrators")) {
-          return ApiError.forbidden(error.message);
+          return apiError(error.message, 403);
         }
       }
       throw error;

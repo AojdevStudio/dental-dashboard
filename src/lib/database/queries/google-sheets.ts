@@ -3,7 +3,7 @@
  * Multi-tenant aware Google Sheets operations
  */
 
-import type { Prisma } from "@/generated/prisma";
+import type { Prisma } from "@prisma/client";
 import { type AuthContext, isClinicAdmin, validateClinicAccess } from "../auth-context";
 import { prisma } from "../client";
 

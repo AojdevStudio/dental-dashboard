@@ -13,6 +13,7 @@ import { prisma } from "@/lib/database/client";
 import * as clinicQueries from "@/lib/database/queries/clinics";
 import * as googleSheetsQueries from "@/lib/database/queries/google-sheets";
 import * as userQueries from "@/lib/database/queries/users";
+import type { User } from "@prisma/client"; // Corrected User import path
 import { createClient } from "@supabase/supabase-js";
 import { v4 as uuidv4 } from "uuid";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
@@ -28,7 +29,7 @@ const securityTestData = {
     { id: uuidv4(), name: "Secure Clinic A", location: "Secure City A" },
     { id: uuidv4(), name: "Secure Clinic B", location: "Secure City B" },
   ],
-  users: [] as unknown[],
+  users: [] as User[], // Changed from unknown[] to User[]
   authIds: [] as string[],
   maliciousInputs: [
     "'; DROP TABLE users; --",

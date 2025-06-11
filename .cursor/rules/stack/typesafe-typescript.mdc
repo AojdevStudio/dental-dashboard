@@ -1,0 +1,53 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+# TypeScript Safety and Best Practices
+
+To minimize `tsc` errors and improve code quality, all TypeScript code (`.ts` and `.tsx` files) must adhere to the following rules.
+
+### 1. Enforce Strict Null Checks
+Always verify that a variable is not `null` or `undefined` before using it. Use conditional checks, optional chaining (`?.`), and the nullish coalescing operator (`??`) to handle potentially null values safely.
+
+**Example:**
+```typescript
+// Don't do this:
+const name = user.profile.name; // Fails if user or profile is null
+
+// Do this:
+const name = user?.profile?.name ?? 'Guest';
+```
+
+### 2. Define and Validate Types for External Data
+For any data coming from an external source (APIs, raw SQL, etc.), create a specific `interface` or `type`. Use a validation library like **Zod** to parse this data at the boundary of your application. This ensures that the data conforms to the expected shape before your code interacts with it.
+
+**Example:**
+```typescript
+import { z } from 'zod';
+
+const UserSchema = z.object({
+  id: z.string().uuid(),
+  name: z.string(),
+  email: z.string().email(),
+});
+
+async function fetchUserData(userId: string) {
+  const response = await fetch(`/api/users/${userId}`);
+  const data = await response.json();
+  
+  // Validate data at the boundary
+  const user = UserSchema.parse(data);
+  
+  return user;
+}
+```
+
+### 3. Use Environment-Specific tsconfig.json Files
+Create separate `tsconfig.json` files for different execution environments. For instance, have a `supabase/functions/tsconfig.json` that includes Deno types and extends the base `tsconfig.json`. This will resolve environment-specific global type conflicts.
+
+### 4. Write Type-Safe Prisma Queries
+Rely on the auto-generated types from your Prisma client. Your IDE's autocompletion, guided by these types, will help you write valid queries and prevent errors in `include` or `select` clauses. Let the Prisma client guide you.
+
+### 5. Integrate Type Checking into Your Workflow
+Run `pnpm tsc --noEmit` regularly during development to catch errors early. A pre-commit hook that runs both the TypeScript check and `pnpm biome check` is required. This prevents code with type errors or linting issues from ever being committed to the repository.

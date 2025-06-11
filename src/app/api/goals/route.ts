@@ -3,15 +3,17 @@
  * Multi-tenant aware goal management endpoints
  */
 
-import { withAuth } from "@/lib/api/middleware";
-import { ApiError, ApiResponse, getPaginationParams } from "@/lib/api/utils";
-import * as goalQueries from "@/lib/database/queries/goals";
+import { withAuth } from "../../../lib/api/middleware";
+import { apiError, apiPaginated, apiSuccess, getPaginationParams } from "../../../lib/api/utils";
+import type { AuthContext } from "../../../lib/database/auth-context";
+import * as goalQueries from "../../../lib/database/queries/goals";
+import type { NextRequest } from "next/server";
 import { z } from "zod";
 
 // Request schemas
 const createGoalSchema = z.object({
   metricDefinitionId: z.string().cuid(),
-  timePeriod: z.enum(["daily", "weekly", "monthly", "quarterly", "annual"]),
+  timePeriod: z.enum(["daily", "weekly", "monthly", "quarterly", "yearly"]),
   startDate: z.string().datetime(),
   endDate: z.string().datetime(),
   targetValue: z.string(),
@@ -36,14 +38,14 @@ export type CreateGoalResponse = Awaited<ReturnType<typeof goalQueries.createGoa
  * Get goals with filtering and optional progress
  */
 export const GET = withAuth(async (request, { authContext }) => {
-  const searchParams = request.nextUrl.searchParams;
+  const searchParams = (request as NextRequest).nextUrl.searchParams;
   const clinicId = searchParams.get("clinicId") || undefined;
   const providerId = searchParams.get("providerId") || undefined;
   const metricDefinitionId = searchParams.get("metricDefinitionId") || undefined;
   const active = searchParams.get("active");
   const timePeriod = searchParams.get("timePeriod") || undefined;
   const includeProgress = searchParams.get("includeProgress") === "true";
-  const { limit, offset } = getPaginationParams(request);
+  const { limit, page, offset } = getPaginationParams(searchParams);
 
   const result = await goalQueries.getGoals(
     authContext,
@@ -61,7 +63,7 @@ export const GET = withAuth(async (request, { authContext }) => {
     }
   );
 
-  return ApiResponse.paginated(result.goals, result.total, Math.floor(offset / limit) + 1, limit);
+  return apiPaginated(result.goals, result.total, page, limit);
 });
 
 /**
@@ -77,7 +79,7 @@ export const POST = withAuth(async (request, { authContext }) => {
     try {
       body = createFromTemplateSchema.parse(rawBody);
     } catch (error) {
-      return ApiError.badRequest("Invalid request body");
+      return apiError("Invalid request body", 400);
     }
 
     try {
@@ -88,14 +90,14 @@ export const POST = withAuth(async (request, { authContext }) => {
         endDate: new Date(body.endDate),
         targetValue: body.targetValue,
       });
-      return ApiResponse.created(goal);
+      return apiSuccess(goal, 201);
     } catch (error) {
       if (error instanceof Error) {
         if (error.message.includes("Access denied")) {
-          return ApiError.forbidden(error.message);
+          return apiError(error.message, 403);
         }
         if (error.message.includes("not found")) {
-          return ApiError.notFound(error.message);
+          return apiError(error.message, 404);
         }
       }
       throw error;
@@ -106,28 +108,32 @@ export const POST = withAuth(async (request, { authContext }) => {
     try {
       body = createGoalSchema.parse(rawBody);
     } catch (error) {
-      return ApiError.badRequest("Invalid request body");
+      return apiError("Invalid request body", 400);
     }
 
-    const goalData = {
-      ...body,
+    const goalData: goalQueries.CreateGoalInput = {
+      metricDefinitionId: body.metricDefinitionId,
+      timePeriod: body.timePeriod,
       startDate: new Date(body.startDate),
       endDate: new Date(body.endDate),
+      targetValue: body.targetValue,
+      clinicId: body.clinicId,
+      providerId: body.providerId,
     };
 
     try {
       const goal = await goalQueries.createGoal(authContext, goalData);
-      return ApiResponse.created(goal);
+      return apiSuccess(goal, 201);
     } catch (error) {
       if (error instanceof Error) {
         if (error.message.includes("Access denied")) {
-          return ApiError.forbidden(error.message);
+          return apiError(error.message, 403);
         }
         if (error.message.includes("Insufficient permissions")) {
-          return ApiError.forbidden(error.message);
+          return apiError(error.message, 403);
         }
         if (error.message.includes("Invalid")) {
-          return ApiError.badRequest(error.message);
+          return apiError(error.message, 400);
         }
       }
       throw error;

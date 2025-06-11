@@ -21,12 +21,12 @@
 
       3. Package Creation:
          📦 Create Optimized Package:
-         repomix pack create --name "ai-optimized"
-         --include "models/"
-         --include "data/"
-         --include "configs/"
-         --exclude "*.tmp"
-         --exclude "cache/"
+         repomix pack create --name "ai-optimized" \
+             --include "models/" \
+             --include "data/" \
+             --include "configs/" \
+             --exclude "*.tmp" \
+             --exclude "cache/"
 
       4. Validation:
          ✅ Verify Package:

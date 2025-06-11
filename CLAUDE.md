@@ -2,159 +2,190 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+## Project Overview
+
+This is a multi-tenant dental practice dashboard built with Next.js 15, TypeScript, Supabase, and Prisma. The application provides comprehensive data visualization and KPI tracking for dental clinics, with Google Sheets integration for data sync.
+
+## Development Commands
+
+### Core Development
+- `pnpm dev` - Start development server with Turbopack
+- `pnpm build` - Build production application
+- `pnpm start` - Start production server
+
+### Code Quality
+- `pnpm lint` - Run Biome linter
+- `pnpm lint:fix` - Fix linting issues automatically
+- `pnpm format` - Format code with Biome
+- `pnpm typecheck` - Run TypeScript type checking
+
+### Database Operations
+- `pnpm prisma:generate` - Generate Prisma client after schema changes
+- `pnpm prisma:push` - Push schema changes to database (development)
+- `pnpm prisma:studio` - Open Prisma Studio for data inspection
+- `pnpm prisma:seed` - Seed database with initial data
+- `pnpm dlx tsx prisma/seed.ts` - Alternative seed command
+
+### Testing
+- `pnpm test` - Run unit tests with Vitest
+- `pnpm test:watch` - Run tests in watch mode
+- `pnpm test:coverage` - Generate test coverage report
+
+### Data Migration Scripts
+- `pnpm migrate:uuid` - Run UUID migration script
+- `pnpm migrate:validate` - Validate migration integrity
+- `pnpm migrate:rollback` - Rollback UUID migration
+
+## Architecture Overview
+
+### Technology Stack
+- **Framework:** Next.js 15 with App Router and Turbopack
+- **Language:** TypeScript 5.8.3 with strict mode
+- **Database:** Supabase PostgreSQL with Prisma ORM
+- **UI:** React 19, Shadcn UI, Radix UI, Tailwind CSS 4
+- **State Management:** Server Components, React Context, Zustand, TanStack Query
+- **Authentication:** Supabase Auth with SSR
+- **Testing:** Vitest with jsdom environment
+- **Code Quality:** Biome for linting and formatting
+
+### Project Structure
+```
+src/
+├── app/                    # Next.js App Router pages
+│   ├── (auth)/            # Authentication pages
+│   ├── (dashboard)/       # Main application pages
+│   └── api/               # API routes
+├── components/            # React components
+│   ├── ui/               # Generic UI components (Shadcn)
+│   ├── dashboard/        # Dashboard-specific components
+│   ├── auth/             # Authentication components
+│   └── common/           # Shared components
+├── lib/                  # Utilities and configurations
+│   ├── database/         # Prisma client and queries
+│   ├── auth/             # Authentication utilities
+│   ├── supabase/         # Supabase client configurations
+│   └── utils/            # General utilities
+├── hooks/                # Custom React hooks
+├── types/                # TypeScript type definitions
+└── styles/               # Global styles
+```
+
+### Database Architecture
+- **Multi-tenant design** with clinic-based data isolation
+- **Row Level Security (RLS)** for data access control
+- **UUID migration in progress** (dual CUID/UUID support)
+- **Prisma as exclusive data access layer** (Supabase Data API disabled)
+
+## Workflow Guidance
+
+### Project Management
+- When starting work on a PRD (Product Requirements Document), move it from the backlog folder to the doing folder
+- Once a PRD is completed, move it to the done folder
+- After completion, write a summary and place it in ~/.claude/completed
+
+### Database Development
+1. **Schema Changes:**
+   - For rapid iteration: `pnpm prisma:push`
+   - For versioned changes: `pnpm prisma migrate dev --name descriptive_name`
+2. **After schema changes:** Always run `pnpm prisma:generate`
+3. **Data seeding:** Use `pnpm dlx tsx prisma/seed.ts` for reliable seeding
+
+### API Development
+- API routes are located in `src/app/api/`
+- Use the `withAuth` middleware for protected routes
+- Follow RESTful conventions for route naming
+- Use Zod for request/response validation
+- Implement proper error handling with `ApiError` and `ApiResponse`
+
 ## Supabase Project Details
 - **Project ID:** yovbdmjwrrgardkgrenc
 - **Project Name:** dashboard
 
-## Essential Commands
+## TypeScript Best Practices
 
-**Development:**
-```bash
-pnpm dev          # Start development server with Turbopack
-pnpm build        # Build for production
-pnpm start        # Start production server
-pnpm lint         # Run Biome linter and formatter
-pnpm lint:fix     # Auto-fix linting issues
-```
+1. **Enforce Strict Null Checks:**
+   - Always verify that a variable is not null or undefined before using it
+   - Use conditional checks, optional chaining (?.), and the nullish coalescing operator (??)
 
-**Database:**
-```bash
-pnpm db:generate  # Generate Prisma client
-pnpm db:push      # Push schema changes to database
-pnpm db:migrate   # Run database migrations
-pnpm db:studio    # Open Prisma Studio
-pnpm db:seed      # Seed database with sample data
-```
+2. **Define and Validate Types for External Data:**
+   - For any data coming from an external source (APIs, raw SQL, etc.), create a specific interface or type
+   - Use Zod to parse this data at the boundary of your application
 
-**Testing:**
-```bash
-pnpm test         # Run all tests with Vitest
-pnpm test:ui      # Run tests with UI
-pnpm test:integration  # Run integration tests only
-```
+3. **Use Environment-Specific tsconfig.json Files:**
+   - Create separate tsconfig.json files for different execution environments
+   - For Supabase functions, include Deno types and extend the base tsconfig.json
 
-**Utility:**
-```bash
-date              # Run `date` for date-related tasks
-```
+4. **Write Type-Safe Prisma Queries:**
+   - Rely on the auto-generated types from your Prisma client
+   - Use IDE autocompletion to prevent errors in include or select clauses
 
-## Architecture Overview
-
-### Tech Stack
-- **Framework:** Next.js 15 (App Router) with React 19, TypeScript 5.8
-- **Database:** Supabase (PostgreSQL) with Prisma ORM
-- **Authentication:** Supabase Auth with SSR
-- **UI:** Tailwind CSS 4, Shadcn UI, Radix primitives
-- **State:** TanStack Query, Zustand, React Hook Form + Zod
-- **Code Quality:** Biome (linting/formatting), Vitest (testing)
-
-### Multi-Tenant Architecture
-This is a **multi-tenant dental practice management system** with:
-- **Clinic-based isolation** using Row Level Security (RLS)
-- **Role-based access control:** clinic_admin, provider, staff, viewer
-- **Location-based financial tracking** for multi-location clinics
-- **UUID migration support** with dual ID system (CUID + UUID)
-
-### Key Database Models
-```
-Clinic -> User (via UserClinicRole) -> Provider -> DataSource
-Clinic -> Location -> LocationFinancial
-Provider -> HygieneProduction, DentistProduction
-```
-
-### Authentication Flow
-- **Middleware-based route protection** (`middleware.ts`) with comprehensive logging
-- **Separate Supabase clients** for browser vs server contexts
-- **API route protection** using `withAuth` middleware pattern
-- **OAuth integration** for Google Sheets access
-
-## Critical Patterns
-
-### 1. Database Queries
-- **All queries in `src/lib/database/queries/`** - centralized data access
-- **Auth context required** - every query must include clinic/user authorization
-- **Zod schemas in `src/lib/database/schemas/`** for validation
-- **Generated Prisma client** located at `src/generated/prisma/` (not standard location)
-
-### 2. API Routes Structure
-```
-/api/auth/          # Authentication endpoints
-/api/clinics/       # Clinic management + statistics
-/api/metrics/       # Financial, provider, patient metrics
-/api/providers/     # Provider management + locations
-/api/export/        # CSV/PDF export functionality
-```
-
-### 3. Logging with Winston
-- **Structured logging required** - use `src/lib/utils/logger.ts`
-- **Environment-specific levels:** debug (dev), warn (production)
-- **Include metadata:** userId, clinicId, action for all operations
-- **Avoid PII in logs** - follow guidelines in `/docs/rules/agent/winston-logging-guidelines.mdc`
-
-### 4. Error Handling
-- **Use ApiError classes** for consistent error responses
-- **Include correlation IDs** in error logs
-- **Follow error handling patterns** in existing API routes
+5. **Integrate Type Checking into Your Workflow:**
+   - Run `pnpm typecheck` regularly during development
+   - Set up pre-commit hooks that run TypeScript check and Biome formatting
 
 ## Development Guidelines
 
-### File Organization
-- **`src/` directory structure** (not root-level components)
-- **Absolute imports with `@/`** alias
-- **Component organization:** ui/ (reusable), auth/, dashboard/, common/
-- **Generated files in `src/generated/`** - do not edit manually
+### Code Quality Standards
+- Follow Biome configuration for consistent formatting
+- Use structured logging with Winston (configured in `src/lib/utils/logger.ts`)
+- Implement comprehensive error handling
+- Write unit tests for utilities and integration tests for API routes
 
-### Code Quality
-- **Biome configuration:** 100-char line width, 2-space indentation, strict rules
-- **TypeScript strict mode** with comprehensive type checking
-- **Server Components by default** - only use 'use client' when necessary
-- **Consistent naming:** kebab-case for files, PascalCase for components
+### Component Development
+- Use Server Components by default, Client Components only when needed
+- Follow the component structure in `docs/rules/structure/`
+- Use absolute imports with `@/` prefix
+- Group imports in order: React/Next.js, third-party, local absolute, local relative, types
 
-### Google Sheets Integration
-- **OAuth flow implemented** but data processing is placeholder
-- **Column mapping system** for transforming spreadsheet data
-- **Sync operations** need implementation in `/api/hygiene-production/sync/` and similar endpoints
-- **Google Apps Scripts** available in `/scripts/google-apps-script/`
+### Security Considerations
+- Never log sensitive information (passwords, API keys, PII)
+- Use environment variables for configuration
+- Implement proper authentication and authorization
+- Follow RLS patterns for data access control
 
-## Current State
+## Common Tasks
 
-### Implemented Features
-- Complete Supabase SSR authentication
-- Multi-tenant database schema with RLS
-- API route infrastructure
-- Component library and dashboard layout
-- Google OAuth integration
+### Adding a New API Route
+1. Create route file in appropriate `src/app/api/` directory
+2. Implement HTTP methods as named exports (GET, POST, etc.)
+3. Add authentication with `withAuth` middleware if needed
+4. Use Zod schemas for request validation
+5. Return responses using `ApiResponse` utility
 
-### Placeholder/Incomplete Features
-- **Google Sheets sync logic** - endpoints exist but core processing is TODO
-- **Metric calculations** - basic structure exists, specific formulas needed
-- **Dashboard data integration** - components ready but data flow incomplete
-- **Export functionality** - PDF/CSV endpoints are placeholders
+### Adding a New Component
+1. Place in appropriate `src/components/` subdirectory
+2. Follow naming conventions (PascalCase for components)
+3. Use TypeScript interfaces for props
+4. Include proper JSDoc comments if complex
+5. Add unit tests for utilities, integration tests for complex logic
 
-### Testing Strategy
-- **Unit tests** with Vitest for utilities and components
-- **Integration tests** for multi-tenant database operations
-- **API route testing** with auth context simulation
-- **Test files:** `src/tests/` and `__tests__/` directories
+### Database Schema Changes
+1. Modify `prisma/schema.prisma`
+2. Run `pnpm prisma:push` for development
+3. Run `pnpm prisma:generate` to update client
+4. Update related TypeScript types if needed
+5. Create proper migration with `pnpm prisma migrate dev` for production
 
-## Security Considerations
+## Environment Configuration
 
-- **Row Level Security policies** enforced at database level
-- **Environment variables:** PUBLIC_ prefix for client-accessible vars
-- **API authentication** required on all protected routes
-- **Sensitive data handling** per logging guidelines
-- **Multi-tenant isolation** verified through comprehensive tests
+Required environment variables:
+- `DATABASE_URL` - Supabase PostgreSQL connection string
+- `DIRECT_URL` - Direct database connection (for migrations)
+- `NEXT_PUBLIC_SUPABASE_URL` - Supabase project URL
+- `NEXT_PUBLIC_SUPABASE_ANON_KEY` - Supabase anonymous key
+- `GOOGLE_REDIRECT_URI` - Google OAuth redirect URI
 
-## Performance Notes
+## Testing Strategy
 
-- **Prisma client singleton** with global caching in development
-- **Server-side rendering** by default for better performance
-- **TanStack Query** for client-side data caching
-- **Database indexing** optimized for multi-tenant queries
+- Unit tests for utilities and pure functions
+- Integration tests for API routes and database operations
+- Component tests for complex UI interactions
+- Use `vitest.config.ts` for unit tests, `vitest.integration.config.ts` for integration tests
 
-## Development Notes
+## Important Notes
 
-- Use the Supabase MCP to handle most tasks
-- Always check paths for nested CLAUDE.md files that might be useful for task execution.
-
-When working with this codebase, always consider the multi-tenant context, use the established authentication patterns, and follow the logging guidelines for maintainability.
+- **Data Access:** Use Prisma exclusively; Supabase Data API is disabled
+- **Authentication:** Supabase Auth with SSR configuration
+- **Multi-tenancy:** All data operations must respect clinic-based isolation
+- **Migration Status:** Currently migrating from CUID to UUID identifiers
+- **Google Integration:** OAuth flow for Sheets API access is implemented

@@ -1,78 +1,93 @@
 import { withAuth } from "@/lib/api/middleware";
-import { ApiError, ApiResponse } from "@/lib/api/utils";
+import { apiSuccess, apiError, type ApiResponse, ApiError as ApiErrorClass } from "@/lib/api/utils";
 import * as goalQueries from "@/lib/database/queries/goals";
-import { NextRequest } from "next/server";
+
 import { z } from "zod";
+import {
+  updateGoalSchema,
+  type UpdateGoalData,
+  type UpdateGoalQueryInput,
+} from "@/lib/types/goals";
 
-// Schema for goal update
-const updateGoalSchema = z.object({
-  name: z.string().min(1).optional(),
-  description: z.string().optional(),
-  targetValue: z.number().positive().optional(),
-  currentValue: z.number().min(0).optional(),
-  targetDate: z.string().datetime().optional(),
-  frequency: z.enum(["daily", "weekly", "monthly", "quarterly", "yearly"]).optional(),
-  category: z.string().optional(),
-  status: z.enum(["active", "paused", "completed", "cancelled"]).optional(),
-  metricId: z.string().uuid().optional(),
-});
-
-export const GET = withAuth(async (request, { params, authContext }) => {
-  const { goalId } = await params;
+export const GET = withAuth<GoalResponse>(async (request: Request, { params, authContext }) => {
+  const goalId = params?.goalId as string;
+  if (!goalId) return apiError("Goal ID is required", 400);
 
   const goal = await goalQueries.getGoalById(authContext, goalId);
 
   if (!goal) {
-    throw new ApiError("Goal not found", 404);
+    return apiError("Goal not found", 404);
   }
 
-  return ApiResponse.success(goal);
+  return apiSuccess(goal);
 });
 
-export const PUT = withAuth(
-  async (request, { params, authContext }) => {
-    const { goalId } = await params;
+export const PUT = withAuth<GoalResponse>(
+  async (request: Request, { params, authContext }) => {
+    const goalId = params?.goalId as string;
+    if (!goalId) return apiError("Goal ID is required", 400);
 
     // Parse and validate request body
     const body = await request.json();
-    const validatedData = updateGoalSchema.parse(body);
+    const validatedData: UpdateGoalData = updateGoalSchema.parse(body);
 
     // Check if goal exists
     const existingGoal = await goalQueries.getGoalById(authContext, goalId);
     if (!existingGoal) {
-      throw new ApiError("Goal not found", 404);
+      return apiError("Goal not found", 404);
     }
 
     // Check permissions - only clinic_admin and admin can update goals
     const userRole = authContext.role;
     if (!userRole || !["admin", "clinic_admin"].includes(userRole)) {
-      throw new ApiError("Insufficient permissions", 403);
+      return apiError("Insufficient permissions", 403);
     }
 
-    // Update goal
-    const updatedGoal = await goalQueries.updateGoal(authContext, goalId, validatedData);
+    // Prepare data for the query layer, aligning with its UpdateGoalInput type
+    const updateDataForQuery: UpdateGoalQueryInput = {};
+    if (validatedData.name !== undefined) updateDataForQuery.name = validatedData.name;
+    if (validatedData.description !== undefined)
+      updateDataForQuery.description = validatedData.description;
+    if (validatedData.targetValue !== undefined)
+      updateDataForQuery.targetValue = validatedData.targetValue;
+    if (validatedData.currentValue !== undefined)
+      updateDataForQuery.currentValue = validatedData.currentValue;
+    if (validatedData.targetDate !== undefined)
+      updateDataForQuery.endDate = validatedData.targetDate; // Zod's targetDate maps to Prisma's endDate
+    if (validatedData.frequency !== undefined)
+      updateDataForQuery.timePeriod = validatedData.frequency;
+    if (validatedData.category !== undefined) updateDataForQuery.category = validatedData.category;
+    if (validatedData.status !== undefined) updateDataForQuery.status = validatedData.status;
+    if (validatedData.metricId !== undefined)
+      updateDataForQuery.metricDefinitionId = validatedData.metricId;
 
-    return ApiResponse.success(updatedGoal);
+    // Update goal
+    const updatedGoal = await goalQueries.updateGoal(authContext, goalId, updateDataForQuery);
+
+    return apiSuccess(updatedGoal);
   },
   {
     requireClinicAdmin: true,
   }
 );
 
-export const DELETE = withAuth(
-  async (request, { params, authContext }) => {
-    const { goalId } = await params;
+export const DELETE = withAuth<{ success: true }>(
+  async (request: Request, { params, authContext }) => {
+    const goalId = params?.goalId as string;
+    if (!goalId) return apiError("Goal ID is required", 400);
 
     // Check if goal exists
     const existingGoal = await goalQueries.getGoalById(authContext, goalId);
     if (!existingGoal) {
-      throw new ApiError("Goal not found", 404);
+      return apiError("Goal not found", 404);
     }
 
     // Soft delete by setting status to cancelled
-    await goalQueries.updateGoal(authContext, goalId, { status: "cancelled" });
+    await goalQueries.updateGoal(authContext, goalId, {
+      status: "cancelled",
+    } as UpdateGoalQueryInput);
 
-    return ApiResponse.success({ success: true });
+    return apiSuccess({ success: true });
   },
   {
     requireClinicAdmin: true,
@@ -81,4 +96,4 @@ export const DELETE = withAuth(
 
 // Export types for client-side usage
 export type GoalResponse = Awaited<ReturnType<typeof goalQueries.getGoalById>>;
-export type UpdateGoalInput = z.infer<typeof updateGoalSchema>;
+// UpdateGoalData (from Zod schema) and UpdateGoalQueryInput (for query layer) are now imported from @/lib/types/goals.ts

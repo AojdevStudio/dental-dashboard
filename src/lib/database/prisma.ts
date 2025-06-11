@@ -9,7 +9,7 @@
  * using global object caching in development and creating a fresh instance in production.
  */
 
-import { PrismaClient } from "@/generated/prisma";
+import { PrismaClient } from "@prisma/client";
 
 /**
  * Type extension for the global object to store the Prisma client instance

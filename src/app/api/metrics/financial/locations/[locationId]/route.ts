@@ -1,4 +1,4 @@
-import type { Clinic, DataSource, Location, LocationFinancial, Prisma } from "@/generated/prisma";
+import type { Clinic, DataSource, Location, LocationFinancial, Prisma } from "@prisma/client";
 import { prisma } from "@/lib/database/client";
 import { type NextRequest, NextResponse } from "next/server";
 
