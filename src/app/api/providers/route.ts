@@ -50,6 +50,14 @@ const getProvidersHandler: ApiHandler = async (
     // Fetch providers with locations
     const providers = await getProvidersWithLocations(filters);
 
+    // Temporary safeguard – remove once DB-level pagination lands
+    if (providers.length > 1000) {
+      return apiError(
+        "Too many providers returned; pagination not yet supported at DB level",
+        413
+      );
+    }
+
     // WARNING: Performance Issue - In-memory pagination
     // This implementation fetches ALL providers and paginates in-memory which will not scale.
     // TODO: Update getProvidersWithLocations to accept offset/limit parameters and use

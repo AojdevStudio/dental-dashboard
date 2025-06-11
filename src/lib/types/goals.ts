@@ -25,12 +25,34 @@ export interface UpdateGoalQueryInput {
   description?: string;
   targetValue?: string; // Prisma Decimal is handled as string for precision
   currentValue?: string; // Prisma Decimal is handled as string for precision
-  startDate?: Date | string; // Prisma DateTime
   endDate?: Date | string; // Prisma DateTime for what Zod calls targetDate
   timePeriod?: string; // For what Zod calls frequency
   category?: string;
   status?: "active" | "paused" | "completed" | "cancelled";
   metricDefinitionId?: string; // For what Zod calls metricId
+}
+
+/**
+ * Utility function to map UpdateGoalData (from Zod validation) to UpdateGoalQueryInput (for database layer)
+ * This handles the field name transformations between API and database schemas
+ */
+export function mapUpdateGoalData(data: UpdateGoalData): UpdateGoalQueryInput {
+  const mapped: UpdateGoalQueryInput = {};
+  
+  // Direct mappings (same field names)
+  if (data.name !== undefined) mapped.name = data.name;
+  if (data.description !== undefined) mapped.description = data.description;
+  if (data.targetValue !== undefined) mapped.targetValue = data.targetValue;
+  if (data.currentValue !== undefined) mapped.currentValue = data.currentValue;
+  if (data.category !== undefined) mapped.category = data.category;
+  if (data.status !== undefined) mapped.status = data.status;
+  
+  // Field name transformations
+  if (data.targetDate !== undefined) mapped.endDate = data.targetDate;
+  if (data.frequency !== undefined) mapped.timePeriod = data.frequency;
+  if (data.metricId !== undefined) mapped.metricDefinitionId = data.metricId;
+  
+  return mapped;
 }
 
 // TODO: Consider moving GoalResponse here if it becomes shared across different modules or API routes.

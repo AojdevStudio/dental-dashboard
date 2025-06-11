@@ -22,7 +22,7 @@ export type GetClinicStatisticsResponse = Awaited<
  * GET /api/clinics/:clinicId/statistics
  * Get clinic statistics with optional date range
  */
-export const GET = withAuth<GetClinicStatisticsResponse>(
+export const GET = withAuth<ApiResponse<GetClinicStatisticsResponse>>(
   async (request: Request, { authContext, params }) => {
     const clinicIdParam = params?.clinicId;
     let clinicId: string;

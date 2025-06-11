@@ -7,6 +7,7 @@ import {
   updateGoalSchema,
   type UpdateGoalData,
   type UpdateGoalQueryInput,
+  mapUpdateGoalData,
 } from "@/lib/types/goals";
 
 export const GET = withAuth<GoalResponse>(async (request: Request, { params, authContext }) => {
@@ -43,23 +44,8 @@ export const PUT = withAuth<GoalResponse>(
       return apiError("Insufficient permissions", 403);
     }
 
-    // Prepare data for the query layer, aligning with its UpdateGoalInput type
-    const updateDataForQuery: UpdateGoalQueryInput = {};
-    if (validatedData.name !== undefined) updateDataForQuery.name = validatedData.name;
-    if (validatedData.description !== undefined)
-      updateDataForQuery.description = validatedData.description;
-    if (validatedData.targetValue !== undefined)
-      updateDataForQuery.targetValue = validatedData.targetValue;
-    if (validatedData.currentValue !== undefined)
-      updateDataForQuery.currentValue = validatedData.currentValue;
-    if (validatedData.targetDate !== undefined)
-      updateDataForQuery.endDate = validatedData.targetDate; // Zod's targetDate maps to Prisma's endDate
-    if (validatedData.frequency !== undefined)
-      updateDataForQuery.timePeriod = validatedData.frequency;
-    if (validatedData.category !== undefined) updateDataForQuery.category = validatedData.category;
-    if (validatedData.status !== undefined) updateDataForQuery.status = validatedData.status;
-    if (validatedData.metricId !== undefined)
-      updateDataForQuery.metricDefinitionId = validatedData.metricId;
+    // Transform API data to database query input format
+    const updateDataForQuery = mapUpdateGoalData(validatedData);
 
     // Update goal
     const updatedGoal = await goalQueries.updateGoal(authContext, goalId, updateDataForQuery);
