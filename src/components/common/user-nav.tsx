@@ -24,8 +24,12 @@ export function UserNav() {
   const { user, isLoading, isAuthenticated } = useAuth();
 
   // If still loading auth state, show nothing
-  if (isLoading) return null;
-  if (!isAuthenticated || !user) return null;
+  if (isLoading) {
+    return null;
+  }
+  if (!(isAuthenticated && user)) {
+    return null;
+  }
 
   /**
    * Handles the sign-out action with complete session cleanup
@@ -34,8 +38,7 @@ export function UserNav() {
     try {
       // Use server action for proper cleanup
       await signOutWithCleanup();
-    } catch (error) {
-      console.error('Sign-out error:', error);
+    } catch (_error) {
       // Even on error, try to redirect to login
       window.location.href = '/login';
     }

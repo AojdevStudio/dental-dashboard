@@ -84,7 +84,6 @@ export async function GET(request: NextRequest, { params }: { params: { provider
       },
     });
   } catch (error) {
-    console.error('Error fetching provider locations:', error);
     return NextResponse.json(
       {
         success: false,
@@ -215,7 +214,6 @@ export async function POST(request: NextRequest, { params }: { params: { provide
       { status: 201 }
     );
   } catch (error) {
-    console.error('Error creating provider-location relationship:', error);
     return NextResponse.json(
       {
         success: false,
@@ -278,10 +276,18 @@ export async function PATCH(request: NextRequest, { params }: { params: { provid
 
     // Build update data
     const updateData: ProviderLocationUpdateData = {};
-    if (isPrimary !== undefined) updateData.isPrimary = isPrimary;
-    if (isActive !== undefined) updateData.isActive = isActive;
-    if (startDate !== undefined) updateData.startDate = new Date(startDate);
-    if (endDate !== undefined) updateData.endDate = endDate ? new Date(endDate) : null;
+    if (isPrimary !== undefined) {
+      updateData.isPrimary = isPrimary;
+    }
+    if (isActive !== undefined) {
+      updateData.isActive = isActive;
+    }
+    if (startDate !== undefined) {
+      updateData.startDate = new Date(startDate);
+    }
+    if (endDate !== undefined) {
+      updateData.endDate = endDate ? new Date(endDate) : null;
+    }
 
     // Update the relationship
     const updatedRelation = await prisma.providerLocation.update({
@@ -313,7 +319,6 @@ export async function PATCH(request: NextRequest, { params }: { params: { provid
       message: 'Provider-location relationship updated successfully',
     });
   } catch (error) {
-    console.error('Error updating provider-location relationship:', error);
     return NextResponse.json(
       {
         success: false,

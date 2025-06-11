@@ -3,12 +3,8 @@ import { PrismaClient } from '../src/generated/prisma';
 const prisma = new PrismaClient();
 
 async function testMultiTenantTables() {
-  console.log('Testing multi-tenant tables...\n');
-
   try {
-    // Test 1: Create a user-clinic role
-    console.log('1. Testing UserClinicRole creation...');
-    const userClinicRole = await prisma.userClinicRole.create({
+    const _userClinicRole = await prisma.userClinicRole.create({
       data: {
         userId: 'test-user-id',
         clinicId: 'test-clinic-id',
@@ -17,11 +13,7 @@ async function testMultiTenantTables() {
         createdBy: 'system',
       },
     });
-    console.log('✓ UserClinicRole created:', userClinicRole.id);
-
-    // Test 2: Create a goal template
-    console.log('\n2. Testing GoalTemplate creation...');
-    const goalTemplate = await prisma.goalTemplate.create({
+    const _goalTemplate = await prisma.goalTemplate.create({
       data: {
         name: 'Monthly Production Goal',
         description: 'Increase production by 10% month-over-month',
@@ -32,11 +24,7 @@ async function testMultiTenantTables() {
         isSystemTemplate: true,
       },
     });
-    console.log('✓ GoalTemplate created:', goalTemplate.id);
-
-    // Test 3: Create a financial metric
-    console.log('\n3. Testing FinancialMetric creation...');
-    const financialMetric = await prisma.financialMetric.create({
+    const _financialMetric = await prisma.financialMetric.create({
       data: {
         clinicId: 'test-clinic-id',
         date: new Date(),
@@ -48,11 +36,7 @@ async function testMultiTenantTables() {
         notes: 'Comprehensive oral evaluation',
       },
     });
-    console.log('✓ FinancialMetric created:', financialMetric.id);
-
-    // Test 4: Create appointment metrics
-    console.log('\n4. Testing AppointmentMetric creation...');
-    const appointmentMetric = await prisma.appointmentMetric.create({
+    const _appointmentMetric = await prisma.appointmentMetric.create({
       data: {
         clinicId: 'test-clinic-id',
         date: new Date(),
@@ -67,11 +51,7 @@ async function testMultiTenantTables() {
         utilizationRate: 85.5,
       },
     });
-    console.log('✓ AppointmentMetric created:', appointmentMetric.id);
-
-    // Test 5: Create call metrics
-    console.log('\n5. Testing CallMetric creation...');
-    const callMetric = await prisma.callMetric.create({
+    const _callMetric = await prisma.callMetric.create({
       data: {
         clinicId: 'test-clinic-id',
         date: new Date(),
@@ -85,11 +65,7 @@ async function testMultiTenantTables() {
         staffMemberId: 'test-staff-id',
       },
     });
-    console.log('✓ CallMetric created:', callMetric.id);
-
-    // Test 6: Create patient metrics
-    console.log('\n6. Testing PatientMetric creation...');
-    const patientMetric = await prisma.patientMetric.create({
+    const _patientMetric = await prisma.patientMetric.create({
       data: {
         clinicId: 'test-clinic-id',
         date: new Date(),
@@ -103,11 +79,7 @@ async function testMultiTenantTables() {
         treatmentAcceptanceRate: 65.0,
       },
     });
-    console.log('✓ PatientMetric created:', patientMetric.id);
-
-    // Test 7: Create metric aggregation
-    console.log('\n7. Testing MetricAggregation creation...');
-    const metricAggregation = await prisma.metricAggregation.create({
+    const _metricAggregation = await prisma.metricAggregation.create({
       data: {
         clinicId: 'test-clinic-id',
         metricDefinitionId: 'test-metric-def-id',
@@ -126,10 +98,6 @@ async function testMultiTenantTables() {
         },
       },
     });
-    console.log('✓ MetricAggregation created:', metricAggregation.id);
-
-    // Test 8: Create Google credentials
-    console.log('\n8. Testing GoogleCredential creation...');
     const googleCredential = await prisma.googleCredential.create({
       data: {
         clinicId: 'test-clinic-id',
@@ -140,10 +108,6 @@ async function testMultiTenantTables() {
         scope: ['https://www.googleapis.com/auth/spreadsheets.readonly'],
       },
     });
-    console.log('✓ GoogleCredential created:', googleCredential.id);
-
-    // Test 9: Create spreadsheet connection
-    console.log('\n9. Testing SpreadsheetConnection creation...');
     const spreadsheetConnection = await prisma.spreadsheetConnection.create({
       data: {
         clinicId: 'test-clinic-id',
@@ -154,11 +118,7 @@ async function testMultiTenantTables() {
         syncStatus: 'active',
       },
     });
-    console.log('✓ SpreadsheetConnection created:', spreadsheetConnection.id);
-
-    // Test 10: Create column mapping
-    console.log('\n10. Testing ColumnMappingV2 creation...');
-    const columnMapping = await prisma.columnMappingV2.create({
+    const _columnMapping = await prisma.columnMappingV2.create({
       data: {
         connectionId: spreadsheetConnection.id,
         sheetName: 'January',
@@ -181,12 +141,6 @@ async function testMultiTenantTables() {
         isActive: true,
       },
     });
-    console.log('✓ ColumnMappingV2 created:', columnMapping.id);
-
-    console.log('\n✅ All tests passed! New tables are working correctly.');
-
-    // Cleanup test data
-    console.log('\n🧹 Cleaning up test data...');
     await prisma.columnMappingV2.deleteMany({});
     await prisma.spreadsheetConnection.deleteMany({});
     await prisma.googleCredential.deleteMany({});
@@ -197,9 +151,7 @@ async function testMultiTenantTables() {
     await prisma.financialMetric.deleteMany({});
     await prisma.goalTemplate.deleteMany({});
     await prisma.userClinicRole.deleteMany({});
-    console.log('✓ Test data cleaned up');
-  } catch (error) {
-    console.error('❌ Test failed:', error);
+  } catch (_error) {
     process.exit(1);
   } finally {
     await prisma.$disconnect();

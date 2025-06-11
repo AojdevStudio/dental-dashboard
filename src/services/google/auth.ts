@@ -125,7 +125,7 @@ export async function refreshAccessToken(refreshToken: string): Promise<{
   oauth2Client.setCredentials({ refresh_token: refreshToken });
   await oauth2Client.getAccessToken();
 
-  if (!oauth2Client.credentials.access_token || !oauth2Client.credentials.expiry_date) {
+  if (!(oauth2Client.credentials.access_token && oauth2Client.credentials.expiry_date)) {
     throw new Error('Failed to refresh access token or get expiry date.');
   }
 

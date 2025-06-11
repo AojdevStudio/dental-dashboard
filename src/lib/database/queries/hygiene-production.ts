@@ -180,7 +180,7 @@ export async function getHygieneProductionStats(
 }> {
   const targetClinicId = clinicId || authContext.clinicIds[0];
 
-  if (!targetClinicId || !authContext.clinicIds.includes(targetClinicId)) {
+  if (!(targetClinicId && authContext.clinicIds.includes(targetClinicId))) {
     throw new Error('No access to clinic');
   }
 

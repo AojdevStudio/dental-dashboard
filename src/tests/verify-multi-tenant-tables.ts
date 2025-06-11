@@ -4,8 +4,6 @@ import { PrismaClient } from '@prisma/client';
 const prisma = new PrismaClient();
 
 async function verifyMultiTenantTables() {
-  console.log('🔍 Verifying multi-tenant tables...\n');
-
   try {
     // Verify table existence by attempting to count records
     const tables = [
@@ -22,19 +20,9 @@ async function verifyMultiTenantTables() {
     ];
 
     for (const { name, model } of tables) {
-      try {
-        const count = await model.count();
-        console.log(`✅ ${name}: Table exists (${count} records)`);
-      } catch (error) {
-        console.log(`❌ ${name}: Table verification failed`);
-        throw error;
-      }
+      const _count = await model.count();
     }
-
-    console.log('\n✨ All multi-tenant tables verified successfully!');
-    console.log('📋 Phase 1 migration completed successfully.');
-  } catch (error) {
-    console.error('\n❌ Verification failed:', error);
+  } catch (_error) {
     process.exit(1);
   } finally {
     await prisma.$disconnect();

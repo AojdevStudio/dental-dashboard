@@ -21,7 +21,7 @@ const createMetricSchema = z.object({
   externalId: z.string().optional(),
 });
 
-const aggregationSchema = z.object({
+const _aggregationSchema = z.object({
   clinicId: z.string().cuid(),
   metricDefinitionId: z.string().cuid().optional(),
   providerId: z.string().cuid().optional(),
@@ -94,7 +94,7 @@ export const POST = withAuth(async (request, { authContext }) => {
   try {
     const rawBody = await request.json();
     body = createMetricSchema.parse(rawBody);
-  } catch (error) {
+  } catch (_error) {
     return ApiError.badRequest('Invalid request body');
   }
 

@@ -170,7 +170,7 @@ export async function createGoal(authContext: AuthContext, input: CreateGoalInpu
 
   // Check user role - providers and admins can create goals
   const userRole = await getUserClinicRole(authContext, input.clinicId);
-  if (!userRole || !['clinic_admin', 'provider'].includes(userRole)) {
+  if (!(userRole && ['clinic_admin', 'provider'].includes(userRole))) {
     throw new Error('Insufficient permissions to create goals');
   }
 
@@ -232,7 +232,7 @@ export async function updateGoal(
 
     // Check user role
     const userRole = await getUserClinicRole(authContext, goal.clinicId);
-    if (!userRole || !['clinic_admin', 'provider'].includes(userRole)) {
+    if (!(userRole && ['clinic_admin', 'provider'].includes(userRole))) {
       throw new Error('Insufficient permissions to update goals');
     }
   }

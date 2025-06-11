@@ -1,5 +1,7 @@
 'use client';
 
+import type React from 'react';
+
 import { useAuth } from '@/hooks/use-auth';
 import { Loader2 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
@@ -31,8 +33,7 @@ export function AuthGuard({
   const router = useRouter();
 
   useEffect(() => {
-    if (!isLoading && !isAuthenticated) {
-      console.warn('AuthGuard: User not authenticated, redirecting to', fallbackUrl);
+    if (!(isLoading || isAuthenticated)) {
       router.push(fallbackUrl);
     }
   }, [isLoading, isAuthenticated, router, fallbackUrl]);
@@ -58,7 +59,6 @@ export function AuthGuard({
   if (requireDatabaseUser && user) {
     // System admins bypass metadata requirements since they're validated server-side
     if (isSystemAdmin && dbUser) {
-      console.log('AuthGuard: System admin authenticated with database user');
       return <>{children}</>;
     }
 
@@ -66,8 +66,7 @@ export function AuthGuard({
     const hasDbUser = !!dbUser;
     const hasMetadataRole = !!user.user_metadata?.role;
 
-    if (!hasDbUser && !hasMetadataRole) {
-      console.warn('AuthGuard: User authenticated but missing database user and metadata');
+    if (!(hasDbUser || hasMetadataRole)) {
       return (
         <div class="flex items-center justify-center min-h-screen">
           <div class="text-center space-y-4 max-w-md mx-auto p-6">

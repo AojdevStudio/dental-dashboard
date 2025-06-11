@@ -200,7 +200,7 @@ export async function updateUser(authContext: AuthContext, userId: string, input
       },
     }));
 
-  if (!isSelf && !isAdmin) {
+  if (!(isSelf || isAdmin)) {
     throw new Error('Permission denied');
   }
 
@@ -266,7 +266,7 @@ export async function getUserClinicRoles(authContext: AuthContext, userId?: stri
       where: { id: targetUserId },
     });
 
-    if (!targetUser || !authContext.clinicIds.includes(targetUser.clinicId)) {
+    if (!(targetUser && authContext.clinicIds.includes(targetUser.clinicId))) {
       throw new Error('Access denied');
     }
   }

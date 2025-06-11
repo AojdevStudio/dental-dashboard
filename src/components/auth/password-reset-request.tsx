@@ -7,6 +7,8 @@
 
 'use client';
 
+import type React from 'react';
+
 import Link from 'next/link';
 import { useState } from 'react';
 
@@ -33,7 +35,7 @@ export function PasswordResetRequest(): React.ReactElement {
     e.preventDefault();
 
     // Basic email validation
-    if (!email || !email.includes('@')) {
+    if (!email?.includes('@')) {
       setErrorMessage('Please enter a valid email address');
       setSubmitStatus('error');
       return;
@@ -50,7 +52,7 @@ export function PasswordResetRequest(): React.ReactElement {
 
       // Simulate successful submission
       setSubmitStatus('success');
-    } catch (error) {
+    } catch (_error) {
       setSubmitStatus('error');
       setErrorMessage('An error occurred. Please try again later.');
     } finally {

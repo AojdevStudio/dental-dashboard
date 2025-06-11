@@ -338,12 +338,10 @@ export const parseFilterUrlParams = (searchParams: URLSearchParams) => {
       const endDate = new Date(urlEndDate);
 
       // Validate dates
-      if (!Number.isNaN(startDate.getTime()) && !Number.isNaN(endDate.getTime())) {
+      if (!(Number.isNaN(startDate.getTime()) || Number.isNaN(endDate.getTime()))) {
         setDateRange(startDate, endDate);
       }
-    } catch (error) {
-      console.error('Error parsing date params:', error);
-    }
+    } catch (_error) {}
   }
 
   // Parse clinics

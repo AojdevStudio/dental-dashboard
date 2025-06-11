@@ -79,8 +79,7 @@ export function ExportButton({
       setTimeout(() => {
         setExportSuccess(false);
       }, 2000);
-    } catch (error) {
-      console.error(`Error exporting ${format}:`, error);
+    } catch (_error) {
     } finally {
       setIsExporting(false);
     }

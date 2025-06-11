@@ -48,11 +48,11 @@ export async function POST(request: NextRequest) {
       if (!recordsByClinic.has(record.clinic_id)) {
         recordsByClinic.set(record.clinic_id, []);
       }
-      recordsByClinic.get(record.clinic_id)!.push(record);
+      recordsByClinic.get(record.clinic_id)?.push(record);
     }
 
-    const results = [];
-    const errors = [];
+    const results: any[] = [];
+    const errors: any[] = [];
 
     // Process each clinic's records
     for (const [clinicId, clinicRecords] of recordsByClinic) {
@@ -106,7 +106,6 @@ export async function POST(request: NextRequest) {
           success: true,
         });
       } catch (error) {
-        console.error(`Error processing clinic ${clinicId}:`, error);
         errors.push({
           clinicId,
           error: error instanceof Error ? error.message : 'Unknown error',
@@ -124,8 +123,6 @@ export async function POST(request: NextRequest) {
       syncedAt: new Date().toISOString(),
     });
   } catch (error) {
-    console.error('Hygiene production sync error:', error);
-
     if (error instanceof z.ZodError) {
       throw new ApiError(`Validation error: ${error.message}`, 400);
     }

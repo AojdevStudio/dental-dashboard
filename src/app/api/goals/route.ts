@@ -77,7 +77,7 @@ export const POST = withAuth(async (request, { authContext }) => {
     let body: z.infer<typeof createFromTemplateSchema>;
     try {
       body = createFromTemplateSchema.parse(rawBody);
-    } catch (error) {
+    } catch (_error) {
       return apiError('Invalid request body', 400);
     }
 
@@ -106,7 +106,7 @@ export const POST = withAuth(async (request, { authContext }) => {
     let body: z.infer<typeof createGoalSchema>;
     try {
       body = createGoalSchema.parse(rawBody);
-    } catch (error) {
+    } catch (_error) {
       return apiError('Invalid request body', 400);
     }
 

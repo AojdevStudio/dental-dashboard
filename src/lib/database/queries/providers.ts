@@ -339,53 +339,47 @@ export async function getProviderPerformanceByLocation(params: {
     GROUP BY p.id, p.name, l.id, l.name
     HAVING COUNT(hp.id) > 0
   `;
+  let results: (RawDentistPerformanceRow | RawHygienistPerformanceRow)[] = [];
 
-  try {
-    let results: (RawDentistPerformanceRow | RawHygienistPerformanceRow)[] = [];
-
-    if (!providerType || providerType === 'dentist') {
-      const dentistResults = (await prisma.$queryRawUnsafe(
-        dentistQuery,
-        ...values
-      )) as RawDentistPerformanceRow[];
-      results = [...results, ...dentistResults];
-    }
-
-    if (!providerType || providerType === 'hygienist') {
-      const hygienistResults = (await prisma.$queryRawUnsafe(
-        hygienistQuery,
-        ...values,
-        startDate,
-        endDate
-      )) as RawHygienistPerformanceRow[];
-      results = [...results, ...hygienistResults];
-    }
-
-    return results.map((row) => ({
-      providerId: row.provider_id,
-      providerName: row.provider_name,
-      locationId: row.location_id,
-      locationName: row.location_name,
-      periodStart: new Date(row.period_start),
-      periodEnd: new Date(row.period_end),
-      totalProduction: Number.parseFloat(row.total_production || '0'),
-      avgDailyProduction: Number.parseFloat(row.avg_daily_production || '0'),
-      productionDays: Number.parseInt(String(row.production_days || '0')),
-      productionGoal: row.production_goal
-        ? Number.parseFloat(String(row.production_goal))
-        : undefined,
-      variancePercentage:
-        row.production_goal && Number.parseFloat(row.production_goal) !== 0
-          ? ((Number.parseFloat(row.total_production || '0') -
-              Number.parseFloat(row.production_goal)) /
-              Number.parseFloat(row.production_goal)) *
-            100
-          : undefined,
-    }));
-  } catch (error) {
-    console.error('Error fetching provider performance by location:', error);
-    throw error;
+  if (!providerType || providerType === 'dentist') {
+    const dentistResults = (await prisma.$queryRawUnsafe(
+      dentistQuery,
+      ...values
+    )) as RawDentistPerformanceRow[];
+    results = [...results, ...dentistResults];
   }
+
+  if (!providerType || providerType === 'hygienist') {
+    const hygienistResults = (await prisma.$queryRawUnsafe(
+      hygienistQuery,
+      ...values,
+      startDate,
+      endDate
+    )) as RawHygienistPerformanceRow[];
+    results = [...results, ...hygienistResults];
+  }
+
+  return results.map((row) => ({
+    providerId: row.provider_id,
+    providerName: row.provider_name,
+    locationId: row.location_id,
+    locationName: row.location_name,
+    periodStart: new Date(row.period_start),
+    periodEnd: new Date(row.period_end),
+    totalProduction: Number.parseFloat(row.total_production || '0'),
+    avgDailyProduction: Number.parseFloat(row.avg_daily_production || '0'),
+    productionDays: Number.parseInt(String(row.production_days || '0')),
+    productionGoal: row.production_goal
+      ? Number.parseFloat(String(row.production_goal))
+      : undefined,
+    variancePercentage:
+      row.production_goal && Number.parseFloat(row.production_goal) !== 0
+        ? ((Number.parseFloat(row.total_production || '0') -
+            Number.parseFloat(row.production_goal)) /
+            Number.parseFloat(row.production_goal)) *
+          100
+        : undefined,
+  }));
 }
 
 /**
@@ -476,9 +470,15 @@ export async function getProviderLocationSummary(
     });
 
     acc[locationKey].counts.total++;
-    if (pl.provider.providerType === 'dentist') acc[locationKey].counts.dentists++;
-    if (pl.provider.providerType === 'hygienist') acc[locationKey].counts.hygienists++;
-    if (pl.isPrimary) acc[locationKey].counts.primary++;
+    if (pl.provider.providerType === 'dentist') {
+      acc[locationKey].counts.dentists++;
+    }
+    if (pl.provider.providerType === 'hygienist') {
+      acc[locationKey].counts.hygienists++;
+    }
+    if (pl.isPrimary) {
+      acc[locationKey].counts.primary++;
+    }
 
     return acc;
   }, {} as LocationSummaryAccumulator);

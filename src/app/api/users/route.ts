@@ -69,7 +69,7 @@ export const POST = withAuth<CreateUserResponse>(
     try {
       const rawBody = await request.json();
       body = createUserSchema.parse(rawBody);
-    } catch (error) {
+    } catch (_error) {
       return apiError('Invalid request body', 400);
     }
 

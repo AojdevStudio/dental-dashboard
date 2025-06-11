@@ -1,4 +1,5 @@
 'use client';
+
 /** Dashboard Error UI */
 export default function DashboardError({
   error,

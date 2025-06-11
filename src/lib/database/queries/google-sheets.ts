@@ -129,7 +129,7 @@ export async function getDataSourceById(
   }
 
   // Only clinic admins can see tokens
-  if (!options?.includeToken || !(await isClinicAdmin(authContext, dataSource.clinicId))) {
+  if (!(options?.includeToken && (await isClinicAdmin(authContext, dataSource.clinicId)))) {
     return {
       ...dataSource,
       accessToken: '***',

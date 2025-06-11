@@ -506,7 +506,7 @@ describe('Security Tests', () => {
           role: 'admin',
           clinicId: user.clinicId,
         });
-      } catch (error) {
+      } catch (_error) {
         // Expected to fail
       }
 
@@ -521,7 +521,7 @@ describe('Security Tests', () => {
     it('should validate and sanitize all inputs', async () => {
       const adminUser = securityTestData.users.find((u) => u.role === 'clinic_admin');
 
-      const authContext = {
+      const _authContext = {
         userId: adminUser.id,
         authId: adminUser.authId,
         clinicIds: [adminUser.clinicId],
@@ -562,7 +562,7 @@ describe('Security Tests', () => {
     it('should enforce data type constraints', async () => {
       const adminUser = securityTestData.users.find((u) => u.role === 'clinic_admin');
 
-      const authContext = {
+      const _authContext = {
         userId: adminUser.id,
         authId: adminUser.authId,
         clinicIds: [adminUser.clinicId],
@@ -626,7 +626,6 @@ describe('Security Tests', () => {
       const successful = results.filter((r) => r.status === 'fulfilled');
 
       expect(successful.length).toBeGreaterThan(0);
-      console.log(`Bulk query success rate: ${successful.length}/50`);
     });
 
     it('should limit result set sizes', async () => {

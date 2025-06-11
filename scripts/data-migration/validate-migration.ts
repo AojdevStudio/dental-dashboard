@@ -3,9 +3,9 @@
  * Validates data integrity after migration
  */
 
-import * as path from 'path';
+import * as fs from 'node:fs/promises';
+import * as path from 'node:path';
 import { PrismaClient } from '@prisma/client';
-import * as fs from 'fs/promises';
 
 const prisma = new PrismaClient();
 
@@ -15,7 +15,7 @@ interface ValidationResult {
     name: string;
     passed: boolean;
     message: string;
-    details?: any;
+    details?: Record<string, unknown>;
   }>;
 }
 
@@ -49,7 +49,13 @@ class MigrationValidator {
     };
   }
 
-  private addCheck(table: string, name: string, passed: boolean, message: string, details?: any) {
+  private addCheck(
+    table: string,
+    name: string,
+    passed: boolean,
+    message: string,
+    details?: Record<string, unknown>
+  ) {
     let tableResult = this.results.find((r) => r.table === table);
     if (!tableResult) {
       tableResult = { table, checks: [] };
@@ -68,7 +74,6 @@ class MigrationValidator {
   }
 
   async validateUsers() {
-    console.log('\n=== Validating Users ===');
     const table = 'users';
 
     // Check 1: All users have UUIDs
@@ -155,7 +160,6 @@ class MigrationValidator {
   }
 
   async validateClinics() {
-    console.log('\n=== Validating Clinics ===');
     const table = 'clinics';
 
     // Check 1: All clinics have UUIDs
@@ -219,7 +223,6 @@ class MigrationValidator {
   }
 
   async validateRelationships() {
-    console.log('\n=== Validating Relationships ===');
     const table = 'relationships';
 
     // Check 1: Provider-Clinic relationships
@@ -321,7 +324,6 @@ class MigrationValidator {
   }
 
   async validateDataIntegrity() {
-    console.log('\n=== Validating Data Integrity ===');
     const table = 'data_integrity';
 
     // Check 1: Consistent timestamps
@@ -379,7 +381,6 @@ class MigrationValidator {
   }
 
   async validatePerformance() {
-    console.log('\n=== Validating Performance ===');
     const table = 'performance';
 
     // Check 1: Index usage
@@ -452,33 +453,17 @@ class MigrationValidator {
 
     await fs.writeFile(reportPath, JSON.stringify(this.report, null, 2));
 
-    // Console output
-    console.log('\n=== Validation Report Summary ===');
-    console.log(`Overall Status: ${this.report.overallStatus.toUpperCase()}`);
-    console.log(`Total Checks: ${this.report.summary.totalChecks}`);
-    console.log(`Passed: ${this.report.summary.passed}`);
-    console.log(`Failed: ${this.report.summary.failed}`);
-    console.log(`Warnings: ${this.report.summary.warnings}`);
-
     if (this.report.summary.failed > 0) {
-      console.log('\n=== Failed Checks ===');
       this.results.forEach((result) => {
         const failedChecks = result.checks.filter((c) => !c.passed);
         if (failedChecks.length > 0) {
-          console.log(`\n${result.table}:`);
           failedChecks.forEach((check) => {
-            console.log(`  ✗ ${check.name}: ${check.message}`);
             if (check.details) {
-              console.log(
-                `    Details: ${JSON.stringify(check.details, null, 2).replace(/\n/g, '\n    ')}`
-              );
             }
           });
         }
       });
     }
-
-    console.log(`\nFull report saved to: ${reportPath}`);
   }
 
   async run() {
@@ -491,7 +476,6 @@ class MigrationValidator {
 
       await this.generateReport();
     } catch (error) {
-      console.error('Validation failed:', error);
       this.report.overallStatus = 'failed';
       await this.generateReport();
       throw error;
@@ -504,8 +488,7 @@ class MigrationValidator {
 // Run validator if called directly
 if (require.main === module) {
   const validator = new MigrationValidator();
-  validator.run().catch((error) => {
-    console.error('Fatal validation error:', error);
+  validator.run().catch((_error) => {
     process.exit(1);
   });
 }

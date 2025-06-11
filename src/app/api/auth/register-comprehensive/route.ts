@@ -34,7 +34,7 @@ export async function POST(request: NextRequest) {
     const supabase = await createClient();
 
     // Validate required fields
-    if (!data.email || !data.password || !data.fullName || !data.role) {
+    if (!(data.email && data.password && data.fullName && data.role)) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
     }
 
@@ -63,7 +63,7 @@ export async function POST(request: NextRequest) {
         clinicId = clinic.id;
       } else {
         // Create new clinic
-        if (!data.newClinic?.name || !data.newClinic?.location) {
+        if (!(data.newClinic?.name && data.newClinic?.location)) {
           throw new Error('Clinic name and location are required');
         }
 
@@ -143,8 +143,6 @@ export async function POST(request: NextRequest) {
 
       // If creating a new clinic, generate a registration code for future users
       if (isNewClinic) {
-        // In a real app, you'd store this in a separate table or as a clinic field
-        console.log(`New clinic registration code: ${generateClinicCode()}`);
       }
 
       return {
@@ -164,12 +162,9 @@ export async function POST(request: NextRequest) {
       clinicId: result.clinicId,
     });
   } catch (error) {
-    console.error('Registration error:', error);
-
     // Note: In production, you'd want to handle cleanup of partial registrations
     // This could be done via a scheduled job or admin API
     if (data?.email) {
-      console.error('Registration failed - manual cleanup may be required for:', data.email);
     }
 
     return NextResponse.json(

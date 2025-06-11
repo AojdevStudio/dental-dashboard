@@ -75,7 +75,7 @@ export default async function DashboardPage() {
   }
 
   // Get the current clinic information
-  let currentClinic = null;
+  let currentClinic: ClinicWithCounts | null = null;
   if (authContext.selectedClinicId && authContext.selectedClinicId !== 'all') {
     try {
       currentClinic = await prisma.clinic.findUnique({
@@ -93,8 +93,7 @@ export default async function DashboardPage() {
           },
         },
       });
-    } catch (error) {
-      console.error('Error fetching clinic data:', error);
+    } catch (_error) {
       // Continue with currentClinic as null - the UI will handle the fallback
       // This ensures the app remains stable even if the clinic query fails
     }
@@ -210,7 +209,6 @@ async function AllClinicsOverview() {
       orderBy: { name: 'asc' },
     });
   } catch (error) {
-    console.error('Error fetching clinics data:', error);
     // Return error state when clinic data cannot be fetched
     return (
       <Card class="max-w-md mx-auto">

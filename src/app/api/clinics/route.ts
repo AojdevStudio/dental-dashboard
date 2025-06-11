@@ -10,7 +10,7 @@ const createClinicSchema = z.object({
   status: z.enum(['active', 'inactive']).optional(),
 });
 
-const updateClinicSchema = z.object({
+const _updateClinicSchema = z.object({
   name: z.string().min(2).optional(),
   location: z.string().min(2).optional(),
   status: z.enum(['active', 'inactive']).optional(),
@@ -51,7 +51,7 @@ export const POST = withAuth<CreateClinicResponse>(
     try {
       const rawBody = await request.json();
       body = createClinicSchema.parse(rawBody);
-    } catch (error) {
+    } catch (_error) {
       return apiError('Invalid request body', 400);
     }
 

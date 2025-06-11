@@ -67,7 +67,9 @@ export function useClinics() {
    * Get the currently selected clinic from session storage
    */
   const getSelectedClinicId = (): string | null => {
-    if (typeof window === 'undefined') return null;
+    if (typeof window === 'undefined') {
+      return null;
+    }
     return sessionStorage.getItem('selectedClinicId');
   };
 
@@ -95,7 +97,7 @@ export function useClinics() {
 
       return response.json();
     },
-    onSuccess: (data, clinicId) => {
+    onSuccess: (_data, clinicId) => {
       // Update session storage
       sessionStorage.setItem('selectedClinicId', clinicId);
 

@@ -58,7 +58,9 @@ export function useGoals() {
   const fetchGoals = async (): Promise<Goal[]> => {
     const params = new URLSearchParams();
 
-    if (selectedClinicId) params.append('clinicId', selectedClinicId);
+    if (selectedClinicId) {
+      params.append('clinicId', selectedClinicId);
+    }
 
     const response = await fetch(`/api/goals?${params.toString()}`);
 
@@ -76,7 +78,9 @@ export function useGoals() {
   const fetchGoalProgress = async (): Promise<GoalProgress[]> => {
     const params = new URLSearchParams();
 
-    if (selectedClinicId) params.append('clinicId', selectedClinicId);
+    if (selectedClinicId) {
+      params.append('clinicId', selectedClinicId);
+    }
 
     const response = await fetch(`/api/goals/progress?${params.toString()}`);
 
@@ -177,7 +181,7 @@ export function useGoals() {
 
       return { previousGoals };
     },
-    onError: (err, variables, context) => {
+    onError: (_err, _variables, context) => {
       // Rollback on error
       if (context?.previousGoals) {
         queryClient.setQueryData(goalsQueryKey, context.previousGoals);

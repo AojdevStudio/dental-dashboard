@@ -22,10 +22,14 @@ export const formatPercentage = (value: number, decimals = 1): string => {
 };
 
 export const formatDate = (date: Date | string, formatString = 'MMM dd'): string => {
-  if (!date) return '';
+  if (!date) {
+    return '';
+  }
 
   const dateObj = typeof date === 'string' ? parseISO(date) : date;
-  if (!isValid(dateObj)) return '';
+  if (!isValid(dateObj)) {
+    return '';
+  }
 
   return format(dateObj, formatString);
 };
@@ -47,7 +51,9 @@ export const aggregateDataByPeriod = (
   const grouped = data.reduce(
     (acc, item) => {
       const date = item[dateKey] as string | Date;
-      if (!date) return acc;
+      if (!date) {
+        return acc;
+      }
 
       const key = formatDate(date, formatMap[period]);
       if (!acc[key]) {
@@ -126,7 +132,9 @@ export const generateTickValues = (min: number, max: number, tickCount = 5): num
 };
 
 export const truncateLabel = (label: string, maxLength = 20): string => {
-  if (label.length <= maxLength) return label;
+  if (label.length <= maxLength) {
+    return label;
+  }
   return `${label.substring(0, maxLength - 3)}...`;
 };
 

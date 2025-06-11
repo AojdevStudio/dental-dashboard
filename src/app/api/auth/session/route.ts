@@ -67,7 +67,6 @@ export async function GET() {
       'PRIVATE'
     );
   } catch (error) {
-    console.error('Error getting session:', error);
     return cachedJson(
       {
         authenticated: false,
@@ -78,7 +77,7 @@ export async function GET() {
   }
 }
 
-export async function POST(request: Request) {
+export async function POST(_request: Request) {
   // TODO: Implement session creation/update logic
   return Response.json({ message: 'Session POST placeholder' });
 }

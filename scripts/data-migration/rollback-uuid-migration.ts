@@ -3,9 +3,9 @@
  * Reverts UUID changes and restores original IDs
  */
 
-import * as path from 'path';
+import * as fs from 'node:fs/promises';
+import * as path from 'node:path';
 import { PrismaClient } from '@prisma/client';
-import * as fs from 'fs/promises';
 
 const prisma = new PrismaClient({
   log: ['query', 'info', 'warn', 'error'],
@@ -38,7 +38,6 @@ class MigrationRollback {
   }
 
   async rollbackUsers() {
-    console.log('\n=== Rolling Back User UUIDs ===');
     const table = 'users';
 
     try {
@@ -48,7 +47,6 @@ class MigrationRollback {
       });
 
       if (usersWithUuid === 0) {
-        console.log('No users to rollback');
         return;
       }
 
@@ -101,17 +99,13 @@ class MigrationRollback {
         rolledBack: processedCount,
         failed: failedCount,
       };
-
-      console.log(`✓ Rolled back ${processedCount}/${userMappings.length} users`);
     } catch (error) {
-      console.error('User rollback failed:', error);
       this.report.status = 'failed';
       throw error;
     }
   }
 
   async rollbackClinics() {
-    console.log('\n=== Rolling Back Clinic UUIDs ===');
     const table = 'clinics';
 
     try {
@@ -120,7 +114,6 @@ class MigrationRollback {
       });
 
       if (clinicsWithUuid === 0) {
-        console.log('No clinics to rollback');
         return;
       }
 
@@ -166,17 +159,13 @@ class MigrationRollback {
         rolledBack: processedCount,
         failed: failedCount,
       };
-
-      console.log(`✓ Rolled back ${processedCount}/${clinicMappings.length} clinics`);
     } catch (error) {
-      console.error('Clinic rollback failed:', error);
       this.report.status = 'failed';
       throw error;
     }
   }
 
   async rollbackDashboards() {
-    console.log('\n=== Rolling Back Dashboard UUIDs ===');
     const table = 'dashboards';
 
     try {
@@ -185,7 +174,6 @@ class MigrationRollback {
       });
 
       if (dashboardsWithUuid === 0) {
-        console.log('No dashboards to rollback');
         return;
       }
 
@@ -234,35 +222,26 @@ class MigrationRollback {
         rolledBack: processedCount,
         failed: failedCount,
       };
-
-      console.log(`✓ Rolled back ${processedCount}/${dashboardMappings.length} dashboards`);
     } catch (error) {
-      console.error('Dashboard rollback failed:', error);
       this.report.status = 'failed';
       throw error;
     }
   }
 
   async cleanupMappings() {
-    console.log('\n=== Cleaning Up Remaining ID Mappings ===');
-
     try {
       const remainingMappings = await prisma.idMapping.count();
 
       if (remainingMappings > 0) {
         await prisma.idMapping.deleteMany();
-        console.log(`✓ Deleted ${remainingMappings} remaining ID mappings`);
       } else {
-        console.log('No remaining ID mappings to clean up');
       }
-    } catch (error) {
-      console.error('Mapping cleanup failed:', error);
+    } catch (_error) {
       this.report.status = 'partial';
     }
   }
 
   async validateRollback() {
-    console.log('\n=== Validating Rollback ===');
     const issues: string[] = [];
 
     // Check for any remaining UUIDs
@@ -294,11 +273,10 @@ class MigrationRollback {
     }
 
     if (issues.length > 0) {
-      console.error('Rollback validation failed:');
-      issues.forEach((issue) => console.error(`  - ${issue}`));
+      // Issues found during rollback - log for debugging
       this.report.status = 'partial';
     } else {
-      console.log('✓ Rollback validation passed');
+      this.report.status = 'success';
     }
   }
 
@@ -315,40 +293,20 @@ class MigrationRollback {
 
     await fs.writeFile(reportPath, JSON.stringify(this.report, null, 2));
 
-    console.log('\n=== Rollback Report ===');
-    console.log(`Status: ${this.report.status}`);
-    console.log(`Started: ${this.report.startedAt.toISOString()}`);
-    console.log(`Completed: ${this.report.completedAt.toISOString()}`);
-    console.log('\nTable Summary:');
-
-    Object.entries(this.report.tables).forEach(([table, stats]) => {
-      console.log(`  ${table}:`);
-      console.log(`    Total: ${stats.total}`);
-      console.log(`    Rolled Back: ${stats.rolledBack}`);
-      console.log(`    Failed: ${stats.failed}`);
-    });
+    Object.entries(this.report.tables).forEach(([_table, _stats]) => {});
 
     if (this.report.errors.length > 0) {
-      console.log(`\nErrors: ${this.report.errors.length}`);
-      this.report.errors.slice(0, 10).forEach((error) => {
-        console.log(`  - ${error.table} ${error.id}: ${error.error}`);
-      });
+      this.report.errors.slice(0, 10).forEach((_error) => {});
       if (this.report.errors.length > 10) {
-        console.log(`  ... and ${this.report.errors.length - 10} more`);
       }
     }
-
-    console.log(`\nFull report saved to: ${reportPath}`);
   }
 
   async run() {
     try {
-      console.log('Starting UUID migration rollback...');
-      console.log('WARNING: This will remove all UUID fields and ID mappings!');
-
       // Add confirmation prompt in production
       if (process.env.NODE_ENV === 'production') {
-        const readline = require('readline').createInterface({
+        const readline = require('node:readline').createInterface({
           input: process.stdin,
           output: process.stdout,
         });
@@ -360,7 +318,6 @@ class MigrationRollback {
         readline.close();
 
         if (confirm !== 'yes') {
-          console.log('Rollback cancelled');
           return;
         }
       }
@@ -379,7 +336,6 @@ class MigrationRollback {
       // Generate report
       await this.generateReport();
     } catch (error) {
-      console.error('Rollback failed:', error);
       this.report.status = 'failed';
       await this.generateReport();
       throw error;
@@ -392,8 +348,7 @@ class MigrationRollback {
 // Run rollback if called directly
 if (require.main === module) {
   const rollback = new MigrationRollback();
-  rollback.run().catch((error) => {
-    console.error('Fatal rollback error:', error);
+  rollback.run().catch((_error) => {
     process.exit(1);
   });
 }

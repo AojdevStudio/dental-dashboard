@@ -272,7 +272,9 @@ export function useProviderFilters(clinicId?: string) {
     queryKey: ['provider-filters', clinicId],
     queryFn: async () => {
       const params = new URLSearchParams();
-      if (clinicId) params.append('clinicId', clinicId);
+      if (clinicId) {
+        params.append('clinicId', clinicId);
+      }
 
       const response = await fetch(`/api/providers?${params.toString()}`, {
         credentials: 'include',

@@ -7,7 +7,7 @@ import { NextResponse } from 'next/server';
  * GET /api/test/data-source
  * Get test data source for the current user
  */
-export const GET = withAuth(async (request, { authContext }) => {
+export const GET = withAuth(async (_request, { authContext }) => {
   try {
     const dataSource = await prisma.dataSource.findFirst({
       where: {
@@ -18,8 +18,7 @@ export const GET = withAuth(async (request, { authContext }) => {
     });
 
     return NextResponse.json({ dataSource });
-  } catch (error) {
-    console.error('Failed to fetch data source:', error);
+  } catch (_error) {
     throw new ApiError('Failed to fetch data source', 500);
   }
 });
@@ -28,7 +27,7 @@ export const GET = withAuth(async (request, { authContext }) => {
  * POST /api/test/data-source
  * Create a test data source for Google Sheets integration
  */
-export const POST = withAuth(async (request, { authContext }) => {
+export const POST = withAuth(async (_request, { authContext }) => {
   try {
     // Create a test data source
     const dataSource = await prisma.dataSource.create({
@@ -53,8 +52,7 @@ export const POST = withAuth(async (request, { authContext }) => {
         clinicId: dataSource.clinicId,
       },
     });
-  } catch (error) {
-    console.error('Failed to create data source:', error);
+  } catch (_error) {
     throw new ApiError('Failed to create data source', 500);
   }
 });

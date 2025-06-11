@@ -33,7 +33,7 @@ export function DashboardGrid({
 }: DashboardGridProps) {
   const breakpoint = useBreakpoint();
   const mobile = isMobile(breakpoint);
-  const tablet = isTablet(breakpoint);
+  const _tablet = isTablet(breakpoint);
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
@@ -61,13 +61,17 @@ export function DashboardGrid({
   };
 
   const renderComponent = (component: DashboardComponent) => {
-    if (!component.visible) return null;
+    if (!component.visible) {
+      return null;
+    }
 
     const componentContent = () => {
       switch (component.type) {
         case 'chart': {
           const chartConfig = component.data;
-          if (!chartConfig) return null;
+          if (!chartConfig) {
+            return null;
+          }
 
           switch (chartConfig.type) {
             case 'line':
@@ -170,7 +174,7 @@ export function DashboardGrid({
     return (
       <div class={cn('p-4', className)}>
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {[...Array(6)].map((_, i) => (
+          {[...new Array(6)].map((_, i) => (
             <Skeleton key={i} class="h-64 w-full" />
           ))}
         </div>

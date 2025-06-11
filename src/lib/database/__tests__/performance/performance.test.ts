@@ -34,8 +34,6 @@ const perfTestData = {
 
 describe('Performance Tests', () => {
   beforeAll(async () => {
-    console.log('Setting up performance test data...');
-
     // Create test clinics
     for (let i = 0; i < 5; i++) {
       const clinic = await prisma.clinic.create({
@@ -102,9 +100,6 @@ describe('Performance Tests', () => {
       });
     }
 
-    // Generate test data
-    console.log('Generating metrics data...');
-
     // Create 1000 metric values per clinic
     const metricBulkData = [];
     for (const clinic of perfTestData.clinics) {
@@ -145,13 +140,9 @@ describe('Performance Tests', () => {
         });
       }
     }
-
-    console.log('Performance test data setup complete');
   }, 60000); // 60 second timeout for setup
 
   afterAll(async () => {
-    console.log('Cleaning up performance test data...');
-
     // Clean up in reverse order of dependencies
     await prisma.goalProgress.deleteMany({
       where: { goal: { clinicId: { in: perfTestData.clinics.map((c) => c.id) } } },
@@ -177,8 +168,6 @@ describe('Performance Tests', () => {
         where: { id: perfTestData.metricDefinition.id },
       });
     }
-
-    console.log('Cleanup complete');
   }, 60000);
 
   describe('Query Performance with RLS', () => {
@@ -194,7 +183,6 @@ describe('Performance Tests', () => {
 
       expect(result.users).toBeDefined();
       expect(duration).toBeLessThan(THRESHOLDS.singleQuery);
-      console.log(`Single user query: ${duration}ms`);
     });
 
     it('should execute filtered queries efficiently', async () => {
@@ -210,7 +198,6 @@ describe('Performance Tests', () => {
 
       expect(result.users.length).toBeGreaterThan(0);
       expect(duration).toBeLessThan(THRESHOLDS.singleQuery * 2);
-      console.log(`Filtered user query: ${duration}ms`);
     });
 
     it('should handle large metric queries efficiently', async () => {
@@ -226,7 +213,6 @@ describe('Performance Tests', () => {
 
       expect(result.metrics).toBeDefined();
       expect(duration).toBeLessThan(THRESHOLDS.complexQuery);
-      console.log(`Large metric query (100 records): ${duration}ms`);
     });
 
     it('should execute aggregation queries within threshold', async () => {
@@ -246,7 +232,6 @@ describe('Performance Tests', () => {
 
       expect(result).toBeDefined();
       expect(duration).toBeLessThan(THRESHOLDS.aggregation);
-      console.log(`Metric aggregation query: ${duration}ms`);
     });
   });
 
@@ -272,7 +257,6 @@ describe('Performance Tests', () => {
 
       expect(results).toHaveLength(10);
       expect(duration).toBeLessThan(THRESHOLDS.concurrent);
-      console.log(`10 concurrent reads: ${duration}ms`);
     });
 
     it('should handle mixed read/write operations', async () => {
@@ -307,7 +291,6 @@ describe('Performance Tests', () => {
 
       expect(results).toHaveLength(10);
       expect(duration).toBeLessThan(THRESHOLDS.concurrent * 1.5);
-      console.log(`Mixed read/write operations: ${duration}ms`);
     });
   });
 
@@ -338,7 +321,6 @@ describe('Performance Tests', () => {
       const duration = Date.now() - start;
 
       expect(duration).toBeLessThan(THRESHOLDS.bulkInsert);
-      console.log(`Bulk insert (100 records): ${duration}ms`);
     });
 
     it('should handle bulk updates efficiently', async () => {
@@ -364,7 +346,6 @@ describe('Performance Tests', () => {
       const duration = Date.now() - start;
 
       expect(duration).toBeLessThan(THRESHOLDS.bulkInsert);
-      console.log(`Bulk update (${goals.goals.length} records): ${duration}ms`);
     });
   });
 
@@ -380,7 +361,6 @@ describe('Performance Tests', () => {
 
       expect(result).toBeDefined();
       expect(duration).toBeLessThan(THRESHOLDS.singleQuery);
-      console.log(`get_user_clinics function: ${duration}ms`);
     });
 
     it('should check clinic access quickly', async () => {
@@ -399,7 +379,6 @@ describe('Performance Tests', () => {
 
       expect(result).toBeDefined();
       expect(duration).toBeLessThan(THRESHOLDS.singleQuery);
-      console.log(`check_clinic_access function: ${duration}ms`);
     });
 
     it('should handle trigger execution efficiently', async () => {
@@ -440,7 +419,6 @@ describe('Performance Tests', () => {
 
       expect(updatedGoal?.status).toBe('completed');
       expect(duration).toBeLessThan(THRESHOLDS.complexQuery);
-      console.log(`Goal progress trigger execution: ${duration}ms`);
 
       // Cleanup
       await prisma.goal.delete({ where: { id: goalId } });
@@ -464,9 +442,8 @@ describe('Performance Tests', () => {
       }
 
       // Check that all pages load within threshold
-      pageTimes.forEach((time, index) => {
+      pageTimes.forEach((time, _index) => {
         expect(time).toBeLessThan(THRESHOLDS.complexQuery);
-        console.log(`Page ${index + 1} load time: ${time}ms`);
       });
 
       // Check that performance doesn't degrade significantly
@@ -505,7 +482,6 @@ describe('Performance Tests', () => {
 
       expect(result).toBeDefined();
       expect(duration).toBeLessThan(THRESHOLDS.complexQuery);
-      console.log(`Complex multi-join query: ${duration}ms`);
     });
 
     it('should execute date range queries efficiently', async () => {
@@ -526,7 +502,6 @@ describe('Performance Tests', () => {
 
       expect(result.metrics).toBeDefined();
       expect(duration).toBeLessThan(THRESHOLDS.complexQuery);
-      console.log(`Date range query (3 months): ${duration}ms`);
     });
   });
 
@@ -535,11 +510,9 @@ describe('Performance Tests', () => {
       const authContext = perfTestData.authContexts[0];
 
       // Count total metrics for the clinic
-      const totalCount = await prisma.metricValue.count({
+      const _totalCount = await prisma.metricValue.count({
         where: { clinicId: perfTestData.clinics[0].id },
       });
-
-      console.log(`Total metrics in test clinic: ${totalCount}`);
 
       // Query with large limit
       const start = Date.now();
@@ -551,7 +524,6 @@ describe('Performance Tests', () => {
 
       expect(result.metrics.length).toBeLessThanOrEqual(500);
       expect(duration).toBeLessThan(THRESHOLDS.complexQuery * 2);
-      console.log(`Large dataset query (500 records): ${duration}ms`);
     });
 
     it('should handle aggregations on large datasets', async () => {
@@ -581,7 +553,6 @@ describe('Performance Tests', () => {
 
       expect(result).toBeDefined();
       expect(duration).toBeLessThan(THRESHOLDS.aggregation);
-      console.log(`Year-long aggregation query: ${duration}ms`);
     });
   });
 });

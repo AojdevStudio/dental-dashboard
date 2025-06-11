@@ -64,23 +64,16 @@ function makeRequest(url, options = {}) {
  * @param {string} testName - Name of the test
  * @param {Function} testFn - Test function that returns a promise
  */
-async function runTest(testName, testFn) {
+async function runTest(_testName, testFn) {
   try {
-    console.log(`🧪 Running: ${testName}`);
     const result = await testFn();
     if (result.passed) {
-      console.log(`✅ PASSED: ${testName}`);
       if (result.details) {
-        console.log(`   Details: ${result.details}`);
       }
     } else {
-      console.log(`❌ FAILED: ${testName}`);
-      console.log(`   Reason: ${result.reason}`);
     }
     return result.passed;
-  } catch (error) {
-    console.log(`❌ ERROR: ${testName}`);
-    console.log(`   Error: ${error.message}`);
+  } catch (_error) {
     return false;
   }
 }
@@ -214,8 +207,6 @@ async function testAPIRoutes() {
  * Main test runner
  */
 async function runAllTests() {
-  console.log('🚀 Starting Authentication Flow Tests\n');
-
   const tests = [
     ['Server Running', testServerRunning],
     ['Environment Configuration', testEnvironmentConfig],
@@ -233,21 +224,13 @@ async function runAllTests() {
 
   for (const [testName, testFn] of tests) {
     const passed = await runTest(testName, testFn);
-    if (passed) passedTests++;
-    console.log(''); // Empty line for readability
+    if (passed) {
+      passedTests++;
+    }
   }
 
-  console.log('📊 Test Results Summary');
-  console.log('========================');
-  console.log(`Total Tests: ${totalTests}`);
-  console.log(`Passed: ${passedTests}`);
-  console.log(`Failed: ${totalTests - passedTests}`);
-  console.log(`Success Rate: ${Math.round((passedTests / totalTests) * 100)}%`);
-
   if (passedTests === totalTests) {
-    console.log('\n🎉 All tests passed! Authentication system is working correctly.');
   } else {
-    console.log('\n⚠️  Some tests failed. Please review the results above.');
   }
 
   return passedTests === totalTests;

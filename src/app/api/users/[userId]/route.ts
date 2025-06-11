@@ -97,8 +97,12 @@ export const PATCH = withAuth<UpdateUserResponse>(
         return apiError(error.message, error.statusCode, error.code);
       }
       if (error instanceof Error) {
-        if (error.message === 'User not found') return apiError('User not found', 404);
-        if (error.message === 'Permission denied') return apiError('Permission denied', 403);
+        if (error.message === 'User not found') {
+          return apiError('User not found', 404);
+        }
+        if (error.message === 'Permission denied') {
+          return apiError('Permission denied', 403);
+        }
       }
       throw error;
     }
@@ -128,8 +132,12 @@ export const DELETE = withAuth<{ success: boolean }>(
         return apiError(error.message, error.statusCode, error.code);
       }
       if (error instanceof Error) {
-        if (error.message === 'User not found') return apiError('User not found', 404);
-        if (error.message.includes('Only clinic admins')) return apiError(error.message, 403);
+        if (error.message === 'User not found') {
+          return apiError('User not found', 404);
+        }
+        if (error.message.includes('Only clinic admins')) {
+          return apiError(error.message, 403);
+        }
       }
       throw error;
     }

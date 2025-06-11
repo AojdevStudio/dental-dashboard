@@ -61,8 +61,7 @@ export async function verifyGoogleAuth(dataSourceId) {
           isValid: true,
           accessToken: tokenResponse.access_token,
         };
-      } catch (refreshError) {
-        console.error('Failed to refresh access token:', refreshError);
+      } catch (_refreshError) {
         return {
           isValid: false,
           error: 'Failed to refresh access token',
@@ -81,8 +80,7 @@ export async function verifyGoogleAuth(dataSourceId) {
         accessToken: dataSource.accessToken,
       };
     }
-  } catch (error) {
-    console.error('Error verifying Google authentication:', error);
+  } catch (_error) {
     return {
       isValid: false,
       error: 'Failed to verify authentication',

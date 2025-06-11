@@ -57,7 +57,6 @@ export const GET = withAuth<null>(
 
     const googleRedirectUri = process.env.GOOGLE_REDIRECT_URI;
     if (!googleRedirectUri) {
-      console.error('GOOGLE_REDIRECT_URI is not set in environment variables.');
       return apiError('Server configuration error', 500);
     }
 
@@ -68,8 +67,7 @@ export const GET = withAuth<null>(
         { success: true, data: null },
         { status: 302, headers: { Location: authorizationUrl } }
       );
-    } catch (error) {
-      console.error('Failed to generate Google authorization URL:', error);
+    } catch (_error) {
       return apiError('Failed to initiate Google authentication', 500);
     }
   },

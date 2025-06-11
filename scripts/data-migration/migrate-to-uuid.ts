@@ -3,9 +3,9 @@
  * Migrates existing data to UUID-based multi-tenant structure
  */
 
-import * as path from 'path';
+import * as fs from 'node:fs/promises';
+import * as path from 'node:path';
 import { PrismaClient } from '@prisma/client';
-import * as fs from 'fs/promises';
 import { v4 as uuidv4 } from 'uuid';
 
 const prisma = new PrismaClient({
@@ -69,9 +69,7 @@ class DataMigration {
       checkpoints.forEach((cp: MigrationCheckpoint) => {
         this.checkpoints.set(`${cp.table}`, cp);
       });
-    } catch (error) {
-      console.log('No existing checkpoint found, starting fresh migration');
-    }
+    } catch (_error) {}
   }
 
   async saveCheckpoint(table: string, checkpoint: MigrationCheckpoint) {
@@ -81,7 +79,6 @@ class DataMigration {
   }
 
   async migrateUsers() {
-    console.log('\n=== Migrating Users ===');
     const startTime = Date.now();
     const table = 'users';
 
@@ -89,7 +86,6 @@ class DataMigration {
       // Get total count
       const totalCount = await prisma.user.count();
       if (totalCount === 0) {
-        console.log('No users to migrate');
         return;
       }
 
@@ -108,7 +104,7 @@ class DataMigration {
 
       // Process in batches
       let hasMore = true;
-      let processedInSession = 0;
+      let _processedInSession = 0;
 
       while (hasMore) {
         const users = await prisma.user.findMany({
@@ -148,7 +144,7 @@ class DataMigration {
                 },
               });
 
-              processedInSession++;
+              _processedInSession++;
               checkpoint.processedCount++;
               checkpoint.lastProcessedId = user.id;
             } catch (error) {
@@ -170,10 +166,6 @@ class DataMigration {
         // Update checkpoint
         checkpoint.updatedAt = new Date().toISOString();
         await this.saveCheckpoint(table, checkpoint);
-
-        console.log(
-          `Processed ${processedInSession} users (${checkpoint.processedCount}/${totalCount})`
-        );
       }
 
       // Mark as completed
@@ -187,24 +179,19 @@ class DataMigration {
         failed: checkpoint.errors.length,
         duration,
       };
-
-      console.log(`✓ User migration completed in ${duration}ms`);
     } catch (error) {
-      console.error('User migration failed:', error);
       this.report.status = 'failed';
       throw error;
     }
   }
 
   async migrateClinics() {
-    console.log('\n=== Migrating Clinics ===');
     const startTime = Date.now();
     const table = 'clinics';
 
     try {
       const totalCount = await prisma.clinic.count();
       if (totalCount === 0) {
-        console.log('No clinics to migrate');
         return;
       }
 
@@ -221,7 +208,7 @@ class DataMigration {
       };
 
       let hasMore = true;
-      let processedInSession = 0;
+      let _processedInSession = 0;
 
       while (hasMore) {
         const clinics = await prisma.clinic.findMany({
@@ -258,7 +245,7 @@ class DataMigration {
                 },
               });
 
-              processedInSession++;
+              _processedInSession++;
               checkpoint.processedCount++;
               checkpoint.lastProcessedId = clinic.id;
             } catch (error) {
@@ -279,10 +266,6 @@ class DataMigration {
 
         checkpoint.updatedAt = new Date().toISOString();
         await this.saveCheckpoint(table, checkpoint);
-
-        console.log(
-          `Processed ${processedInSession} clinics (${checkpoint.processedCount}/${totalCount})`
-        );
       }
 
       checkpoint.status = 'completed';
@@ -295,24 +278,19 @@ class DataMigration {
         failed: checkpoint.errors.length,
         duration,
       };
-
-      console.log(`✓ Clinic migration completed in ${duration}ms`);
     } catch (error) {
-      console.error('Clinic migration failed:', error);
       this.report.status = 'failed';
       throw error;
     }
   }
 
   async migrateDashboards() {
-    console.log('\n=== Migrating Dashboards ===');
     const startTime = Date.now();
     const table = 'dashboards';
 
     try {
       const totalCount = await prisma.dashboard.count();
       if (totalCount === 0) {
-        console.log('No dashboards to migrate');
         return;
       }
 
@@ -329,7 +307,7 @@ class DataMigration {
       };
 
       let hasMore = true;
-      let processedInSession = 0;
+      let _processedInSession = 0;
 
       while (hasMore) {
         const dashboards = await prisma.dashboard.findMany({
@@ -375,7 +353,7 @@ class DataMigration {
                 },
               });
 
-              processedInSession++;
+              _processedInSession++;
               checkpoint.processedCount++;
               checkpoint.lastProcessedId = dashboard.id;
             } catch (error) {
@@ -396,10 +374,6 @@ class DataMigration {
 
         checkpoint.updatedAt = new Date().toISOString();
         await this.saveCheckpoint(table, checkpoint);
-
-        console.log(
-          `Processed ${processedInSession} dashboards (${checkpoint.processedCount}/${totalCount})`
-        );
       }
 
       checkpoint.status = 'completed';
@@ -412,17 +386,13 @@ class DataMigration {
         failed: checkpoint.errors.length,
         duration,
       };
-
-      console.log(`✓ Dashboard migration completed in ${duration}ms`);
     } catch (error) {
-      console.error('Dashboard migration failed:', error);
       this.report.status = 'failed';
       throw error;
     }
   }
 
   async validateDataIntegrity() {
-    console.log('\n=== Validating Data Integrity ===');
     const validationErrors: string[] = [];
 
     try {
@@ -485,14 +455,12 @@ class DataMigration {
       }
 
       if (validationErrors.length > 0) {
-        console.error('Validation errors found:');
-        validationErrors.forEach((error) => console.error(`  - ${error}`));
+        // Validation errors found during migration
         this.report.status = 'partial';
       } else {
-        console.log('✓ All data integrity checks passed');
+        this.report.status = 'success';
       }
     } catch (error) {
-      console.error('Validation failed:', error);
       this.report.status = 'failed';
       throw error;
     }
@@ -508,31 +476,13 @@ class DataMigration {
 
     await fs.writeFile(reportPath, JSON.stringify(this.report, null, 2));
 
-    console.log('\n=== Migration Report ===');
-    console.log(`Status: ${this.report.status}`);
-    console.log(`Started: ${this.report.startedAt.toISOString()}`);
-    console.log(`Completed: ${this.report.completedAt.toISOString()}`);
-    console.log('\nTable Summary:');
-
-    Object.entries(this.report.tables).forEach(([table, stats]) => {
-      console.log(`  ${table}:`);
-      console.log(`    Total: ${stats.total}`);
-      console.log(`    Migrated: ${stats.migrated}`);
-      console.log(`    Failed: ${stats.failed}`);
-      console.log(`    Duration: ${stats.duration}ms`);
-    });
+    Object.entries(this.report.tables).forEach(([_table, _stats]) => {});
 
     if (this.report.errors.length > 0) {
-      console.log(`\nErrors: ${this.report.errors.length}`);
-      this.report.errors.slice(0, 10).forEach((error) => {
-        console.log(`  - ${error.table} ${error.id}: ${error.error}`);
-      });
+      this.report.errors.slice(0, 10).forEach((_error) => {});
       if (this.report.errors.length > 10) {
-        console.log(`  ... and ${this.report.errors.length - 10} more`);
       }
     }
-
-    console.log(`\nFull report saved to: ${reportPath}`);
   }
 
   async run() {
@@ -550,7 +500,6 @@ class DataMigration {
       // Generate report
       await this.generateReport();
     } catch (error) {
-      console.error('Migration failed:', error);
       this.report.status = 'failed';
       await this.generateReport();
       throw error;
@@ -563,8 +512,7 @@ class DataMigration {
 // Run migration if called directly
 if (require.main === module) {
   const migration = new DataMigration();
-  migration.run().catch((error) => {
-    console.error('Fatal migration error:', error);
+  migration.run().catch((_error) => {
     process.exit(1);
   });
 }

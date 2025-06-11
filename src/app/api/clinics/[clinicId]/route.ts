@@ -110,7 +110,7 @@ export const PATCH = withAuth<Clinic>(async (request, { authContext, params }) =
   try {
     const rawBody = await request.json();
     body = updateClinicSchema.parse(rawBody);
-  } catch (error) {
+  } catch (_error) {
     return apiError('Invalid request body', 400);
   }
 

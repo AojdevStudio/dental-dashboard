@@ -17,7 +17,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Validate access to the clinic
-    if (!authContext.isSystemAdmin && !authContext.clinicIds.includes(clinicId)) {
+    if (!(authContext.isSystemAdmin || authContext.clinicIds.includes(clinicId))) {
       return NextResponse.json({ error: 'Access denied to this clinic' }, { status: 403 });
     }
 
@@ -25,8 +25,7 @@ export async function POST(request: NextRequest) {
     await updateSelectedClinic(clinicId);
 
     return NextResponse.json({ success: true, clinicId }, { status: 200 });
-  } catch (error) {
-    console.error('Error switching clinic:', error);
+  } catch (_error) {
     return NextResponse.json({ error: 'Failed to switch clinic' }, { status: 500 });
   }
 }

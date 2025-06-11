@@ -111,8 +111,8 @@ export async function GET(request: NextRequest) {
       }
 
       // Build parameterized query conditions
-      const conditions = [];
-      const params = [];
+      const conditions: string[] = [];
+      const params: any[] = [];
 
       if (where.clinicId) {
         conditions.push(`clinic_id = ${params.length + 1}`);
@@ -230,7 +230,6 @@ export async function GET(request: NextRequest) {
       },
     });
   } catch (e: unknown) {
-    console.error('Error fetching location financial data:', e);
     let errorMessage = 'An unknown error occurred';
     if (e instanceof Error) {
       errorMessage = e.message;
@@ -264,7 +263,7 @@ export async function POST(request: NextRequest) {
     } = body;
 
     // Validate required fields
-    if (!clinicId || !locationId || !date || production === undefined) {
+    if (!(clinicId && locationId && date) || production === undefined) {
       return NextResponse.json(
         {
           success: false,
@@ -380,7 +379,6 @@ export async function POST(request: NextRequest) {
       { status: 201 }
     );
   } catch (error) {
-    console.error('Error creating location financial data:', error);
     return NextResponse.json(
       {
         success: false,

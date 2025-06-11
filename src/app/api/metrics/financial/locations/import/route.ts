@@ -49,7 +49,7 @@ export async function POST(request: NextRequest) {
     const { clinicId, dataSourceId, records, upsert = true, dryRun = false } = body;
 
     // Validate required fields
-    if (!clinicId || !records || !Array.isArray(records) || records.length === 0) {
+    if (!(clinicId && records && Array.isArray(records)) || records.length === 0) {
       return NextResponse.json(
         {
           success: false,
@@ -99,7 +99,7 @@ export async function POST(request: NextRequest) {
 
       try {
         // Validate required fields
-        if (!record.date || !record.locationName) {
+        if (!(record.date && record.locationName)) {
           errors.push(`Record ${recordIndex}: date and locationName are required`);
           continue;
         }
@@ -206,7 +206,7 @@ export async function POST(request: NextRequest) {
       failed: 0,
     };
 
-    const processedRecords = [];
+    const processedRecords: any[] = [];
 
     for (const item of validRecords) {
       try {
@@ -294,12 +294,8 @@ export async function POST(request: NextRequest) {
             status: 'created',
           });
         }
-      } catch (error) {
+      } catch (_error) {
         results.failed++;
-        console.error(
-          `Failed to process record for ${item.locationName} on ${item.date.toISOString().split('T')[0]}:`,
-          error
-        );
       }
     }
 
@@ -310,9 +306,7 @@ export async function POST(request: NextRequest) {
           where: { id: dataSourceId },
           data: { lastSyncedAt: new Date() },
         });
-      } catch (error) {
-        console.warn('Failed to update data source sync timestamp:', error);
-      }
+      } catch (_error) {}
     }
 
     return NextResponse.json({
@@ -324,7 +318,6 @@ export async function POST(request: NextRequest) {
       totalProcessed: processedRecords.length,
     });
   } catch (error) {
-    console.error('Error importing location financial data:', error);
     return NextResponse.json(
       {
         success: false,

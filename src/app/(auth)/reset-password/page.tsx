@@ -14,6 +14,7 @@
 
 import { PasswordResetRequest } from '@/components/auth/password-reset-request';
 import type { Metadata } from 'next';
+import type React from 'react';
 
 /**
  * Metadata for the reset password page

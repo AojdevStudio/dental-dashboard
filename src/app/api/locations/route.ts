@@ -60,7 +60,6 @@ export async function GET(request: NextRequest) {
       count: locations.length,
     });
   } catch (error) {
-    console.error('Error fetching locations:', error);
     return NextResponse.json(
       {
         success: false,
@@ -78,7 +77,7 @@ export async function POST(request: NextRequest) {
     const { clinicId, name, address, isActive = true } = body;
 
     // Validate required fields
-    if (!clinicId || !name) {
+    if (!(clinicId && name)) {
       return NextResponse.json(
         {
           success: false,
@@ -151,7 +150,6 @@ export async function POST(request: NextRequest) {
       { status: 201 }
     );
   } catch (error) {
-    console.error('Error creating location:', error);
     return NextResponse.json(
       {
         success: false,

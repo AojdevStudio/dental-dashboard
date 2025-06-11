@@ -53,7 +53,7 @@ export function BarChart({
   const mobile = isMobile(breakpoint);
   const margin = getResponsiveMargin(breakpoint);
 
-  const colors = getChartColors('dental', config.series?.length || config.data.length);
+  const colors = getChartColors('dental', config.series?.length > 0 || config.data.length > 0);
 
   const defaultConfig: ChartConfig = {
     ...config,
@@ -77,7 +77,9 @@ export function BarChart({
     }>;
     label?: string;
   }) => {
-    if (!active || !payload || !payload.length) return null;
+    if (!(active && payload && payload.length > 0)) {
+      return null;
+    }
 
     return (
       <div style={chartTheme.tooltip.container}>
@@ -144,7 +146,7 @@ export function BarChart({
           />
         )) || (
           <Bar dataKey="value" fill={colors[0]} animationDuration={defaultConfig.animationDuration}>
-            {defaultConfig.data.map((entry, index) => (
+            {defaultConfig.data.map((_entry, index) => (
               <Cell key={`cell-${index}`} fill={colors[index % colors.length]} />
             ))}
           </Bar>
@@ -211,7 +213,7 @@ export function BarChart({
           />
         )) || (
           <Bar dataKey="value" fill={colors[0]} animationDuration={defaultConfig.animationDuration}>
-            {defaultConfig.data.map((entry, index) => (
+            {defaultConfig.data.map((_entry, index) => (
               <Cell key={`cell-${index}`} fill={colors[index % colors.length]} />
             ))}
           </Bar>

@@ -1,5 +1,7 @@
 'use client';
 
+import type React from 'react';
+
 import { AuthGuard } from '@/components/auth/auth-guard';
 import { DashboardLayout as Layout } from '@/components/common/dashboard-layout';
 import { Providers } from './providers';

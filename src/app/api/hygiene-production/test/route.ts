@@ -75,7 +75,6 @@ export async function GET(request: NextRequest) {
       },
     });
   } catch (error) {
-    console.error('Test endpoint error:', error);
     return ApiResponse.error(error instanceof Error ? error.message : 'Internal server error', 500);
   }
 }

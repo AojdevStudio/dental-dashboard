@@ -52,7 +52,6 @@ interface Location {
 
 Deno.serve(async (req: Request) => {
   const startTime = Date.now();
-  console.log(`[${new Date().toISOString()}] Function started`);
 
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
@@ -84,13 +83,10 @@ Deno.serve(async (req: Request) => {
   }
 
   try {
-    // Get Supabase client
-    console.log(`[${new Date().toISOString()}] Initializing Supabase client`);
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
     const supabaseServiceRoleKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
 
-    if (!supabaseUrl || !supabaseServiceRoleKey) {
-      console.error('Missing required environment variables');
+    if (!(supabaseUrl && supabaseServiceRoleKey)) {
       return new Response(
         JSON.stringify({
           success: false,
@@ -112,22 +108,11 @@ Deno.serve(async (req: Request) => {
         persistSession: false,
       },
     });
-
-    // Parse request body
-    console.log(`[${new Date().toISOString()}] Parsing request body`);
     const body: ImportRequest = await req.json();
     const { clinicId, dataSourceId, records, upsert = true, dryRun = false } = body;
 
-    console.log(`[${new Date().toISOString()}] Request params:`, {
-      clinicId,
-      recordCount: records?.length,
-      dryRun,
-      upsert,
-    });
-
     // Validate required fields and request size limits
-    if (!clinicId || !records || !Array.isArray(records) || records.length === 0) {
-      console.error('Validation failed: Missing required fields');
+    if (!(clinicId && records && Array.isArray(records)) || records.length === 0) {
       return new Response(
         JSON.stringify({
           success: false,
@@ -145,7 +130,6 @@ Deno.serve(async (req: Request) => {
 
     // SECURITY: Limit request size to prevent abuse
     if (records.length > 5000) {
-      console.error(`Request too large: ${records.length} records (max 5000)`);
       return new Response(
         JSON.stringify({
           success: false,
@@ -160,11 +144,6 @@ Deno.serve(async (req: Request) => {
         }
       );
     }
-
-    // Verify clinic exists and get locations
-    console.log(
-      `[${new Date().toISOString()}] Querying clinic and locations for clinicId: ${clinicId}`
-    );
 
     const clinicQueryStart = Date.now();
     const { data: clinic, error: clinicError } = await supabase
@@ -181,11 +160,9 @@ Deno.serve(async (req: Request) => {
       .eq('id', clinicId)
       .single();
 
-    const clinicQueryTime = Date.now() - clinicQueryStart;
-    console.log(`[${new Date().toISOString()}] Clinic query completed in ${clinicQueryTime}ms`);
+    const _clinicQueryTime = Date.now() - clinicQueryStart;
 
     if (clinicError) {
-      console.error('Clinic query error:', clinicError);
       return new Response(
         JSON.stringify({
           success: false,
@@ -203,7 +180,6 @@ Deno.serve(async (req: Request) => {
     }
 
     if (!clinic) {
-      console.error(`Clinic not found for ID: ${clinicId}`);
       return new Response(
         JSON.stringify({
           success: false,
@@ -219,12 +195,6 @@ Deno.serve(async (req: Request) => {
       );
     }
 
-    console.log(`[${new Date().toISOString()}] Found clinic:`, {
-      id: clinic.id,
-      name: clinic.name,
-      locationCount: clinic.locations?.length || 0,
-    });
-
     // Create location name to ID mapping
     const locationMap = new Map<string, Location>();
     clinic.locations?.forEach((loc: any) => {
@@ -234,14 +204,11 @@ Deno.serve(async (req: Request) => {
         isActive: loc.isActive,
       });
     });
-
-    // Validate and process records
-    console.log(`[${new Date().toISOString()}] Starting validation of ${records.length} records`);
     const validRecords: ValidatedFinancialData[] = [];
     const errors: string[] = [];
     const warnings: string[] = [];
 
-    const validationStart = Date.now();
+    const _validationStart = Date.now();
     for (let i = 0; i < records.length; i++) {
       const record = records[i];
       const recordIndex = i + 1;
@@ -250,8 +217,6 @@ Deno.serve(async (req: Request) => {
       if (i % 10 === 0) {
         const elapsed = Date.now() - startTime;
         if (elapsed > 120000) {
-          // 2 minutes
-          console.error(`Function timeout approaching at record ${i}, elapsed: ${elapsed}ms`);
           return new Response(
             JSON.stringify({
               success: false,
@@ -272,14 +237,14 @@ Deno.serve(async (req: Request) => {
 
       try {
         // Validate required fields
-        if (!record.date || !record.locationName) {
+        if (!(record.date && record.locationName)) {
           errors.push(`Record ${recordIndex}: date and locationName are required`);
           continue;
         }
 
         // Validate date
         const recordDate = new Date(record.date);
-        if (isNaN(recordDate.getTime())) {
+        if (Number.isNaN(recordDate.getTime())) {
           errors.push(`Record ${recordIndex}: invalid date format`);
           continue;
         }
@@ -305,7 +270,7 @@ Deno.serve(async (req: Request) => {
         const insuranceIncome = Number.parseFloat(record.insuranceIncome?.toString() || '0');
         const unearned = record.unearned ? Number.parseFloat(record.unearned.toString()) : null;
 
-        if (isNaN(production) || production < 0) {
+        if (Number.isNaN(production) || production < 0) {
           errors.push(`Record ${recordIndex}: invalid production value`);
           continue;
         }
@@ -424,10 +389,6 @@ Deno.serve(async (req: Request) => {
       // PERFORMANCE FIX: Batch check for existing records
       const dateStrings = validRecords.map((item) => item.date.toISOString().split('T')[0]);
       const locationIds = [...new Set(validRecords.map((item) => item.locationId))];
-
-      console.log(
-        `[${new Date().toISOString()}] Batch checking ${validRecords.length} records for existence`
-      );
       const { data: existingRecords } = await supabase
         .from('location_financial')
         .select('id,clinic_id,location_id,date')
@@ -443,10 +404,6 @@ Deno.serve(async (req: Request) => {
         const key = `${record.clinic_id}-${record.location_id}-${dbDate}`;
         existingMap.set(key, record.id);
       });
-
-      console.log(
-        `[${new Date().toISOString()}] Found ${existingRecords?.length || 0} existing records`
-      );
 
       // Process each record with batch info
       for (const item of validRecords) {
@@ -505,7 +462,6 @@ Deno.serve(async (req: Request) => {
         } catch (error) {
           results.failed++;
           const errorMsg = `Failed to process record for ${item.locationName} on ${item.date.toISOString().split('T')[0]}: ${error instanceof Error ? error.message : JSON.stringify(error)}`;
-          console.error(errorMsg);
 
           // Add error to warnings so user can see it
           warnings.push(errorMsg);
@@ -551,7 +507,6 @@ Deno.serve(async (req: Request) => {
         } catch (error) {
           results.failed++;
           const errorMsg = `Failed to process record for ${item.locationName} on ${item.date.toISOString().split('T')[0]}: ${error instanceof Error ? error.message : JSON.stringify(error)}`;
-          console.error(errorMsg);
 
           // Add error to warnings so user can see it
           warnings.push(errorMsg);
@@ -566,13 +521,10 @@ Deno.serve(async (req: Request) => {
           .from('data_sources')
           .update({ last_synced_at: new Date().toISOString() })
           .eq('id', dataSourceId);
-      } catch (error) {
-        console.warn('Failed to update data source sync timestamp:', error);
-      }
+      } catch (_error) {}
     }
 
     const totalTime = Date.now() - startTime;
-    console.log(`[${new Date().toISOString()}] Import completed successfully in ${totalTime}ms`);
 
     return new Response(
       JSON.stringify({
@@ -594,10 +546,6 @@ Deno.serve(async (req: Request) => {
     );
   } catch (error) {
     const totalTime = Date.now() - startTime;
-    console.error(
-      `[${new Date().toISOString()}] Error importing location financial data after ${totalTime}ms:`,
-      error
-    );
 
     return new Response(
       JSON.stringify({

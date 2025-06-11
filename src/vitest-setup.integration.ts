@@ -30,21 +30,15 @@ beforeAll(() => {
 
   // Verify we're using a test database
   const dbUrl = process.env.DATABASE_URL!;
-  if (!dbUrl.includes('test') && !dbUrl.includes('localhost')) {
+  if (!(dbUrl.includes('test') || dbUrl.includes('localhost'))) {
     throw new Error(
       'Integration tests must use a test database. ' +
         'Please ensure DATABASE_URL points to a test database.'
     );
   }
-
-  console.log('Integration test environment configured');
-  console.log(`Database: ${dbUrl.split('@')[1]?.split('/')[0] || 'unknown'}`);
 });
 
-afterAll(() => {
-  // Global cleanup if needed
-  console.log('Integration tests completed');
-});
+afterAll(() => {});
 
 // Mock next/navigation for API route tests
 vi.mock('next/navigation', () => ({

@@ -6,7 +6,7 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     const { authId, email, name, clinicName, role } = body;
 
-    if (!authId || !email || !name || !clinicName || !role) {
+    if (!(authId && email && name && clinicName && role)) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
     }
 
@@ -60,8 +60,7 @@ export async function POST(request: NextRequest) {
       user: result.user,
       clinic: result.clinic,
     });
-  } catch (error) {
-    console.error('Error completing signup:', error);
+  } catch (_error) {
     return NextResponse.json({ error: 'Failed to create profile' }, { status: 500 });
   }
 }

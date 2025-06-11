@@ -58,7 +58,9 @@ export function VarianceIndicator({
 
   // Determine text color based on variance direction and inverseColors setting
   const getTextColorClass = () => {
-    if (isNeutral) return 'text-muted-foreground';
+    if (isNeutral) {
+      return 'text-muted-foreground';
+    }
 
     // If inverseColors is true, negative variance is good (green) and positive is bad (red)
     if (inverseColors) {
@@ -69,8 +71,12 @@ export function VarianceIndicator({
 
   // Get the appropriate icon based on variance direction
   const Icon = () => {
-    if (isNeutral) return <Minus class="h-3 w-3" />;
-    if (isPositive) return <ArrowUp class="h-3 w-3" />;
+    if (isNeutral) {
+      return <Minus class="h-3 w-3" />;
+    }
+    if (isPositive) {
+      return <ArrowUp class="h-3 w-3" />;
+    }
     return <ArrowDown class="h-3 w-3" />;
   };
 

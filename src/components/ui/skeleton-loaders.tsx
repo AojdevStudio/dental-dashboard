@@ -1,11 +1,3 @@
-/**
- * @fileoverview Pre-built skeleton loading components for common UI patterns
- *
- * This file provides ready-to-use skeleton loading components for various
- * sections of the application, ensuring consistent loading states across
- * the dashboard while improving perceived performance.
- */
-
 import { Card, CardContent, CardHeader } from './card';
 import { Skeleton } from './skeleton';
 

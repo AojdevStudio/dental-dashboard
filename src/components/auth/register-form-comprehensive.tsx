@@ -114,12 +114,7 @@ export function RegisterFormComprehensive() {
   const handleNextStep = () => {
     // Validate current step
     if (currentStep === 1) {
-      if (
-        !formData.email ||
-        !formData.password ||
-        !formData.confirmPassword ||
-        !formData.fullName
-      ) {
+      if (!(formData.email && formData.password && formData.confirmPassword && formData.fullName)) {
         setError('Please fill in all required fields');
         return;
       }
@@ -164,7 +159,7 @@ export function RegisterFormComprehensive() {
     e.preventDefault();
 
     // Final validation
-    if (!formData.termsAccepted || !formData.privacyAccepted) {
+    if (!(formData.termsAccepted && formData.privacyAccepted)) {
       setError('You must accept the terms and privacy policy');
       return;
     }
@@ -187,7 +182,7 @@ export function RegisterFormComprehensive() {
       } else {
         setError(result.error || 'Registration failed');
       }
-    } catch (err) {
+    } catch (_err) {
       setError('An unexpected error occurred. Please try again.');
     } finally {
       setLoading(false);

@@ -34,7 +34,6 @@ export async function GET(request: NextRequest) {
 
     const googleRedirectUri = process.env.GOOGLE_REDIRECT_URI;
     if (!googleRedirectUri) {
-      console.error('GOOGLE_REDIRECT_URI is not set in environment variables.');
       return NextResponse.json({ error: 'Server configuration error' }, { status: 500 });
     }
 
@@ -42,7 +41,6 @@ export async function GET(request: NextRequest) {
     const authorizationUrl = generateAuthUrl(dataSourceId);
     return NextResponse.redirect(authorizationUrl);
   } catch (error) {
-    console.error('Failed to generate Google authorization URL:', error);
     return NextResponse.json(
       {
         error: 'Failed to initiate Google authentication',

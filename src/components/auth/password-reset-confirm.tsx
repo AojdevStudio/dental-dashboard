@@ -56,7 +56,7 @@ export function PasswordResetConfirm(): React.ReactElement {
 
       // For now, just show a success message
       alert('Password reset functionality will be implemented in a future update.');
-    } catch (err) {
+    } catch (_err) {
       setError('An error occurred. Please try again.');
     } finally {
       setIsLoading(false);

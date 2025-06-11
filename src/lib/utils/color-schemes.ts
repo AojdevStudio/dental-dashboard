@@ -107,7 +107,9 @@ export const getTrendColor = (
 ): string => {
   const scheme = getColorScheme('default');
 
-  if (direction === 'neutral') return scheme.neutral[4];
+  if (direction === 'neutral') {
+    return scheme.neutral[4];
+  }
 
   if (context === 'positive') {
     return direction === 'up' ? scheme.success : scheme.error;
@@ -162,9 +164,15 @@ export const getStatusColor = (
 ): string => {
   const palette = getColorScheme(scheme);
 
-  if (value < thresholds.low) return palette.error;
-  if (value < thresholds.medium) return palette.warning;
-  if (value < thresholds.high) return palette.primary[0];
+  if (value < thresholds.low) {
+    return palette.error;
+  }
+  if (value < thresholds.medium) {
+    return palette.warning;
+  }
+  if (value < thresholds.high) {
+    return palette.primary[0];
+  }
   return palette.success;
 };
 

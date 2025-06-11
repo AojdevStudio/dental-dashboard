@@ -28,7 +28,7 @@ export const GET = withAuth(async (request, { authContext }) => {
   const dateRange = getDateRangeParams(request);
 
   // Validate required parameters
-  if (!dateRange.startDate || !dateRange.endDate) {
+  if (!(dateRange.startDate && dateRange.endDate)) {
     return ApiError.badRequest('Start date and end date are required');
   }
 
@@ -41,7 +41,7 @@ export const GET = withAuth(async (request, { authContext }) => {
       providerId: searchParams.get('providerId') || undefined,
       aggregationType: searchParams.get('aggregationType') || 'monthly',
     });
-  } catch (error) {
+  } catch (_error) {
     return ApiError.badRequest('Invalid query parameters');
   }
 

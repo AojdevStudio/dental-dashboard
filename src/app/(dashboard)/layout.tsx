@@ -1,5 +1,6 @@
 import { getAuthContext } from '@/lib/database/auth-context';
 import { prisma } from '@/lib/database/prisma';
+import type React from 'react';
 import DashboardLayout from './layout-client';
 
 export default async function DashboardLayoutServer({
@@ -44,7 +45,7 @@ export default async function DashboardLayoutServer({
     <DashboardLayout
       clinics={clinics}
       currentClinicId={authContext?.selectedClinicId}
-      isSystemAdmin={authContext?.isSystemAdmin || false}
+      isSystemAdmin={authContext?.isSystemAdmin}
     >
       {children}
     </DashboardLayout>

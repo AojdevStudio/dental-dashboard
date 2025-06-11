@@ -61,7 +61,6 @@ export async function POST() {
       },
     });
   } catch (error) {
-    console.error('Failed to create data source:', error);
     return NextResponse.json(
       {
         error: 'Failed to create data source',

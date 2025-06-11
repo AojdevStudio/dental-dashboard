@@ -9,9 +9,11 @@ import {
   updateGoalSchema,
 } from '@/lib/types/goals';
 
-export const GET = withAuth<GoalResponse>(async (request: Request, { params, authContext }) => {
+export const GET = withAuth<GoalResponse>(async (_request: Request, { params, authContext }) => {
   const goalId = params?.goalId as string;
-  if (!goalId) return apiError('Goal ID is required', 400);
+  if (!goalId) {
+    return apiError('Goal ID is required', 400);
+  }
 
   const goal = await goalQueries.getGoalById(authContext, goalId);
 
@@ -25,7 +27,9 @@ export const GET = withAuth<GoalResponse>(async (request: Request, { params, aut
 export const PUT = withAuth<GoalResponse>(
   async (request: Request, { params, authContext }) => {
     const goalId = params?.goalId as string;
-    if (!goalId) return apiError('Goal ID is required', 400);
+    if (!goalId) {
+      return apiError('Goal ID is required', 400);
+    }
 
     // Parse and validate request body
     const body = await request.json();
@@ -39,7 +43,7 @@ export const PUT = withAuth<GoalResponse>(
 
     // Check permissions - only clinic_admin and admin can update goals
     const userRole = authContext.role;
-    if (!userRole || !['admin', 'clinic_admin'].includes(userRole)) {
+    if (!(userRole && ['admin', 'clinic_admin'].includes(userRole))) {
       return apiError('Insufficient permissions', 403);
     }
 
@@ -57,9 +61,11 @@ export const PUT = withAuth<GoalResponse>(
 );
 
 export const DELETE = withAuth<{ success: true }>(
-  async (request: Request, { params, authContext }) => {
+  async (_request: Request, { params, authContext }) => {
     const goalId = params?.goalId as string;
-    if (!goalId) return apiError('Goal ID is required', 400);
+    if (!goalId) {
+      return apiError('Goal ID is required', 400);
+    }
 
     // Check if goal exists
     const existingGoal = await goalQueries.getGoalById(authContext, goalId);

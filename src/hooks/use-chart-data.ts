@@ -34,7 +34,9 @@ export function useChartData({
   const [error, setError] = useState<Error | null>(null);
 
   const fetchData = useCallback(async () => {
-    if (!enabled || !endpoint) return;
+    if (!(enabled && endpoint)) {
+      return;
+    }
 
     setLoading(true);
     setError(null);
@@ -73,7 +75,9 @@ export function useChartData({
 
   // Set up refresh interval if specified
   useEffect(() => {
-    if (!refreshInterval || !enabled) return;
+    if (!(refreshInterval && enabled)) {
+      return;
+    }
 
     const interval = setInterval(fetchData, refreshInterval);
     return () => clearInterval(interval);

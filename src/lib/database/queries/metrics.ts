@@ -37,7 +37,7 @@ export interface MetricFilter {
  * Get metric definitions (available to all authenticated users)
  */
 export async function getMetricDefinitions(
-  authContext: AuthContext,
+  _authContext: AuthContext,
   options?: {
     category?: string;
     dataType?: string;
@@ -345,7 +345,7 @@ export async function getMetricStatistics(
   const avg = sum / values.length;
   const min = Math.min(...values);
   const max = Math.max(...values);
-  const latest = metrics[metrics.length - 1];
+  const latest = metrics.at(-1);
 
   return {
     count: metrics.length,
@@ -364,7 +364,7 @@ export async function getMetricStatistics(
  * Compute aggregations on the fly when pre-computed ones don't exist
  */
 async function computeAggregations(
-  authContext: AuthContext,
+  _authContext: AuthContext,
   clinicId: string,
   options: {
     metricDefinitionId?: string;
@@ -404,7 +404,7 @@ async function computeAggregations(
     if (!groupedMetrics.has(periodKey)) {
       groupedMetrics.set(periodKey, []);
     }
-    groupedMetrics.get(periodKey)!.push(metric);
+    groupedMetrics.get(periodKey)?.push(metric);
   }
 
   // Calculate aggregations

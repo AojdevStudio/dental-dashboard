@@ -15,7 +15,7 @@ export async function signInWithVerification(
   const password = formData.get('password') as string;
   const supabase = await createClient();
 
-  if (!email || !password) {
+  if (!(email && password)) {
     return { error: 'Email and password are required.', success: false };
   }
 
@@ -50,7 +50,6 @@ export async function signInWithVerification(
 
       // If found by email but authId doesn't match, update it
       if (dbUser && dbUser.authId !== authData.user.id) {
-        console.log('Updating authId for user:', dbUser.email);
         dbUser = await prisma.user.update({
           where: { id: dbUser.id },
           data: {
@@ -70,9 +69,6 @@ export async function signInWithVerification(
     });
 
     if (!dbUser) {
-      // User exists in auth but not in database - this is the "granting user" error
-      console.error('User authenticated but not found in database:', authData.user.id);
-
       // Sign them out to prevent partial access
       await supabase.auth.signOut();
 
@@ -83,9 +79,7 @@ export async function signInWithVerification(
     }
 
     // Verify user has a clinic assignment (skip for system admins)
-    if (dbUser.role !== 'system_admin' && (!dbUser.clinicId || !dbUser.clinic)) {
-      console.error('User has no clinic assignment:', dbUser.id);
-
+    if (dbUser.role !== 'system_admin' && !(dbUser.clinicId && dbUser.clinic)) {
       await supabase.auth.signOut();
 
       return {
@@ -96,8 +90,6 @@ export async function signInWithVerification(
 
     // Verify user has role assignments (skip for system admins)
     if (dbUser.role !== 'system_admin' && (!userRoles || userRoles.length === 0)) {
-      console.error('User has no clinic roles:', dbUser.id);
-
       // Try to create a default role
       try {
         await prisma.userClinicRole.create({
@@ -108,25 +100,14 @@ export async function signInWithVerification(
             isActive: true,
           },
         });
-      } catch (roleError) {
-        console.error('Failed to create default role:', roleError);
-      }
+      } catch (_roleError) {}
     }
-
-    // Everything is good - proceed with login
-    console.log('Login successful for user:', dbUser.email);
 
     revalidatePath('/', 'layout');
 
     // Return success without redirect - let client handle navigation
     return { error: null, success: true };
-  } catch (dbError) {
-    console.error('Database error during sign-in:', dbError);
-    console.error('Error details:', {
-      message: dbError instanceof Error ? dbError.message : 'Unknown error',
-      stack: dbError instanceof Error ? dbError.stack : undefined,
-    });
-
+  } catch (_dbError) {
     // Sign them out to prevent partial access
     await supabase.auth.signOut();
 
@@ -150,14 +131,12 @@ export async function signOutWithCleanup() {
     } = await supabase.auth.getUser();
 
     if (user) {
-      console.log('Signing out user:', user.id);
     }
 
     // Sign out from Supabase Auth
     const { error } = await supabase.auth.signOut();
 
     if (error) {
-      console.error('Sign-out error:', error);
       // Continue with cleanup even if sign out partially fails
     }
 
@@ -167,8 +146,7 @@ export async function signOutWithCleanup() {
 
     // Always redirect to login, even if there was an error
     redirect('/login');
-  } catch (error) {
-    console.error('Error during sign out:', error);
+  } catch (_error) {
     // Force redirect to login even on error
     redirect('/login');
   }

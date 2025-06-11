@@ -11,7 +11,7 @@
  */
 
 import { cn } from '@/lib/utils';
-import type * as React from 'react';
+import type React from 'react';
 
 /**
  * Skeleton component for loading states

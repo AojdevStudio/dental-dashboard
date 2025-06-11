@@ -65,8 +65,12 @@ export async function GET(request: NextRequest, { params }: { params: { location
     // Build date filter
     const dateFilter: { gte?: Date; lte?: Date } = {};
     if (startDate || endDate) {
-      if (startDate) dateFilter.gte = new Date(startDate);
-      if (endDate) dateFilter.lte = new Date(endDate);
+      if (startDate) {
+        dateFilter.gte = new Date(startDate);
+      }
+      if (endDate) {
+        dateFilter.lte = new Date(endDate);
+      }
     }
 
     const where = {
@@ -174,7 +178,6 @@ export async function GET(request: NextRequest, { params }: { params: { location
       },
     });
   } catch (error) {
-    console.error('Error fetching location financial data:', error);
     return NextResponse.json(
       {
         success: false,
@@ -248,15 +251,27 @@ export async function PUT(request: NextRequest, { params }: { params: { location
         Number.parseFloat(insuranceIncome || existingRecord.insuranceIncome.toString());
 
       const updateData: LocationFinancialUpdateData = { netProduction, totalCollections };
-      if (date !== undefined) updateData.date = new Date(date);
-      if (production !== undefined) updateData.production = Number.parseFloat(production);
-      if (adjustments !== undefined) updateData.adjustments = Number.parseFloat(adjustments);
-      if (writeOffs !== undefined) updateData.writeOffs = Number.parseFloat(writeOffs);
-      if (patientIncome !== undefined) updateData.patientIncome = Number.parseFloat(patientIncome);
-      if (insuranceIncome !== undefined)
+      if (date !== undefined) {
+        updateData.date = new Date(date);
+      }
+      if (production !== undefined) {
+        updateData.production = Number.parseFloat(production);
+      }
+      if (adjustments !== undefined) {
+        updateData.adjustments = Number.parseFloat(adjustments);
+      }
+      if (writeOffs !== undefined) {
+        updateData.writeOffs = Number.parseFloat(writeOffs);
+      }
+      if (patientIncome !== undefined) {
+        updateData.patientIncome = Number.parseFloat(patientIncome);
+      }
+      if (insuranceIncome !== undefined) {
         updateData.insuranceIncome = Number.parseFloat(insuranceIncome);
-      if (unearned !== undefined)
+      }
+      if (unearned !== undefined) {
         updateData.unearned = unearned ? Number.parseFloat(unearned) : null;
+      }
 
       financialRecord = await prisma.locationFinancial.update({
         where: { id: recordId },
@@ -344,7 +359,6 @@ export async function PUT(request: NextRequest, { params }: { params: { location
       message: 'Financial data updated successfully',
     });
   } catch (error) {
-    console.error('Error updating location financial data:', error);
     return NextResponse.json(
       {
         success: false,

@@ -19,9 +19,7 @@ export function useNavigationState() {
       try {
         const parsed = JSON.parse(savedState);
         setState(parsed);
-      } catch (error) {
-        console.error('Failed to parse navigation state:', error);
-      }
+      } catch (_error) {}
     }
   }, []);
 

@@ -112,8 +112,6 @@ export function getPaginationParams(searchParams: URLSearchParams) {
  * Handle API errors consistently
  */
 export function handleApiError(error: unknown): NextResponse<ApiErrorPayload> {
-  console.error('API Error:', error);
-
   if (error instanceof ApiError) {
     return apiError(error.message, error.statusCode, error.code);
   }
@@ -152,7 +150,7 @@ export function getDateRangeParams(searchParams: URLSearchParams) {
   const startDate = searchParams.get('startDate');
   const endDate = searchParams.get('endDate');
 
-  if (!startDate || !endDate) {
+  if (!(startDate && endDate)) {
     return null;
   }
 

@@ -11,7 +11,7 @@ import { redirect } from 'next/navigation';
  */
 export async function getSession() {
   const supabase = await createClient();
-  const { data, error } = await supabase.auth.getSession();
+  const { data } = await supabase.auth.getSession();
 
   return { session: data.session };
 }
@@ -24,7 +24,7 @@ export async function getSession() {
  */
 export async function getUser() {
   const supabase = await createClient();
-  const { data, error } = await supabase.auth.getUser();
+  const { data } = await supabase.auth.getUser();
 
   return { user: data.user };
 }

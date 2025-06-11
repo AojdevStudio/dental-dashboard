@@ -135,7 +135,7 @@ export function useUsers() {
 
       return { previousUsers };
     },
-    onError: (err, variables, context) => {
+    onError: (_err, _variables, context) => {
       // If the mutation fails, use the context returned from onMutate to roll back
       if (context?.previousUsers) {
         queryClient.setQueryData(usersQueryKey, context.previousUsers);

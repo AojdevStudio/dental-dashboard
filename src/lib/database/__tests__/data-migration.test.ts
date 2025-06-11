@@ -230,7 +230,7 @@ describe('Data Migration', () => {
           // Simulate error handling in transaction
           try {
             await callback(tx);
-          } catch (error) {
+          } catch (_error) {
             // Expected error
           }
 

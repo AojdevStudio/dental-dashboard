@@ -95,7 +95,7 @@ export default function DashboardClient({ initialData }: DashboardClientProps) {
   // Dashboard components
   const dashboardComponents: DashboardComponent[] = [
     // KPI Cards
-    ...kpiData.map((kpi, index) => ({
+    ...kpiData.map((kpi, _index) => ({
       id: `kpi-${kpi.id}`,
       type: 'kpi' as const,
       title: kpi.title,
@@ -183,13 +183,7 @@ export default function DashboardClient({ initialData }: DashboardClientProps) {
           </Button>
         </div>
         {layout.isEditing && (
-          <Button
-            size="sm"
-            onClick={() => {
-              // In a real app, this would open a modal to add components
-              console.log('Add component');
-            }}
-          >
+          <Button size="sm" onClick={() => {}}>
             <Plus class="h-4 w-4 mr-2" />
             Add Widget
           </Button>

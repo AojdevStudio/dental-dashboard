@@ -58,9 +58,7 @@ export function useDashboardLayout({
             isEditing: false,
             refreshStatus: {},
           };
-        } catch (e) {
-          console.error('Failed to parse stored layout:', e);
-        }
+        } catch (_e) {}
       }
     }
 
@@ -86,7 +84,9 @@ export function useDashboardLayout({
 
   const addComponent = useCallback((component: DashboardComponent) => {
     setState((prev) => {
-      if (!prev.activeLayout) return prev;
+      if (!prev.activeLayout) {
+        return prev;
+      }
 
       const newComponent = {
         ...component,
@@ -109,7 +109,9 @@ export function useDashboardLayout({
 
   const removeComponent = useCallback((componentId: string) => {
     setState((prev) => {
-      if (!prev.activeLayout) return prev;
+      if (!prev.activeLayout) {
+        return prev;
+      }
 
       const updatedLayout = {
         ...prev.activeLayout,
@@ -127,7 +129,9 @@ export function useDashboardLayout({
   const updateComponent = useCallback(
     (componentId: string, updates: Partial<DashboardComponent>) => {
       setState((prev) => {
-        if (!prev.activeLayout) return prev;
+        if (!prev.activeLayout) {
+          return prev;
+        }
 
         const updatedLayout = {
           ...prev.activeLayout,
@@ -148,7 +152,9 @@ export function useDashboardLayout({
 
   const updateLayout = useCallback((newLayout: GridItemLayout[]) => {
     setState((prev) => {
-      if (!prev.activeLayout) return prev;
+      if (!prev.activeLayout) {
+        return prev;
+      }
 
       const layoutMap = new Map(newLayout.map((item) => [item.i, item]));
 
@@ -192,7 +198,9 @@ export function useDashboardLayout({
   const selectLayout = useCallback((layoutId: string) => {
     setState((prev) => {
       const layout = prev.layouts.find((l) => l.id === layoutId);
-      if (!layout) return prev;
+      if (!layout) {
+        return prev;
+      }
 
       return {
         ...prev,

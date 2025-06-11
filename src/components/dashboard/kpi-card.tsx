@@ -49,7 +49,9 @@ export function KPICard({
   }
 
   const getTrendIcon = () => {
-    if (!data.trend) return null;
+    if (!data.trend) {
+      return null;
+    }
 
     const Icon =
       data.trend.direction === 'up'

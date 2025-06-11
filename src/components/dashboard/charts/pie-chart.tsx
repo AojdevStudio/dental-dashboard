@@ -68,7 +68,9 @@ export function PieChart({
       payload: Record<string, unknown>;
     }>;
   }) => {
-    if (!active || !payload || !payload.length) return null;
+    if (!(active && payload && payload.length > 0)) {
+      return null;
+    }
 
     const data = payload[0];
     const percentage = (data.value / total) * 100;
@@ -102,7 +104,9 @@ export function PieChart({
     value: number;
     index: number;
   }) => {
-    if (mobile) return null;
+    if (mobile) {
+      return null;
+    }
 
     const RADIAN = Math.PI / 180;
     const radius = innerRadius + (outerRadius - innerRadius) * 0.5;
@@ -110,7 +114,9 @@ export function PieChart({
     const y = cy + radius * Math.sin(-midAngle * RADIAN);
     const percentage = (value / total) * 100;
 
-    if (percentage < 5) return null; // Don't show label for small slices
+    if (percentage < 5) {
+      return null; // Don't show label for small slices
+    }
 
     return (
       <text
@@ -178,7 +184,7 @@ export function PieChart({
             animationDuration={defaultConfig.animationDuration}
             onClick={onDataPointClick}
           >
-            {defaultConfig.data.map((entry, index) => (
+            {defaultConfig.data.map((_entry, index) => (
               <Cell
                 key={`cell-${index}`}
                 fill={colors[index % colors.length]}

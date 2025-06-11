@@ -30,17 +30,17 @@ export function UserDropdown({ user, className }: UserDropdownProps) {
       if (response.ok) {
         router.push('/login');
       } else {
-        console.error('Logout failed');
       }
-    } catch (error) {
-      console.error('Logout error:', error);
+    } catch (_error) {
     } finally {
       setIsLoggingOut(false);
     }
   };
 
   const getUserInitials = () => {
-    if (!user?.name) return '?';
+    if (!user?.name) {
+      return '?';
+    }
     const names = user.name.split(' ');
     if (names.length >= 2) {
       return `${names[0][0]}${names[1][0]}`.toUpperCase();

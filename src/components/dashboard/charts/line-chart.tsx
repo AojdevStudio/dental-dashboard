@@ -67,7 +67,9 @@ export function LineChart({
     }>;
     label?: string;
   }) => {
-    if (!active || !payload || !payload.length) return null;
+    if (!(active && payload && payload.length > 0)) {
+      return null;
+    }
 
     return (
       <div style={chartTheme.tooltip.container}>

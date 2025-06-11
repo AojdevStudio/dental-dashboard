@@ -44,13 +44,11 @@ export async function GET(request: NextRequest) {
   const redirectBaseUrl = new URL('/integrations/google-sheets/test', request.nextUrl.origin);
 
   if (error) {
-    console.error('Google OAuth error:', error);
     redirectBaseUrl.searchParams.set('googleAuthError', error);
     return NextResponse.redirect(redirectBaseUrl);
   }
 
-  if (!code || !state) {
-    console.error('Missing code or state in Google OAuth callback');
+  if (!(code && state)) {
     redirectBaseUrl.searchParams.set('googleAuthError', 'Callback parameters missing');
     return NextResponse.redirect(redirectBaseUrl);
   }
@@ -66,14 +64,12 @@ export async function GET(request: NextRequest) {
     } = await supabase.auth.getUser();
 
     if (authError || !user) {
-      console.error('User not authenticated during Google callback');
       redirectBaseUrl.searchParams.set('googleAuthError', 'User not authenticated');
       return NextResponse.redirect(redirectBaseUrl);
     }
 
     const authContext = await getAuthContextByAuthId(user.id);
     if (!authContext) {
-      console.error('Failed to get auth context for user:', user.id);
       redirectBaseUrl.searchParams.set('googleAuthError', 'Failed to get user context');
       return NextResponse.redirect(redirectBaseUrl);
     }
@@ -82,7 +78,6 @@ export async function GET(request: NextRequest) {
     const dataSource = await googleSheetsQueries.getDataSourceById(authContext, dataSourceId);
 
     if (!dataSource) {
-      console.error('Data source not found or access denied:', dataSourceId);
       redirectBaseUrl.searchParams.set('googleAuthError', 'Data source not found');
       return NextResponse.redirect(redirectBaseUrl);
     }
@@ -91,7 +86,6 @@ export async function GET(request: NextRequest) {
     const tokenData = await handleAuthCallback(code);
 
     if (!tokenData.accessToken) {
-      console.error('Access token not found in token data:', tokenData);
       throw new Error('Access token not found in token data');
     }
 
@@ -106,7 +100,6 @@ export async function GET(request: NextRequest) {
     redirectBaseUrl.searchParams.set('dataSourceId', dataSourceId);
     return NextResponse.redirect(redirectBaseUrl);
   } catch (err) {
-    console.error('Failed to exchange Google code for tokens or update data source:', err);
     const errorMessage = err instanceof Error ? err.message : 'Token exchange failed';
     redirectBaseUrl.searchParams.set('googleAuthError', errorMessage);
     return NextResponse.redirect(redirectBaseUrl);

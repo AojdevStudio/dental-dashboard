@@ -69,8 +69,7 @@ export function ClinicSelector({
 
       // Trigger a page refresh to update context
       router.refresh();
-    } catch (error) {
-      console.error('Error switching clinic:', error);
+    } catch (_error) {
       // Revert selection on error
       setSelectedClinicId(currentClinicId || clinics[0]?.id || '');
     }

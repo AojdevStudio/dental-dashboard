@@ -98,7 +98,7 @@ export function DateRangePicker({
   placeholder?: string;
   disabled?: boolean;
 }) {
-  const [isOpen, setIsOpen] = React.useState(false);
+  const [_isOpen, _setIsOpen] = React.useState(false);
   const [range, setRange] = React.useState<{ from: Date; to?: Date }>({
     from: from || new Date(),
     to: to,

@@ -12,11 +12,21 @@ export const breakpoints = {
 export type Breakpoint = keyof typeof breakpoints;
 
 export const getBreakpoint = (width: number): Breakpoint => {
-  if (width >= breakpoints['2xl']) return '2xl';
-  if (width >= breakpoints.xl) return 'xl';
-  if (width >= breakpoints.lg) return 'lg';
-  if (width >= breakpoints.md) return 'md';
-  if (width >= breakpoints.sm) return 'sm';
+  if (width >= breakpoints['2xl']) {
+    return '2xl';
+  }
+  if (width >= breakpoints.xl) {
+    return 'xl';
+  }
+  if (width >= breakpoints.lg) {
+    return 'lg';
+  }
+  if (width >= breakpoints.md) {
+    return 'md';
+  }
+  if (width >= breakpoints.sm) {
+    return 'sm';
+  }
   return 'xs';
 };
 
@@ -105,7 +115,9 @@ export const useContainerDimensions = (ref: React.RefObject<HTMLElement>) => {
 
   useEffect(() => {
     const element = ref.current;
-    if (!element) return;
+    if (!element) {
+      return;
+    }
 
     const resizeObserver = new ResizeObserver((entries) => {
       for (const entry of entries) {
@@ -183,17 +195,23 @@ export const getResponsiveMargin = (
 };
 
 export const isMobile = (breakpoint: Breakpoint | undefined): boolean => {
-  if (!breakpoint) return false; // Default to false for SSR safety
+  if (!breakpoint) {
+    return false; // Default to false for SSR safety
+  }
   return breakpoint === 'xs' || breakpoint === 'sm';
 };
 
 export const isTablet = (breakpoint: Breakpoint | undefined): boolean => {
-  if (!breakpoint) return false; // Default to false for SSR safety
+  if (!breakpoint) {
+    return false; // Default to false for SSR safety
+  }
   return breakpoint === 'md';
 };
 
 export const isDesktop = (breakpoint: Breakpoint | undefined): boolean => {
-  if (!breakpoint) return true; // Default to true for SSR safety (assume desktop)
+  if (!breakpoint) {
+    return true; // Default to true for SSR safety (assume desktop)
+  }
   return breakpoint === 'lg' || breakpoint === 'xl' || breakpoint === '2xl';
 };
 

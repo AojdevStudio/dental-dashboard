@@ -26,7 +26,7 @@ export function withAuth<TSuccessPayload = unknown>(
   context: { params?: Record<string, string | string[]> }
 ) => Promise<NextResponse> {
   return async (req: Request, context: { params?: Record<string, string | string[]> }) => {
-    const nextRequest = req as NextRequest;
+    const _nextRequest = req as NextRequest;
     try {
       // Get auth context
       // Note: getAuthContext relies on cookies(), which needs NextRequest. This cast should be fine.
@@ -67,8 +67,6 @@ export function withAuth<TSuccessPayload = unknown>(
         authContext,
       });
     } catch (error) {
-      console.error('API route error:', error);
-
       // Handle specific error types
       if (error instanceof Error) {
         if (error.message.includes('Access denied')) {
@@ -92,11 +90,15 @@ export function withAuth<TSuccessPayload = unknown>(
 export function getClinicId(request: NextRequest): string | null {
   // Check URL params
   const urlClinicId = request.nextUrl.searchParams.get('clinicId');
-  if (urlClinicId) return urlClinicId;
+  if (urlClinicId) {
+    return urlClinicId;
+  }
 
   // Check headers
   const headerClinicId = request.headers.get('x-clinic-id');
-  if (headerClinicId) return headerClinicId;
+  if (headerClinicId) {
+    return headerClinicId;
+  }
 
   // Check body for POST/PUT requests
   // Note: This would need to be handled in the route handler
@@ -134,7 +136,7 @@ export async function validateBody<T>(
   try {
     const body = await request.json();
     return schema.parse(body);
-  } catch (error) {
+  } catch (_error) {
     throw new Error('Invalid request body');
   }
 }
