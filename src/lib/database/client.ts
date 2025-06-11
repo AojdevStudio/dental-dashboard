@@ -3,7 +3,7 @@
  * Ensures we don't create multiple instances in development
  */
 
-import { PrismaClient } from "@/generated/prisma";
+import { PrismaClient } from "@prisma/client";
 
 const globalForPrisma = globalThis as unknown as {
   prisma: PrismaClient | undefined;
@@ -20,4 +20,4 @@ if (process.env.NODE_ENV !== "production") {
 }
 
 // Export type for use in other files
-export type { PrismaClient } from "@/generated/prisma";
+export type { PrismaClient } from "@prisma/client";

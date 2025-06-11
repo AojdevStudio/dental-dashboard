@@ -1,22 +1,24 @@
 /**
  * @fileoverview Provider type definitions for the API responses and frontend components.
- * 
+ *
  * This file exports the provider types used throughout the application,
  * including the enhanced ProviderWithLocations type that includes location relationships.
  */
 
-// Re-export the main types from the database queries module
-export type { 
-  ProviderWithLocations, 
-  ProviderPerformanceMetrics 
+import type {
+  ProviderWithLocations as DBProviderWithLocations,
+  ProviderPerformanceMetrics,
 } from "@/lib/database/queries/providers";
+
+// Keep this for other modules that might be using the re-export
+export type { DBProviderWithLocations as ProviderWithLocations, ProviderPerformanceMetrics };
 
 /**
  * API response wrapper for paginated providers
  */
 export interface ProvidersApiResponse {
   success: boolean;
-  data: ProviderWithLocations[];
+  data: DBProviderWithLocations[];
   pagination: {
     total: number;
     page: number;

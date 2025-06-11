@@ -3,36 +3,42 @@
  * Provides authentication and auth context for API routes
  */
 
-import { handleApiError } from "@/lib/api/utils";
-import { type AuthContext, getAuthContext } from "@/lib/database/auth-context";
+import { handleApiError } from "./utils";
+import type { ApiResponse } from "./utils";
+import { type AuthContext, getAuthContext } from "../database/auth-context";
 import { createClient } from "@supabase/supabase-js";
 import { cookies } from "next/headers";
 import { type NextRequest, NextResponse } from "next/server";
 
-export type ApiHandler = (
-  request: NextRequest,
+export type ApiHandler<TSuccessPayload = unknown> = (
+  request: Request,
   context: {
-    params?: Promise<Record<string, string>>;
+    params?: Record<string, string | string[]>;
     authContext: AuthContext;
   }
-) => Promise<NextResponse>;
+) => Promise<
+  NextResponse<ApiResponse<TSuccessPayload>> | NextResponse<{ error: string; code?: string }>
+>;
 
 /**
  * Wraps an API route handler with authentication and auth context
  */
-export function withAuth(
-  handler: ApiHandler,
+export function withAuth<TSuccessPayload = unknown>(
+  handler: ApiHandler<TSuccessPayload>,
   options?: {
     requireAdmin?: boolean;
     requireClinicAdmin?: boolean;
   }
 ): (
-  request: NextRequest,
-  context: { params?: Promise<Record<string, string>> }
+  request: Request,
+  context: { params?: Record<string, string | string[]> }
 ) => Promise<NextResponse> {
-  return async (request: NextRequest, context: { params?: Promise<Record<string, string>> }) => {
+  return async (req: Request, context: { params?: Record<string, string | string[]> }) => {
+    const nextRequest = req as NextRequest;
     try {
       // Get auth context
+      // Note: getAuthContext relies on cookies(), which needs NextRequest. This cast should be fine.
+      // getAuthContext uses next/headers cookies() directly.
       const authContext = await getAuthContext();
 
       if (!authContext) {
@@ -47,13 +53,14 @@ export function withAuth(
       // Check clinic admin requirements
       if (options?.requireClinicAdmin) {
         const clinicId =
-          request.nextUrl.searchParams.get("clinicId") || request.headers.get("x-clinic-id");
+          (req as NextRequest).nextUrl.searchParams.get("clinicId") ||
+          (req as NextRequest).headers.get("x-clinic-id");
 
         if (!clinicId) {
           return NextResponse.json({ error: "Clinic ID required" }, { status: 400 });
         }
 
-        const { isClinicAdmin } = await import("@/lib/database/auth-context");
+        const { isClinicAdmin } = await import("../database/auth-context");
         const isAdmin = await isClinicAdmin(authContext, clinicId);
 
         if (!isAdmin) {
@@ -62,7 +69,8 @@ export function withAuth(
       }
 
       // Call the handler with auth context
-      return await handler(request, {
+      return await handler(req, {
+        // Pass base Request 'req' to handler
         ...context,
         authContext,
       });

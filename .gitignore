@@ -80,3 +80,7 @@ src/generated/prisma/
 
 # Ignore specific script with potentially sensitive information
 scripts/apply-migrations-supabase.ts
+
+# Repomix outputs
+repomix-*.xml
+repomix.config.json

@@ -21,7 +21,7 @@
 
       3. Package Creation:
          📦 Create Optimized Package:
-         repomix pack create --name "ai-optimized"
+         repomix 
          --include "models/"
          --include "data/"
          --include "configs/"

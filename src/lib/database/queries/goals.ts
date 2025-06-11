@@ -3,9 +3,10 @@
  * Multi-tenant aware goal operations
  */
 
-import type { Prisma } from "@/generated/prisma";
+import type { Prisma } from "@prisma/client";
 import { type AuthContext, getUserClinicRole, validateClinicAccess } from "../auth-context";
 import { prisma } from "../client";
+import type { UpdateGoalQueryInput } from "../../types/goals";
 
 export interface CreateGoalInput {
   metricDefinitionId: string;
@@ -15,13 +16,6 @@ export interface CreateGoalInput {
   targetValue: string;
   clinicId: string;
   providerId?: string;
-}
-
-export interface UpdateGoalInput {
-  targetValue?: string;
-  startDate?: Date;
-  endDate?: Date;
-  timePeriod?: string;
 }
 
 export interface GoalFilter {
@@ -215,7 +209,11 @@ export async function createGoal(authContext: AuthContext, input: CreateGoalInpu
 /**
  * Update a goal
  */
-export async function updateGoal(authContext: AuthContext, goalId: string, input: UpdateGoalInput) {
+export async function updateGoal(
+  authContext: AuthContext,
+  goalId: string,
+  input: UpdateGoalQueryInput
+) {
   // Get the goal to check permissions
   const goal = await prisma.goal.findUnique({
     where: { id: goalId },

@@ -1,18 +1,18 @@
 /**
  * @fileoverview React hook for fetching and managing provider data
- * 
- * This hook provides a clean interface for interacting with the enhanced 
+ *
+ * This hook provides a clean interface for interacting with the enhanced
  * providers API, including filtering, pagination, and real-time updates.
  */
 
-import { useQuery, useQueryClient, useMutation } from "@tanstack/react-query";
-import { useState, useCallback } from "react";
-import type { 
-  ProviderWithLocations, 
-  ProvidersApiResponse, 
+import type {
+  CreateProviderRequest,
+  ProviderWithLocations,
+  ProvidersApiResponse,
   ProvidersQueryParams,
-  CreateProviderRequest 
 } from "@/types/providers";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useCallback, useState } from "react";
 
 // API response type for the enhanced providers endpoint
 interface ApiResponse {
@@ -38,23 +38,23 @@ interface UseProvidersReturn {
   // Data
   providers: ProviderWithLocations[];
   pagination: ApiResponse["pagination"] | null;
-  
+
   // Loading states
   isLoading: boolean;
   isError: boolean;
   error: Error | null;
-  
+
   // Filters and pagination
   filters: ProvidersQueryParams;
   setFilters: (filters: Partial<ProvidersQueryParams>) => void;
   clearFilters: () => void;
-  
+
   // Pagination controls
   page: number;
   setPage: (page: number) => void;
   nextPage: () => void;
   previousPage: () => void;
-  
+
   // Actions
   refetch: () => void;
   createProvider: (data: CreateProviderRequest) => Promise<void>;
@@ -66,7 +66,7 @@ interface UseProvidersReturn {
  */
 async function fetchProviders(params: ProvidersQueryParams): Promise<ApiResponse> {
   const searchParams = new URLSearchParams();
-  
+
   // Add all defined parameters to the search params
   for (const [key, value] of Object.entries(params)) {
     if (value !== undefined && value !== null && value !== "") {
@@ -116,29 +116,29 @@ async function createProvider(data: CreateProviderRequest): Promise<ProviderWith
  * Custom hook for managing provider data with filtering and pagination
  */
 export function useProviders(options: UseProvidersOptions = {}): UseProvidersReturn {
-  const { 
-    initialFilters = {}, 
-    enabled = true, 
-    refetchOnWindowFocus = false 
-  } = options;
+  const { initialFilters = {}, enabled = true, refetchOnWindowFocus = false } = options;
 
   const queryClient = useQueryClient();
-  
+
   // State for filters and pagination
-  const [filters, setFiltersState] = useState<ProvidersQueryParams>({
-    page: 1,
-    limit: 10,
-    ...initialFilters,
+  const [filters, setFiltersState] = useState<ProvidersQueryParams>(() => {
+    const defaultFilters = { page: 1, limit: 10 };
+    return {
+      ...defaultFilters,
+      ...(initialFilters || {}),
+      page:
+        initialFilters?.page !== undefined && initialFilters.page !== null
+          ? initialFilters.page
+          : defaultFilters.page,
+      limit:
+        initialFilters?.limit !== undefined && initialFilters.limit !== null
+          ? initialFilters.limit
+          : defaultFilters.limit,
+    };
   });
 
   // Query for fetching providers
-  const {
-    data,
-    isLoading,
-    isError,
-    error,
-    refetch,
-  } = useQuery({
+  const { data, isLoading, isError, error, refetch } = useQuery({
     queryKey: ["providers", filters],
     queryFn: () => fetchProviders(filters),
     enabled,
@@ -157,11 +157,21 @@ export function useProviders(options: UseProvidersOptions = {}): UseProvidersRet
 
   // Filter management
   const setFilters = useCallback((newFilters: Partial<ProvidersQueryParams>) => {
-    setFiltersState(prev => ({
+    setFiltersState((prev) => ({
       ...prev,
       ...newFilters,
       // Reset to page 1 when filters change (unless page is explicitly set)
-      page: newFilters.page ?? 1,
+      page:
+        newFilters.page !== undefined
+          ? newFilters.page
+          : Object.keys(newFilters).some(
+                (k) =>
+                  k !== "page" &&
+                  k !== "limit" &&
+                  newFilters[k as keyof typeof newFilters] !== prev[k as keyof typeof prev]
+              )
+            ? 1
+            : prev.page,
     }));
   }, []);
 
@@ -173,48 +183,54 @@ export function useProviders(options: UseProvidersOptions = {}): UseProvidersRet
   }, [filters.limit]);
 
   // Pagination helpers
-  const setPage = useCallback((page: number) => {
-    setFilters({ page });
-  }, [setFilters]);
+  const setPage = useCallback(
+    (page: number) => {
+      setFilters({ page });
+    },
+    [setFilters]
+  );
 
   const nextPage = useCallback(() => {
-    if (data?.pagination && filters.page < data.pagination.totalPages) {
-      setPage(filters.page + 1);
+    if (data?.pagination && filters.page! < data.pagination.totalPages) {
+      setPage(filters.page! + 1);
     }
   }, [data?.pagination, filters.page, setPage]);
 
   const previousPage = useCallback(() => {
-    if (filters.page > 1) {
-      setPage(filters.page - 1);
+    if (filters.page! > 1) {
+      setPage(filters.page! - 1);
     }
   }, [filters.page, setPage]);
 
   // Create provider wrapper
-  const handleCreateProvider = useCallback(async (providerData: CreateProviderRequest) => {
-    await createMutation.mutateAsync(providerData);
-  }, [createMutation]);
+  const handleCreateProvider = useCallback(
+    async (providerData: CreateProviderRequest) => {
+      await createMutation.mutateAsync(providerData);
+    },
+    [createMutation]
+  );
 
   return {
     // Data
     providers: data?.data || [],
     pagination: data?.pagination || null,
-    
+
     // Loading states
     isLoading,
     isError,
     error: error as Error | null,
-    
+
     // Filters and pagination
     filters,
     setFilters,
     clearFilters,
-    
+
     // Pagination controls
     page: filters.page || 1,
     setPage,
     nextPage,
     previousPage,
-    
+
     // Actions
     refetch,
     createProvider: handleCreateProvider,
@@ -232,16 +248,16 @@ export function useProvider(providerId: string, enabled = true) {
       const response = await fetch(`/api/providers?providerId=${providerId}`, {
         credentials: "include",
       });
-      
+
       if (!response.ok) {
         throw new Error(`Failed to fetch provider: ${response.statusText}`);
       }
-      
+
       const result: ApiResponse = await response.json();
       if (!result.data || result.data.length === 0) {
         throw new Error("Provider not found");
       }
-      
+
       return result.data[0];
     },
     enabled: enabled && !!providerId,
@@ -258,29 +274,29 @@ export function useProviderFilters(clinicId?: string) {
     queryFn: async () => {
       const params = new URLSearchParams();
       if (clinicId) params.append("clinicId", clinicId);
-      
+
       const response = await fetch(`/api/providers?${params.toString()}`, {
         credentials: "include",
       });
-      
+
       if (!response.ok) {
         throw new Error("Failed to fetch provider data");
       }
-      
+
       const result: ApiResponse = await response.json();
       const providers = result.data;
-      
+
       // Calculate filter options from the data
-      const providerTypes = [...new Set(providers.map(p => p.providerType))];
-      const statuses = [...new Set(providers.map(p => p.status))];
+      const providerTypes = [...new Set(providers.map((p) => p.providerType))];
+      const statuses = [...new Set(providers.map((p) => p.status))];
       const locations = [
         ...new Set(
-          providers.flatMap(p => 
-            p.locations.map(l => ({ id: l.locationId, name: l.locationName }))
+          providers.flatMap((p) =>
+            p.locations.map((l) => ({ id: l.locationId, name: l.locationName }))
           )
-        )
+        ),
       ];
-      
+
       return {
         providerTypes,
         statuses,

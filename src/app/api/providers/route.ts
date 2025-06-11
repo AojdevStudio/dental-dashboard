@@ -1,7 +1,7 @@
-import { getProvidersWithLocations } from "@/lib/database/queries/providers";
+import { type ApiHandler, withAuth } from "@/lib/api/middleware";
 import { apiError, apiPaginated, getPaginationParams, handleApiError } from "@/lib/api/utils";
-import { withAuth, type ApiHandler } from "@/lib/api/middleware";
 import type { AuthContext } from "@/lib/database/auth-context";
+import { getProvidersWithLocations } from "@/lib/database/queries/providers";
 import { type NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 
@@ -11,29 +11,40 @@ const providersQuerySchema = z.object({
   locationId: z.string().uuid().optional(),
   providerType: z.enum(["dentist", "hygienist", "specialist", "other"]).optional(),
   status: z.enum(["active", "inactive"]).optional(),
-  includeInactive: z.string().transform(val => val === "true").optional(),
-  page: z.string().transform(val => Math.max(1, Number.parseInt(val) || 1)).optional(),
-  limit: z.string().transform(val => Math.min(100, Math.max(1, Number.parseInt(val) || 10))).optional(),
+  includeInactive: z
+    .string()
+    .transform((val) => val === "true")
+    .optional(),
+  page: z
+    .string()
+    .transform((val) => Math.max(1, Number.parseInt(val) || 1))
+    .optional(),
+  limit: z
+    .string()
+    .transform((val) => Math.min(100, Math.max(1, Number.parseInt(val) || 10)))
+    .optional(),
 });
 
-async function getProvidersHandler(
+const getProvidersHandler: ApiHandler = async (
   request: NextRequest,
   { authContext }: { authContext: AuthContext }
-) {
+) => {
   try {
     const searchParams = request.nextUrl.searchParams;
-    
+
     // Parse and validate query parameters
-    const queryParams = providersQuerySchema.parse(
-      Object.fromEntries(searchParams.entries())
-    );
+    const queryParams = providersQuerySchema.parse(Object.fromEntries(searchParams.entries()));
 
     const { page = 1, limit = 10, ...filterParams } = queryParams;
 
     // Apply multi-tenant filtering - providers can only see providers from their clinic
     const filters = {
       ...filterParams,
-      clinicId: filterParams.clinicId || authContext.clinicId,
+      clinicId:
+        filterParams.clinicId ||
+        (authContext.clinicIds && authContext.clinicIds.length > 0
+          ? authContext.clinicIds[0]
+          : undefined),
     };
 
     // Fetch providers with locations
@@ -41,18 +52,18 @@ async function getProvidersHandler(
 
     // WARNING: Performance Issue - In-memory pagination
     // This implementation fetches ALL providers and paginates in-memory which will not scale.
-    // TODO: Update getProvidersWithLocations to accept offset/limit parameters and use 
+    // TODO: Update getProvidersWithLocations to accept offset/limit parameters and use
     // database-level LIMIT/OFFSET for efficient pagination. Consider enforcing a maximum
     // limit (e.g., 1000) to prevent excessive memory usage until proper pagination is implemented.
     const offset = (page - 1) * limit;
     const paginatedProviders = providers.slice(offset, offset + limit);
     const total = providers.length;
 
-    return apiPaginated(paginatedProviders, total, page, limit);
+    return apiPaginated(paginatedProviders, total, page, limit) as NextResponse;
   } catch (error) {
     return handleApiError(error);
   }
-}
+};
 
 export const GET = withAuth(getProvidersHandler);
 
@@ -67,17 +78,17 @@ const createProviderSchema = z.object({
   clinic_id: z.string().uuid("Invalid clinic ID format"),
 });
 
-async function createProviderHandler(
+const createProviderHandler: ApiHandler = async (
   request: NextRequest,
   { authContext }: { authContext: AuthContext }
-) {
+) => {
   try {
     const body = await request.json();
     const validatedData = createProviderSchema.parse(body);
 
     // Ensure user can only create providers for their clinic (unless admin)
     const clinicId = validatedData.clinic_id;
-    if (authContext.role !== "admin" && authContext.clinicId !== clinicId) {
+    if (authContext.role !== "admin" && !authContext.clinicIds.includes(clinicId)) {
       return apiError("Access denied: cannot create provider for different clinic", 403);
     }
 
@@ -96,7 +107,7 @@ async function createProviderHandler(
       },
     });
 
-    return NextResponse.json({ success: true, data: provider }, { status: 201 });
+    return NextResponse.json({ success: true, data: provider }, { status: 201 }) as NextResponse;
   } catch (error: unknown) {
     // Handle specific Prisma errors
     if (error && typeof error === "object" && "code" in error) {
@@ -111,6 +122,6 @@ async function createProviderHandler(
 
     return handleApiError(error);
   }
-}
+};
 
 export const POST = withAuth(createProviderHandler);

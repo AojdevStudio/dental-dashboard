@@ -27,6 +27,12 @@ Create a comprehensive Providers page at `/dashboard/providers` that serves as t
 - I want to view provider utilization across multiple clinics so I can optimize resource allocation
 - I want to generate provider performance reports so I can support clinic management decisions
 
+## Priority & Timeline Assessment
+
+- **Priority**: High
+- **Timeline**: 2-3 Days
+- **Justification**: This is a core feature for clinic management and provider engagement, directly impacting operational efficiency and performance tracking. Its completion is a high priority for the dashboard's core functionality.
+
 ## Functional Expectations
 
 ### Core Features
@@ -130,6 +136,68 @@ Create a comprehensive Providers page at `/dashboard/providers` that serves as t
 - **Indexes**: Ensure proper indexing for provider filtering and sorting
 - **Permissions**: Implement row-level security for provider data access
 
+## Implementation Strategy
+
+The implementation will follow a phased, component-driven approach, starting with data access and backend logic, followed by frontend component creation and integration.
+
+1.  **Backend First**:
+    -   Update `src/lib/database/queries/providers.ts` to include functions for fetching provider lists with aggregated performance metrics.
+    -   Enhance the API route `src/app/api/providers/route.ts` to support the new data requirements, including filtering, sorting, and pagination.
+    -   Implement RLS policies on provider-related tables to enforce the specified access control rules.
+
+2.  **Frontend Scaffolding**:
+    -   Create the new page, loading, and error files under `src/app/(dashboard)/providers/`.
+    -   Populate the page with basic structure and connect it to the API to fetch and display raw provider data.
+
+3.  **Component Development**:
+    -   Develop the reusable UI components (`provider-card.tsx`, `provider-grid.tsx`, `provider-filters.tsx`, etc.) in isolation, preferably using Storybook or a similar tool if available.
+    -   Start with displaying static data, then connect them to the custom hook `use-providers.ts`.
+
+4.  **Integration and Interactivity**:
+    -   Integrate the developed components into the main page (`page.tsx`).
+    -   Implement client-side logic for search, filtering, and sorting, leveraging the custom hook.
+    -   Ensure loading and error states are handled gracefully.
+
+5.  **Review and Refine**:
+    -   Conduct a thorough review of the functionality against the user stories.
+    -   Perform responsive testing and ensure accessibility standards are met.
+
+## AI Guardrails Implementation Strategy
+
+Given the complexity and number of files affected, a strict AI guardrails strategy is required.
+
+-   **File-level Constraints**: When working with an AI assistant, each task should be scoped to a single file or a small, related group of files. For instance, a session should focus *only* on API route changes, or *only* on a specific component.
+-   **Change Type Isolation**: Separate different types of changes into distinct sessions. Do not mix database query modifications with frontend component creation in the same request.
+-   **Incremental Validation**: After each significant change (e.g., after modifying the API), manually test the endpoint using a tool like Postman or `curl` to validate its functionality before moving to the frontend.
+-   **Safety Prompts for AI Sessions**: Use explicit and safe prompts. For example: "Safely add filtering logic to `src/app/api/providers/route.ts`. Do not modify any other part of the file. Show me the diff before applying."
+
+## Risk Assessment & Mitigation
+
+-   **Risk**: Performance degradation due to complex data aggregation queries.
+    -   **Mitigation**: Use `EXPLAIN ANALYZE` on all new database queries. Implement proper caching at the data layer and API layer.
+-   **Risk**: Incorrect data exposure due to faulty RLS policies or API logic.
+    -   **Mitigation**: Write specific tests for access control scenarios. Manually test each user role (Admin, Office Manager, Dentist) to verify data visibility.
+-   **Risk**: Breaking changes to the existing `/api/providers` if it's used elsewhere.
+    -   **Mitigation**: Before modification, search the codebase for all usages of the endpoint. Consider creating a new, versioned endpoint (`/api/v2/providers`) if the risk of breaking existing functionality is high.
+
+## Phase Breakdown
+
+-   **Phase 1: Data Foundation (Backend)**
+    -   Implement database queries in `providers.ts`.
+    -   Update API route `route.ts`.
+    -   Implement RLS policies and test them.
+    -   **Goal**: A functional, secure API endpoint that provides all necessary data.
+-   **Phase 2: Core UI (Frontend)**
+    -   Create the page and layout files.
+    -   Create `provider-card.tsx` and `provider-grid.tsx`.
+    -   Display a list of providers using the API from Phase 1.
+    -   **Goal**: A page that correctly displays provider information.
+-   **Phase 3: Interactivity & Analytics**
+    -   Implement `provider-filters.tsx` and `provider-metrics.tsx`.
+    -   Add client-side logic for search, filtering, and sorting.
+    -   Integrate performance charts and indicators.
+    -   **Goal**: A fully interactive and data-rich user experience.
+
 ## Additional Considerations
 
 ### Security and Privacy
@@ -161,4 +229,14 @@ Create a comprehensive Providers page at `/dashboard/providers` that serves as t
 - **Performance Benchmarking**: Compare against industry benchmarks
 - **Advanced Analytics**: Detailed analytics and trend analysis
 - **Mobile App**: Potential mobile app integration for provider access
-- **Communication Tools**: Built-in messaging or communication features 
+- **Communication Tools**: Built-in messaging or communication features
+
+---
+
+## Linear Integration Prep
+
+- **Suggested issue title**: Providers Main Page
+- **Priority level**: High
+- **Due date recommendation**: 2-3 days from start
+- **Labels suggestions**: `feature`, `dashboard`, `providers`, `rbac`
+- **Assignee recommendations**: AOJ Sr 
