@@ -10,14 +10,13 @@
  * user experience by showing a loading state that matches the final UI structure.
  */
 
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Skeleton } from "@/components/ui/skeleton";
-import { DashboardSkeleton } from "@/components/ui/skeleton-loaders";
-import type { Prisma } from "@prisma/client";
-import { type AuthContext, getAuthContext } from "@/lib/database/auth-context";
-import { prisma } from "@/lib/database/prisma";
-import { Suspense } from "react";
-import DashboardClient from "./dashboard-client";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { DashboardSkeleton } from '@/components/ui/skeleton-loaders';
+import { type AuthContext, getAuthContext } from '@/lib/database/auth-context';
+import { prisma } from '@/lib/database/prisma';
+import type { Prisma } from '@prisma/client';
+import { Suspense } from 'react';
+import DashboardClient from './dashboard-client';
 
 /**
  * Dashboard Page Component
@@ -34,23 +33,23 @@ export default async function DashboardPage() {
     authContext = await getAuthContext();
   } catch (error) {
     return (
-      <Card className="max-w-md mx-auto mt-8">
+      <Card class="max-w-md mx-auto mt-8">
         <CardHeader>
           <CardTitle>Authentication Error</CardTitle>
           <CardDescription>
             An error occurred while verifying your authentication. Please try again.
           </CardDescription>
         </CardHeader>
-        <CardContent className="space-y-4">
-          <p className="text-sm text-muted-foreground">
-            {error instanceof Error ? error.message : "Unknown authentication error"}
+        <CardContent class="space-y-4">
+          <p class="text-sm text-muted-foreground">
+            {error instanceof Error ? error.message : 'Unknown authentication error'}
           </p>
-          <div className="flex gap-2">
-            <a href="/login" className="text-primary hover:underline">
+          <div class="flex gap-2">
+            <a href="/login" class="text-primary hover:underline">
               Return to Login
             </a>
-            <span className="text-muted-foreground">•</span>
-            <a href="/dashboard" className="text-primary hover:underline">
+            <span class="text-muted-foreground">•</span>
+            <a href="/dashboard" class="text-primary hover:underline">
               Retry
             </a>
           </div>
@@ -61,13 +60,13 @@ export default async function DashboardPage() {
 
   if (!authContext) {
     return (
-      <Card className="max-w-md mx-auto mt-8">
+      <Card class="max-w-md mx-auto mt-8">
         <CardHeader>
           <CardTitle>Authentication Required</CardTitle>
           <CardDescription>Please log in to access the dashboard.</CardDescription>
         </CardHeader>
         <CardContent>
-          <a href="/login" className="text-primary hover:underline">
+          <a href="/login" class="text-primary hover:underline">
             Return to Login
           </a>
         </CardContent>
@@ -77,7 +76,7 @@ export default async function DashboardPage() {
 
   // Get the current clinic information
   let currentClinic = null;
-  if (authContext.selectedClinicId && authContext.selectedClinicId !== "all") {
+  if (authContext.selectedClinicId && authContext.selectedClinicId !== 'all') {
     try {
       currentClinic = await prisma.clinic.findUnique({
         where: { id: authContext.selectedClinicId },
@@ -95,14 +94,14 @@ export default async function DashboardPage() {
         },
       });
     } catch (error) {
-      console.error("Error fetching clinic data:", error);
+      console.error('Error fetching clinic data:', error);
       // Continue with currentClinic as null - the UI will handle the fallback
       // This ensures the app remains stable even if the clinic query fails
     }
   }
 
   return (
-    <div className="w-full space-y-6">
+    <div class="w-full space-y-6">
       <Suspense fallback={<DashboardSkeleton />}>
         <DashboardContent authContext={authContext} clinic={currentClinic} />
       </Suspense>
@@ -144,29 +143,29 @@ async function DashboardContent({
   const initialData = {
     clinic,
     isSystemAdmin: authContext.isSystemAdmin ?? false,
-    selectedClinicId: authContext.selectedClinicId ?? "all",
+    selectedClinicId: authContext.selectedClinicId ?? 'all',
     userId: authContext.userId,
   };
 
   return (
-    <div className="w-full space-y-6">
+    <div class="w-full space-y-6">
       <div>
-        <h1 className="text-3xl font-bold">Dashboard</h1>
-        <p className="text-muted-foreground mt-2">
-          {authContext.isSystemAdmin && authContext.selectedClinicId === "all"
-            ? "Viewing all clinics"
+        <h1 class="text-3xl font-bold">Dashboard</h1>
+        <p class="text-muted-foreground mt-2">
+          {authContext.isSystemAdmin && authContext.selectedClinicId === 'all'
+            ? 'Viewing all clinics'
             : clinic
               ? `${clinic.name} - ${clinic.location}`
-              : "Select a clinic to view metrics"}
+              : 'Select a clinic to view metrics'}
         </p>
       </div>
 
       {/* Main Dashboard Content */}
       {clinic ? (
         <DashboardClient initialData={initialData} />
-      ) : authContext.isSystemAdmin && authContext.selectedClinicId === "all" ? (
-        <div className="space-y-4">
-          <h2 className="text-xl font-semibold">All Clinics Overview</h2>
+      ) : authContext.isSystemAdmin && authContext.selectedClinicId === 'all' ? (
+        <div class="space-y-4">
+          <h2 class="text-xl font-semibold">All Clinics Overview</h2>
           <AllClinicsOverview />
         </div>
       ) : (
@@ -195,7 +194,7 @@ async function AllClinicsOverview() {
 
   try {
     clinics = await prisma.clinic.findMany({
-      where: { status: "active" },
+      where: { status: 'active' },
       select: {
         id: true,
         name: true,
@@ -208,13 +207,13 @@ async function AllClinicsOverview() {
           },
         },
       },
-      orderBy: { name: "asc" },
+      orderBy: { name: 'asc' },
     });
   } catch (error) {
-    console.error("Error fetching clinics data:", error);
+    console.error('Error fetching clinics data:', error);
     // Return error state when clinic data cannot be fetched
     return (
-      <Card className="max-w-md mx-auto">
+      <Card class="max-w-md mx-auto">
         <CardHeader>
           <CardTitle>Data Loading Error</CardTitle>
           <CardDescription>
@@ -222,8 +221,8 @@ async function AllClinicsOverview() {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <p className="text-sm text-muted-foreground">
-            {error instanceof Error ? error.message : "Unknown database error"}
+          <p class="text-sm text-muted-foreground">
+            {error instanceof Error ? error.message : 'Unknown database error'}
           </p>
         </CardContent>
       </Card>
@@ -231,26 +230,26 @@ async function AllClinicsOverview() {
   }
 
   return (
-    <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+    <div class="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
       {clinics.map((clinic) => (
         <Card key={clinic.id}>
           <CardHeader>
-            <CardTitle className="text-lg">{clinic.name}</CardTitle>
+            <CardTitle class="text-lg">{clinic.name}</CardTitle>
             <CardDescription>{clinic.location}</CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="space-y-2 text-sm">
-              <div className="flex justify-between">
-                <span className="text-muted-foreground">Users:</span>
-                <span className="font-medium">{clinic._count.users}</span>
+            <div class="space-y-2 text-sm">
+              <div class="flex justify-between">
+                <span class="text-muted-foreground">Users:</span>
+                <span class="font-medium">{clinic._count.users}</span>
               </div>
-              <div className="flex justify-between">
-                <span className="text-muted-foreground">Providers:</span>
-                <span className="font-medium">{clinic._count.providers}</span>
+              <div class="flex justify-between">
+                <span class="text-muted-foreground">Providers:</span>
+                <span class="font-medium">{clinic._count.providers}</span>
               </div>
-              <div className="flex justify-between">
-                <span className="text-muted-foreground">Metrics:</span>
-                <span className="font-medium">{clinic._count.metrics}</span>
+              <div class="flex justify-between">
+                <span class="text-muted-foreground">Metrics:</span>
+                <span class="font-medium">{clinic._count.metrics}</span>
               </div>
             </div>
           </CardContent>

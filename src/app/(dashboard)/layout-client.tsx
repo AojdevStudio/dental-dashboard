@@ -1,8 +1,8 @@
-"use client";
+'use client';
 
-import { AuthGuard } from "@/components/auth/auth-guard";
-import { DashboardLayout as Layout } from "@/components/common/dashboard-layout";
-import { Providers } from "./providers";
+import { AuthGuard } from '@/components/auth/auth-guard';
+import { DashboardLayout as Layout } from '@/components/common/dashboard-layout';
+import { Providers } from './providers';
 
 interface DashboardLayoutProps {
   children: React.ReactNode;

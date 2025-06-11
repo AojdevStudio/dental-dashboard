@@ -10,11 +10,11 @@
  * context providers. It also includes the React Query DevTools for development purposes.
  */
 
-"use client";
+'use client';
 
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
-import React from "react";
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
+import React from 'react';
 
 /**
  * Dashboard Providers Component

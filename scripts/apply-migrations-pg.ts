@@ -1,50 +1,50 @@
 #!/usr/bin/env tsx
 
-import pg from "pg";
-import fs from "fs/promises";
-import path from "path";
+import path from 'path';
+import fs from 'fs/promises';
+import pg from 'pg';
 
 const { Client } = pg;
 
 // Database configuration - Using pooler connection
 const DATABASE_URL =
-  "postgresql://postgres.yovbdmjwrrgardkgrenc:4Fd5TiV9nrJxWt@aws-0-us-east-2.pooler.supabase.com:6543/postgres";
+  'postgresql://postgres.yovbdmjwrrgardkgrenc:4Fd5TiV9nrJxWt@aws-0-us-east-2.pooler.supabase.com:6543/postgres';
 
 // Migration files to apply
 const MIGRATIONS = [
   {
-    name: "03_row_level_security.sql",
-    description: "Row Level Security policies",
+    name: '03_row_level_security.sql',
+    description: 'Row Level Security policies',
   },
   {
-    name: "04_triggers_and_functions.sql",
-    description: "Database triggers and functions",
+    name: '04_triggers_and_functions.sql',
+    description: 'Database triggers and functions',
   },
   {
-    name: "04_scheduled_jobs_setup.sql",
-    description: "Scheduled jobs setup (optional)",
+    name: '04_scheduled_jobs_setup.sql',
+    description: 'Scheduled jobs setup (optional)',
   },
 ];
 
 async function executeSqlFile(client: pg.Client, filepath: string): Promise<void> {
-  const sql = await fs.readFile(filepath, "utf8");
+  const sql = await fs.readFile(filepath, 'utf8');
 
   console.log(`📝 Executing SQL from ${path.basename(filepath)}`);
 
   try {
     // Execute the entire SQL file as one transaction
-    await client.query("BEGIN");
+    await client.query('BEGIN');
     await client.query(sql);
-    await client.query("COMMIT");
+    await client.query('COMMIT');
     console.log(`✅ Successfully executed ${path.basename(filepath)}`);
   } catch (error) {
-    await client.query("ROLLBACK");
+    await client.query('ROLLBACK');
     throw error;
   }
 }
 
 async function checkMigrationStatus(client: pg.Client) {
-  console.log("\n📊 Checking current migration status...");
+  console.log('\n📊 Checking current migration status...');
 
   // Check if RLS is enabled
   const rlsResult = await client.query(`
@@ -55,9 +55,9 @@ async function checkMigrationStatus(client: pg.Client) {
     ORDER BY tablename
   `);
 
-  console.log("\nRLS Status:");
+  console.log('\nRLS Status:');
   rlsResult.rows.forEach((row) => {
-    console.log(`  ${row.tablename}: ${row.rowsecurity ? "✅ Enabled" : "❌ Disabled"}`);
+    console.log(`  ${row.tablename}: ${row.rowsecurity ? '✅ Enabled' : '❌ Disabled'}`);
   });
 
   // Check for RLS functions
@@ -69,9 +69,9 @@ async function checkMigrationStatus(client: pg.Client) {
     ORDER BY routine_name
   `);
 
-  console.log("\nRLS Functions:");
+  console.log('\nRLS Functions:');
   if (functionsResult.rows.length === 0) {
-    console.log("  ❌ No RLS functions found");
+    console.log('  ❌ No RLS functions found');
   } else {
     functionsResult.rows.forEach((row) => {
       console.log(`  ✅ ${row.routine_name}`);
@@ -86,9 +86,9 @@ async function checkMigrationStatus(client: pg.Client) {
     ORDER BY event_object_table, trigger_name
   `);
 
-  console.log("\nTriggers:");
+  console.log('\nTriggers:');
   if (triggersResult.rows.length === 0) {
-    console.log("  ❌ No triggers found");
+    console.log('  ❌ No triggers found');
   } else {
     triggersResult.rows.forEach((row) => {
       console.log(`  ✅ ${row.event_object_table}: ${row.trigger_name}`);
@@ -97,8 +97,8 @@ async function checkMigrationStatus(client: pg.Client) {
 }
 
 async function main() {
-  console.log("🚀 Applying Supabase Migrations via Direct PostgreSQL Connection");
-  console.log("==============================================================\n");
+  console.log('🚀 Applying Supabase Migrations via Direct PostgreSQL Connection');
+  console.log('==============================================================\n');
 
   const client = new Client({
     connectionString: DATABASE_URL,
@@ -106,19 +106,19 @@ async function main() {
 
   try {
     await client.connect();
-    console.log("✅ Connected to database\n");
+    console.log('✅ Connected to database\n');
 
     // Check current status
     await checkMigrationStatus(client);
 
-    console.log("\n📋 Migrations to apply:");
+    console.log('\n📋 Migrations to apply:');
     MIGRATIONS.forEach((m, i) => {
       console.log(`${i + 1}. ${m.description} (${m.name})`);
     });
 
     // Apply migrations
     for (const migration of MIGRATIONS) {
-      const filepath = path.join(__dirname, "..", "supabase", "migrations", migration.name);
+      const filepath = path.join(__dirname, '..', 'supabase', 'migrations', migration.name);
 
       // Check if file exists
       try {
@@ -145,32 +145,32 @@ async function main() {
         }
 
         // Rollback instructions
-        if (migration.name === "03_row_level_security.sql") {
-          console.log("\n🔄 To rollback RLS:");
-          console.log("   Run: supabase/migrations/rollback/03_rollback_rls.sql");
+        if (migration.name === '03_row_level_security.sql') {
+          console.log('\n🔄 To rollback RLS:');
+          console.log('   Run: supabase/migrations/rollback/03_rollback_rls.sql');
         }
 
         throw error;
       }
     }
 
-    console.log("\n✅ All migrations applied successfully!");
+    console.log('\n✅ All migrations applied successfully!');
 
     // Final status check
-    console.log("\n📊 Final migration status:");
+    console.log('\n📊 Final migration status:');
     await checkMigrationStatus(client);
 
-    console.log("\n📝 Next steps:");
-    console.log("1. Test authentication with a real user");
-    console.log("2. Verify RLS policies are working correctly");
-    console.log("3. Check that triggers fire on user creation/update");
-    console.log("4. Monitor audit logs for changes");
+    console.log('\n📝 Next steps:');
+    console.log('1. Test authentication with a real user');
+    console.log('2. Verify RLS policies are working correctly');
+    console.log('3. Check that triggers fire on user creation/update');
+    console.log('4. Monitor audit logs for changes');
   } catch (error) {
-    console.error("\n❌ Migration process failed:", error);
+    console.error('\n❌ Migration process failed:', error);
     process.exit(1);
   } finally {
     await client.end();
-    console.log("\n👋 Database connection closed");
+    console.log('\n👋 Database connection closed');
   }
 }
 

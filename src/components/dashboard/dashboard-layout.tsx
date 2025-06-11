@@ -7,13 +7,12 @@
  * this would be connected to real data sources and metrics.
  */
 
-"use client";
+'use client';
 
-import { FilterBar } from "@/components/common/filters";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Separator } from "@/components/ui/separator";
-import { useFilterParams } from "@/hooks/use-filters";
-import React from "react";
+import { FilterBar } from '@/components/common/filters';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Separator } from '@/components/ui/separator';
+import { useFilterParams } from '@/hooks/use-filters';
 
 /**
  * Dashboard Example Component
@@ -54,10 +53,10 @@ export function DashboardExample() {
    * @returns {JSX.Element} The rendered dashboard UI
    */
   return (
-    <div className="w-full space-y-6">
+    <div class="w-full space-y-6">
       {/* Dashboard header with title */}
-      <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-semibold">Dental Practice Dashboard</h1>
+      <div class="flex items-center justify-between">
+        <h1 class="text-2xl font-semibold">Dental Practice Dashboard</h1>
       </div>
 
       {/* Filter Bar component for selecting clinics, providers, and time periods */}
@@ -69,7 +68,7 @@ export function DashboardExample() {
           <CardTitle>Current Filter Parameters</CardTitle>
         </CardHeader>
         <CardContent>
-          <pre className="bg-secondary p-4 rounded-md overflow-auto text-sm">
+          <pre class="bg-secondary p-4 rounded-md overflow-auto text-sm">
             {JSON.stringify(filterParams, null, 2)}
           </pre>
         </CardContent>
@@ -79,7 +78,7 @@ export function DashboardExample() {
       <Separator />
 
       {/* Responsive grid of metric cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {/* Appointments metric card - would display real data in production */}
         <Card>
           <CardHeader>

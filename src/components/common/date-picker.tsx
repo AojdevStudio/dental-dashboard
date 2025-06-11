@@ -6,13 +6,13 @@
  * interface with range selection capabilities.
  */
 
-"use client";
+'use client';
 
-import { Button } from "@/components/ui/button";
-import { cn } from "@/lib/utils";
-import { format } from "date-fns";
-import { Calendar as CalendarIcon } from "lucide-react";
-import * as React from "react";
+import { Button } from '@/components/ui/button';
+import { cn } from '@/lib/utils';
+import { format } from 'date-fns';
+import { Calendar as CalendarIcon } from 'lucide-react';
+import * as React from 'react';
 
 /**
  * Interface for DatePicker component properties
@@ -45,24 +45,24 @@ interface DatePickerProps {
 export function DatePicker({
   date,
   onDateChange,
-  placeholder = "Select date",
+  placeholder = 'Select date',
   disabled = false,
 }: DatePickerProps) {
   return (
     <div>
       <Button
         variant="outline"
-        className={cn(
-          "w-full justify-start text-left font-normal",
-          !date && "text-muted-foreground",
-          disabled && "opacity-50 cursor-not-allowed"
+        class={cn(
+          'w-full justify-start text-left font-normal',
+          !date && 'text-muted-foreground',
+          disabled && 'opacity-50 cursor-not-allowed'
         )}
         disabled={disabled}
       >
-        <CalendarIcon className="mr-2 h-4 w-4" />
-        {date ? format(date, "PPP") : <span>{placeholder}</span>}
+        <CalendarIcon class="mr-2 h-4 w-4" />
+        {date ? format(date, 'PPP') : <span>{placeholder}</span>}
       </Button>
-      <div className="w-auto p-0" />
+      <div class="w-auto p-0" />
     </div>
   );
 }
@@ -89,7 +89,7 @@ export function DateRangePicker({
   from,
   to,
   onRangeChange,
-  placeholder = "Select date range",
+  placeholder = 'Select date range',
   disabled = false,
 }: {
   from?: Date;
@@ -125,27 +125,27 @@ export function DateRangePicker({
     <div>
       <Button
         variant="outline"
-        className={cn(
-          "w-full justify-start text-left font-normal",
-          !range.from && "text-muted-foreground",
-          disabled && "opacity-50 cursor-not-allowed"
+        class={cn(
+          'w-full justify-start text-left font-normal',
+          !range.from && 'text-muted-foreground',
+          disabled && 'opacity-50 cursor-not-allowed'
         )}
         disabled={disabled}
       >
-        <CalendarIcon className="mr-2 h-4 w-4" />
+        <CalendarIcon class="mr-2 h-4 w-4" />
         {range.from ? (
           range.to ? (
             <>
-              {format(range.from, "PPP")} - {format(range.to, "PPP")}
+              {format(range.from, 'PPP')} - {format(range.to, 'PPP')}
             </>
           ) : (
-            format(range.from, "PPP")
+            format(range.from, 'PPP')
           )
         ) : (
           <span>{placeholder}</span>
         )}
       </Button>
-      <div className="w-auto p-0" />
+      <div class="w-auto p-0" />
     </div>
   );
 }

@@ -8,7 +8,7 @@
 import type {
   ProviderWithLocations as DBProviderWithLocations,
   ProviderPerformanceMetrics,
-} from "@/lib/database/queries/providers";
+} from '@/lib/database/queries/providers';
 
 // Keep this for other modules that might be using the re-export
 export type { DBProviderWithLocations as ProviderWithLocations, ProviderPerformanceMetrics };
@@ -52,8 +52,8 @@ export interface PaginatedResponse<T> {
 export interface ProvidersQueryParams {
   clinicId?: string;
   locationId?: string;
-  providerType?: "dentist" | "hygienist" | "specialist" | "other";
-  status?: "active" | "inactive";
+  providerType?: 'dentist' | 'hygienist' | 'specialist' | 'other';
+  status?: 'active' | 'inactive';
   includeInactive?: boolean;
   page?: number;
   limit?: number;
@@ -66,7 +66,7 @@ export interface ProviderFilters {
   clinicId?: string;
   locationId?: string;
   providerId?: string;
-  providerType?: "dentist" | "hygienist" | "specialist" | "other";
+  providerType?: 'dentist' | 'hygienist' | 'specialist' | 'other';
   includeInactive?: boolean;
   pagination?: PaginationParams;
 }
@@ -79,7 +79,7 @@ export interface CreateProviderRequest {
   first_name?: string;
   last_name?: string;
   email?: string;
-  provider_type?: "dentist" | "hygienist" | "specialist" | "other";
+  provider_type?: 'dentist' | 'hygienist' | 'specialist' | 'other';
   position?: string;
   clinic_id: string;
 }

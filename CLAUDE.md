@@ -14,9 +14,16 @@ This is a multi-tenant dental practice dashboard built with Next.js 15, TypeScri
 - `pnpm start` - Start production server
 
 ### Code Quality
-- `pnpm lint` - Run Biome linter
-- `pnpm lint:fix` - Fix linting issues automatically
+- `pnpm lint` - Run Next.js ESLint linter
+- `pnpm lint:fix` - Fix Biome linting issues automatically
 - `pnpm format` - Format code with Biome
+- `pnpm imports:fix` - Organize and fix import statements
+- `pnpm biome:check` - Check code with Biome (linting + formatting)
+- `pnpm biome:fix` - Auto-fix Biome issues
+- `pnpm biome:format` - Format code with Biome
+- `pnpm biome:lint` - Run Biome linter only
+- `pnpm pre-commit` - Manual pre-commit check (Biome + tests)
+- `pnpm code-quality` - Full quality pipeline (Biome + tests + build)
 - `pnpm typecheck` - Run TypeScript type checking
 
 ### Database Operations
@@ -46,7 +53,7 @@ This is a multi-tenant dental practice dashboard built with Next.js 15, TypeScri
 - **State Management:** Server Components, React Context, Zustand, TanStack Query
 - **Authentication:** Supabase Auth with SSR
 - **Testing:** Vitest with jsdom environment
-- **Code Quality:** Biome for linting and formatting
+- **Code Quality:** Biome for comprehensive linting, formatting, and import organization with Husky pre-commit hooks
 
 ### Project Structure
 ```
@@ -121,12 +128,53 @@ src/
 
 5. **Integrate Type Checking into Your Workflow:**
    - Run `pnpm typecheck` regularly during development
-   - Set up pre-commit hooks that run TypeScript check and Biome formatting
+   - Pre-commit hooks automatically run Biome formatting and tests before commits
+   - Use `pnpm code-quality` for full quality pipeline before pushing changes
+
+## Code Quality Pipeline
+
+### Biome Configuration
+The project uses a comprehensive Biome setup (`.biome.json`) with:
+
+**Core Features:**
+- **VCS Integration:** Git-aware linting with automatic ignore file handling
+- **Import Organization:** Automatic import sorting and organization
+- **Multi-language Support:** JavaScript/TypeScript, JSON, and CSS formatting
+
+**Rule Categories (300+ rules):**
+- **Accessibility:** Ensures WCAG compliance and semantic HTML
+- **Performance:** Prevents performance anti-patterns (barrel files, unnecessary re-exports)
+- **Security:** XSS prevention and secure coding practices
+- **Complexity:** Maintains code readability and cognitive load
+- **Style:** Consistent code formatting and naming conventions
+- **Correctness:** Prevents runtime errors and type issues
+
+**Smart Overrides:**
+- Test files: Allow `console` statements and `any` types for testing flexibility
+- Config files: Allow default exports and Node.js modules
+- Type definition files: Relaxed namespace and interface rules
+
+### Husky Pre-commit Hooks
+Automated quality control via `.husky/pre-commit`:
+1. **Auto-fix Issues:** Runs `pnpm biome:fix` to resolve formatting and linting
+2. **Run Tests:** Ensures no regressions with `pnpm test --run`
+3. **Stage Changes:** Automatically adds fixed files to the commit
+
+### Quality Commands
+- `pnpm biome:check` - Full check without fixes
+- `pnpm biome:fix` - Auto-fix all issues
+- `pnpm imports:fix` - Organize imports specifically
+- `pnpm pre-commit` - Manual pre-commit simulation
+- `pnpm code-quality` - Complete quality pipeline (Biome + tests + build)
 
 ## Development Guidelines
 
 ### Code Quality Standards
-- Follow Biome configuration for consistent formatting
+- **Biome Configuration:** Comprehensive setup with 300+ rules covering accessibility, performance, security, and style
+- **Automated Quality Control:** Husky pre-commit hooks automatically run Biome fixes and tests
+- **Import Organization:** Auto-organized imports with `pnpm imports:fix` command
+- **Multi-language Support:** JavaScript/TypeScript, JSON, and CSS formatting and linting
+- **Smart Overrides:** Context-aware rules for test files, config files, and type definitions
 - Use structured logging with Winston (configured in `src/lib/utils/logger.ts`)
 - Implement comprehensive error handling
 - Write unit tests for utilities and integration tests for API routes

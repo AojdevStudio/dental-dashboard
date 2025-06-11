@@ -1,7 +1,7 @@
-"use server";
+'use server';
 
-import { createClient } from "@/lib/auth/session";
-import { redirect } from "next/navigation";
+import { createClient } from '@/lib/auth/session';
+import { redirect } from 'next/navigation';
 
 /**
  * Type definition for login credentials.
@@ -39,5 +39,5 @@ export async function login({ email, password }: LoginData) {
     return { error: error.message };
   }
 
-  redirect("/dashboard");
+  redirect('/dashboard');
 }

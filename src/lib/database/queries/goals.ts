@@ -3,10 +3,10 @@
  * Multi-tenant aware goal operations
  */
 
-import type { Prisma } from "@prisma/client";
-import { type AuthContext, getUserClinicRole, validateClinicAccess } from "../auth-context";
-import { prisma } from "../client";
-import type { UpdateGoalQueryInput } from "../../types/goals";
+import type { Prisma } from '@prisma/client';
+import type { UpdateGoalQueryInput } from '../../types/goals';
+import { type AuthContext, getUserClinicRole, validateClinicAccess } from '../auth-context';
+import { prisma } from '../client';
 
 export interface CreateGoalInput {
   metricDefinitionId: string;
@@ -49,7 +49,7 @@ export async function getGoals(
   if (filter.clinicId) {
     const hasAccess = await validateClinicAccess(authContext, filter.clinicId);
     if (!hasAccess) {
-      throw new Error("Access denied to this clinic");
+      throw new Error('Access denied to this clinic');
     }
   }
 
@@ -77,7 +77,7 @@ export async function getGoals(
         clinic: true,
         provider: true,
       },
-      orderBy: [{ endDate: "desc" }, { startDate: "desc" }],
+      orderBy: [{ endDate: 'desc' }, { startDate: 'desc' }],
       take: options?.limit,
       skip: options?.offset,
     }),
@@ -126,7 +126,7 @@ export async function getGoalById(
   if (goal.clinicId) {
     const hasAccess = await validateClinicAccess(authContext, goal.clinicId);
     if (!hasAccess) {
-      throw new Error("Access denied to this goal");
+      throw new Error('Access denied to this goal');
     }
   }
 
@@ -150,7 +150,7 @@ export async function getGoalById(
           lte: goal.endDate,
         },
       },
-      orderBy: { date: "asc" },
+      orderBy: { date: 'asc' },
     });
     result = { ...result, history };
   }
@@ -165,13 +165,13 @@ export async function createGoal(authContext: AuthContext, input: CreateGoalInpu
   // Validate clinic access
   const hasAccess = await validateClinicAccess(authContext, input.clinicId);
   if (!hasAccess) {
-    throw new Error("Access denied to this clinic");
+    throw new Error('Access denied to this clinic');
   }
 
   // Check user role - providers and admins can create goals
   const userRole = await getUserClinicRole(authContext, input.clinicId);
-  if (!userRole || !["clinic_admin", "provider"].includes(userRole)) {
-    throw new Error("Insufficient permissions to create goals");
+  if (!userRole || !['clinic_admin', 'provider'].includes(userRole)) {
+    throw new Error('Insufficient permissions to create goals');
   }
 
   // Validate metric definition exists
@@ -179,7 +179,7 @@ export async function createGoal(authContext: AuthContext, input: CreateGoalInpu
     where: { id: input.metricDefinitionId },
   });
   if (!metricDef) {
-    throw new Error("Invalid metric definition");
+    throw new Error('Invalid metric definition');
   }
 
   // Validate provider if specified
@@ -191,7 +191,7 @@ export async function createGoal(authContext: AuthContext, input: CreateGoalInpu
       },
     });
     if (!provider) {
-      throw new Error("Invalid provider for this clinic");
+      throw new Error('Invalid provider for this clinic');
     }
   }
 
@@ -220,20 +220,20 @@ export async function updateGoal(
   });
 
   if (!goal) {
-    throw new Error("Goal not found");
+    throw new Error('Goal not found');
   }
 
   // Validate clinic access
   if (goal.clinicId) {
     const hasAccess = await validateClinicAccess(authContext, goal.clinicId);
     if (!hasAccess) {
-      throw new Error("Access denied to this goal");
+      throw new Error('Access denied to this goal');
     }
 
     // Check user role
     const userRole = await getUserClinicRole(authContext, goal.clinicId);
-    if (!userRole || !["clinic_admin", "provider"].includes(userRole)) {
-      throw new Error("Insufficient permissions to update goals");
+    if (!userRole || !['clinic_admin', 'provider'].includes(userRole)) {
+      throw new Error('Insufficient permissions to update goals');
     }
   }
 
@@ -258,19 +258,19 @@ export async function deleteGoal(authContext: AuthContext, goalId: string) {
   });
 
   if (!goal) {
-    throw new Error("Goal not found");
+    throw new Error('Goal not found');
   }
 
   // Validate clinic access and admin role
   if (goal.clinicId) {
     const hasAccess = await validateClinicAccess(authContext, goal.clinicId);
     if (!hasAccess) {
-      throw new Error("Access denied to this goal");
+      throw new Error('Access denied to this goal');
     }
 
     const userRole = await getUserClinicRole(authContext, goal.clinicId);
-    if (userRole !== "clinic_admin") {
-      throw new Error("Only clinic administrators can delete goals");
+    if (userRole !== 'clinic_admin') {
+      throw new Error('Only clinic administrators can delete goals');
     }
   }
 
@@ -293,14 +293,14 @@ export async function getGoalsByTemplate(
   });
 
   if (!template) {
-    throw new Error("Goal template not found");
+    throw new Error('Goal template not found');
   }
 
   // Check access to template
   if (template.clinicId) {
     const hasAccess = await validateClinicAccess(authContext, template.clinicId);
     if (!hasAccess) {
-      throw new Error("Access denied to this template");
+      throw new Error('Access denied to this template');
     }
   }
 
@@ -313,7 +313,7 @@ export async function getGoalsByTemplate(
   if (clinicId) {
     const hasClinicAccess = await validateClinicAccess(authContext, clinicId);
     if (!hasClinicAccess) {
-      throw new Error("Access denied to this clinic");
+      throw new Error('Access denied to this clinic');
     }
     where.clinicId = clinicId;
   } else {
@@ -327,7 +327,7 @@ export async function getGoalsByTemplate(
       clinic: true,
       provider: true,
     },
-    orderBy: { startDate: "desc" },
+    orderBy: { startDate: 'desc' },
   });
 }
 
@@ -351,19 +351,19 @@ export async function createGoalFromTemplate(
   });
 
   if (!template) {
-    throw new Error("Goal template not found");
+    throw new Error('Goal template not found');
   }
 
   // Check access to template
   if (template.clinicId && template.clinicId !== options.clinicId) {
     const hasAccess = await validateClinicAccess(authContext, template.clinicId);
     if (!hasAccess) {
-      throw new Error("Access denied to this template");
+      throw new Error('Access denied to this template');
     }
   }
 
   // Calculate target value if formula provided
-  let targetValue = options.targetValue || "0";
+  let targetValue = options.targetValue || '0';
   if (template.targetFormula && !options.targetValue) {
     targetValue = await calculateTargetFromFormula(
       template.targetFormula,
@@ -418,7 +418,7 @@ async function calculateGoalProgress(goal: Record<string, unknown>) {
       currentValue: 0,
       targetValue: Number.parseFloat(targetValueStr),
       percentage: 0,
-      trend: "neutral" as const,
+      trend: 'neutral' as const,
       daysRemaining: Math.ceil((endDate.getTime() - Date.now()) / (1000 * 60 * 60 * 24)),
     };
   }
@@ -431,13 +431,13 @@ async function calculateGoalProgress(goal: Record<string, unknown>) {
   const percentage = targetValue > 0 ? (currentValue / targetValue) * 100 : 0;
 
   // Calculate trend
-  let trend: "up" | "down" | "neutral" = "neutral";
+  let trend: 'up' | 'down' | 'neutral' = 'neutral';
   if (metrics.length >= 2) {
     const recent = values.slice(-5);
     const older = values.slice(-10, -5);
     const recentAvg = recent.reduce((a, b) => a + b, 0) / recent.length;
     const olderAvg = older.length > 0 ? older.reduce((a, b) => a + b, 0) / older.length : recentAvg;
-    trend = recentAvg > olderAvg ? "up" : recentAvg < olderAvg ? "down" : "neutral";
+    trend = recentAvg > olderAvg ? 'up' : recentAvg < olderAvg ? 'down' : 'neutral';
   }
 
   const daysRemaining = Math.max(
@@ -467,7 +467,7 @@ async function calculateTargetFromFormula(
   // Simple formula parser - in production would be more sophisticated
   // Example: "previous_month * 1.1" means 10% increase from previous month
 
-  if (formula.includes("previous_month")) {
+  if (formula.includes('previous_month')) {
     const lastMonth = new Date();
     lastMonth.setMonth(lastMonth.getMonth() - 1);
     const startOfLastMonth = new Date(lastMonth.getFullYear(), lastMonth.getMonth(), 1);
@@ -499,5 +499,5 @@ async function calculateTargetFromFormula(
   }
 
   // Default to 0 if formula not recognized
-  return "0";
+  return '0';
 }

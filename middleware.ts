@@ -1,5 +1,5 @@
-import { createServerClient } from "@supabase/ssr";
-import { type NextRequest, NextResponse } from "next/server";
+import { createServerClient } from '@supabase/ssr';
+import { type NextRequest, NextResponse } from 'next/server';
 
 export async function middleware(request: NextRequest) {
   const startTime = Date.now();
@@ -10,8 +10,8 @@ export async function middleware(request: NextRequest) {
     requestId,
     method: request.method,
     pathname: request.nextUrl.pathname,
-    userAgent: request.headers.get("user-agent"),
-    ip: request.headers.get("x-forwarded-for") || request.headers.get("x-real-ip") || "unknown",
+    userAgent: request.headers.get('user-agent'),
+    ip: request.headers.get('x-forwarded-for') || request.headers.get('x-real-ip') || 'unknown',
   });
 
   try {
@@ -29,7 +29,7 @@ export async function middleware(request: NextRequest) {
         hasUrl: !!supabaseUrl,
         hasKey: !!supabaseAnonKey,
       });
-      throw new Error("Missing Supabase environment variables");
+      throw new Error('Missing Supabase environment variables');
     }
 
     console.log(`[${new Date().toISOString()}] Initializing Supabase client`, { requestId });
@@ -77,10 +77,10 @@ export async function middleware(request: NextRequest) {
 
     // Check if the request is for an auth page
     const isAuthPage =
-      request.nextUrl.pathname.startsWith("/auth/") ||
-      request.nextUrl.pathname === "/login" ||
-      request.nextUrl.pathname === "/register" ||
-      request.nextUrl.pathname === "/signup";
+      request.nextUrl.pathname.startsWith('/auth/') ||
+      request.nextUrl.pathname === '/login' ||
+      request.nextUrl.pathname === '/register' ||
+      request.nextUrl.pathname === '/signup';
 
     console.log(`[${new Date().toISOString()}] Route protection analysis`, {
       requestId,
@@ -95,19 +95,19 @@ export async function middleware(request: NextRequest) {
       console.log(`[${new Date().toISOString()}] Redirecting unauthenticated user to login`, {
         requestId,
         fromPath: request.nextUrl.pathname,
-        toPath: "/login",
-        reason: "unauthenticated_access_to_protected_route",
+        toPath: '/login',
+        reason: 'unauthenticated_access_to_protected_route',
       });
 
       const url = request.nextUrl.clone();
-      url.pathname = "/login";
+      url.pathname = '/login';
       const response = NextResponse.redirect(url);
 
       const duration = Date.now() - startTime;
       console.log(`[${new Date().toISOString()}] Middleware redirect completed`, {
         requestId,
         statusCode: 307,
-        redirectTo: "/login",
+        redirectTo: '/login',
         durationMs: duration,
       });
 
@@ -120,19 +120,19 @@ export async function middleware(request: NextRequest) {
         requestId,
         userId: user.id,
         fromPath: request.nextUrl.pathname,
-        toPath: "/dashboard",
-        reason: "authenticated_access_to_auth_page",
+        toPath: '/dashboard',
+        reason: 'authenticated_access_to_auth_page',
       });
 
       const url = request.nextUrl.clone();
-      url.pathname = "/dashboard";
+      url.pathname = '/dashboard';
       const response = NextResponse.redirect(url);
 
       const duration = Date.now() - startTime;
       console.log(`[${new Date().toISOString()}] Middleware redirect completed`, {
         requestId,
         statusCode: 307,
-        redirectTo: "/dashboard",
+        redirectTo: '/dashboard',
         durationMs: duration,
       });
 
@@ -162,11 +162,11 @@ export async function middleware(request: NextRequest) {
     console.warn(`[${new Date().toISOString()}] Redirecting to login due to middleware error`, {
       requestId,
       pathname: request.nextUrl.pathname,
-      reason: "middleware_error_fallback",
+      reason: 'middleware_error_fallback',
     });
 
     const url = request.nextUrl.clone();
-    url.pathname = "/login";
+    url.pathname = '/login';
     return NextResponse.redirect(url);
   }
 }
@@ -180,6 +180,6 @@ export const config = {
      * - favicon.ico (favicon file)
      * Feel free to modify this pattern to include more paths.
      */
-    "/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)",
+    '/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
   ],
 };

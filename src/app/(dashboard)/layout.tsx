@@ -1,6 +1,6 @@
-import { getAuthContext } from "@/lib/database/auth-context";
-import { prisma } from "@/lib/database/prisma";
-import DashboardLayout from "./layout-client";
+import { getAuthContext } from '@/lib/database/auth-context';
+import { prisma } from '@/lib/database/prisma';
+import DashboardLayout from './layout-client';
 
 export default async function DashboardLayoutServer({
   children,
@@ -15,27 +15,27 @@ export default async function DashboardLayoutServer({
     if (authContext.isSystemAdmin) {
       // System admins can see all clinics
       clinics = await prisma.clinic.findMany({
-        where: { status: "active" },
+        where: { status: 'active' },
         select: {
           id: true,
           name: true,
           location: true,
         },
-        orderBy: { name: "asc" },
+        orderBy: { name: 'asc' },
       });
     } else {
       // Regular users see only their accessible clinics
       clinics = await prisma.clinic.findMany({
         where: {
           id: { in: authContext.clinicIds },
-          status: "active",
+          status: 'active',
         },
         select: {
           id: true,
           name: true,
           location: true,
         },
-        orderBy: { name: "asc" },
+        orderBy: { name: 'asc' },
       });
     }
   }

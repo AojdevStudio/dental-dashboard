@@ -1,12 +1,12 @@
-import type { Prisma } from "@prisma/client";
-import { prisma } from "@/lib/database/client";
-import { type NextRequest, NextResponse } from "next/server";
+import { prisma } from '@/lib/database/client';
+import type { Prisma } from '@prisma/client';
+import { type NextRequest, NextResponse } from 'next/server';
 
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
-    const clinicId = searchParams.get("clinicId");
-    const includeInactive = searchParams.get("includeInactive") === "true";
+    const clinicId = searchParams.get('clinicId');
+    const includeInactive = searchParams.get('includeInactive') === 'true';
 
     // Build where clause
     const where: Prisma.LocationWhereInput = {};
@@ -51,7 +51,7 @@ export async function GET(request: NextRequest) {
           },
         },
       },
-      orderBy: [{ clinic: { name: "asc" } }, { name: "asc" }],
+      orderBy: [{ clinic: { name: 'asc' } }, { name: 'asc' }],
     });
 
     return NextResponse.json({
@@ -60,12 +60,12 @@ export async function GET(request: NextRequest) {
       count: locations.length,
     });
   } catch (error) {
-    console.error("Error fetching locations:", error);
+    console.error('Error fetching locations:', error);
     return NextResponse.json(
       {
         success: false,
-        error: "Failed to fetch locations",
-        details: error instanceof Error ? error.message : "Unknown error",
+        error: 'Failed to fetch locations',
+        details: error instanceof Error ? error.message : 'Unknown error',
       },
       { status: 500 }
     );
@@ -82,7 +82,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json(
         {
           success: false,
-          error: "Missing required fields: clinicId and name are required",
+          error: 'Missing required fields: clinicId and name are required',
         },
         { status: 400 }
       );
@@ -97,7 +97,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json(
         {
           success: false,
-          error: "Clinic not found",
+          error: 'Clinic not found',
         },
         { status: 404 }
       );
@@ -109,7 +109,7 @@ export async function POST(request: NextRequest) {
         clinicId,
         name: {
           equals: name,
-          mode: "insensitive",
+          mode: 'insensitive',
         },
       },
     });
@@ -118,7 +118,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json(
         {
           success: false,
-          error: "A location with this name already exists for this clinic",
+          error: 'A location with this name already exists for this clinic',
         },
         { status: 409 }
       );
@@ -146,17 +146,17 @@ export async function POST(request: NextRequest) {
       {
         success: true,
         data: location,
-        message: "Location created successfully",
+        message: 'Location created successfully',
       },
       { status: 201 }
     );
   } catch (error) {
-    console.error("Error creating location:", error);
+    console.error('Error creating location:', error);
     return NextResponse.json(
       {
         success: false,
-        error: "Failed to create location",
-        details: error instanceof Error ? error.message : "Unknown error",
+        error: 'Failed to create location',
+        details: error instanceof Error ? error.message : 'Unknown error',
       },
       { status: 500 }
     );

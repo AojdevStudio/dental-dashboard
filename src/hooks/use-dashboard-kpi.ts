@@ -1,7 +1,7 @@
-import { useMemo } from "react";
-import type { ChartDataPoint } from "../lib/types/charts";
-import type { KPIData } from "../lib/types/kpi";
-import { calculateTrend, formatCurrency } from "../lib/utils/chart-helpers";
+import { useMemo } from 'react';
+import type { ChartDataPoint } from '../lib/types/charts';
+import type { KPIData } from '../lib/types/kpi';
+import { calculateTrend, formatCurrency } from '../lib/utils/chart-helpers';
 
 interface UseDashboardKPIParams {
   revenueData: ChartDataPoint[];
@@ -43,8 +43,8 @@ export function useDashboardKPI({
 
     return [
       {
-        id: "revenue",
-        title: "Weekly Revenue",
+        id: 'revenue',
+        title: 'Weekly Revenue',
         value: formatCurrency(currentRevenue),
         trend: {
           direction: revenueTrend.direction,
@@ -52,62 +52,62 @@ export function useDashboardKPI({
           percentage: revenueTrend.percentage,
         },
         comparison: {
-          period: "week",
+          period: 'week',
           previousValue: formatCurrency(previousRevenue),
         },
         goal: {
           value: weeklyRevenueTarget,
           progress: Math.min((currentRevenue / weeklyRevenueTarget) * 100, 100),
-          label: "Weekly Target",
+          label: 'Weekly Target',
         },
       },
       {
-        id: "appointments",
-        title: "Weekly Appointments",
+        id: 'appointments',
+        title: 'Weekly Appointments',
         value: currentAppointments,
-        unit: "appointments",
+        unit: 'appointments',
         trend: {
           direction: appointmentsTrend.direction,
           value: currentAppointments - previousAppointments,
           percentage: appointmentsTrend.percentage,
         },
         comparison: {
-          period: "week",
+          period: 'week',
           previousValue: previousAppointments,
         },
       },
       {
-        id: "patients",
-        title: "New Patients",
+        id: 'patients',
+        title: 'New Patients',
         value: currentPatients,
-        unit: "patients",
+        unit: 'patients',
         trend: {
           direction: patientsTrend.direction,
           value: currentPatients - previousPatients,
           percentage: patientsTrend.percentage,
         },
         comparison: {
-          period: "week",
+          period: 'week',
           previousValue: previousPatients,
         },
         goal: {
           value: weeklyPatientsTarget,
           progress: Math.min((currentPatients / weeklyPatientsTarget) * 100, 100),
-          label: "Weekly Target",
+          label: 'Weekly Target',
         },
       },
       {
-        id: "utilization",
-        title: "Chair Utilization",
-        value: "78%",
+        id: 'utilization',
+        title: 'Chair Utilization',
+        value: '78%',
         trend: {
-          direction: "up",
+          direction: 'up',
           value: 5,
           percentage: 6.8,
         },
         comparison: {
-          period: "week",
-          previousValue: "73%",
+          period: 'week',
+          previousValue: '73%',
         },
       },
     ];

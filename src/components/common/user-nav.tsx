@@ -1,17 +1,16 @@
-"use client";
+'use client';
 
-import { Button } from "@/components/ui/button";
+import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { useAuth } from "@/hooks/use-auth";
-import { LogOut, User as UserIcon } from "lucide-react";
-import React from "react";
+} from '@/components/ui/dropdown-menu';
+import { useAuth } from '@/hooks/use-auth';
+import { LogOut, User as UserIcon } from 'lucide-react';
 
-import { signOutWithCleanup } from "@/app/auth/actions";
+import { signOutWithCleanup } from '@/app/auth/actions';
 
 /**
  * UserNav Component
@@ -36,25 +35,23 @@ export function UserNav() {
       // Use server action for proper cleanup
       await signOutWithCleanup();
     } catch (error) {
-      console.error("Sign-out error:", error);
+      console.error('Sign-out error:', error);
       // Even on error, try to redirect to login
-      window.location.href = "/login";
+      window.location.href = '/login';
     }
   };
 
   return (
     <DropdownMenu>
-      <DropdownMenuTrigger asChild>
-        <Button variant="ghost" className="flex items-center gap-2 px-3 py-2">
-          <UserIcon className="h-5 w-5 text-blue-600" />
-          <span className="font-medium text-gray-900 text-sm max-w-[120px] truncate">
-            {user.email}
-          </span>
+      <DropdownMenuTrigger asChild={true}>
+        <Button variant="ghost" class="flex items-center gap-2 px-3 py-2">
+          <UserIcon class="h-5 w-5 text-blue-600" />
+          <span class="font-medium text-gray-900 text-sm max-w-[120px] truncate">{user.email}</span>
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
-        <DropdownMenuItem onClick={handleSignOut} className="text-red-600 focus:bg-red-50">
-          <LogOut className="h-4 w-4 mr-2" /> Sign out
+        <DropdownMenuItem onClick={handleSignOut} class="text-red-600 focus:bg-red-50">
+          <LogOut class="h-4 w-4 mr-2" /> Sign out
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>

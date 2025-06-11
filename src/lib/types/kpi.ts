@@ -1,5 +1,5 @@
-export type TrendDirection = "up" | "down" | "neutral";
-export type ComparisonPeriod = "day" | "week" | "month" | "quarter" | "year" | "custom";
+export type TrendDirection = 'up' | 'down' | 'neutral';
+export type ComparisonPeriod = 'day' | 'week' | 'month' | 'quarter' | 'year' | 'custom';
 
 export interface KPIData {
   id: string;
@@ -29,8 +29,8 @@ export interface KPIData {
 
 export interface KPICardProps {
   data: KPIData;
-  variant?: "default" | "compact" | "detailed";
-  colorScheme?: "default" | "success" | "warning" | "error";
+  variant?: 'default' | 'compact' | 'detailed';
+  colorScheme?: 'default' | 'success' | 'warning' | 'error';
   loading?: boolean;
   error?: Error | null;
   className?: string;
@@ -46,7 +46,7 @@ export interface KPIGroup {
   title: string;
   description?: string;
   kpis: KPIData[];
-  layout?: "grid" | "list";
+  layout?: 'grid' | 'list';
   columns?: number;
 }
 

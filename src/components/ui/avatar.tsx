@@ -13,12 +13,12 @@
  * with appropriate fallback behavior for missing or failed images.
  */
 
-"use client";
+'use client';
 
-import * as AvatarPrimitive from "@radix-ui/react-avatar";
-import * as React from "react";
+import * as AvatarPrimitive from '@radix-ui/react-avatar';
+import * as React from 'react';
 
-import { cn } from "@/lib/utils";
+import { cn } from '@/lib/utils';
 
 /**
  * Root avatar component that serves as a container for the avatar image and fallback
@@ -38,7 +38,7 @@ const Avatar = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <AvatarPrimitive.Root
     ref={ref}
-    className={cn("relative flex h-10 w-10 shrink-0 overflow-hidden rounded-full", className)}
+    class={cn('relative flex h-10 w-10 shrink-0 overflow-hidden rounded-full', className)}
     {...props}
   />
 ));
@@ -64,7 +64,7 @@ const AvatarImage = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <AvatarPrimitive.Image
     ref={ref}
-    className={cn("aspect-square h-full w-full", className)}
+    class={cn('aspect-square h-full w-full', className)}
     {...props}
   />
 ));
@@ -93,10 +93,7 @@ const AvatarFallback = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <AvatarPrimitive.Fallback
     ref={ref}
-    className={cn(
-      "flex h-full w-full items-center justify-center rounded-full bg-muted",
-      className
-    )}
+    class={cn('flex h-full w-full items-center justify-center rounded-full bg-muted', className)}
     {...props}
   />
 ));

@@ -1,9 +1,9 @@
-"use client";
+'use client';
 
-import { useAuth } from "@/hooks/use-auth";
-import { Loader2 } from "lucide-react";
-import { useRouter } from "next/navigation";
-import { useEffect } from "react";
+import { useAuth } from '@/hooks/use-auth';
+import { Loader2 } from 'lucide-react';
+import { useRouter } from 'next/navigation';
+import { useEffect } from 'react';
 
 interface AuthGuardProps {
   children: React.ReactNode;
@@ -24,7 +24,7 @@ interface AuthGuardProps {
  */
 export function AuthGuard({
   children,
-  fallbackUrl = "/login",
+  fallbackUrl = '/login',
   requireDatabaseUser = true,
 }: AuthGuardProps) {
   const { user, dbUser, isAuthenticated, isLoading, isSystemAdmin } = useAuth();
@@ -32,7 +32,7 @@ export function AuthGuard({
 
   useEffect(() => {
     if (!isLoading && !isAuthenticated) {
-      console.warn("AuthGuard: User not authenticated, redirecting to", fallbackUrl);
+      console.warn('AuthGuard: User not authenticated, redirecting to', fallbackUrl);
       router.push(fallbackUrl);
     }
   }, [isLoading, isAuthenticated, router, fallbackUrl]);
@@ -40,10 +40,10 @@ export function AuthGuard({
   // Show loading state while checking auth
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="text-center space-y-4">
-          <Loader2 className="h-8 w-8 animate-spin text-primary mx-auto" />
-          <p className="text-sm text-muted-foreground">Verifying authentication...</p>
+      <div class="flex items-center justify-center min-h-screen">
+        <div class="text-center space-y-4">
+          <Loader2 class="h-8 w-8 animate-spin text-primary mx-auto" />
+          <p class="text-sm text-muted-foreground">Verifying authentication...</p>
         </div>
       </div>
     );
@@ -58,7 +58,7 @@ export function AuthGuard({
   if (requireDatabaseUser && user) {
     // System admins bypass metadata requirements since they're validated server-side
     if (isSystemAdmin && dbUser) {
-      console.log("AuthGuard: System admin authenticated with database user");
+      console.log('AuthGuard: System admin authenticated with database user');
       return <>{children}</>;
     }
 
@@ -67,19 +67,19 @@ export function AuthGuard({
     const hasMetadataRole = !!user.user_metadata?.role;
 
     if (!hasDbUser && !hasMetadataRole) {
-      console.warn("AuthGuard: User authenticated but missing database user and metadata");
+      console.warn('AuthGuard: User authenticated but missing database user and metadata');
       return (
-        <div className="flex items-center justify-center min-h-screen">
-          <div className="text-center space-y-4 max-w-md mx-auto p-6">
-            <h2 className="text-lg font-semibold text-destructive">Account Setup Incomplete</h2>
-            <p className="text-sm text-muted-foreground">
+        <div class="flex items-center justify-center min-h-screen">
+          <div class="text-center space-y-4 max-w-md mx-auto p-6">
+            <h2 class="text-lg font-semibold text-destructive">Account Setup Incomplete</h2>
+            <p class="text-sm text-muted-foreground">
               Your account setup is incomplete. Please contact your administrator or try logging in
               again.
             </p>
             <button
               type="button"
-              onClick={() => router.push("/login")}
-              className="text-sm text-primary hover:underline"
+              onClick={() => router.push('/login')}
+              class="text-sm text-primary hover:underline"
             >
               Return to Login
             </button>

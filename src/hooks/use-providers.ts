@@ -8,11 +8,10 @@
 import type {
   CreateProviderRequest,
   ProviderWithLocations,
-  ProvidersApiResponse,
   ProvidersQueryParams,
-} from "@/types/providers";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useCallback, useState } from "react";
+} from '@/types/providers';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useCallback, useState } from 'react';
 
 // API response type for the enhanced providers endpoint
 interface ApiResponse {
@@ -37,7 +36,7 @@ interface UseProvidersOptions {
 interface UseProvidersReturn {
   // Data
   providers: ProviderWithLocations[];
-  pagination: ApiResponse["pagination"] | null;
+  pagination: ApiResponse['pagination'] | null;
 
   // Loading states
   isLoading: boolean;
@@ -69,17 +68,17 @@ async function fetchProviders(params: ProvidersQueryParams): Promise<ApiResponse
 
   // Add all defined parameters to the search params
   for (const [key, value] of Object.entries(params)) {
-    if (value !== undefined && value !== null && value !== "") {
+    if (value !== undefined && value !== null && value !== '') {
       searchParams.append(key, String(value));
     }
   }
 
   const response = await fetch(`/api/providers?${searchParams.toString()}`, {
-    method: "GET",
+    method: 'GET',
     headers: {
-      "Content-Type": "application/json",
+      'Content-Type': 'application/json',
     },
-    credentials: "include", // Include cookies for authentication
+    credentials: 'include', // Include cookies for authentication
   });
 
   if (!response.ok) {
@@ -94,12 +93,12 @@ async function fetchProviders(params: ProvidersQueryParams): Promise<ApiResponse
  * Creates a new provider
  */
 async function createProvider(data: CreateProviderRequest): Promise<ProviderWithLocations> {
-  const response = await fetch("/api/providers", {
-    method: "POST",
+  const response = await fetch('/api/providers', {
+    method: 'POST',
     headers: {
-      "Content-Type": "application/json",
+      'Content-Type': 'application/json',
     },
-    credentials: "include",
+    credentials: 'include',
     body: JSON.stringify(data),
   });
 
@@ -139,7 +138,7 @@ export function useProviders(options: UseProvidersOptions = {}): UseProvidersRet
 
   // Query for fetching providers
   const { data, isLoading, isError, error, refetch } = useQuery({
-    queryKey: ["providers", filters],
+    queryKey: ['providers', filters],
     queryFn: () => fetchProviders(filters),
     enabled,
     refetchOnWindowFocus,
@@ -151,7 +150,7 @@ export function useProviders(options: UseProvidersOptions = {}): UseProvidersRet
     mutationFn: createProvider,
     onSuccess: () => {
       // Invalidate providers query to refetch data
-      queryClient.invalidateQueries({ queryKey: ["providers"] });
+      queryClient.invalidateQueries({ queryKey: ['providers'] });
     },
   });
 
@@ -166,8 +165,8 @@ export function useProviders(options: UseProvidersOptions = {}): UseProvidersRet
           ? newFilters.page
           : Object.keys(newFilters).some(
                 (k) =>
-                  k !== "page" &&
-                  k !== "limit" &&
+                  k !== 'page' &&
+                  k !== 'limit' &&
                   newFilters[k as keyof typeof newFilters] !== prev[k as keyof typeof prev]
               )
             ? 1
@@ -243,10 +242,10 @@ export function useProviders(options: UseProvidersOptions = {}): UseProvidersRet
  */
 export function useProvider(providerId: string, enabled = true) {
   return useQuery({
-    queryKey: ["provider", providerId],
+    queryKey: ['provider', providerId],
     queryFn: async (): Promise<ProviderWithLocations> => {
       const response = await fetch(`/api/providers?providerId=${providerId}`, {
-        credentials: "include",
+        credentials: 'include',
       });
 
       if (!response.ok) {
@@ -255,7 +254,7 @@ export function useProvider(providerId: string, enabled = true) {
 
       const result: ApiResponse = await response.json();
       if (!result.data || result.data.length === 0) {
-        throw new Error("Provider not found");
+        throw new Error('Provider not found');
       }
 
       return result.data[0];
@@ -270,17 +269,17 @@ export function useProvider(providerId: string, enabled = true) {
  */
 export function useProviderFilters(clinicId?: string) {
   return useQuery({
-    queryKey: ["provider-filters", clinicId],
+    queryKey: ['provider-filters', clinicId],
     queryFn: async () => {
       const params = new URLSearchParams();
-      if (clinicId) params.append("clinicId", clinicId);
+      if (clinicId) params.append('clinicId', clinicId);
 
       const response = await fetch(`/api/providers?${params.toString()}`, {
-        credentials: "include",
+        credentials: 'include',
       });
 
       if (!response.ok) {
-        throw new Error("Failed to fetch provider data");
+        throw new Error('Failed to fetch provider data');
       }
 
       const result: ApiResponse = await response.json();

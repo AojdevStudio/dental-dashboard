@@ -14,12 +14,12 @@
  * that might occur during the authentication process.
  */
 
-"use client";
+'use client';
 
-import { Skeleton } from "@/components/ui/skeleton";
-import { createBrowserClient } from "@supabase/ssr";
-import { useRouter, useSearchParams } from "next/navigation";
-import { useEffect, useState } from "react";
+import { Skeleton } from '@/components/ui/skeleton';
+import { createBrowserClient } from '@supabase/ssr';
+import { useRouter, useSearchParams } from 'next/navigation';
+import { useEffect, useState } from 'react';
 
 /**
  * Authentication Callback Page Component
@@ -34,7 +34,7 @@ export default function AuthCallbackPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [error, setError] = useState<string | null>(null);
-  const code = searchParams.get("code");
+  const code = searchParams.get('code');
 
   useEffect(() => {
     /**
@@ -47,7 +47,7 @@ export default function AuthCallbackPage() {
     async function handleCallback() {
       try {
         if (!code) {
-          router.replace("/login");
+          router.replace('/login');
           return;
         }
 
@@ -55,7 +55,7 @@ export default function AuthCallbackPage() {
         const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
         if (!supabaseUrl || !supabaseAnonKey) {
-          throw new Error("Missing Supabase environment variables");
+          throw new Error('Missing Supabase environment variables');
         }
 
         const supabase = createBrowserClient(supabaseUrl, supabaseAnonKey);
@@ -65,12 +65,12 @@ export default function AuthCallbackPage() {
           throw error;
         }
 
-        router.replace("/dashboard");
+        router.replace('/dashboard');
       } catch (err) {
-        console.error("Error during auth callback:", err);
-        setError(err instanceof Error ? err.message : "Authentication error");
+        console.error('Error during auth callback:', err);
+        setError(err instanceof Error ? err.message : 'Authentication error');
         setTimeout(() => {
-          router.replace("/auth-error");
+          router.replace('/auth-error');
         }, 2000);
       }
     }
@@ -84,12 +84,12 @@ export default function AuthCallbackPage() {
    */
   if (error) {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center bg-[#121212] relative overflow-hidden w-full rounded-xl">
-        <div className="relative z-10 w-full max-w-sm rounded-3xl bg-gradient-to-r from-[#ffffff10] to-[#121212] backdrop-blur-sm shadow-2xl p-8 flex flex-col items-center">
-          <div className="flex items-center justify-center w-24 h-24 rounded-full bg-red-500/20 mb-6 shadow-lg">
+      <div class="min-h-screen flex flex-col items-center justify-center bg-[#121212] relative overflow-hidden w-full rounded-xl">
+        <div class="relative z-10 w-full max-w-sm rounded-3xl bg-gradient-to-r from-[#ffffff10] to-[#121212] backdrop-blur-sm shadow-2xl p-8 flex flex-col items-center">
+          <div class="flex items-center justify-center w-24 h-24 rounded-full bg-red-500/20 mb-6 shadow-lg">
             <svg
               xmlns="http://www.w3.org/2000/svg"
-              className="h-12 w-12 text-red-500"
+              class="h-12 w-12 text-red-500"
               fill="none"
               viewBox="0 0 24 24"
               stroke="currentColor"
@@ -102,11 +102,9 @@ export default function AuthCallbackPage() {
               />
             </svg>
           </div>
-          <h2 className="text-2xl font-semibold text-red-400 mb-6 text-center">
-            Authentication Error
-          </h2>
-          <p className="text-gray-300 mb-6 text-center">{error}</p>
-          <p className="text-gray-400 mb-6 text-center">Redirecting you...</p>
+          <h2 class="text-2xl font-semibold text-red-400 mb-6 text-center">Authentication Error</h2>
+          <p class="text-gray-300 mb-6 text-center">{error}</p>
+          <p class="text-gray-400 mb-6 text-center">Redirecting you...</p>
         </div>
       </div>
     );
@@ -117,21 +115,21 @@ export default function AuthCallbackPage() {
    * Shows a spinner and skeleton loaders to indicate processing
    */
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-[#121212] relative overflow-hidden w-full rounded-xl">
-      <div className="relative z-10 w-full max-w-sm rounded-3xl bg-gradient-to-r from-[#ffffff10] to-[#121212] backdrop-blur-sm shadow-2xl p-8 flex flex-col items-center">
-        <div className="flex items-center justify-center w-24 h-24 rounded-full bg-white/20 mb-6 shadow-lg">
-          <div className="w-16 h-16 rounded-full bg-white/10 flex items-center justify-center">
-            <div className="w-10 h-10 border-4 border-white border-t-transparent rounded-full animate-spin" />
+    <div class="min-h-screen flex flex-col items-center justify-center bg-[#121212] relative overflow-hidden w-full rounded-xl">
+      <div class="relative z-10 w-full max-w-sm rounded-3xl bg-gradient-to-r from-[#ffffff10] to-[#121212] backdrop-blur-sm shadow-2xl p-8 flex flex-col items-center">
+        <div class="flex items-center justify-center w-24 h-24 rounded-full bg-white/20 mb-6 shadow-lg">
+          <div class="w-16 h-16 rounded-full bg-white/10 flex items-center justify-center">
+            <div class="w-10 h-10 border-4 border-white border-t-transparent rounded-full animate-spin" />
           </div>
         </div>
-        <h2 className="text-2xl font-semibold text-white mb-6 text-center">Authenticating...</h2>
-        <p className="text-gray-300 mb-6 text-center">
+        <h2 class="text-2xl font-semibold text-white mb-6 text-center">Authenticating...</h2>
+        <p class="text-gray-300 mb-6 text-center">
           Please wait while we complete your authentication.
         </p>
-        <div className="w-full space-y-4">
-          <Skeleton className="h-2 w-full bg-white/10 rounded-full" />
-          <Skeleton className="h-2 w-4/5 bg-white/10 rounded-full mx-auto" />
-          <Skeleton className="h-2 w-2/3 bg-white/10 rounded-full mx-auto" />
+        <div class="w-full space-y-4">
+          <Skeleton class="h-2 w-full bg-white/10 rounded-full" />
+          <Skeleton class="h-2 w-4/5 bg-white/10 rounded-full mx-auto" />
+          <Skeleton class="h-2 w-2/3 bg-white/10 rounded-full mx-auto" />
         </div>
       </div>
     </div>

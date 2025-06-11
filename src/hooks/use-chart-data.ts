@@ -1,13 +1,13 @@
-import { ChartConfig, type ChartDataPoint } from "@/lib/types/charts";
-import { aggregateDataByPeriod } from "@/lib/utils/chart-helpers";
-import { useCallback, useEffect, useState } from "react";
+import type { ChartDataPoint } from '@/lib/types/charts';
+import { aggregateDataByPeriod } from '@/lib/utils/chart-helpers';
+import { useCallback, useEffect, useState } from 'react';
 
 interface UseChartDataOptions {
   endpoint?: string;
   transform?: (data: unknown) => ChartDataPoint[];
   aggregation?: {
     enabled: boolean;
-    period: "day" | "week" | "month" | "quarter" | "year";
+    period: 'day' | 'week' | 'month' | 'quarter' | 'year';
     valueKey: string;
     dateKey?: string;
   };
@@ -60,7 +60,7 @@ export function useChartData({
 
       setData(processedData);
     } catch (err) {
-      setError(err instanceof Error ? err : new Error("Unknown error occurred"));
+      setError(err instanceof Error ? err : new Error('Unknown error occurred'));
     } finally {
       setLoading(false);
     }
@@ -89,7 +89,7 @@ export function useChartData({
 
 // Mock data generator for development
 export function generateMockChartData(
-  type: "revenue" | "appointments" | "patients" | "treatments",
+  type: 'revenue' | 'appointments' | 'patients' | 'treatments',
   points = 30
 ): ChartDataPoint[] {
   const now = new Date();
@@ -101,22 +101,22 @@ export function generateMockChartData(
 
     let value: number;
     switch (type) {
-      case "revenue":
+      case 'revenue':
         value = Math.floor(Math.random() * 5000) + 10000;
         break;
-      case "appointments":
+      case 'appointments':
         value = Math.floor(Math.random() * 20) + 30;
         break;
-      case "patients":
+      case 'patients':
         value = Math.floor(Math.random() * 15) + 20;
         break;
-      case "treatments":
+      case 'treatments':
         value = Math.floor(Math.random() * 30) + 40;
         break;
     }
 
     data.push({
-      name: date.toLocaleDateString("en-US", { month: "short", day: "numeric" }),
+      name: date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
       date: date.toISOString(),
       value,
     });
@@ -135,9 +135,9 @@ export const chartDataTransformers = {
     return data.map((item) => {
       const dateValue = item[dateKey] as string | Date;
       return {
-        name: new Date(dateValue).toLocaleDateString("en-US", {
-          month: "short",
-          day: "numeric",
+        name: new Date(dateValue).toLocaleDateString('en-US', {
+          month: 'short',
+          day: 'numeric',
         }),
         date: dateValue,
         value: Number(item[valueKey]) || 0,

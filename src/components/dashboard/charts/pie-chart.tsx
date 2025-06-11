@@ -1,9 +1,9 @@
-"use client";
+'use client';
 
-import type { ChartConfig } from "@/lib/types/charts";
-import { formatCurrency, formatNumber, formatPercentage } from "@/lib/utils/chart-helpers";
-import { chartTheme, getChartColors } from "@/lib/utils/color-schemes";
-import { isMobile, useBreakpoint } from "@/lib/utils/responsive-helpers";
+import type { ChartConfig } from '@/lib/types/charts';
+import { formatNumber } from '@/lib/utils/chart-helpers';
+import { chartTheme, getChartColors } from '@/lib/utils/color-schemes';
+import { isMobile, useBreakpoint } from '@/lib/utils/responsive-helpers';
 import {
   Cell,
   Legend,
@@ -11,8 +11,8 @@ import {
   PieChart as RechartsPieChart,
   ResponsiveContainer,
   Tooltip,
-} from "recharts";
-import { ChartContainer } from "../chart-container";
+} from 'recharts';
+import { ChartContainer } from '../chart-container';
 
 interface PieChartProps {
   config: ChartConfig;
@@ -44,7 +44,7 @@ export function PieChart({
   const breakpoint = useBreakpoint();
   const mobile = isMobile(breakpoint);
 
-  const colors = getChartColors("dental", config.data.length);
+  const colors = getChartColors('dental', config.data.length);
 
   const defaultConfig: ChartConfig = {
     ...config,
@@ -117,7 +117,7 @@ export function PieChart({
         x={x}
         y={y}
         fill="white"
-        textAnchor={x > cx ? "start" : "end"}
+        textAnchor={x > cx ? 'start' : 'end'}
         dominantBaseline="central"
         fontSize={12}
         fontWeight={600}
@@ -137,12 +137,12 @@ export function PieChart({
     const { payload } = props;
 
     return (
-      <ul className={`flex ${mobile ? "flex-col" : "flex-wrap"} gap-2 justify-center mt-4`}>
+      <ul class={`flex ${mobile ? 'flex-col' : 'flex-wrap'} gap-2 justify-center mt-4`}>
         {payload.map((entry, index: number) => {
           const percentage = (entry.payload.value / total) * 100;
           return (
-            <li key={`item-${index}`} className="flex items-center gap-2">
-              <span className="w-3 h-3 rounded-sm" style={{ backgroundColor: entry.color }} />
+            <li key={`item-${index}`} class="flex items-center gap-2">
+              <span class="w-3 h-3 rounded-sm" style={{ backgroundColor: entry.color }} />
               <span style={chartTheme.legend.style}>
                 {entry.value}
                 {showPercentage && ` (${percentage.toFixed(1)}%)`}
@@ -161,7 +161,7 @@ export function PieChart({
       config={defaultConfig}
       loading={loading}
       error={error}
-      className={className}
+      class={className}
     >
       <ResponsiveContainer width="100%" height={defaultConfig.height}>
         <RechartsPieChart>
@@ -182,7 +182,7 @@ export function PieChart({
               <Cell
                 key={`cell-${index}`}
                 fill={colors[index % colors.length]}
-                style={{ cursor: onDataPointClick ? "pointer" : "default" }}
+                style={{ cursor: onDataPointClick ? 'pointer' : 'default' }}
               />
             ))}
           </Pie>

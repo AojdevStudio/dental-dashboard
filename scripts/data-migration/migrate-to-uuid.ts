@@ -3,20 +3,19 @@
  * Migrates existing data to UUID-based multi-tenant structure
  */
 
-import { PrismaClient } from "@prisma/client";
-import { v4 as uuidv4 } from "uuid";
-import { createHash } from "crypto";
-import * as fs from "fs/promises";
-import * as path from "path";
+import * as path from 'path';
+import { PrismaClient } from '@prisma/client';
+import * as fs from 'fs/promises';
+import { v4 as uuidv4 } from 'uuid';
 
 const prisma = new PrismaClient({
-  log: ["query", "info", "warn", "error"],
+  log: ['query', 'info', 'warn', 'error'],
 });
 
 // Migration configuration
 const BATCH_SIZE = 1000;
-const MIGRATION_LOG_DIR = path.join(process.cwd(), "migration-logs");
-const CHECKPOINT_FILE = path.join(MIGRATION_LOG_DIR, "migration-checkpoint.json");
+const MIGRATION_LOG_DIR = path.join(process.cwd(), 'migration-logs');
+const CHECKPOINT_FILE = path.join(MIGRATION_LOG_DIR, 'migration-checkpoint.json');
 
 interface MigrationCheckpoint {
   phase: string;
@@ -26,14 +25,14 @@ interface MigrationCheckpoint {
   totalCount: number;
   startedAt: string;
   updatedAt: string;
-  status: "pending" | "in_progress" | "completed" | "failed";
+  status: 'pending' | 'in_progress' | 'completed' | 'failed';
   errors: Array<{ id: string; error: string; timestamp: string }>;
 }
 
 interface MigrationReport {
   startedAt: Date;
   completedAt?: Date;
-  status: "success" | "failed" | "partial";
+  status: 'success' | 'failed' | 'partial';
   tables: {
     [key: string]: {
       total: number;
@@ -52,7 +51,7 @@ class DataMigration {
   constructor() {
     this.report = {
       startedAt: new Date(),
-      status: "success",
+      status: 'success',
       tables: {},
       errors: [],
     };
@@ -65,13 +64,13 @@ class DataMigration {
 
     // Load existing checkpoints if any
     try {
-      const checkpointData = await fs.readFile(CHECKPOINT_FILE, "utf-8");
+      const checkpointData = await fs.readFile(CHECKPOINT_FILE, 'utf-8');
       const checkpoints = JSON.parse(checkpointData);
       checkpoints.forEach((cp: MigrationCheckpoint) => {
         this.checkpoints.set(`${cp.table}`, cp);
       });
     } catch (error) {
-      console.log("No existing checkpoint found, starting fresh migration");
+      console.log('No existing checkpoint found, starting fresh migration');
     }
   }
 
@@ -82,28 +81,28 @@ class DataMigration {
   }
 
   async migrateUsers() {
-    console.log("\n=== Migrating Users ===");
+    console.log('\n=== Migrating Users ===');
     const startTime = Date.now();
-    const table = "users";
+    const table = 'users';
 
     try {
       // Get total count
       const totalCount = await prisma.user.count();
       if (totalCount === 0) {
-        console.log("No users to migrate");
+        console.log('No users to migrate');
         return;
       }
 
       // Get or create checkpoint
       const checkpoint = this.checkpoints.get(table) || {
-        phase: "uuid_migration",
+        phase: 'uuid_migration',
         table,
         lastProcessedId: null,
         processedCount: 0,
         totalCount,
         startedAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
-        status: "in_progress" as const,
+        status: 'in_progress' as const,
         errors: [],
       };
 
@@ -119,7 +118,7 @@ class DataMigration {
               { uuidId: null }, // Only process users without UUID
             ],
           },
-          orderBy: { id: "asc" },
+          orderBy: { id: 'asc' },
           take: BATCH_SIZE,
         });
 
@@ -143,7 +142,7 @@ class DataMigration {
               // Create ID mapping
               await tx.idMapping.create({
                 data: {
-                  tableName: "users",
+                  tableName: 'users',
                   oldId: user.id,
                   newId: uuid,
                 },
@@ -160,7 +159,7 @@ class DataMigration {
                 timestamp: new Date().toISOString(),
               });
               this.report.errors.push({
-                table: "users",
+                table: 'users',
                 id: user.id,
                 error: errorMsg,
               });
@@ -178,7 +177,7 @@ class DataMigration {
       }
 
       // Mark as completed
-      checkpoint.status = "completed";
+      checkpoint.status = 'completed';
       await this.saveCheckpoint(table, checkpoint);
 
       const duration = Date.now() - startTime;
@@ -191,33 +190,33 @@ class DataMigration {
 
       console.log(`✓ User migration completed in ${duration}ms`);
     } catch (error) {
-      console.error("User migration failed:", error);
-      this.report.status = "failed";
+      console.error('User migration failed:', error);
+      this.report.status = 'failed';
       throw error;
     }
   }
 
   async migrateClinics() {
-    console.log("\n=== Migrating Clinics ===");
+    console.log('\n=== Migrating Clinics ===');
     const startTime = Date.now();
-    const table = "clinics";
+    const table = 'clinics';
 
     try {
       const totalCount = await prisma.clinic.count();
       if (totalCount === 0) {
-        console.log("No clinics to migrate");
+        console.log('No clinics to migrate');
         return;
       }
 
       const checkpoint = this.checkpoints.get(table) || {
-        phase: "uuid_migration",
+        phase: 'uuid_migration',
         table,
         lastProcessedId: null,
         processedCount: 0,
         totalCount,
         startedAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
-        status: "in_progress" as const,
+        status: 'in_progress' as const,
         errors: [],
       };
 
@@ -232,7 +231,7 @@ class DataMigration {
               { uuidId: null },
             ],
           },
-          orderBy: { id: "asc" },
+          orderBy: { id: 'asc' },
           take: BATCH_SIZE,
         });
 
@@ -253,7 +252,7 @@ class DataMigration {
 
               await tx.idMapping.create({
                 data: {
-                  tableName: "clinics",
+                  tableName: 'clinics',
                   oldId: clinic.id,
                   newId: uuid,
                 },
@@ -270,7 +269,7 @@ class DataMigration {
                 timestamp: new Date().toISOString(),
               });
               this.report.errors.push({
-                table: "clinics",
+                table: 'clinics',
                 id: clinic.id,
                 error: errorMsg,
               });
@@ -286,7 +285,7 @@ class DataMigration {
         );
       }
 
-      checkpoint.status = "completed";
+      checkpoint.status = 'completed';
       await this.saveCheckpoint(table, checkpoint);
 
       const duration = Date.now() - startTime;
@@ -299,33 +298,33 @@ class DataMigration {
 
       console.log(`✓ Clinic migration completed in ${duration}ms`);
     } catch (error) {
-      console.error("Clinic migration failed:", error);
-      this.report.status = "failed";
+      console.error('Clinic migration failed:', error);
+      this.report.status = 'failed';
       throw error;
     }
   }
 
   async migrateDashboards() {
-    console.log("\n=== Migrating Dashboards ===");
+    console.log('\n=== Migrating Dashboards ===');
     const startTime = Date.now();
-    const table = "dashboards";
+    const table = 'dashboards';
 
     try {
       const totalCount = await prisma.dashboard.count();
       if (totalCount === 0) {
-        console.log("No dashboards to migrate");
+        console.log('No dashboards to migrate');
         return;
       }
 
       const checkpoint = this.checkpoints.get(table) || {
-        phase: "uuid_migration",
+        phase: 'uuid_migration',
         table,
         lastProcessedId: null,
         processedCount: 0,
         totalCount,
         startedAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
-        status: "in_progress" as const,
+        status: 'in_progress' as const,
         errors: [],
       };
 
@@ -341,7 +340,7 @@ class DataMigration {
             ],
           },
           include: { user: true },
-          orderBy: { id: "asc" },
+          orderBy: { id: 'asc' },
           take: BATCH_SIZE,
         });
 
@@ -370,7 +369,7 @@ class DataMigration {
 
               await tx.idMapping.create({
                 data: {
-                  tableName: "dashboards",
+                  tableName: 'dashboards',
                   oldId: dashboard.id,
                   newId: uuid,
                 },
@@ -387,7 +386,7 @@ class DataMigration {
                 timestamp: new Date().toISOString(),
               });
               this.report.errors.push({
-                table: "dashboards",
+                table: 'dashboards',
                 id: dashboard.id,
                 error: errorMsg,
               });
@@ -403,7 +402,7 @@ class DataMigration {
         );
       }
 
-      checkpoint.status = "completed";
+      checkpoint.status = 'completed';
       await this.saveCheckpoint(table, checkpoint);
 
       const duration = Date.now() - startTime;
@@ -416,14 +415,14 @@ class DataMigration {
 
       console.log(`✓ Dashboard migration completed in ${duration}ms`);
     } catch (error) {
-      console.error("Dashboard migration failed:", error);
-      this.report.status = "failed";
+      console.error('Dashboard migration failed:', error);
+      this.report.status = 'failed';
       throw error;
     }
   }
 
   async validateDataIntegrity() {
-    console.log("\n=== Validating Data Integrity ===");
+    console.log('\n=== Validating Data Integrity ===');
     const validationErrors: string[] = [];
 
     try {
@@ -464,7 +463,7 @@ class DataMigration {
 
       // Validate ID mappings
       const userMappings = await prisma.idMapping.count({
-        where: { tableName: "users" },
+        where: { tableName: 'users' },
       });
       const totalUsers = await prisma.user.count();
       if (userMappings !== totalUsers) {
@@ -486,15 +485,15 @@ class DataMigration {
       }
 
       if (validationErrors.length > 0) {
-        console.error("Validation errors found:");
+        console.error('Validation errors found:');
         validationErrors.forEach((error) => console.error(`  - ${error}`));
-        this.report.status = "partial";
+        this.report.status = 'partial';
       } else {
-        console.log("✓ All data integrity checks passed");
+        console.log('✓ All data integrity checks passed');
       }
     } catch (error) {
-      console.error("Validation failed:", error);
-      this.report.status = "failed";
+      console.error('Validation failed:', error);
+      this.report.status = 'failed';
       throw error;
     }
   }
@@ -504,16 +503,16 @@ class DataMigration {
 
     const reportPath = path.join(
       MIGRATION_LOG_DIR,
-      `migration-report-${this.report.startedAt.toISOString().replace(/[:.]/g, "-")}.json`
+      `migration-report-${this.report.startedAt.toISOString().replace(/[:.]/g, '-')}.json`
     );
 
     await fs.writeFile(reportPath, JSON.stringify(this.report, null, 2));
 
-    console.log("\n=== Migration Report ===");
+    console.log('\n=== Migration Report ===');
     console.log(`Status: ${this.report.status}`);
     console.log(`Started: ${this.report.startedAt.toISOString()}`);
     console.log(`Completed: ${this.report.completedAt.toISOString()}`);
-    console.log("\nTable Summary:");
+    console.log('\nTable Summary:');
 
     Object.entries(this.report.tables).forEach(([table, stats]) => {
       console.log(`  ${table}:`);
@@ -551,8 +550,8 @@ class DataMigration {
       // Generate report
       await this.generateReport();
     } catch (error) {
-      console.error("Migration failed:", error);
-      this.report.status = "failed";
+      console.error('Migration failed:', error);
+      this.report.status = 'failed';
       await this.generateReport();
       throw error;
     } finally {
@@ -565,7 +564,7 @@ class DataMigration {
 if (require.main === module) {
   const migration = new DataMigration();
   migration.run().catch((error) => {
-    console.error("Fatal migration error:", error);
+    console.error('Fatal migration error:', error);
     process.exit(1);
   });
 }

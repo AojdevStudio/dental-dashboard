@@ -1,7 +1,6 @@
-import { cachedJson } from "@/lib/api/cache-headers";
-import { prisma } from "@/lib/database/prisma";
-import { createClient } from "@/lib/supabase/server";
-import { NextResponse } from "next/server";
+import { cachedJson } from '@/lib/api/cache-headers';
+import { prisma } from '@/lib/database/prisma';
+import { createClient } from '@/lib/supabase/server';
 
 /**
  * Get current user session with database role information
@@ -20,9 +19,9 @@ export async function GET() {
       return cachedJson(
         {
           authenticated: false,
-          error: error?.message || "No user session found",
+          error: error?.message || 'No user session found',
         },
-        "NO_CACHE"
+        'NO_CACHE'
       );
     }
 
@@ -42,9 +41,9 @@ export async function GET() {
       return cachedJson(
         {
           authenticated: false,
-          error: "User not found in database",
+          error: 'User not found in database',
         },
-        "NO_CACHE"
+        'NO_CACHE'
       );
     }
 
@@ -61,25 +60,25 @@ export async function GET() {
             name: dbUser.name,
             role: dbUser.role,
             clinicId: dbUser.clinicId,
-            isSystemAdmin: dbUser.role === "system_admin",
+            isSystemAdmin: dbUser.role === 'system_admin',
           },
         },
       },
-      "PRIVATE"
+      'PRIVATE'
     );
   } catch (error) {
-    console.error("Error getting session:", error);
+    console.error('Error getting session:', error);
     return cachedJson(
       {
         authenticated: false,
-        error: error instanceof Error ? error.message : "Unknown error",
+        error: error instanceof Error ? error.message : 'Unknown error',
       },
-      "NO_CACHE"
+      'NO_CACHE'
     );
   }
 }
 
 export async function POST(request: Request) {
   // TODO: Implement session creation/update logic
-  return Response.json({ message: "Session POST placeholder" });
+  return Response.json({ message: 'Session POST placeholder' });
 }

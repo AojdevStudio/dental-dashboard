@@ -3,9 +3,9 @@
  * Multi-tenant aware Google Sheets operations
  */
 
-import type { Prisma } from "@prisma/client";
-import { type AuthContext, isClinicAdmin, validateClinicAccess } from "../auth-context";
-import { prisma } from "../client";
+import type { Prisma } from '@prisma/client';
+import { type AuthContext, isClinicAdmin, validateClinicAccess } from '../auth-context';
+import { prisma } from '../client';
 
 export interface CreateDataSourceInput {
   name: string;
@@ -54,7 +54,7 @@ export async function getDataSources(
   if (options?.clinicId) {
     const hasAccess = await validateClinicAccess(authContext, options.clinicId);
     if (!hasAccess) {
-      throw new Error("Access denied to this clinic");
+      throw new Error('Access denied to this clinic');
     }
   }
 
@@ -79,7 +79,7 @@ export async function getDataSources(
           },
         },
       },
-      orderBy: { createdAt: "desc" },
+      orderBy: { createdAt: 'desc' },
       take: options?.limit,
       skip: options?.offset,
     }),
@@ -89,8 +89,8 @@ export async function getDataSources(
   // Remove sensitive tokens from response
   const sanitizedDataSources = dataSources.map((ds) => ({
     ...ds,
-    accessToken: "***",
-    refreshToken: ds.refreshToken ? "***" : null,
+    accessToken: '***',
+    refreshToken: ds.refreshToken ? '***' : null,
   }));
 
   return { dataSources: sanitizedDataSources, total };
@@ -125,15 +125,15 @@ export async function getDataSourceById(
   // Validate clinic access
   const hasAccess = await validateClinicAccess(authContext, dataSource.clinicId);
   if (!hasAccess) {
-    throw new Error("Access denied to this data source");
+    throw new Error('Access denied to this data source');
   }
 
   // Only clinic admins can see tokens
   if (!options?.includeToken || !(await isClinicAdmin(authContext, dataSource.clinicId))) {
     return {
       ...dataSource,
-      accessToken: "***",
-      refreshToken: dataSource.refreshToken ? "***" : null,
+      accessToken: '***',
+      refreshToken: dataSource.refreshToken ? '***' : null,
     };
   }
 
@@ -147,19 +147,19 @@ export async function createDataSource(authContext: AuthContext, input: CreateDa
   // Validate clinic access and admin role
   const hasAccess = await validateClinicAccess(authContext, input.clinicId);
   if (!hasAccess) {
-    throw new Error("Access denied to this clinic");
+    throw new Error('Access denied to this clinic');
   }
 
   const isAdmin = await isClinicAdmin(authContext, input.clinicId);
   if (!isAdmin) {
-    throw new Error("Only clinic administrators can create data sources");
+    throw new Error('Only clinic administrators can create data sources');
   }
 
   // Create the data source
   const dataSource = await prisma.dataSource.create({
     data: {
       ...input,
-      connectionStatus: "active",
+      connectionStatus: 'active',
     },
     include: {
       clinic: true,
@@ -168,8 +168,8 @@ export async function createDataSource(authContext: AuthContext, input: CreateDa
 
   return {
     ...dataSource,
-    accessToken: "***",
-    refreshToken: dataSource.refreshToken ? "***" : null,
+    accessToken: '***',
+    refreshToken: dataSource.refreshToken ? '***' : null,
   };
 }
 
@@ -187,18 +187,18 @@ export async function updateDataSource(
   });
 
   if (!dataSource) {
-    throw new Error("Data source not found");
+    throw new Error('Data source not found');
   }
 
   // Validate clinic access and admin role
   const hasAccess = await validateClinicAccess(authContext, dataSource.clinicId);
   if (!hasAccess) {
-    throw new Error("Access denied to this data source");
+    throw new Error('Access denied to this data source');
   }
 
   const isAdmin = await isClinicAdmin(authContext, dataSource.clinicId);
   if (!isAdmin) {
-    throw new Error("Only clinic administrators can update data sources");
+    throw new Error('Only clinic administrators can update data sources');
   }
 
   const updated = await prisma.dataSource.update({
@@ -216,8 +216,8 @@ export async function updateDataSource(
 
   return {
     ...updated,
-    accessToken: "***",
-    refreshToken: updated.refreshToken ? "***" : null,
+    accessToken: '***',
+    refreshToken: updated.refreshToken ? '***' : null,
   };
 }
 
@@ -231,18 +231,18 @@ export async function deleteDataSource(authContext: AuthContext, dataSourceId: s
   });
 
   if (!dataSource) {
-    throw new Error("Data source not found");
+    throw new Error('Data source not found');
   }
 
   // Validate clinic access and admin role
   const hasAccess = await validateClinicAccess(authContext, dataSource.clinicId);
   if (!hasAccess) {
-    throw new Error("Access denied to this data source");
+    throw new Error('Access denied to this data source');
   }
 
   const isAdmin = await isClinicAdmin(authContext, dataSource.clinicId);
   if (!isAdmin) {
-    throw new Error("Only clinic administrators can delete data sources");
+    throw new Error('Only clinic administrators can delete data sources');
   }
 
   // Delete cascades to column mappings
@@ -262,12 +262,12 @@ export async function getColumnMappings(authContext: AuthContext, dataSourceId: 
   });
 
   if (!dataSource) {
-    throw new Error("Data source not found");
+    throw new Error('Data source not found');
   }
 
   const hasAccess = await validateClinicAccess(authContext, dataSource.clinicId);
   if (!hasAccess) {
-    throw new Error("Access denied to this data source");
+    throw new Error('Access denied to this data source');
   }
 
   return prisma.columnMapping.findMany({
@@ -281,7 +281,7 @@ export async function getColumnMappings(authContext: AuthContext, dataSourceId: 
         },
       },
     },
-    orderBy: { createdAt: "desc" },
+    orderBy: { createdAt: 'desc' },
   });
 }
 
@@ -299,17 +299,17 @@ export async function createColumnMapping(
   });
 
   if (!dataSource) {
-    throw new Error("Data source not found");
+    throw new Error('Data source not found');
   }
 
   const hasAccess = await validateClinicAccess(authContext, dataSource.clinicId);
   if (!hasAccess) {
-    throw new Error("Access denied to this data source");
+    throw new Error('Access denied to this data source');
   }
 
   const isAdmin = await isClinicAdmin(authContext, dataSource.clinicId);
   if (!isAdmin) {
-    throw new Error("Only clinic administrators can create column mappings");
+    throw new Error('Only clinic administrators can create column mappings');
   }
 
   // Verify metric definition exists
@@ -317,7 +317,7 @@ export async function createColumnMapping(
     where: { id: input.metricDefinitionId },
   });
   if (!metricDef) {
-    throw new Error("Invalid metric definition");
+    throw new Error('Invalid metric definition');
   }
 
   return prisma.columnMapping.create({
@@ -356,17 +356,17 @@ export async function updateColumnMapping(
   });
 
   if (!mapping) {
-    throw new Error("Column mapping not found");
+    throw new Error('Column mapping not found');
   }
 
   const hasAccess = await validateClinicAccess(authContext, mapping.dataSource.clinicId);
   if (!hasAccess) {
-    throw new Error("Access denied to this column mapping");
+    throw new Error('Access denied to this column mapping');
   }
 
   const isAdmin = await isClinicAdmin(authContext, mapping.dataSource.clinicId);
   if (!isAdmin) {
-    throw new Error("Only clinic administrators can update column mappings");
+    throw new Error('Only clinic administrators can update column mappings');
   }
 
   return prisma.columnMapping.update({
@@ -399,17 +399,17 @@ export async function deleteColumnMapping(authContext: AuthContext, mappingId: s
   });
 
   if (!mapping) {
-    throw new Error("Column mapping not found");
+    throw new Error('Column mapping not found');
   }
 
   const hasAccess = await validateClinicAccess(authContext, mapping.dataSource.clinicId);
   if (!hasAccess) {
-    throw new Error("Access denied to this column mapping");
+    throw new Error('Access denied to this column mapping');
   }
 
   const isAdmin = await isClinicAdmin(authContext, mapping.dataSource.clinicId);
   if (!isAdmin) {
-    throw new Error("Only clinic administrators can delete column mappings");
+    throw new Error('Only clinic administrators can delete column mappings');
   }
 
   return prisma.columnMapping.delete({
@@ -436,17 +436,17 @@ export async function getDataSourceSyncHistory(
   });
 
   if (!dataSource) {
-    throw new Error("Data source not found");
+    throw new Error('Data source not found');
   }
 
   const hasAccess = await validateClinicAccess(authContext, dataSource.clinicId);
   if (!hasAccess) {
-    throw new Error("Access denied to this data source");
+    throw new Error('Access denied to this data source');
   }
 
   const where: Prisma.MetricValueWhereInput = {
     dataSourceId,
-    sourceType: "spreadsheet",
+    sourceType: 'spreadsheet',
   };
 
   if (options?.startDate && options?.endDate) {
@@ -469,7 +469,7 @@ export async function getDataSourceSyncHistory(
         },
       },
     },
-    orderBy: { createdAt: "desc" },
+    orderBy: { createdAt: 'desc' },
     take: options?.limit || 100,
   });
 }
@@ -492,13 +492,13 @@ export async function updateDataSourceTokens(
   });
 
   if (!dataSource) {
-    throw new Error("Data source not found");
+    throw new Error('Data source not found');
   }
 
   // Only clinic admins can update tokens
   const isAdmin = await isClinicAdmin(authContext, dataSource.clinicId);
   if (!isAdmin) {
-    throw new Error("Only clinic administrators can update tokens");
+    throw new Error('Only clinic administrators can update tokens');
   }
 
   return prisma.dataSource.update({
@@ -507,7 +507,7 @@ export async function updateDataSourceTokens(
       accessToken: tokens.accessToken,
       refreshToken: tokens.refreshToken || dataSource.refreshToken,
       expiryDate: tokens.expiryDate,
-      connectionStatus: "active",
+      connectionStatus: 'active',
       updatedAt: new Date(),
     },
   });

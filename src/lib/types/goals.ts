@@ -1,4 +1,4 @@
-import { z } from "zod";
+import { z } from 'zod';
 
 // Schema for goal update, used for API input validation
 export const updateGoalSchema = z
@@ -7,16 +7,16 @@ export const updateGoalSchema = z
     description: z.string().optional(),
     targetValue: z.coerce
       .string()
-      .regex(/^(?:0|[1-9]\d*)(?:\.\d+)?$/, "Must be a valid positive decimal number")
+      .regex(/^(?:0|[1-9]\d*)(?:\.\d+)?$/, 'Must be a valid positive decimal number')
       .optional(),
     currentValue: z.coerce
       .string()
-      .regex(/^(?:0|[1-9]\d*)(?:\.\d+)?$/, "Must be a valid non-negative decimal number")
+      .regex(/^(?:0|[1-9]\d*)(?:\.\d+)?$/, 'Must be a valid non-negative decimal number')
       .optional(),
     targetDate: z.string().datetime().optional(), // Represents endDate in Prisma model
-    frequency: z.enum(["daily", "weekly", "monthly", "quarterly", "yearly"]).optional(), // Represents timePeriod in Prisma
+    frequency: z.enum(['daily', 'weekly', 'monthly', 'quarterly', 'yearly']).optional(), // Represents timePeriod in Prisma
     category: z.string().optional(),
-    status: z.enum(["active", "paused", "completed", "cancelled"]).optional(),
+    status: z.enum(['active', 'paused', 'completed', 'cancelled']).optional(),
     metricId: z.string().uuid().optional(), // Represents metricDefinitionId in Prisma
   })
   .strict();
@@ -34,7 +34,7 @@ export interface UpdateGoalQueryInput {
   endDate?: Date | string; // Prisma DateTime for what Zod calls targetDate
   timePeriod?: string; // For what Zod calls frequency
   category?: string;
-  status?: "active" | "paused" | "completed" | "cancelled";
+  status?: 'active' | 'paused' | 'completed' | 'cancelled';
   metricDefinitionId?: string; // For what Zod calls metricId
 }
 

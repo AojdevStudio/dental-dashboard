@@ -1,8 +1,8 @@
-import { ApiError, ApiResponse } from "@/lib/api/utils";
-import { prisma } from "@/lib/database/client";
-import { upsertHygieneProduction } from "@/lib/database/queries/hygiene-production";
-import type { NextRequest } from "next/server";
-import { z } from "zod";
+import { ApiError, ApiResponse } from '@/lib/api/utils';
+import { prisma } from '@/lib/database/client';
+import { upsertHygieneProduction } from '@/lib/database/queries/hygiene-production';
+import type { NextRequest } from 'next/server';
+import { z } from 'zod';
 
 // Schema for hygiene production sync data
 const hygieneProductionSyncSchema = z.object({
@@ -38,7 +38,7 @@ export async function POST(request: NextRequest) {
     // In a real implementation, you might want to use a proper API key or JWT
     const expectedKey = process.env.SUPABASE_ANON_KEY;
     if (!expectedKey || supabase_key !== expectedKey) {
-      throw new ApiError("Unauthorized", 401);
+      throw new ApiError('Unauthorized', 401);
     }
 
     // Group records by clinic for processing
@@ -73,9 +73,9 @@ export async function POST(request: NextRequest) {
 
         // Create a minimal auth context for the clinic
         const authContext = {
-          user: { id: "system", email: "system@sync" },
+          user: { id: 'system', email: 'system@sync' },
           clinicIds: [clinicId],
-          roles: { [clinicId]: "system" },
+          roles: { [clinicId]: 'system' },
         };
 
         // Transform records to match the expected format
@@ -109,7 +109,7 @@ export async function POST(request: NextRequest) {
         console.error(`Error processing clinic ${clinicId}:`, error);
         errors.push({
           clinicId,
-          error: error instanceof Error ? error.message : "Unknown error",
+          error: error instanceof Error ? error.message : 'Unknown error',
           recordCount: clinicRecords.length,
         });
       }
@@ -124,7 +124,7 @@ export async function POST(request: NextRequest) {
       syncedAt: new Date().toISOString(),
     });
   } catch (error) {
-    console.error("Hygiene production sync error:", error);
+    console.error('Hygiene production sync error:', error);
 
     if (error instanceof z.ZodError) {
       throw new ApiError(`Validation error: ${error.message}`, 400);
@@ -134,7 +134,7 @@ export async function POST(request: NextRequest) {
       throw error;
     }
 
-    throw new ApiError("Internal server error during sync", 500);
+    throw new ApiError('Internal server error during sync', 500);
   }
 }
 

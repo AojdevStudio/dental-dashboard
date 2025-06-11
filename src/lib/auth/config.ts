@@ -9,7 +9,7 @@
  * authentication state management in the browser context.
  */
 
-import { createBrowserClient } from "@supabase/ssr";
+import { createBrowserClient } from '@supabase/ssr';
 
 /**
  * Creates a Supabase client for browser environments
@@ -35,7 +35,7 @@ export function createClient() {
   const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
   if (!supabaseUrl || !supabaseAnonKey) {
-    throw new Error("Missing Supabase environment variables");
+    throw new Error('Missing Supabase environment variables');
   }
 
   return createBrowserClient(supabaseUrl, supabaseAnonKey);

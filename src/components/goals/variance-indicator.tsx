@@ -6,11 +6,10 @@
  * a goal is ahead, behind, or on track with its expected progress.
  */
 
-"use client";
+'use client';
 
-import { cn } from "@/lib/utils";
-import { ArrowDown, ArrowUp, Minus } from "lucide-react";
-import * as React from "react";
+import { cn } from '@/lib/utils';
+import { ArrowDown, ArrowUp, Minus } from 'lucide-react';
 
 /**
  * Interface for VarianceIndicator component properties
@@ -44,7 +43,7 @@ interface VarianceIndicatorProps {
  */
 export function VarianceIndicator({
   variance,
-  label = "Variance",
+  label = 'Variance',
   showIcon = true,
   inverseColors = false,
   className,
@@ -55,33 +54,33 @@ export function VarianceIndicator({
   const isNeutral = variance === 0;
 
   // Format variance as a percentage string
-  const formattedVariance = `${isPositive ? "+" : ""}${variance}%`;
+  const formattedVariance = `${isPositive ? '+' : ''}${variance}%`;
 
   // Determine text color based on variance direction and inverseColors setting
   const getTextColorClass = () => {
-    if (isNeutral) return "text-muted-foreground";
+    if (isNeutral) return 'text-muted-foreground';
 
     // If inverseColors is true, negative variance is good (green) and positive is bad (red)
     if (inverseColors) {
-      return isNegative ? "text-green-600" : "text-red-600";
+      return isNegative ? 'text-green-600' : 'text-red-600';
     }
-    return isPositive ? "text-green-600" : "text-red-600";
+    return isPositive ? 'text-green-600' : 'text-red-600';
   };
 
   // Get the appropriate icon based on variance direction
   const Icon = () => {
-    if (isNeutral) return <Minus className="h-3 w-3" />;
-    if (isPositive) return <ArrowUp className="h-3 w-3" />;
-    return <ArrowDown className="h-3 w-3" />;
+    if (isNeutral) return <Minus class="h-3 w-3" />;
+    if (isPositive) return <ArrowUp class="h-3 w-3" />;
+    return <ArrowDown class="h-3 w-3" />;
   };
 
   return (
-    <div className={cn("flex items-center text-sm", className)}>
-      {label && <span className="text-muted-foreground mr-2">{label}:</span>}
+    <div class={cn('flex items-center text-sm', className)}>
+      {label && <span class="text-muted-foreground mr-2">{label}:</span>}
 
-      <div className={cn("flex items-center font-medium", getTextColorClass())}>
+      <div class={cn('flex items-center font-medium', getTextColorClass())}>
         {showIcon && (
-          <span className="mr-1">
+          <span class="mr-1">
             <Icon />
           </span>
         )}

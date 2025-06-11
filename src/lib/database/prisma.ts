@@ -9,7 +9,7 @@
  * using global object caching in development and creating a fresh instance in production.
  */
 
-import { PrismaClient } from "@prisma/client";
+import { PrismaClient } from '@prisma/client';
 
 /**
  * Type extension for the global object to store the Prisma client instance
@@ -45,6 +45,6 @@ export const prisma = globalForPrisma.prisma ?? new PrismaClient();
  * This is not necessary in production where the application typically
  * has a more stable lifecycle without hot reloading.
  */
-if (process.env.NODE_ENV !== "production") {
+if (process.env.NODE_ENV !== 'production') {
   globalForPrisma.prisma = prisma;
 }

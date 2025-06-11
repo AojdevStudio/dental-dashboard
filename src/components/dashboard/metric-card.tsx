@@ -5,13 +5,13 @@
  * key performance indicators and metrics in the dashboard interface.
  */
 
-"use client";
+'use client';
 
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Skeleton } from "@/components/ui/skeleton";
-import { cn } from "@/lib/utils";
-import { ArrowDown, ArrowUp, Minus } from "lucide-react";
-import type * as React from "react";
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Skeleton } from '@/components/ui/skeleton';
+import { cn } from '@/lib/utils';
+import { ArrowDown, ArrowUp, Minus } from 'lucide-react';
+import type * as React from 'react';
 
 /**
  * Interface for MetricCard component properties
@@ -32,7 +32,7 @@ interface MetricCardProps {
   changePercent?: number;
   isLoading?: boolean;
   icon?: React.ReactNode;
-  changeDirection?: "increase" | "decrease" | "neutral";
+  changeDirection?: 'increase' | 'decrease' | 'neutral';
   inverseColor?: boolean;
 }
 
@@ -65,28 +65,28 @@ export function MetricCard({
     changeDirection ||
     (changePercent
       ? changePercent > 0
-        ? "increase"
+        ? 'increase'
         : changePercent < 0
-          ? "decrease"
-          : "neutral"
-      : "neutral");
+          ? 'decrease'
+          : 'neutral'
+      : 'neutral');
 
   // Determine if the change is positive based on direction and inverseColor
-  const isPositive = inverseColor ? direction === "decrease" : direction === "increase";
+  const isPositive = inverseColor ? direction === 'decrease' : direction === 'increase';
 
   // Determine if the change is negative based on direction and inverseColor
-  const isNegative = inverseColor ? direction === "increase" : direction === "decrease";
+  const isNegative = inverseColor ? direction === 'increase' : direction === 'decrease';
 
   // Only show loading state if isLoading is true
   if (isLoading) {
     return (
       <Card>
-        <CardHeader className="pb-2">
-          <Skeleton className="h-4 w-32" />
+        <CardHeader class="pb-2">
+          <Skeleton class="h-4 w-32" />
         </CardHeader>
         <CardContent>
-          <Skeleton className="h-10 w-20 mb-2" />
-          <Skeleton className="h-4 w-40" />
+          <Skeleton class="h-10 w-20 mb-2" />
+          <Skeleton class="h-4 w-40" />
         </CardContent>
       </Card>
     );
@@ -94,33 +94,33 @@ export function MetricCard({
 
   return (
     <Card>
-      <CardHeader className="pb-2">
-        <CardTitle className="text-sm font-medium text-muted-foreground flex items-center">
-          {icon && <span className="mr-2">{icon}</span>}
+      <CardHeader class="pb-2">
+        <CardTitle class="text-sm font-medium text-muted-foreground flex items-center">
+          {icon && <span class="mr-2">{icon}</span>}
           {title}
         </CardTitle>
       </CardHeader>
       <CardContent>
-        <div className="text-2xl font-bold">{value}</div>
+        <div class="text-2xl font-bold">{value}</div>
 
         {/* Description and change percentage */}
-        <div className="flex items-center mt-1">
+        <div class="flex items-center mt-1">
           {changePercent !== undefined && (
             <div
-              className={cn(
-                "text-xs font-medium mr-2 flex items-center",
-                isPositive && "text-green-500",
-                isNegative && "text-red-500"
+              class={cn(
+                'text-xs font-medium mr-2 flex items-center',
+                isPositive && 'text-green-500',
+                isNegative && 'text-red-500'
               )}
             >
-              {direction === "increase" && <ArrowUp className="mr-1 h-3 w-3" />}
-              {direction === "decrease" && <ArrowDown className="mr-1 h-3 w-3" />}
-              {direction === "neutral" && <Minus className="mr-1 h-3 w-3" />}
+              {direction === 'increase' && <ArrowUp class="mr-1 h-3 w-3" />}
+              {direction === 'decrease' && <ArrowDown class="mr-1 h-3 w-3" />}
+              {direction === 'neutral' && <Minus class="mr-1 h-3 w-3" />}
               {Math.abs(changePercent)}%
             </div>
           )}
 
-          {description && <p className="text-xs text-muted-foreground">{description}</p>}
+          {description && <p class="text-xs text-muted-foreground">{description}</p>}
         </div>
       </CardContent>
     </Card>

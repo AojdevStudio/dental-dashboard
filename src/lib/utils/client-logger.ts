@@ -10,7 +10,7 @@
 /**
  * Log levels for client-side logging
  */
-type LogLevel = "error" | "warn" | "info" | "debug";
+type LogLevel = 'error' | 'warn' | 'info' | 'debug';
 
 /**
  * Metadata object for structured logging
@@ -34,7 +34,7 @@ interface ClientLogger {
  */
 const formatMetadata = (metadata?: LogMetadata): string => {
   if (!metadata || Object.keys(metadata).length === 0) {
-    return "";
+    return '';
   }
 
   try {
@@ -66,10 +66,10 @@ const createLogFunction = (level: LogLevel, consoleMethod: (...args: unknown[]) 
  * production console logs.
  */
 const clientLogger: ClientLogger = {
-  error: createLogFunction("error", console.error),
-  warn: createLogFunction("warn", console.warn),
-  info: createLogFunction("info", console.info),
-  debug: createLogFunction("debug", console.debug),
+  error: createLogFunction('error', console.error),
+  warn: createLogFunction('warn', console.warn),
+  info: createLogFunction('info', console.info),
+  debug: createLogFunction('debug', console.debug),
 };
 
 /**
@@ -77,7 +77,7 @@ const clientLogger: ClientLogger = {
  * In production, all log methods are no-ops to avoid console clutter
  */
 const logger: ClientLogger =
-  process.env.NODE_ENV === "development"
+  process.env.NODE_ENV === 'development'
     ? clientLogger
     : {
         error: () => {},

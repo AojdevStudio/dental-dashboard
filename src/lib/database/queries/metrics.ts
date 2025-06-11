@@ -3,10 +3,10 @@
  * Multi-tenant aware metrics operations
  */
 
-import type { Prisma } from "@prisma/client";
-import { type AuthContext, getUserClinicRole, validateClinicAccess } from "../auth-context";
-import { prisma } from "../client";
-import { buildClinicWhereClause } from "./utils";
+import type { Prisma } from '@prisma/client';
+import { type AuthContext, getUserClinicRole, validateClinicAccess } from '../auth-context';
+import { prisma } from '../client';
+import { buildClinicWhereClause } from './utils';
 
 export interface CreateMetricInput {
   metricDefinitionId: string;
@@ -58,7 +58,7 @@ export async function getMetricDefinitions(
 
   return prisma.metricDefinition.findMany({
     where,
-    orderBy: [{ category: "asc" }, { name: "asc" }],
+    orderBy: [{ category: 'asc' }, { name: 'asc' }],
   });
 }
 
@@ -71,8 +71,8 @@ export async function getMetrics(
   options?: {
     limit?: number;
     offset?: number;
-    orderBy?: "date" | "value" | "createdAt";
-    orderDir?: "asc" | "desc";
+    orderBy?: 'date' | 'value' | 'createdAt';
+    orderDir?: 'asc' | 'desc';
   }
 ) {
   // Build where clause with clinic access validation
@@ -99,8 +99,8 @@ export async function getMetrics(
 
   // Determine order by
   const orderBy: Prisma.MetricValueOrderByWithRelationInput = {};
-  const orderField = options?.orderBy || "date";
-  const orderDirection = options?.orderDir || "desc";
+  const orderField = options?.orderBy || 'date';
+  const orderDirection = options?.orderDir || 'desc';
   orderBy[orderField] = orderDirection;
 
   const [metrics, total] = await Promise.all([
@@ -131,7 +131,7 @@ export async function getAggregatedMetrics(
   options: {
     metricDefinitionId?: string;
     providerId?: string;
-    aggregationType: "daily" | "weekly" | "monthly" | "quarterly" | "yearly";
+    aggregationType: 'daily' | 'weekly' | 'monthly' | 'quarterly' | 'yearly';
     dateRange: { start: Date; end: Date };
   }
 ) {
@@ -157,7 +157,7 @@ export async function getAggregatedMetrics(
       metricDefinition: true,
       provider: true,
     },
-    orderBy: { periodStart: "asc" },
+    orderBy: { periodStart: 'asc' },
   });
 
   // If no pre-computed aggregations, compute on the fly
@@ -175,13 +175,13 @@ export async function createMetric(authContext: AuthContext, input: CreateMetric
   // Validate clinic access
   const hasAccess = await validateClinicAccess(authContext, input.clinicId);
   if (!hasAccess) {
-    throw new Error("Access denied to this clinic");
+    throw new Error('Access denied to this clinic');
   }
 
   // Check user role - staff, provider, or admin can create metrics
   const userRole = await getUserClinicRole(authContext, input.clinicId);
-  if (!userRole || userRole === "viewer") {
-    throw new Error("Insufficient permissions to create metrics");
+  if (!userRole || userRole === 'viewer') {
+    throw new Error('Insufficient permissions to create metrics');
   }
 
   // Validate metric definition exists
@@ -189,7 +189,7 @@ export async function createMetric(authContext: AuthContext, input: CreateMetric
     where: { id: input.metricDefinitionId },
   });
   if (!metricDef) {
-    throw new Error("Invalid metric definition");
+    throw new Error('Invalid metric definition');
   }
 
   // Create the metric
@@ -226,20 +226,20 @@ export async function updateMetric(
   });
 
   if (!metric) {
-    throw new Error("Metric not found");
+    throw new Error('Metric not found');
   }
 
   // Validate clinic access
   if (metric.clinicId) {
     const hasAccess = await validateClinicAccess(authContext, metric.clinicId);
     if (!hasAccess) {
-      throw new Error("Access denied to this metric");
+      throw new Error('Access denied to this metric');
     }
 
     // Check user role
     const userRole = await getUserClinicRole(authContext, metric.clinicId);
-    if (!userRole || userRole === "viewer") {
-      throw new Error("Insufficient permissions to update metrics");
+    if (!userRole || userRole === 'viewer') {
+      throw new Error('Insufficient permissions to update metrics');
     }
   }
 
@@ -264,19 +264,19 @@ export async function deleteMetric(authContext: AuthContext, metricId: string) {
   });
 
   if (!metric) {
-    throw new Error("Metric not found");
+    throw new Error('Metric not found');
   }
 
   // Validate clinic access and admin role
   if (metric.clinicId) {
     const hasAccess = await validateClinicAccess(authContext, metric.clinicId);
     if (!hasAccess) {
-      throw new Error("Access denied to this metric");
+      throw new Error('Access denied to this metric');
     }
 
     const userRole = await getUserClinicRole(authContext, metric.clinicId);
-    if (userRole !== "clinic_admin") {
-      throw new Error("Only clinic administrators can delete metrics");
+    if (userRole !== 'clinic_admin') {
+      throw new Error('Only clinic administrators can delete metrics');
     }
   }
 
@@ -300,7 +300,7 @@ export async function getMetricStatistics(
   // Validate clinic access
   const hasAccess = await validateClinicAccess(authContext, clinicId);
   if (!hasAccess) {
-    throw new Error("Access denied to this clinic");
+    throw new Error('Access denied to this clinic');
   }
 
   const where: Prisma.MetricValueWhereInput = {
@@ -325,7 +325,7 @@ export async function getMetricStatistics(
       value: true,
       date: true,
     },
-    orderBy: { date: "asc" },
+    orderBy: { date: 'asc' },
   });
 
   if (metrics.length === 0) {
@@ -369,7 +369,7 @@ async function computeAggregations(
   options: {
     metricDefinitionId?: string;
     providerId?: string;
-    aggregationType: "daily" | "weekly" | "monthly" | "quarterly" | "yearly";
+    aggregationType: 'daily' | 'weekly' | 'monthly' | 'quarterly' | 'yearly';
     dateRange: { start: Date; end: Date };
   }
 ) {
@@ -393,7 +393,7 @@ async function computeAggregations(
     include: {
       metricDefinition: true,
     },
-    orderBy: { date: "asc" },
+    orderBy: { date: 'asc' },
   });
 
   // Group metrics by period
@@ -441,22 +441,22 @@ function getPeriodKey(date: Date, aggregationType: string): string {
   const day = date.getDate();
 
   switch (aggregationType) {
-    case "daily":
-      return `${year}-${String(month + 1).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
-    case "weekly": {
+    case 'daily':
+      return `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+    case 'weekly': {
       const weekStart = new Date(date);
       weekStart.setDate(date.getDate() - date.getDay());
-      return weekStart.toISOString().split("T")[0];
+      return weekStart.toISOString().split('T')[0];
     }
-    case "monthly":
-      return `${year}-${String(month + 1).padStart(2, "0")}-01`;
-    case "quarterly": {
+    case 'monthly':
+      return `${year}-${String(month + 1).padStart(2, '0')}-01`;
+    case 'quarterly': {
       const quarter = Math.floor(month / 3);
-      return `${year}-${String(quarter * 3 + 1).padStart(2, "0")}-01`;
+      return `${year}-${String(quarter * 3 + 1).padStart(2, '0')}-01`;
     }
-    case "yearly":
+    case 'yearly':
       return `${year}-01-01`;
     default:
-      return date.toISOString().split("T")[0];
+      return date.toISOString().split('T')[0];
   }
 }

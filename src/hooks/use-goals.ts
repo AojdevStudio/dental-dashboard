@@ -1,6 +1,6 @@
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useAuth } from "./use-auth";
-import { useClinics } from "./use-clinics";
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useAuth } from './use-auth';
+import { useClinics } from './use-clinics';
 
 /**
  * Goal type
@@ -11,10 +11,10 @@ interface Goal {
   metricId: string;
   targetValue: number;
   targetDate: string;
-  frequency: "daily" | "weekly" | "monthly" | "quarterly";
+  frequency: 'daily' | 'weekly' | 'monthly' | 'quarterly';
   clinicId: string;
   providerId?: string;
-  status: "active" | "completed" | "cancelled";
+  status: 'active' | 'completed' | 'cancelled';
   createdAt: string;
   updatedAt: string;
 }
@@ -28,7 +28,7 @@ interface GoalProgress {
   targetValue: number;
   percentageComplete: number;
   daysRemaining: number;
-  trend: "up" | "down" | "stable";
+  trend: 'up' | 'down' | 'stable';
 }
 
 /**
@@ -49,8 +49,8 @@ export function useGoals() {
   const queryClient = useQueryClient();
 
   // Query keys
-  const goalsQueryKey = ["goals", selectedClinicId];
-  const progressQueryKey = ["goals", "progress", selectedClinicId];
+  const goalsQueryKey = ['goals', selectedClinicId];
+  const progressQueryKey = ['goals', 'progress', selectedClinicId];
 
   /**
    * Fetch goals from the API
@@ -58,12 +58,12 @@ export function useGoals() {
   const fetchGoals = async (): Promise<Goal[]> => {
     const params = new URLSearchParams();
 
-    if (selectedClinicId) params.append("clinicId", selectedClinicId);
+    if (selectedClinicId) params.append('clinicId', selectedClinicId);
 
     const response = await fetch(`/api/goals?${params.toString()}`);
 
     if (!response.ok) {
-      throw new Error("Failed to fetch goals");
+      throw new Error('Failed to fetch goals');
     }
 
     const data = await response.json();
@@ -76,12 +76,12 @@ export function useGoals() {
   const fetchGoalProgress = async (): Promise<GoalProgress[]> => {
     const params = new URLSearchParams();
 
-    if (selectedClinicId) params.append("clinicId", selectedClinicId);
+    if (selectedClinicId) params.append('clinicId', selectedClinicId);
 
     const response = await fetch(`/api/goals/progress?${params.toString()}`);
 
     if (!response.ok) {
-      throw new Error("Failed to fetch goal progress");
+      throw new Error('Failed to fetch goal progress');
     }
 
     const data = await response.json();
@@ -114,11 +114,11 @@ export function useGoals() {
    * Create a new goal
    */
   const createGoalMutation = useMutation({
-    mutationFn: async (goalData: Omit<Goal, "id" | "createdAt" | "updatedAt" | "status">) => {
-      const response = await fetch("/api/goals", {
-        method: "POST",
+    mutationFn: async (goalData: Omit<Goal, 'id' | 'createdAt' | 'updatedAt' | 'status'>) => {
+      const response = await fetch('/api/goals', {
+        method: 'POST',
         headers: {
-          "Content-Type": "application/json",
+          'Content-Type': 'application/json',
         },
         body: JSON.stringify({
           ...goalData,
@@ -128,7 +128,7 @@ export function useGoals() {
 
       if (!response.ok) {
         const error = await response.json();
-        throw new Error(error.message || "Failed to create goal");
+        throw new Error(error.message || 'Failed to create goal');
       }
 
       return response.json();
@@ -146,16 +146,16 @@ export function useGoals() {
   const updateGoalMutation = useMutation({
     mutationFn: async ({ goalId, data }: { goalId: string; data: Partial<Goal> }) => {
       const response = await fetch(`/api/goals/${goalId}`, {
-        method: "PATCH",
+        method: 'PATCH',
         headers: {
-          "Content-Type": "application/json",
+          'Content-Type': 'application/json',
         },
         body: JSON.stringify(data),
       });
 
       if (!response.ok) {
         const error = await response.json();
-        throw new Error(error.message || "Failed to update goal");
+        throw new Error(error.message || 'Failed to update goal');
       }
 
       return response.json();
@@ -196,12 +196,12 @@ export function useGoals() {
   const deleteGoalMutation = useMutation({
     mutationFn: async (goalId: string) => {
       const response = await fetch(`/api/goals/${goalId}`, {
-        method: "DELETE",
+        method: 'DELETE',
       });
 
       if (!response.ok) {
         const error = await response.json();
-        throw new Error(error.message || "Failed to delete goal");
+        throw new Error(error.message || 'Failed to delete goal');
       }
 
       return response.json();

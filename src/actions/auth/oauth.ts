@@ -1,6 +1,6 @@
-"use server";
+'use server';
 
-import { createClient } from "@/lib/auth/session";
+import { createClient } from '@/lib/auth/session';
 
 /**
  * Supported OAuth providers for authentication.
@@ -8,7 +8,7 @@ import { createClient } from "@/lib/auth/session";
  *
  * @typedef {('google'|'github'|'azure')} Provider
  */
-export type Provider = "google" | "github" | "azure";
+export type Provider = 'google' | 'github' | 'azure';
 
 /**
  * Initiates OAuth authentication flow with the specified provider.
@@ -25,7 +25,7 @@ export async function signInWithOAuth(provider: Provider) {
   const { data, error } = await supabase.auth.signInWithOAuth({
     provider,
     options: {
-      redirectTo: `${process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000"}/callback`,
+      redirectTo: `${process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'}/callback`,
     },
   });
 

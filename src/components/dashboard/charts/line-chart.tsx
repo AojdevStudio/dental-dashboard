@@ -1,10 +1,9 @@
-"use client";
+'use client';
 
-import type { ChartConfig } from "@/lib/types/charts";
-import { formatCurrency, formatDate, formatNumber, truncateLabel } from "@/lib/utils/chart-helpers";
-import { chartTheme, getChartColors } from "@/lib/utils/color-schemes";
-import { getResponsiveMargin, isMobile, useBreakpoint } from "@/lib/utils/responsive-helpers";
-import { useEffect, useRef } from "react";
+import type { ChartConfig } from '@/lib/types/charts';
+import { formatDate, formatNumber, truncateLabel } from '@/lib/utils/chart-helpers';
+import { chartTheme, getChartColors } from '@/lib/utils/color-schemes';
+import { getResponsiveMargin, isMobile, useBreakpoint } from '@/lib/utils/responsive-helpers';
 import {
   CartesianGrid,
   Legend,
@@ -14,8 +13,8 @@ import {
   Tooltip,
   XAxis,
   YAxis,
-} from "recharts";
-import { ChartContainer } from "../chart-container";
+} from 'recharts';
+import { ChartContainer } from '../chart-container';
 
 interface LineChartProps {
   config: ChartConfig;
@@ -44,7 +43,7 @@ export function LineChart({
   const mobile = isMobile(breakpoint);
   const margin = getResponsiveMargin(breakpoint);
 
-  const colors = getChartColors("dental", config.series?.length || 1);
+  const colors = getChartColors('dental', config.series?.length || 1);
 
   const defaultConfig: ChartConfig = {
     ...config,
@@ -73,7 +72,7 @@ export function LineChart({
     return (
       <div style={chartTheme.tooltip.container}>
         <p style={chartTheme.tooltip.label}>
-          {config.xAxisKey === "date" ? formatDate(label) : label}
+          {config.xAxisKey === 'date' ? formatDate(label) : label}
         </p>
         {payload.map((entry, index: number) => (
           <p key={index} style={{ ...chartTheme.tooltip.value, color: entry.color }}>
@@ -91,7 +90,7 @@ export function LineChart({
       config={defaultConfig}
       loading={loading}
       error={error}
-      className={className}
+      class={className}
     >
       <ResponsiveContainer width="100%" height={defaultConfig.height}>
         <RechartsLineChart
@@ -116,16 +115,16 @@ export function LineChart({
           )}
 
           <XAxis
-            dataKey={config.xAxisKey || "name"}
+            dataKey={config.xAxisKey || 'name'}
             tick={{ ...chartTheme.axis.style }}
             tickFormatter={(value) => {
-              if (config.xAxisKey === "date") {
-                return formatDate(value, mobile ? "MMM" : "MMM dd");
+              if (config.xAxisKey === 'date') {
+                return formatDate(value, mobile ? 'MMM' : 'MMM dd');
               }
               return truncateLabel(value, mobile ? 10 : 20);
             }}
             angle={mobile ? -45 : 0}
-            textAnchor={mobile ? "end" : "middle"}
+            textAnchor={mobile ? 'end' : 'middle'}
             height={mobile ? 60 : 30}
           />
 
@@ -144,7 +143,7 @@ export function LineChart({
           {config.series?.map((series, index) => (
             <Line
               key={series.dataKey}
-              type={series.type || "monotone"}
+              type={series.type || 'monotone'}
               dataKey={series.dataKey}
               name={series.name}
               stroke={series.color || colors[index]}

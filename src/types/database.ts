@@ -17,10 +17,10 @@
  */
 export enum ClinicStatus {
   /** Clinic is fully operational and accepting patients */
-  ACTIVE = "active",
+  ACTIVE = 'active',
 
   /** Clinic is not currently operational */
-  INACTIVE = "inactive",
+  INACTIVE = 'inactive',
 }
 
 /**
@@ -33,10 +33,10 @@ export enum ClinicStatus {
  */
 export enum ProviderStatus {
   /** Provider is currently working and accepting patients */
-  ACTIVE = "active",
+  ACTIVE = 'active',
 
   /** Provider is not currently working */
-  INACTIVE = "inactive",
+  INACTIVE = 'inactive',
 }
 
 /**
@@ -48,13 +48,13 @@ export enum ProviderStatus {
  */
 export enum ProviderType {
   /** General dentist */
-  DENTIST = "dentist",
+  DENTIST = 'dentist',
 
   /** Dental hygienist */
-  HYGIENIST = "hygienist",
+  HYGIENIST = 'hygienist',
 
   /** Specialized dental professional */
-  SPECIALIST = "specialist",
+  SPECIALIST = 'specialist',
 }
 
 /**
@@ -66,16 +66,16 @@ export enum ProviderType {
  */
 export enum UserRole {
   /** Clinic administrator with full access */
-  ADMIN = "admin",
+  ADMIN = 'admin',
 
   /** Dentist with clinical access */
-  DENTIST = "dentist",
+  DENTIST = 'dentist',
 
   /** Front desk staff with limited access */
-  FRONT_DESK = "front_desk",
+  FRONT_DESK = 'front_desk',
 
   /** Office manager with administrative access */
-  OFFICE_MANAGER = "office_manager",
+  OFFICE_MANAGER = 'office_manager',
 }
 
 /**
@@ -87,16 +87,16 @@ export enum UserRole {
  */
 export enum MetricDataType {
   /** Monetary values */
-  CURRENCY = "currency",
+  CURRENCY = 'currency',
 
   /** Percentage values */
-  PERCENTAGE = "percentage",
+  PERCENTAGE = 'percentage',
 
   /** Whole number values */
-  INTEGER = "integer",
+  INTEGER = 'integer',
 
   /** Date values */
-  DATE = "date",
+  DATE = 'date',
 }
 
 /**
@@ -108,19 +108,19 @@ export enum MetricDataType {
  */
 export enum MetricCategory {
   /** Financial metrics like revenue and expenses */
-  FINANCIAL = "financial",
+  FINANCIAL = 'financial',
 
   /** Patient-related metrics like new patients or recalls */
-  PATIENT = "patient",
+  PATIENT = 'patient',
 
   /** Appointment-related metrics like scheduling rate or no-shows */
-  APPOINTMENT = "appointment",
+  APPOINTMENT = 'appointment',
 
   /** Provider-specific metrics like productivity */
-  PROVIDER = "provider",
+  PROVIDER = 'provider',
 
   /** Treatment-related metrics like procedure counts */
-  TREATMENT = "treatment",
+  TREATMENT = 'treatment',
 }
 
 /**
@@ -132,22 +132,22 @@ export enum MetricCategory {
  */
 export enum TimePeriod {
   /** Daily data points */
-  DAILY = "daily",
+  DAILY = 'daily',
 
   /** Weekly data aggregation */
-  WEEKLY = "weekly",
+  WEEKLY = 'weekly',
 
   /** Monthly data aggregation */
-  MONTHLY = "monthly",
+  MONTHLY = 'monthly',
 
   /** Quarterly data aggregation */
-  QUARTERLY = "quarterly",
+  QUARTERLY = 'quarterly',
 
   /** Annual data aggregation */
-  ANNUAL = "annual",
+  ANNUAL = 'annual',
 
   /** Custom date range */
-  CUSTOM = "custom",
+  CUSTOM = 'custom',
 }
 
 /**
@@ -159,13 +159,13 @@ export enum TimePeriod {
  */
 export enum WidgetType {
   /** Graph or chart visualization */
-  CHART = "chart",
+  CHART = 'chart',
 
   /** Single numeric value display */
-  COUNTER = "counter",
+  COUNTER = 'counter',
 
   /** Tabular data display */
-  TABLE = "table",
+  TABLE = 'table',
 }
 
 /**
@@ -177,19 +177,19 @@ export enum WidgetType {
  */
 export enum ChartType {
   /** Line chart for time series data */
-  LINE = "line",
+  LINE = 'line',
 
   /** Bar chart for category comparisons */
-  BAR = "bar",
+  BAR = 'bar',
 
   /** Pie chart for proportional data */
-  PIE = "pie",
+  PIE = 'pie',
 
   /** Area chart for cumulative data */
-  AREA = "area",
+  AREA = 'area',
 
   /** Scatter plot for correlation data */
-  SCATTER = "scatter",
+  SCATTER = 'scatter',
 }
 
 /**
@@ -201,19 +201,19 @@ export enum ChartType {
  */
 export enum SyncFrequency {
   /** Sync hourly */
-  HOURLY = "hourly",
+  HOURLY = 'hourly',
 
   /** Sync daily */
-  DAILY = "daily",
+  DAILY = 'daily',
 
   /** Sync weekly */
-  WEEKLY = "weekly",
+  WEEKLY = 'weekly',
 
   /** Sync monthly */
-  MONTHLY = "monthly",
+  MONTHLY = 'monthly',
 
   /** Manual sync only */
-  MANUAL = "manual",
+  MANUAL = 'manual',
 }
 
 /**
@@ -225,16 +225,16 @@ export enum SyncFrequency {
  */
 export enum ConnectionStatus {
   /** Successfully connected */
-  CONNECTED = "connected",
+  CONNECTED = 'connected',
 
   /** Connection pending or in progress */
-  PENDING = "pending",
+  PENDING = 'pending',
 
   /** Connection failed or errored */
-  ERROR = "error",
+  ERROR = 'error',
 
   /** Connection deliberately disconnected */
-  DISCONNECTED = "disconnected",
+  DISCONNECTED = 'disconnected',
 }
 
 /**

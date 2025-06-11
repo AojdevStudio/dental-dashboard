@@ -4,8 +4,8 @@
  * configured for use in server-side environments (e.g., Server Components, API Routes).
  */
 
-import { type CookieOptions, createServerClient } from "@supabase/ssr";
-import { cookies } from "next/headers";
+import { type CookieOptions, createServerClient } from '@supabase/ssr';
+import { cookies } from 'next/headers';
 
 /**
  * Creates a Supabase client instance for use in server-side environments.

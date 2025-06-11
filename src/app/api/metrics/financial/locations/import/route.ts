@@ -1,6 +1,5 @@
-import type { Prisma } from "@prisma/client"; // Location type might not be needed directly here anymore
-import { prisma } from "@/lib/database/client";
-import { type NextRequest, NextResponse } from "next/server";
+import { prisma } from '@/lib/database/client';
+import { type NextRequest, NextResponse } from 'next/server';
 
 interface PartialLocationForMap {
   id: string;
@@ -54,7 +53,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json(
         {
           success: false,
-          error: "Missing required fields: clinicId and records array are required",
+          error: 'Missing required fields: clinicId and records array are required',
         },
         { status: 400 }
       );
@@ -78,7 +77,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json(
         {
           success: false,
-          error: "Clinic not found",
+          error: 'Clinic not found',
         },
         { status: 404 }
       );
@@ -126,11 +125,11 @@ export async function POST(request: NextRequest) {
         }
 
         // Validate numeric fields
-        const production = Number.parseFloat(record.production?.toString() || "0");
-        const adjustments = Number.parseFloat(record.adjustments?.toString() || "0");
-        const writeOffs = Number.parseFloat(record.writeOffs?.toString() || "0");
-        const patientIncome = Number.parseFloat(record.patientIncome?.toString() || "0");
-        const insuranceIncome = Number.parseFloat(record.insuranceIncome?.toString() || "0");
+        const production = Number.parseFloat(record.production?.toString() || '0');
+        const adjustments = Number.parseFloat(record.adjustments?.toString() || '0');
+        const writeOffs = Number.parseFloat(record.writeOffs?.toString() || '0');
+        const patientIncome = Number.parseFloat(record.patientIncome?.toString() || '0');
+        const insuranceIncome = Number.parseFloat(record.insuranceIncome?.toString() || '0');
         const unearned = record.unearned ? Number.parseFloat(record.unearned.toString()) : null;
 
         if (Number.isNaN(production) || production < 0) {
@@ -177,7 +176,7 @@ export async function POST(request: NextRequest) {
         });
       } catch (error) {
         errors.push(
-          `Record ${recordIndex}: ${error instanceof Error ? error.message : "Unknown error"}`
+          `Record ${recordIndex}: ${error instanceof Error ? error.message : 'Unknown error'}`
         );
       }
     }
@@ -265,9 +264,9 @@ export async function POST(request: NextRequest) {
 
           processedRecords.push({
             locationName: item.locationName,
-            date: item.date.toISOString().split("T")[0],
+            date: item.date.toISOString().split('T')[0],
             production: item.production,
-            status: "success",
+            status: 'success',
           });
         } else {
           await prisma.locationFinancial.create({
@@ -290,15 +289,15 @@ export async function POST(request: NextRequest) {
           results.created++;
           processedRecords.push({
             locationName: item.locationName,
-            date: item.date.toISOString().split("T")[0],
+            date: item.date.toISOString().split('T')[0],
             production: item.production,
-            status: "created",
+            status: 'created',
           });
         }
       } catch (error) {
         results.failed++;
         console.error(
-          `Failed to process record for ${item.locationName} on ${item.date.toISOString().split("T")[0]}:`,
+          `Failed to process record for ${item.locationName} on ${item.date.toISOString().split('T')[0]}:`,
           error
         );
       }
@@ -312,25 +311,25 @@ export async function POST(request: NextRequest) {
           data: { lastSyncedAt: new Date() },
         });
       } catch (error) {
-        console.warn("Failed to update data source sync timestamp:", error);
+        console.warn('Failed to update data source sync timestamp:', error);
       }
     }
 
     return NextResponse.json({
       success: true,
-      message: "Import completed successfully",
+      message: 'Import completed successfully',
       results,
       warnings,
       processedRecords: processedRecords.slice(0, 10), // Return first 10 for confirmation
       totalProcessed: processedRecords.length,
     });
   } catch (error) {
-    console.error("Error importing location financial data:", error);
+    console.error('Error importing location financial data:', error);
     return NextResponse.json(
       {
         success: false,
-        error: "Failed to import location financial data",
-        details: error instanceof Error ? error.message : "Unknown error",
+        error: 'Failed to import location financial data',
+        details: error instanceof Error ? error.message : 'Unknown error',
       },
       { status: 500 }
     );

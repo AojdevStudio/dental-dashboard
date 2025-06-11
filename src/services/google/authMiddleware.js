@@ -1,4 +1,4 @@
-import { PrismaClient } from "@prisma/client";
+import { PrismaClient } from '@prisma/client';
 /**
  * Google Authentication Middleware
  *
@@ -10,7 +10,7 @@ import { PrismaClient } from "@prisma/client";
  * The middleware integrates with the application's data source model, which stores
  * Google OAuth tokens and their expiry information.
  */
-import { refreshAccessToken } from "./auth";
+import { refreshAccessToken } from './auth';
 
 const prisma = new PrismaClient();
 
@@ -27,12 +27,12 @@ export async function verifyGoogleAuth(dataSourceId) {
     });
 
     if (!dataSource) {
-      return { isValid: false, error: "Data source not found" };
+      return { isValid: false, error: 'Data source not found' };
     }
 
     // Check if access token exists
     if (!dataSource.accessToken) {
-      return { isValid: false, error: "Not authenticated with Google" };
+      return { isValid: false, error: 'Not authenticated with Google' };
     }
 
     // Check if token is expired and needs refresh
@@ -62,32 +62,30 @@ export async function verifyGoogleAuth(dataSourceId) {
           accessToken: tokenResponse.access_token,
         };
       } catch (refreshError) {
-        console.error("Failed to refresh access token:", refreshError);
+        console.error('Failed to refresh access token:', refreshError);
         return {
           isValid: false,
-          error: "Failed to refresh access token",
+          error: 'Failed to refresh access token',
         };
       }
     }
     // If not expired, return the current access token
-    else if (!isExpired) {
+    else if (isExpired) {
+      return {
+        isValid: false,
+        error: 'Authentication expired and cannot be refreshed',
+      };
+    } else {
       return {
         isValid: true,
         accessToken: dataSource.accessToken,
       };
     }
-    // Token is expired and no refresh token available
-    else {
-      return {
-        isValid: false,
-        error: "Authentication expired and cannot be refreshed",
-      };
-    }
   } catch (error) {
-    console.error("Error verifying Google authentication:", error);
+    console.error('Error verifying Google authentication:', error);
     return {
       isValid: false,
-      error: "Failed to verify authentication",
+      error: 'Failed to verify authentication',
     };
   }
 }

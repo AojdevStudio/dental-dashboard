@@ -12,16 +12,16 @@
  * - User feedback during the process
  */
 
-import { PasswordResetRequest } from "@/components/auth/password-reset-request";
-import type { Metadata } from "next";
+import { PasswordResetRequest } from '@/components/auth/password-reset-request';
+import type { Metadata } from 'next';
 
 /**
  * Metadata for the reset password page
  * Defines the page title and description for SEO and browser tabs
  */
 export const metadata: Metadata = {
-  title: "Reset Password | Unified Dental Dashboard",
-  description: "Reset your password for the Unified Dental Dashboard",
+  title: 'Reset Password | Unified Dental Dashboard',
+  description: 'Reset your password for the Unified Dental Dashboard',
 };
 
 /**

@@ -3,16 +3,15 @@
  * Get aggregated statistics for a clinic
  */
 
-import { withAuth } from "@/lib/api/middleware";
+import { withAuth } from '@/lib/api/middleware';
 import {
-  apiSuccess,
-  apiError,
   ApiError as ApiErrorClass,
+  apiError,
+  apiSuccess,
   getDateRangeParams,
-  type ApiResponse,
-} from "@/lib/api/utils";
-import type { NextRequest } from "next/server"; // Import NextRequest
-import * as clinicQueries from "@/lib/database/queries/clinics";
+} from '@/lib/api/utils';
+import * as clinicQueries from '@/lib/database/queries/clinics';
+import type { NextRequest } from 'next/server'; // Import NextRequest
 
 export type GetClinicStatisticsResponse = Awaited<
   ReturnType<typeof clinicQueries.getClinicStatistics>
@@ -29,13 +28,13 @@ export const GET = withAuth<GetClinicStatisticsResponse>(
 
     if (Array.isArray(clinicIdParam)) {
       if (clinicIdParam.length === 0 || !clinicIdParam[0]) {
-        return apiError("Clinic ID is missing or invalid in route parameters", 400);
+        return apiError('Clinic ID is missing or invalid in route parameters', 400);
       }
       clinicId = clinicIdParam[0];
-    } else if (typeof clinicIdParam === "string" && clinicIdParam) {
+    } else if (typeof clinicIdParam === 'string' && clinicIdParam) {
       clinicId = clinicIdParam;
     } else {
-      return apiError("Clinic ID is missing or invalid in route parameters", 400);
+      return apiError('Clinic ID is missing or invalid in route parameters', 400);
     }
 
     const dateRange = getDateRangeParams((request as NextRequest).nextUrl.searchParams);
@@ -54,8 +53,8 @@ export const GET = withAuth<GetClinicStatisticsResponse>(
         // More specific check if ApiErrorClass is thrown by validateClinicAccess
         return apiError(error.message, 403, error.code);
       }
-      if (error instanceof Error && error.message.includes("Access denied")) {
-        return apiError(error.message, 403, "ACCESS_DENIED");
+      if (error instanceof Error && error.message.includes('Access denied')) {
+        return apiError(error.message, 403, 'ACCESS_DENIED');
       }
       throw error;
     }

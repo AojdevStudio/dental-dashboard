@@ -1,13 +1,13 @@
-import { createClient } from "@/lib/supabase/client";
-import type { AuthChangeEvent, Session, User } from "@supabase/supabase-js";
-import { usePathname, useRouter } from "next/navigation";
+import { createClient } from '@/lib/supabase/client';
+import type { AuthChangeEvent, Session, User } from '@supabase/supabase-js';
+import { usePathname, useRouter } from 'next/navigation';
 /**
  * Authentication hook for managing user authentication state
  *
  * Provides a centralized way to access authentication state and methods throughout the application.
  * This hook wraps around Supabase Auth and provides a simpler API for common authentication operations.
  */
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from 'react';
 
 /**
  * Database user information from the session API
@@ -107,7 +107,7 @@ export function useAuth(): AuthState {
     }
 
     try {
-      const response = await fetch("/api/auth/session");
+      const response = await fetch('/api/auth/session');
       const data = await response.json();
 
       if (data.authenticated && data.user?.dbUser) {
@@ -116,7 +116,7 @@ export function useAuth(): AuthState {
         setDbUser(null);
       }
     } catch (error) {
-      console.error("Error fetching database user:", error);
+      console.error('Error fetching database user:', error);
       setDbUser(null);
     }
   }, []);
@@ -135,7 +135,7 @@ export function useAuth(): AuthState {
         // Fetch database user information
         await fetchDbUser(session?.user ?? null);
       } catch (error) {
-        console.error("Error getting initial session:", error);
+        console.error('Error getting initial session:', error);
       } finally {
         setIsLoading(false);
       }
@@ -174,9 +174,9 @@ export function useAuth(): AuthState {
       setDbUser(null);
 
       // Redirect to login page after sign out
-      router.push("/login");
+      router.push('/login');
     } catch (error) {
-      console.error("Error signing out:", error);
+      console.error('Error signing out:', error);
     }
   };
 

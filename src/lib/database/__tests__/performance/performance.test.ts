@@ -8,13 +8,12 @@
  * - Trigger and function performance
  */
 
-import { prisma } from "@/lib/database/client";
-import * as clinicQueries from "@/lib/database/queries/clinics";
-import * as goalQueries from "@/lib/database/queries/goals";
-import * as metricQueries from "@/lib/database/queries/metrics";
-import * as userQueries from "@/lib/database/queries/users";
-import { v4 as uuidv4 } from "uuid";
-import { afterAll, beforeAll, describe, expect, it } from "vitest";
+import { prisma } from '@/lib/database/client';
+import * as goalQueries from '@/lib/database/queries/goals';
+import * as metricQueries from '@/lib/database/queries/metrics';
+import * as userQueries from '@/lib/database/queries/users';
+import { v4 as uuidv4 } from 'uuid';
+import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 
 // Performance thresholds (in milliseconds)
 const THRESHOLDS = {
@@ -33,9 +32,9 @@ const perfTestData = {
   metricDefinition: null as unknown,
 };
 
-describe("Performance Tests", () => {
+describe('Performance Tests', () => {
   beforeAll(async () => {
-    console.log("Setting up performance test data...");
+    console.log('Setting up performance test data...');
 
     // Create test clinics
     for (let i = 0; i < 5; i++) {
@@ -44,7 +43,7 @@ describe("Performance Tests", () => {
           id: uuidv4(),
           name: `Perf Test Clinic ${i}`,
           location: `City ${i}`,
-          status: "active",
+          status: 'active',
         },
       });
       perfTestData.clinics.push(clinic);
@@ -53,11 +52,11 @@ describe("Performance Tests", () => {
     // Create metric definition
     perfTestData.metricDefinition = await prisma.metricDefinition.create({
       data: {
-        name: "Performance Test Metric",
-        category: "test",
-        unit: "count",
-        type: "gauge",
-        aggregationMethod: "sum",
+        name: 'Performance Test Metric',
+        category: 'test',
+        unit: 'count',
+        type: 'gauge',
+        aggregationMethod: 'sum',
       },
     });
 
@@ -70,7 +69,7 @@ describe("Performance Tests", () => {
             authId: uuidv4(),
             email: `perf.user${i}@${clinic.id}.com`,
             name: `Perf User ${i}`,
-            role: i === 0 ? "clinic_admin" : "provider",
+            role: i === 0 ? 'clinic_admin' : 'provider',
             clinicId: clinic.id,
           },
         });
@@ -91,7 +90,7 @@ describe("Performance Tests", () => {
     // Create auth contexts for testing
     for (const clinic of perfTestData.clinics) {
       const adminUser = perfTestData.users.find(
-        (u) => u.clinicId === clinic.id && u.role === "clinic_admin"
+        (u) => u.clinicId === clinic.id && u.role === 'clinic_admin'
       );
 
       perfTestData.authContexts.push({
@@ -99,12 +98,12 @@ describe("Performance Tests", () => {
         authId: adminUser.authId,
         clinicIds: [clinic.id],
         currentClinicId: clinic.id,
-        role: "clinic_admin",
+        role: 'clinic_admin',
       });
     }
 
     // Generate test data
-    console.log("Generating metrics data...");
+    console.log('Generating metrics data...');
 
     // Create 1000 metric values per clinic
     const metricBulkData = [];
@@ -140,18 +139,18 @@ describe("Performance Tests", () => {
             targetValue: 10000,
             currentValue: Math.random() * 10000,
             targetDate: new Date(Date.now() + 180 * 24 * 60 * 60 * 1000),
-            frequency: "monthly",
-            status: "active",
+            frequency: 'monthly',
+            status: 'active',
           },
         });
       }
     }
 
-    console.log("Performance test data setup complete");
+    console.log('Performance test data setup complete');
   }, 60000); // 60 second timeout for setup
 
   afterAll(async () => {
-    console.log("Cleaning up performance test data...");
+    console.log('Cleaning up performance test data...');
 
     // Clean up in reverse order of dependencies
     await prisma.goalProgress.deleteMany({
@@ -179,11 +178,11 @@ describe("Performance Tests", () => {
       });
     }
 
-    console.log("Cleanup complete");
+    console.log('Cleanup complete');
   }, 60000);
 
-  describe("Query Performance with RLS", () => {
-    it("should execute single user query within threshold", async () => {
+  describe('Query Performance with RLS', () => {
+    it('should execute single user query within threshold', async () => {
       const authContext = perfTestData.authContexts[0];
 
       const start = Date.now();
@@ -198,12 +197,12 @@ describe("Performance Tests", () => {
       console.log(`Single user query: ${duration}ms`);
     });
 
-    it("should execute filtered queries efficiently", async () => {
+    it('should execute filtered queries efficiently', async () => {
       const authContext = perfTestData.authContexts[0];
 
       const start = Date.now();
       const result = await userQueries.getUsers(authContext, {
-        role: "provider",
+        role: 'provider',
         limit: 20,
         offset: 0,
       });
@@ -214,7 +213,7 @@ describe("Performance Tests", () => {
       console.log(`Filtered user query: ${duration}ms`);
     });
 
-    it("should handle large metric queries efficiently", async () => {
+    it('should handle large metric queries efficiently', async () => {
       const authContext = perfTestData.authContexts[0];
 
       const start = Date.now();
@@ -230,7 +229,7 @@ describe("Performance Tests", () => {
       console.log(`Large metric query (100 records): ${duration}ms`);
     });
 
-    it("should execute aggregation queries within threshold", async () => {
+    it('should execute aggregation queries within threshold', async () => {
       const clinicId = perfTestData.clinics[0].id;
       const startDate = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
       const endDate = new Date();
@@ -251,8 +250,8 @@ describe("Performance Tests", () => {
     });
   });
 
-  describe("Concurrent Operations", () => {
-    it("should handle concurrent reads efficiently", async () => {
+  describe('Concurrent Operations', () => {
+    it('should handle concurrent reads efficiently', async () => {
       const promises = [];
       const authContext = perfTestData.authContexts[0];
 
@@ -276,7 +275,7 @@ describe("Performance Tests", () => {
       console.log(`10 concurrent reads: ${duration}ms`);
     });
 
-    it("should handle mixed read/write operations", async () => {
+    it('should handle mixed read/write operations', async () => {
       const authContext = perfTestData.authContexts[0];
       const promises = [];
 
@@ -312,8 +311,8 @@ describe("Performance Tests", () => {
     });
   });
 
-  describe("Bulk Operations", () => {
-    it("should handle bulk inserts efficiently", async () => {
+  describe('Bulk Operations', () => {
+    it('should handle bulk inserts efficiently', async () => {
       const authContext = perfTestData.authContexts[0];
       const bulkData = [];
 
@@ -342,12 +341,12 @@ describe("Performance Tests", () => {
       console.log(`Bulk insert (100 records): ${duration}ms`);
     });
 
-    it("should handle bulk updates efficiently", async () => {
+    it('should handle bulk updates efficiently', async () => {
       const authContext = perfTestData.authContexts[0];
 
       // Get goals to update
       const goals = await goalQueries.getGoals(authContext, {
-        status: "active",
+        status: 'active',
         limit: 20,
       });
 
@@ -369,8 +368,8 @@ describe("Performance Tests", () => {
     });
   });
 
-  describe("Database Function Performance", () => {
-    it("should execute helper functions efficiently", async () => {
+  describe('Database Function Performance', () => {
+    it('should execute helper functions efficiently', async () => {
       const authId = perfTestData.users[0].authId;
 
       const start = Date.now();
@@ -384,7 +383,7 @@ describe("Performance Tests", () => {
       console.log(`get_user_clinics function: ${duration}ms`);
     });
 
-    it("should check clinic access quickly", async () => {
+    it('should check clinic access quickly', async () => {
       const authId = perfTestData.users[0].authId;
       const clinicId = perfTestData.clinics[0].id;
 
@@ -403,7 +402,7 @@ describe("Performance Tests", () => {
       console.log(`check_clinic_access function: ${duration}ms`);
     });
 
-    it("should handle trigger execution efficiently", async () => {
+    it('should handle trigger execution efficiently', async () => {
       const goalId = uuidv4();
 
       // Create goal and measure trigger execution
@@ -412,13 +411,13 @@ describe("Performance Tests", () => {
       const goal = await prisma.goal.create({
         data: {
           id: goalId,
-          name: "Trigger Performance Test",
+          name: 'Trigger Performance Test',
           clinicId: perfTestData.clinics[0].id,
           targetValue: 100,
           currentValue: 0,
           targetDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
-          frequency: "monthly",
-          status: "active",
+          frequency: 'monthly',
+          status: 'active',
         },
       });
 
@@ -428,7 +427,7 @@ describe("Performance Tests", () => {
           goalId: goal.id,
           date: new Date(),
           currentValue: 100,
-          notes: "Completed",
+          notes: 'Completed',
         },
       });
 
@@ -439,7 +438,7 @@ describe("Performance Tests", () => {
         where: { id: goalId },
       });
 
-      expect(updatedGoal?.status).toBe("completed");
+      expect(updatedGoal?.status).toBe('completed');
       expect(duration).toBeLessThan(THRESHOLDS.complexQuery);
       console.log(`Goal progress trigger execution: ${duration}ms`);
 
@@ -448,8 +447,8 @@ describe("Performance Tests", () => {
     });
   });
 
-  describe("Pagination Performance", () => {
-    it("should maintain consistent performance across pages", async () => {
+  describe('Pagination Performance', () => {
+    it('should maintain consistent performance across pages', async () => {
       const authContext = perfTestData.authContexts[0];
       const pageTimes = [];
 
@@ -478,8 +477,8 @@ describe("Performance Tests", () => {
     });
   });
 
-  describe("Complex Query Performance", () => {
-    it("should execute multi-join queries efficiently", async () => {
+  describe('Complex Query Performance', () => {
+    it('should execute multi-join queries efficiently', async () => {
       const authContext = perfTestData.authContexts[0];
 
       const start = Date.now();
@@ -488,14 +487,14 @@ describe("Performance Tests", () => {
       const result = await prisma.goal.findMany({
         where: {
           clinicId: { in: authContext.clinicIds },
-          status: "active",
+          status: 'active',
         },
         include: {
           clinic: true,
           provider: true,
           metric: true,
           goalProgress: {
-            orderBy: { date: "desc" },
+            orderBy: { date: 'desc' },
             take: 5,
           },
         },
@@ -509,7 +508,7 @@ describe("Performance Tests", () => {
       console.log(`Complex multi-join query: ${duration}ms`);
     });
 
-    it("should execute date range queries efficiently", async () => {
+    it('should execute date range queries efficiently', async () => {
       const authContext = perfTestData.authContexts[0];
       const endDate = new Date();
       const startDate = new Date();
@@ -531,8 +530,8 @@ describe("Performance Tests", () => {
     });
   });
 
-  describe("Performance Under Load", () => {
-    it("should maintain performance with large dataset", async () => {
+  describe('Performance Under Load', () => {
+    it('should maintain performance with large dataset', async () => {
       const authContext = perfTestData.authContexts[0];
 
       // Count total metrics for the clinic
@@ -555,14 +554,14 @@ describe("Performance Tests", () => {
       console.log(`Large dataset query (500 records): ${duration}ms`);
     });
 
-    it("should handle aggregations on large datasets", async () => {
+    it('should handle aggregations on large datasets', async () => {
       const clinicId = perfTestData.clinics[0].id;
 
       const start = Date.now();
 
       // Aggregate metrics for the entire year
       const result = await prisma.metricValue.groupBy({
-        by: ["metricDefinitionId"],
+        by: ['metricDefinitionId'],
         where: {
           clinicId,
           date: {

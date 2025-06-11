@@ -13,7 +13,7 @@
  * the authentication process.
  */
 
-import { redirect } from "next/navigation";
+import { redirect } from 'next/navigation';
 
 /**
  * Home Page Component
@@ -25,5 +25,5 @@ import { redirect } from "next/navigation";
  * @returns {never} This function doesn't return a component as it triggers a redirect
  */
 export default function Home() {
-  redirect("/login");
+  redirect('/login');
 }

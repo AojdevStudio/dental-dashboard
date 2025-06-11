@@ -1,6 +1,6 @@
-import type { AuthContext } from "../auth-context";
-import { prisma } from "../client";
-import type { Prisma, HygieneProduction as PrismaModelHygieneProduction } from "@prisma/client";
+import type { Prisma, HygieneProduction as PrismaModelHygieneProduction } from '@prisma/client';
+import type { AuthContext } from '../auth-context';
+import { prisma } from '../client';
 
 // Define a type for the raw result from Prisma, including Decimal fields
 // Use the direct model type for simplicity and to potentially avoid compiler issues
@@ -58,11 +58,11 @@ export async function upsertHygieneProduction(
   const targetClinicId = clinicId || authContext.clinicIds[0];
 
   if (!targetClinicId) {
-    throw new Error("No clinic ID provided or accessible to user");
+    throw new Error('No clinic ID provided or accessible to user');
   }
 
   if (!authContext.clinicIds.includes(targetClinicId)) {
-    throw new Error("User does not have access to the specified clinic");
+    throw new Error('User does not have access to the specified clinic');
   }
 
   const results: HygieneProductionRecord[] = [];
@@ -118,11 +118,11 @@ export async function getHygieneProduction(
   const targetClinicId = clinicId || authContext.clinicIds[0];
 
   if (!targetClinicId) {
-    throw new Error("No clinic ID provided or accessible to user");
+    throw new Error('No clinic ID provided or accessible to user');
   }
 
   if (!authContext.clinicIds.includes(targetClinicId)) {
-    throw new Error("User does not have access to the specified clinic");
+    throw new Error('User does not have access to the specified clinic');
   }
 
   const where: Prisma.HygieneProductionWhereInput = {
@@ -151,7 +151,7 @@ export async function getHygieneProduction(
   // as HygieneProductionRecord does not include them.
   const prismaRecords = await prisma.hygieneProduction.findMany({
     where,
-    orderBy: { date: "desc" },
+    orderBy: { date: 'desc' },
     take: options.limit,
     skip: options.offset,
     // Do not include relations if HygieneProductionRecord doesn't define them
@@ -181,7 +181,7 @@ export async function getHygieneProductionStats(
   const targetClinicId = clinicId || authContext.clinicIds[0];
 
   if (!targetClinicId || !authContext.clinicIds.includes(targetClinicId)) {
-    throw new Error("No access to clinic");
+    throw new Error('No access to clinic');
   }
 
   const where: Prisma.HygieneProductionWhereInput = {

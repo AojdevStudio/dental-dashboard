@@ -1,12 +1,10 @@
-import { ChartConfig } from "@/lib/types/charts";
 import type {
   DashboardComponent,
   DashboardLayout,
   DashboardState,
   GridItemLayout,
-} from "@/lib/types/dashboard";
-import { KPIData } from "@/lib/types/kpi";
-import { useCallback, useEffect, useState } from "react";
+} from '@/lib/types/dashboard';
+import { useCallback, useEffect, useState } from 'react';
 
 interface UseDashboardLayoutOptions {
   initialLayout?: DashboardLayout;
@@ -27,13 +25,13 @@ interface UseDashboardLayoutReturn extends DashboardState {
 }
 
 const DEFAULT_LAYOUT: DashboardLayout = {
-  id: "default",
-  name: "Default Dashboard",
-  description: "Standard dashboard layout",
+  id: 'default',
+  name: 'Default Dashboard',
+  description: 'Standard dashboard layout',
   components: [],
   gridCols: { xs: 1, sm: 2, md: 3, lg: 4, xl: 4 },
   rowHeight: 100,
-  compactType: "vertical",
+  compactType: 'vertical',
   preventCollision: false,
   isResizable: true,
   isDraggable: true,
@@ -45,10 +43,10 @@ const DEFAULT_LAYOUT: DashboardLayout = {
 export function useDashboardLayout({
   initialLayout = DEFAULT_LAYOUT,
   persistToLocalStorage = true,
-  storageKey = "dashboard-layout",
+  storageKey = 'dashboard-layout',
 }: UseDashboardLayoutOptions = {}): UseDashboardLayoutReturn {
   const [state, setState] = useState<DashboardState>(() => {
-    if (persistToLocalStorage && typeof window !== "undefined") {
+    if (persistToLocalStorage && typeof window !== 'undefined') {
       const stored = localStorage.getItem(storageKey);
       if (stored) {
         try {
@@ -61,7 +59,7 @@ export function useDashboardLayout({
             refreshStatus: {},
           };
         } catch (e) {
-          console.error("Failed to parse stored layout:", e);
+          console.error('Failed to parse stored layout:', e);
         }
       }
     }
@@ -77,7 +75,7 @@ export function useDashboardLayout({
 
   // Persist to localStorage when state changes
   useEffect(() => {
-    if (persistToLocalStorage && typeof window !== "undefined") {
+    if (persistToLocalStorage && typeof window !== 'undefined') {
       const toStore = {
         activeLayout: state.activeLayout,
         layouts: state.layouts,
@@ -244,13 +242,13 @@ export function useDashboardLayout({
 // Preset dashboard layouts for common use cases
 export const presetLayouts: Record<string, DashboardLayout> = {
   financial: {
-    id: "financial",
-    name: "Financial Overview",
-    description: "Focus on revenue, collections, and financial KPIs",
+    id: 'financial',
+    name: 'Financial Overview',
+    description: 'Focus on revenue, collections, and financial KPIs',
     components: [],
     gridCols: 4,
     rowHeight: 100,
-    compactType: "vertical",
+    compactType: 'vertical',
     preventCollision: false,
     isResizable: true,
     isDraggable: true,
@@ -259,13 +257,13 @@ export const presetLayouts: Record<string, DashboardLayout> = {
     useCSSTransforms: true,
   },
   clinical: {
-    id: "clinical",
-    name: "Clinical Dashboard",
-    description: "Patient appointments, treatments, and provider metrics",
+    id: 'clinical',
+    name: 'Clinical Dashboard',
+    description: 'Patient appointments, treatments, and provider metrics',
     components: [],
     gridCols: 3,
     rowHeight: 120,
-    compactType: "vertical",
+    compactType: 'vertical',
     preventCollision: false,
     isResizable: true,
     isDraggable: true,
@@ -274,13 +272,13 @@ export const presetLayouts: Record<string, DashboardLayout> = {
     useCSSTransforms: true,
   },
   executive: {
-    id: "executive",
-    name: "Executive Summary",
-    description: "High-level KPIs and trend analysis",
+    id: 'executive',
+    name: 'Executive Summary',
+    description: 'High-level KPIs and trend analysis',
     components: [],
     gridCols: 4,
     rowHeight: 100,
-    compactType: "vertical",
+    compactType: 'vertical',
     preventCollision: false,
     isResizable: false,
     isDraggable: false,

@@ -5,11 +5,9 @@
  * and header into a complete navigation system for the dashboard interface.
  */
 
-"use client";
-
-import * as React from "react";
-import { Header } from "./header";
-import { Sidebar } from "./sidebar";
+'use client';
+import { Header } from './header';
+import { Sidebar } from './sidebar';
 
 /**
  * Navigation Component
@@ -21,13 +19,13 @@ import { Sidebar } from "./sidebar";
  */
 export function Navigation() {
   return (
-    <div className="flex flex-col min-h-screen">
+    <div class="flex flex-col min-h-screen">
       <Header />
-      <div className="flex flex-1">
-        <div className="hidden md:flex w-64 flex-col border-r">
+      <div class="flex flex-1">
+        <div class="hidden md:flex w-64 flex-col border-r">
           <Sidebar />
         </div>
-        <div className="flex-1 p-6">
+        <div class="flex-1 p-6">
           {/* Main content will be rendered here by layout.tsx */}
           {/* This is intentionally empty as it's a wrapper component */}
         </div>

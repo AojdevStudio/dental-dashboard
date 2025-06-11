@@ -1,8 +1,8 @@
-import type { ChartConfig } from "./charts";
-import type { KPIData } from "./kpi";
+import type { ChartConfig } from './charts';
+import type { KPIData } from './kpi';
 
-export type ComponentSize = "small" | "medium" | "large" | "full";
-export type ComponentType = "chart" | "kpi" | "table" | "custom";
+export type ComponentSize = 'small' | 'medium' | 'large' | 'full';
+export type ComponentType = 'chart' | 'kpi' | 'table' | 'custom';
 
 export interface GridBreakpoint {
   xs?: number; // Mobile
@@ -46,7 +46,7 @@ export interface DashboardLayout {
   components: DashboardComponent[];
   gridCols: GridBreakpoint | number;
   rowHeight: number;
-  compactType?: "vertical" | "horizontal" | null;
+  compactType?: 'vertical' | 'horizontal' | null;
   preventCollision?: boolean;
   isResizable?: boolean;
   isDraggable?: boolean;
@@ -76,9 +76,9 @@ export interface DashboardState {
 }
 
 export interface DashboardExportConfig {
-  format: "pdf" | "png" | "csv";
+  format: 'pdf' | 'png' | 'csv';
   components?: string[]; // Component IDs to export, all if not specified
   includeTitle?: boolean;
   includeTimestamp?: boolean;
-  orientation?: "portrait" | "landscape";
+  orientation?: 'portrait' | 'landscape';
 }

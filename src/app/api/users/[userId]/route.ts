@@ -3,17 +3,17 @@
  * Operations on specific users
  */
 
-import { withAuth } from "@/lib/api/middleware";
+import { withAuth } from '@/lib/api/middleware';
 import {
-  apiSuccess,
-  apiError,
   ApiError as ApiErrorClass,
-  type ApiSuccessPayload,
   type ApiErrorPayload,
-} from "@/lib/api/utils";
-import * as userQueries from "@/lib/database/queries/users";
-import type { NextResponse } from "next/server";
-import { z } from "zod";
+  type ApiSuccessPayload,
+  apiError,
+  apiSuccess,
+} from '@/lib/api/utils';
+import * as userQueries from '@/lib/database/queries/users';
+import type { NextResponse } from 'next/server';
+import { z } from 'zod';
 
 const updateUserSchema = z
   .object({
@@ -38,20 +38,20 @@ export const GET = withAuth<GetUserResponse>(
     const rawId = params?.userId;
     const userId = Array.isArray(rawId) ? rawId[0] : rawId;
     if (!userId) {
-      return apiError("User ID required", 400);
+      return apiError('User ID required', 400);
     }
 
     try {
       const user = await userQueries.getUserById(authContext, userId);
       if (!user) {
-        return apiError("User not found", 404);
+        return apiError('User not found', 404);
       }
       return apiSuccess(user);
     } catch (error) {
       if (error instanceof ApiErrorClass) {
         return apiError(error.message, error.statusCode, error.code);
       }
-      if (error instanceof Error && error.message.includes("Access denied")) {
+      if (error instanceof Error && error.message.includes('Access denied')) {
         return apiError(error.message, 403);
       }
       throw error;
@@ -71,7 +71,7 @@ export const PATCH = withAuth<UpdateUserResponse>(
     const rawId = params?.userId;
     const userId = Array.isArray(rawId) ? rawId[0] : rawId;
     if (!userId) {
-      return apiError("User ID required", 400);
+      return apiError('User ID required', 400);
     }
 
     // Parse and validate request body
@@ -80,7 +80,7 @@ export const PATCH = withAuth<UpdateUserResponse>(
       const rawBody = await request.json();
       body = updateUserSchema.parse(rawBody);
     } catch (_error) {
-      return apiError("Invalid request body", 400);
+      return apiError('Invalid request body', 400);
     }
 
     // Convert lastLogin string to Date if provided
@@ -97,8 +97,8 @@ export const PATCH = withAuth<UpdateUserResponse>(
         return apiError(error.message, error.statusCode, error.code);
       }
       if (error instanceof Error) {
-        if (error.message === "User not found") return apiError("User not found", 404);
-        if (error.message === "Permission denied") return apiError("Permission denied", 403);
+        if (error.message === 'User not found') return apiError('User not found', 404);
+        if (error.message === 'Permission denied') return apiError('Permission denied', 403);
       }
       throw error;
     }
@@ -117,7 +117,7 @@ export const DELETE = withAuth<{ success: boolean }>(
     const rawId = params?.userId;
     const userId = Array.isArray(rawId) ? rawId[0] : rawId;
     if (!userId) {
-      return apiError("User ID required", 400);
+      return apiError('User ID required', 400);
     }
 
     try {
@@ -128,8 +128,8 @@ export const DELETE = withAuth<{ success: boolean }>(
         return apiError(error.message, error.statusCode, error.code);
       }
       if (error instanceof Error) {
-        if (error.message === "User not found") return apiError("User not found", 404);
-        if (error.message.includes("Only clinic admins")) return apiError(error.message, 403);
+        if (error.message === 'User not found') return apiError('User not found', 404);
+        if (error.message.includes('Only clinic admins')) return apiError(error.message, 403);
       }
       throw error;
     }

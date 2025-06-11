@@ -10,8 +10,8 @@
  * or progress indicators that can increase perceived wait time.
  */
 
-import { cn } from "@/lib/utils";
-import type * as React from "react";
+import { cn } from '@/lib/utils';
+import type * as React from 'react';
 
 /**
  * Skeleton component for loading states
@@ -43,11 +43,11 @@ import type * as React from "react";
  *   </CardContent>
  * </Card>
  */
-function Skeleton({ className, ...props }: React.ComponentProps<"div">) {
+function Skeleton({ className, ...props }: React.ComponentProps<'div'>) {
   return (
     <div
       data-slot="skeleton"
-      className={cn("bg-accent animate-pulse rounded-md", className)}
+      class={cn('bg-accent animate-pulse rounded-md', className)}
       {...props}
     />
   );

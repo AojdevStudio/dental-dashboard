@@ -1,6 +1,5 @@
-import { prisma } from "@/lib/database/client";
-import type { Prisma } from "@prisma/client";
-import { type NextRequest, NextResponse } from "next/server";
+import { prisma } from '@/lib/database/client';
+import { type NextRequest, NextResponse } from 'next/server';
 
 /**
  * @description Defines the shape of the 'where' clause used for filtering
@@ -38,13 +37,13 @@ type AggregatedFinancialItem = {
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
-    const clinicId = searchParams.get("clinicId");
-    const locationId = searchParams.get("locationId");
-    const startDate = searchParams.get("startDate");
-    const endDate = searchParams.get("endDate");
-    const page = Number.parseInt(searchParams.get("page") || "1");
-    const limit = Number.parseInt(searchParams.get("limit") || "50");
-    const groupBy = searchParams.get("groupBy"); // 'day', 'week', 'month'
+    const clinicId = searchParams.get('clinicId');
+    const locationId = searchParams.get('locationId');
+    const startDate = searchParams.get('startDate');
+    const endDate = searchParams.get('endDate');
+    const page = Number.parseInt(searchParams.get('page') || '1');
+    const limit = Number.parseInt(searchParams.get('limit') || '50');
+    const groupBy = searchParams.get('groupBy'); // 'day', 'week', 'month'
 
     // Build where clause
     const where: LocationFinancialWhereInput = {};
@@ -101,10 +100,10 @@ export async function GET(request: NextRequest) {
       // Return aggregated data
       let dateGrouping: string;
       switch (groupBy) {
-        case "week":
+        case 'week':
           dateGrouping = `DATE_TRUNC('week', date)`;
           break;
-        case "month":
+        case 'month':
           dateGrouping = `DATE_TRUNC('month', date)`;
           break;
         default:
@@ -135,7 +134,7 @@ export async function GET(request: NextRequest) {
         params.push(where.date.lte);
       }
 
-      const whereClause = conditions.length > 0 ? `WHERE ${conditions.join(" AND ")}` : "";
+      const whereClause = conditions.length > 0 ? `WHERE ${conditions.join(' AND ')}` : '';
 
       const aggregatedData = (await prisma.$queryRawUnsafe(
         `
@@ -182,15 +181,15 @@ export async function GET(request: NextRequest) {
             clinic,
             location,
             metrics: {
-              totalProduction: Number.parseFloat(item.total_production || "0"),
-              totalAdjustments: Number.parseFloat(item.total_adjustments || "0"),
-              totalWriteOffs: Number.parseFloat(item.total_write_offs || "0"),
-              totalNetProduction: Number.parseFloat(item.total_net_production || "0"),
-              totalPatientIncome: Number.parseFloat(item.total_patient_income || "0"),
-              totalInsuranceIncome: Number.parseFloat(item.total_insurance_income || "0"),
-              totalCollections: Number.parseFloat(item.total_collections || "0"),
-              avgUnearned: Number.parseFloat(item.avg_unearned || "0"),
-              recordCount: Number.parseInt(item.record_count.toString() || "0"),
+              totalProduction: Number.parseFloat(item.total_production || '0'),
+              totalAdjustments: Number.parseFloat(item.total_adjustments || '0'),
+              totalWriteOffs: Number.parseFloat(item.total_write_offs || '0'),
+              totalNetProduction: Number.parseFloat(item.total_net_production || '0'),
+              totalPatientIncome: Number.parseFloat(item.total_patient_income || '0'),
+              totalInsuranceIncome: Number.parseFloat(item.total_insurance_income || '0'),
+              totalCollections: Number.parseFloat(item.total_collections || '0'),
+              avgUnearned: Number.parseFloat(item.avg_unearned || '0'),
+              recordCount: Number.parseInt(item.record_count.toString() || '0'),
             },
           };
         })
@@ -212,7 +211,7 @@ export async function GET(request: NextRequest) {
     const [data, total] = await Promise.all([
       prisma.locationFinancial.findMany({
         ...baseOptions,
-        orderBy: { date: "desc" },
+        orderBy: { date: 'desc' },
         skip: offset,
         take: limit,
       }),
@@ -231,15 +230,15 @@ export async function GET(request: NextRequest) {
       },
     });
   } catch (e: unknown) {
-    console.error("Error fetching location financial data:", e);
-    let errorMessage = "An unknown error occurred";
+    console.error('Error fetching location financial data:', e);
+    let errorMessage = 'An unknown error occurred';
     if (e instanceof Error) {
       errorMessage = e.message;
     }
     return NextResponse.json(
       {
         success: false,
-        error: "Failed to fetch location financial data",
+        error: 'Failed to fetch location financial data',
         details: errorMessage,
       },
       { status: 500 }
@@ -269,7 +268,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json(
         {
           success: false,
-          error: "Missing required fields: clinicId, locationId, date, and production are required",
+          error: 'Missing required fields: clinicId, locationId, date, and production are required',
         },
         { status: 400 }
       );
@@ -285,7 +284,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json(
         {
           success: false,
-          error: "Clinic not found",
+          error: 'Clinic not found',
         },
         { status: 404 }
       );
@@ -295,7 +294,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json(
         {
           success: false,
-          error: "Location not found",
+          error: 'Location not found',
         },
         { status: 404 }
       );
@@ -305,7 +304,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json(
         {
           success: false,
-          error: "Location does not belong to the specified clinic",
+          error: 'Location does not belong to the specified clinic',
         },
         { status: 400 }
       );
@@ -314,10 +313,10 @@ export async function POST(request: NextRequest) {
     // Calculate derived fields
     const netProduction =
       Number.parseFloat(production) -
-      Number.parseFloat(adjustments || "0") -
-      Number.parseFloat(writeOffs || "0");
+      Number.parseFloat(adjustments || '0') -
+      Number.parseFloat(writeOffs || '0');
     const totalCollections =
-      Number.parseFloat(patientIncome || "0") + Number.parseFloat(insuranceIncome || "0");
+      Number.parseFloat(patientIncome || '0') + Number.parseFloat(insuranceIncome || '0');
 
     // Check for existing record on same date
     const existingRecord = await prisma.locationFinancial.findFirst({
@@ -332,7 +331,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json(
         {
           success: false,
-          error: "Financial data already exists for this location and date. Use PUT to update.",
+          error: 'Financial data already exists for this location and date. Use PUT to update.',
         },
         { status: 409 }
       );
@@ -345,11 +344,11 @@ export async function POST(request: NextRequest) {
         locationId,
         date: new Date(date),
         production: Number.parseFloat(production),
-        adjustments: Number.parseFloat(adjustments || "0"),
-        writeOffs: Number.parseFloat(writeOffs || "0"),
+        adjustments: Number.parseFloat(adjustments || '0'),
+        writeOffs: Number.parseFloat(writeOffs || '0'),
         netProduction,
-        patientIncome: Number.parseFloat(patientIncome || "0"),
-        insuranceIncome: Number.parseFloat(insuranceIncome || "0"),
+        patientIncome: Number.parseFloat(patientIncome || '0'),
+        insuranceIncome: Number.parseFloat(insuranceIncome || '0'),
         totalCollections,
         unearned: unearned ? Number.parseFloat(unearned) : null,
         dataSourceId: dataSourceId || null,
@@ -376,17 +375,17 @@ export async function POST(request: NextRequest) {
       {
         success: true,
         data: financialRecord,
-        message: "Financial data created successfully",
+        message: 'Financial data created successfully',
       },
       { status: 201 }
     );
   } catch (error) {
-    console.error("Error creating location financial data:", error);
+    console.error('Error creating location financial data:', error);
     return NextResponse.json(
       {
         success: false,
-        error: "Failed to create location financial data",
-        details: error instanceof Error ? error.message : "Unknown error",
+        error: 'Failed to create location financial data',
+        details: error instanceof Error ? error.message : 'Unknown error',
       },
       { status: 500 }
     );

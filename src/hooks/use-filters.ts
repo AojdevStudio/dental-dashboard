@@ -10,8 +10,7 @@ import {
   startOfQuarter,
   startOfWeek,
   startOfYear,
-  subMonths,
-} from "date-fns";
+} from 'date-fns';
 /**
  * Dashboard filtering functionality using Zustand for global state management with localStorage persistence
  *
@@ -23,15 +22,15 @@ import {
  *
  * The filter state is persisted in localStorage to maintain user preferences across sessions.
  */
-import { create } from "zustand";
-import { persist } from "zustand/middleware";
+import { create } from 'zustand';
+import { persist } from 'zustand/middleware';
 
 /**
  * Available time period options for filtering dashboard data
  *
  * @typedef {'daily' | 'weekly' | 'monthly' | 'quarterly' | 'annual' | 'custom'} TimePeriod
  */
-export type TimePeriod = "daily" | "weekly" | "monthly" | "quarterly" | "annual" | "custom";
+export type TimePeriod = 'daily' | 'weekly' | 'monthly' | 'quarterly' | 'annual' | 'custom';
 
 /**
  * Interface defining the filter state and available actions
@@ -104,27 +103,27 @@ const getDateRangeForPeriod = (period: TimePeriod): { start: Date; end: Date } =
   const today = new Date();
 
   switch (period) {
-    case "daily":
+    case 'daily':
       return {
         start: startOfDay(today),
         end: endOfDay(today),
       };
-    case "weekly":
+    case 'weekly':
       return {
         start: startOfWeek(today, { weekStartsOn: 1 }), // Week starts on Monday
         end: endOfWeek(today, { weekStartsOn: 1 }),
       };
-    case "monthly":
+    case 'monthly':
       return {
         start: startOfMonth(today),
         end: endOfMonth(today),
       };
-    case "quarterly":
+    case 'quarterly':
       return {
         start: startOfQuarter(today),
         end: endOfQuarter(today),
       };
-    case "annual":
+    case 'annual':
       return {
         start: startOfYear(today),
         end: endOfYear(today),
@@ -139,7 +138,7 @@ const getDateRangeForPeriod = (period: TimePeriod): { start: Date; end: Date } =
 };
 
 /** Default time period used when initializing or resetting filters */
-const defaultTimePeriod: TimePeriod = "monthly";
+const defaultTimePeriod: TimePeriod = 'monthly';
 
 /** Default date range calculated based on the default time period */
 const defaultDateRange = getDateRangeForPeriod(defaultTimePeriod);
@@ -190,7 +189,7 @@ export const useFilterStore = create<FilterState>()(
         set({ timePeriod: period, startDate: start, endDate: end });
       },
 
-      setDateRange: (startDate, endDate) => set({ timePeriod: "custom", startDate, endDate }),
+      setDateRange: (startDate, endDate) => set({ timePeriod: 'custom', startDate, endDate }),
 
       setSelectedClinics: (clinics) => set({ selectedClinics: clinics }),
 
@@ -215,7 +214,7 @@ export const useFilterStore = create<FilterState>()(
         }),
     }),
     {
-      name: "dental-dashboard-filters", // localStorage key
+      name: 'dental-dashboard-filters', // localStorage key
     }
   )
 );
@@ -256,8 +255,8 @@ export const useFilterParams = () => {
   return {
     startDate: startDate.toISOString(),
     endDate: endDate.toISOString(),
-    clinicIds: selectedClinics.length > 0 ? selectedClinics.join(",") : undefined,
-    providerIds: selectedProviders.length > 0 ? selectedProviders.join(",") : undefined,
+    clinicIds: selectedClinics.length > 0 ? selectedClinics.join(',') : undefined,
+    providerIds: selectedProviders.length > 0 ? selectedProviders.join(',') : undefined,
     timePeriod,
   };
 };
@@ -276,18 +275,18 @@ export const createFilterUrlParams = () => {
   const params = new URLSearchParams();
 
   // Add time period params
-  params.set("timePeriod", timePeriod);
-  params.set("startDate", startDate.toISOString());
-  params.set("endDate", endDate.toISOString());
+  params.set('timePeriod', timePeriod);
+  params.set('startDate', startDate.toISOString());
+  params.set('endDate', endDate.toISOString());
 
   // Add clinic params
   if (selectedClinics.length > 0) {
-    params.set("clinics", selectedClinics.join(","));
+    params.set('clinics', selectedClinics.join(','));
   }
 
   // Add provider params
   if (selectedProviders.length > 0) {
-    params.set("providers", selectedProviders.join(","));
+    params.set('providers', selectedProviders.join(','));
   }
 
   return params;
@@ -322,17 +321,17 @@ export const parseFilterUrlParams = (searchParams: URLSearchParams) => {
     useFilterStore.getState();
 
   // Parse time period
-  const urlTimePeriod = searchParams.get("timePeriod");
+  const urlTimePeriod = searchParams.get('timePeriod');
   if (
     urlTimePeriod &&
-    ["daily", "weekly", "monthly", "quarterly", "annual", "custom"].includes(urlTimePeriod)
+    ['daily', 'weekly', 'monthly', 'quarterly', 'annual', 'custom'].includes(urlTimePeriod)
   ) {
     setTimePeriod(urlTimePeriod as TimePeriod);
   }
 
   // Parse date range
-  const urlStartDate = searchParams.get("startDate");
-  const urlEndDate = searchParams.get("endDate");
+  const urlStartDate = searchParams.get('startDate');
+  const urlEndDate = searchParams.get('endDate');
   if (urlStartDate && urlEndDate) {
     try {
       const startDate = new Date(urlStartDate);
@@ -343,19 +342,19 @@ export const parseFilterUrlParams = (searchParams: URLSearchParams) => {
         setDateRange(startDate, endDate);
       }
     } catch (error) {
-      console.error("Error parsing date params:", error);
+      console.error('Error parsing date params:', error);
     }
   }
 
   // Parse clinics
-  const urlClinics = searchParams.get("clinics");
+  const urlClinics = searchParams.get('clinics');
   if (urlClinics) {
-    setSelectedClinics(urlClinics.split(","));
+    setSelectedClinics(urlClinics.split(','));
   }
 
   // Parse providers
-  const urlProviders = searchParams.get("providers");
+  const urlProviders = searchParams.get('providers');
   if (urlProviders) {
-    setSelectedProviders(urlProviders.split(","));
+    setSelectedProviders(urlProviders.split(','));
   }
 };

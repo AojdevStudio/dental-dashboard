@@ -1,6 +1,6 @@
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useAuth } from "./use-auth";
-import { useClinics } from "./use-clinics";
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useAuth } from './use-auth';
+import { useClinics } from './use-clinics';
 
 /**
  * User type
@@ -33,7 +33,7 @@ export function useUsers() {
   const queryClient = useQueryClient();
 
   // Query key for users data
-  const usersQueryKey = ["users", selectedClinicId];
+  const usersQueryKey = ['users', selectedClinicId];
 
   /**
    * Fetch users from the API
@@ -43,13 +43,13 @@ export function useUsers() {
 
     // System admins can see all users, others only see their clinic
     if (!isSystemAdmin && selectedClinicId) {
-      params.append("clinicId", selectedClinicId);
+      params.append('clinicId', selectedClinicId);
     }
 
     const response = await fetch(`/api/users?${params.toString()}`);
 
     if (!response.ok) {
-      throw new Error("Failed to fetch users");
+      throw new Error('Failed to fetch users');
     }
 
     const data = await response.json();
@@ -76,18 +76,18 @@ export function useUsers() {
    * Create a new user
    */
   const createUserMutation = useMutation({
-    mutationFn: async (userData: Omit<User, "id" | "createdAt" | "updatedAt">) => {
-      const response = await fetch("/api/users", {
-        method: "POST",
+    mutationFn: async (userData: Omit<User, 'id' | 'createdAt' | 'updatedAt'>) => {
+      const response = await fetch('/api/users', {
+        method: 'POST',
         headers: {
-          "Content-Type": "application/json",
+          'Content-Type': 'application/json',
         },
         body: JSON.stringify(userData),
       });
 
       if (!response.ok) {
         const error = await response.json();
-        throw new Error(error.message || "Failed to create user");
+        throw new Error(error.message || 'Failed to create user');
       }
 
       return response.json();
@@ -104,16 +104,16 @@ export function useUsers() {
   const updateUserMutation = useMutation({
     mutationFn: async ({ userId, data }: { userId: string; data: Partial<User> }) => {
       const response = await fetch(`/api/users/${userId}`, {
-        method: "PATCH",
+        method: 'PATCH',
         headers: {
-          "Content-Type": "application/json",
+          'Content-Type': 'application/json',
         },
         body: JSON.stringify(data),
       });
 
       if (!response.ok) {
         const error = await response.json();
-        throw new Error(error.message || "Failed to update user");
+        throw new Error(error.message || 'Failed to update user');
       }
 
       return response.json();
@@ -153,12 +153,12 @@ export function useUsers() {
   const deleteUserMutation = useMutation({
     mutationFn: async (userId: string) => {
       const response = await fetch(`/api/users/${userId}`, {
-        method: "DELETE",
+        method: 'DELETE',
       });
 
       if (!response.ok) {
         const error = await response.json();
-        throw new Error(error.message || "Failed to delete user");
+        throw new Error(error.message || 'Failed to delete user');
       }
 
       return response.json();

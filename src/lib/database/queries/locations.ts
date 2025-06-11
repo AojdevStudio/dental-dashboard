@@ -1,5 +1,5 @@
-import type { Prisma } from "@prisma/client";
-import { prisma } from "@/lib/database/client";
+import { prisma } from '@/lib/database/client';
+import type { Prisma } from '@prisma/client';
 
 export interface LocationWithMetrics {
   id: string;
@@ -123,7 +123,7 @@ export async function getLocationsWithMetrics(params?: {
             },
           },
         },
-        orderBy: [{ isPrimary: "desc" }, { provider: { name: "asc" } }],
+        orderBy: [{ isPrimary: 'desc' }, { provider: { name: 'asc' } }],
       },
       // `_count` cannot be filtered – fetch active-provider count separately if required
       _count: {
@@ -133,7 +133,7 @@ export async function getLocationsWithMetrics(params?: {
         },
       },
     },
-    orderBy: [{ clinic: { name: "asc" } }, { name: "asc" }],
+    orderBy: [{ clinic: { name: 'asc' } }, { name: 'asc' }],
   });
 
   // Fetch all location IDs
@@ -141,7 +141,7 @@ export async function getLocationsWithMetrics(params?: {
 
   // Single groupBy query to get all aggregates and last record date per location
   const financialSummaries = await prisma.locationFinancial.groupBy({
-    by: ["locationId"],
+    by: ['locationId'],
     where: { locationId: { in: locationIds } },
     _sum: { production: true },
     _avg: { production: true },
@@ -182,7 +182,7 @@ export async function getLocationsWithMetrics(params?: {
 
   // Helper function to safely convert Prisma.Decimal to number
   function safeDecimalToNumber(value: Prisma.Decimal | null | undefined): number {
-    if (value && typeof value === "object" && "toNumber" in value) {
+    if (value && typeof value === 'object' && 'toNumber' in value) {
       return value.toNumber();
     }
     return 0;
@@ -246,12 +246,12 @@ export async function getLocationFinancialSummary(params: {
   }
 
   if (locationIds && locationIds.length > 0) {
-    const placeholders = locationIds.map((_, index) => `$${values.length + index + 1}`).join(", ");
+    const placeholders = locationIds.map((_, index) => `$${values.length + index + 1}`).join(', ');
     whereConditions.push(`lf.location_id IN (${placeholders})`);
     values.push(...locationIds);
   }
 
-  const whereClause = whereConditions.length > 0 ? `WHERE ${whereConditions.join(" AND ")}` : "";
+  const whereClause = whereConditions.length > 0 ? `WHERE ${whereConditions.join(' AND ')}` : '';
 
   const query = `
     SELECT 
@@ -293,17 +293,17 @@ export async function getLocationFinancialSummary(params: {
       clinicName: row.clinic_name,
       periodStart: new Date(row.period_start),
       periodEnd: new Date(row.period_end),
-      totalProduction: Number.parseFloat(row.total_production || "0"),
-      totalAdjustments: Number.parseFloat(row.total_adjustments || "0"),
-      totalWriteOffs: Number.parseFloat(row.total_write_offs || "0"),
-      totalNetProduction: Number.parseFloat(row.total_net_production || "0"),
-      totalCollections: Number.parseFloat(row.total_collections || "0"),
-      avgDailyProduction: Number.parseFloat(row.avg_daily_production || "0"),
-      recordCount: Number.parseInt(String(row.record_count || "0")),
+      totalProduction: Number.parseFloat(row.total_production || '0'),
+      totalAdjustments: Number.parseFloat(row.total_adjustments || '0'),
+      totalWriteOffs: Number.parseFloat(row.total_write_offs || '0'),
+      totalNetProduction: Number.parseFloat(row.total_net_production || '0'),
+      totalCollections: Number.parseFloat(row.total_collections || '0'),
+      avgDailyProduction: Number.parseFloat(row.avg_daily_production || '0'),
+      recordCount: Number.parseInt(String(row.record_count || '0')),
       lastSyncDate: row.last_sync_date ? new Date(row.last_sync_date) : null,
     }));
   } catch (error) {
-    console.error("Error fetching location financial summary:", error);
+    console.error('Error fetching location financial summary:', error);
     throw error;
   }
 }
@@ -353,7 +353,7 @@ export async function getLocationWithRecentData(locationId: string, days = 30) {
       },
     },
     orderBy: {
-      date: "desc",
+      date: 'desc',
     },
     take: 50,
   });
@@ -389,7 +389,7 @@ export async function getTopPerformingLocations(params: {
     values.push(clinicId);
   }
 
-  const whereClause = whereConditions.length > 0 ? `WHERE ${whereConditions.join(" AND ")}` : "";
+  const whereClause = whereConditions.length > 0 ? `WHERE ${whereConditions.join(' AND ')}` : '';
 
   const query = `
     SELECT 
@@ -427,15 +427,15 @@ export async function getTopPerformingLocations(params: {
       name: row.name,
       address: row.address,
       clinicName: row.clinic_name,
-      totalProduction: Number.parseFloat(row.total_production || "0"),
-      totalNetProduction: Number.parseFloat(row.total_net_production || "0"),
-      totalCollections: Number.parseFloat(row.total_collections || "0"),
-      avgDailyProduction: Number.parseFloat(row.avg_daily_production || "0"),
-      productionDays: Number.parseInt(String(row.production_days || "0")),
-      providerCount: Number.parseInt(String(row.provider_count || "0")),
+      totalProduction: Number.parseFloat(row.total_production || '0'),
+      totalNetProduction: Number.parseFloat(row.total_net_production || '0'),
+      totalCollections: Number.parseFloat(row.total_collections || '0'),
+      avgDailyProduction: Number.parseFloat(row.avg_daily_production || '0'),
+      productionDays: Number.parseInt(String(row.production_days || '0')),
+      providerCount: Number.parseInt(String(row.provider_count || '0')),
     }));
   } catch (error) {
-    console.error("Error fetching top performing locations:", error);
+    console.error('Error fetching top performing locations:', error);
     throw error;
   }
 }

@@ -3,9 +3,9 @@
  * Multi-tenant aware user operations
  */
 
-import type { Prisma } from "@prisma/client";
-import { type AuthContext, validateClinicAccess } from "../auth-context";
-import { prisma } from "../client";
+import type { Prisma } from '@prisma/client';
+import { type AuthContext, validateClinicAccess } from '../auth-context';
+import { prisma } from '../client';
 
 export interface CreateUserInput {
   email: string;
@@ -30,7 +30,7 @@ export async function getUserById(authContext: AuthContext, userId: string) {
     include: {
       clinic: true,
       dashboards: {
-        orderBy: { createdAt: "desc" },
+        orderBy: { createdAt: 'desc' },
       },
     },
   });
@@ -42,7 +42,7 @@ export async function getUserById(authContext: AuthContext, userId: string) {
   // Validate access
   const hasAccess = await validateClinicAccess(authContext, user.clinicId);
   if (!hasAccess) {
-    throw new Error("Access denied to this user");
+    throw new Error('Access denied to this user');
   }
 
   return user;
@@ -76,7 +76,7 @@ export async function getUsers(
       include: {
         clinic: true,
       },
-      orderBy: { name: "asc" },
+      orderBy: { name: 'asc' },
       take: options?.limit,
       skip: options?.offset,
     }),
@@ -93,7 +93,7 @@ export async function getUsersByClinic(authContext: AuthContext, clinicId: strin
   // Validate access
   const hasAccess = await validateClinicAccess(authContext, clinicId);
   if (!hasAccess) {
-    throw new Error("Access denied to this clinic");
+    throw new Error('Access denied to this clinic');
   }
 
   const userRoles = await prisma.userClinicRole.findMany({
@@ -109,7 +109,7 @@ export async function getUsersByClinic(authContext: AuthContext, clinicId: strin
       },
     },
     orderBy: {
-      createdAt: "desc",
+      createdAt: 'desc',
     },
   });
 
@@ -127,23 +127,23 @@ export async function createUser(authContext: AuthContext, input: CreateUserInpu
   // Validate clinic access
   const hasAccess = await validateClinicAccess(authContext, input.clinicId);
   if (!hasAccess) {
-    throw new Error("Access denied to this clinic");
+    throw new Error('Access denied to this clinic');
   }
 
   // Check if user is clinic admin
   const isAdmin =
-    authContext.role === "admin" ||
+    authContext.role === 'admin' ||
     (await prisma.userClinicRole.findFirst({
       where: {
         userId: authContext.userId,
         clinicId: input.clinicId,
-        role: "clinic_admin",
+        role: 'clinic_admin',
         isActive: true,
       },
     }));
 
   if (!isAdmin) {
-    throw new Error("Only clinic admins can create users");
+    throw new Error('Only clinic admins can create users');
   }
 
   // Create user with clinic role
@@ -164,7 +164,7 @@ export async function createUser(authContext: AuthContext, input: CreateUserInpu
       data: {
         userId: newUser.id,
         clinicId: input.clinicId,
-        role: input.role === "admin" ? "clinic_admin" : "staff",
+        role: input.role === 'admin' ? 'clinic_admin' : 'staff',
         createdBy: authContext.userId,
       },
     });
@@ -184,24 +184,24 @@ export async function updateUser(authContext: AuthContext, userId: string, input
   });
 
   if (!user) {
-    throw new Error("User not found");
+    throw new Error('User not found');
   }
 
   // Check permissions: self or clinic admin
   const isSelf = authContext.userId === userId;
   const isAdmin =
-    authContext.role === "admin" ||
+    authContext.role === 'admin' ||
     (await prisma.userClinicRole.findFirst({
       where: {
         userId: authContext.userId,
         clinicId: user.clinicId,
-        role: "clinic_admin",
+        role: 'clinic_admin',
         isActive: true,
       },
     }));
 
   if (!isSelf && !isAdmin) {
-    throw new Error("Permission denied");
+    throw new Error('Permission denied');
   }
 
   // Update user
@@ -223,23 +223,23 @@ export async function deleteUser(authContext: AuthContext, userId: string) {
   });
 
   if (!user) {
-    throw new Error("User not found");
+    throw new Error('User not found');
   }
 
   // Check if user is clinic admin
   const isAdmin =
-    authContext.role === "admin" ||
+    authContext.role === 'admin' ||
     (await prisma.userClinicRole.findFirst({
       where: {
         userId: authContext.userId,
         clinicId: user.clinicId,
-        role: "clinic_admin",
+        role: 'clinic_admin',
         isActive: true,
       },
     }));
 
   if (!isAdmin) {
-    throw new Error("Only clinic admins can delete users");
+    throw new Error('Only clinic admins can delete users');
   }
 
   // Soft delete by deactivating all clinic roles
@@ -251,7 +251,7 @@ export async function deleteUser(authContext: AuthContext, userId: string) {
   // Optionally, you might want to actually delete the user
   // return prisma.user.delete({ where: { id: userId } })
 
-  return { success: true, message: "User deactivated" };
+  return { success: true, message: 'User deactivated' };
 }
 
 /**
@@ -267,7 +267,7 @@ export async function getUserClinicRoles(authContext: AuthContext, userId?: stri
     });
 
     if (!targetUser || !authContext.clinicIds.includes(targetUser.clinicId)) {
-      throw new Error("Access denied");
+      throw new Error('Access denied');
     }
   }
 
@@ -280,7 +280,7 @@ export async function getUserClinicRoles(authContext: AuthContext, userId?: stri
       clinic: true,
     },
     orderBy: {
-      createdAt: "desc",
+      createdAt: 'desc',
     },
   });
 
@@ -317,8 +317,8 @@ export async function searchUsers(
       },
       {
         OR: [
-          { name: { contains: query, mode: "insensitive" } },
-          { email: { contains: query, mode: "insensitive" } },
+          { name: { contains: query, mode: 'insensitive' } },
+          { email: { contains: query, mode: 'insensitive' } },
         ],
       },
     ],
@@ -330,6 +330,6 @@ export async function searchUsers(
       clinic: true,
     },
     take: options?.limit || 10,
-    orderBy: { name: "asc" },
+    orderBy: { name: 'asc' },
   });
 }

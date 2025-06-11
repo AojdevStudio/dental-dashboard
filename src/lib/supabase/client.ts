@@ -4,7 +4,7 @@
  * configured for use in client-side (browser) environments.
  */
 
-import { createBrowserClient } from "@supabase/ssr";
+import { createBrowserClient } from '@supabase/ssr';
 
 /**
  * Creates a Supabase client instance for use in browser environments.

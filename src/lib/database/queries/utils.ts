@@ -3,7 +3,7 @@
  * Helper functions for multi-tenant database queries
  */
 
-import type { AuthContext } from "../auth-context";
+import type { AuthContext } from '../auth-context';
 
 /**
  * Get clinic filter for queries based on auth context
@@ -27,13 +27,13 @@ export function getClinicFilter(
     }
 
     // No access to requested clinic
-    throw new Error("Access denied to requested clinic");
+    throw new Error('Access denied to requested clinic');
   }
 
   // No specific clinic requested
   if (authContext.isSystemAdmin) {
     // System admin: use selected clinic or show all
-    return authContext.selectedClinicId === "all"
+    return authContext.selectedClinicId === 'all'
       ? undefined // No filter = all clinics
       : authContext.selectedClinicId;
   }

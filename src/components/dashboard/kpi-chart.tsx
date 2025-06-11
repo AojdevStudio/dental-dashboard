@@ -5,12 +5,11 @@
  * indicators (KPIs) with trend visualization in the dashboard interface.
  */
 
-"use client";
+'use client';
 
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Skeleton } from "@/components/ui/skeleton";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import * as React from "react";
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Skeleton } from '@/components/ui/skeleton';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 /**
  * Sample data for chart visualization
@@ -18,7 +17,7 @@ import * as React from "react";
  */
 const sampleChartData = {
   daily: Array.from({ length: 30 }, (_, i) => ({
-    date: new Date(2025, 4, i + 1).toISOString().split("T")[0],
+    date: new Date(2025, 4, i + 1).toISOString().split('T')[0],
     value: Math.floor(Math.random() * 100) + 50,
   })),
   weekly: Array.from({ length: 12 }, (_, i) => ({
@@ -26,7 +25,7 @@ const sampleChartData = {
     value: Math.floor(Math.random() * 100) + 50,
   })),
   monthly: Array.from({ length: 12 }, (_, i) => ({
-    date: new Date(2025, i, 1).toLocaleString("default", { month: "short" }),
+    date: new Date(2025, i, 1).toLocaleString('default', { month: 'short' }),
     value: Math.floor(Math.random() * 100) + 50,
   })),
 };
@@ -47,7 +46,7 @@ interface KPIChartProps {
   subtitle?: string;
   isLoading?: boolean;
   data?: Array<{ date: string; value: number }>;
-  defaultView?: "daily" | "weekly" | "monthly";
+  defaultView?: 'daily' | 'weekly' | 'monthly';
   valuePrefix?: string;
   valueSuffix?: string;
 }
@@ -70,9 +69,9 @@ export function KPIChart({
   subtitle,
   isLoading = false,
   data,
-  defaultView = "monthly",
-  valuePrefix = "",
-  valueSuffix = "",
+  defaultView = 'monthly',
+  valuePrefix = '',
+  valueSuffix = '',
 }: KPIChartProps) {
   // If no data is provided, use the sample data
   // If data is provided, use it for all time periods
@@ -89,11 +88,11 @@ export function KPIChart({
     return (
       <Card>
         <CardHeader>
-          <Skeleton className="h-5 w-40" />
-          {subtitle && <Skeleton className="h-4 w-60 mt-1" />}
+          <Skeleton class="h-5 w-40" />
+          {subtitle && <Skeleton class="h-4 w-60 mt-1" />}
         </CardHeader>
         <CardContent>
-          <Skeleton className="h-[200px] w-full" />
+          <Skeleton class="h-[200px] w-full" />
         </CardContent>
       </Card>
     );
@@ -103,17 +102,17 @@ export function KPIChart({
     <Card>
       <CardHeader>
         <CardTitle>{title}</CardTitle>
-        {subtitle && <p className="text-sm text-muted-foreground">{subtitle}</p>}
+        {subtitle && <p class="text-sm text-muted-foreground">{subtitle}</p>}
       </CardHeader>
       <CardContent>
         <Tabs defaultValue={defaultView}>
-          <TabsList className="mb-4">
+          <TabsList class="mb-4">
             <TabsTrigger value="daily">Daily</TabsTrigger>
             <TabsTrigger value="weekly">Weekly</TabsTrigger>
             <TabsTrigger value="monthly">Monthly</TabsTrigger>
           </TabsList>
 
-          <TabsContent value="daily" className="h-[200px]">
+          <TabsContent value="daily" class="h-[200px]">
             <ChartPlaceholder
               data={chartData.daily}
               valuePrefix={valuePrefix}
@@ -121,7 +120,7 @@ export function KPIChart({
             />
           </TabsContent>
 
-          <TabsContent value="weekly" className="h-[200px]">
+          <TabsContent value="weekly" class="h-[200px]">
             <ChartPlaceholder
               data={chartData.weekly}
               valuePrefix={valuePrefix}
@@ -129,7 +128,7 @@ export function KPIChart({
             />
           </TabsContent>
 
-          <TabsContent value="monthly" className="h-[200px]">
+          <TabsContent value="monthly" class="h-[200px]">
             <ChartPlaceholder
               data={chartData.monthly}
               valuePrefix={valuePrefix}
@@ -156,8 +155,8 @@ export function KPIChart({
  */
 function ChartPlaceholder({
   data,
-  valuePrefix = "",
-  valueSuffix = "",
+  valuePrefix = '',
+  valueSuffix = '',
 }: {
   data: Array<{ date: string; value: number }>;
   valuePrefix?: string;
@@ -170,12 +169,12 @@ function ChartPlaceholder({
   const range = max - min;
 
   return (
-    <div className="flex flex-col h-full">
-      <div className="text-sm text-muted-foreground mb-2">
+    <div class="flex flex-col h-full">
+      <div class="text-sm text-muted-foreground mb-2">
         Placeholder chart: In production, use a chart library like Recharts
       </div>
 
-      <div className="flex items-end h-full space-x-1">
+      <div class="flex items-end h-full space-x-1">
         {data.map((point, i) => {
           // Scale the bar height based on the value
           const heightPercent =
@@ -184,15 +183,15 @@ function ChartPlaceholder({
               : ((point.value - min) / range) * 80 + 20; // Scale from 20% to 100%
 
           return (
-            <div key={i} className="flex flex-col items-center flex-1">
+            <div key={i} class="flex flex-col items-center flex-1">
               <div
-                className="bg-primary/90 w-full rounded-t"
+                class="bg-primary/90 w-full rounded-t"
                 style={{ height: `${heightPercent}%` }}
                 title={`${point.date}: ${valuePrefix}${point.value}${valueSuffix}`}
               />
               {/* Only show every nth label to avoid overcrowding */}
               {i % Math.ceil(data.length / 10) === 0 && (
-                <div className="text-xs text-muted-foreground mt-1 truncate w-full text-center">
+                <div class="text-xs text-muted-foreground mt-1 truncate w-full text-center">
                   {point.date}
                 </div>
               )}

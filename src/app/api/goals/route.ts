@@ -3,17 +3,16 @@
  * Multi-tenant aware goal management endpoints
  */
 
-import { withAuth } from "../../../lib/api/middleware";
-import { apiError, apiPaginated, apiSuccess, getPaginationParams } from "../../../lib/api/utils";
-import type { AuthContext } from "../../../lib/database/auth-context";
-import * as goalQueries from "../../../lib/database/queries/goals";
-import type { NextRequest } from "next/server";
-import { z } from "zod";
+import type { NextRequest } from 'next/server';
+import { z } from 'zod';
+import { withAuth } from '../../../lib/api/middleware';
+import { apiError, apiPaginated, apiSuccess, getPaginationParams } from '../../../lib/api/utils';
+import * as goalQueries from '../../../lib/database/queries/goals';
 
 // Request schemas
 const createGoalSchema = z.object({
   metricDefinitionId: z.string().cuid(),
-  timePeriod: z.enum(["daily", "weekly", "monthly", "quarterly", "yearly"]),
+  timePeriod: z.enum(['daily', 'weekly', 'monthly', 'quarterly', 'yearly']),
   startDate: z.string().datetime(),
   endDate: z.string().datetime(),
   targetValue: z.string(),
@@ -39,12 +38,12 @@ export type CreateGoalResponse = Awaited<ReturnType<typeof goalQueries.createGoa
  */
 export const GET = withAuth(async (request, { authContext }) => {
   const searchParams = (request as NextRequest).nextUrl.searchParams;
-  const clinicId = searchParams.get("clinicId") || undefined;
-  const providerId = searchParams.get("providerId") || undefined;
-  const metricDefinitionId = searchParams.get("metricDefinitionId") || undefined;
-  const active = searchParams.get("active");
-  const timePeriod = searchParams.get("timePeriod") || undefined;
-  const includeProgress = searchParams.get("includeProgress") === "true";
+  const clinicId = searchParams.get('clinicId') || undefined;
+  const providerId = searchParams.get('providerId') || undefined;
+  const metricDefinitionId = searchParams.get('metricDefinitionId') || undefined;
+  const active = searchParams.get('active');
+  const timePeriod = searchParams.get('timePeriod') || undefined;
+  const includeProgress = searchParams.get('includeProgress') === 'true';
   const { limit, page, offset } = getPaginationParams(searchParams);
 
   const result = await goalQueries.getGoals(
@@ -53,7 +52,7 @@ export const GET = withAuth(async (request, { authContext }) => {
       clinicId,
       providerId,
       metricDefinitionId,
-      active: active === null ? undefined : active === "true",
+      active: active === null ? undefined : active === 'true',
       timePeriod,
     },
     {
@@ -79,7 +78,7 @@ export const POST = withAuth(async (request, { authContext }) => {
     try {
       body = createFromTemplateSchema.parse(rawBody);
     } catch (error) {
-      return apiError("Invalid request body", 400);
+      return apiError('Invalid request body', 400);
     }
 
     try {
@@ -93,10 +92,10 @@ export const POST = withAuth(async (request, { authContext }) => {
       return apiSuccess(goal, 201);
     } catch (error) {
       if (error instanceof Error) {
-        if (error.message.includes("Access denied")) {
+        if (error.message.includes('Access denied')) {
           return apiError(error.message, 403);
         }
-        if (error.message.includes("not found")) {
+        if (error.message.includes('not found')) {
           return apiError(error.message, 404);
         }
       }
@@ -108,7 +107,7 @@ export const POST = withAuth(async (request, { authContext }) => {
     try {
       body = createGoalSchema.parse(rawBody);
     } catch (error) {
-      return apiError("Invalid request body", 400);
+      return apiError('Invalid request body', 400);
     }
 
     const goalData: goalQueries.CreateGoalInput = {
@@ -126,13 +125,13 @@ export const POST = withAuth(async (request, { authContext }) => {
       return apiSuccess(goal, 201);
     } catch (error) {
       if (error instanceof Error) {
-        if (error.message.includes("Access denied")) {
+        if (error.message.includes('Access denied')) {
           return apiError(error.message, 403);
         }
-        if (error.message.includes("Insufficient permissions")) {
+        if (error.message.includes('Insufficient permissions')) {
           return apiError(error.message, 403);
         }
-        if (error.message.includes("Invalid")) {
+        if (error.message.includes('Invalid')) {
           return apiError(error.message, 400);
         }
       }

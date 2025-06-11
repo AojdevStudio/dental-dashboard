@@ -1,6 +1,6 @@
-import type { Prisma } from "@prisma/client";
-import { prisma } from "@/lib/database/client";
-import type { ProviderFilters, PaginationParams } from "@/types/providers";
+import { prisma } from '@/lib/database/client';
+import type { ProviderFilters } from '@/types/providers';
+import type { Prisma } from '@prisma/client';
 
 /**
  * Describes the raw row structure from the dentist performance query.
@@ -143,7 +143,7 @@ export async function getProvidersWithLocations(
   }
 
   if (!includeInactive) {
-    whereClause.status = "active";
+    whereClause.status = 'active';
   }
 
   // If filtering by location, we need to include providers who work at that location
@@ -178,7 +178,7 @@ export async function getProvidersWithLocations(
             },
           },
         },
-        orderBy: [{ isPrimary: "desc" }, { location: { name: "asc" } }],
+        orderBy: [{ isPrimary: 'desc' }, { location: { name: 'asc' } }],
       },
       _count: {
         select: {
@@ -190,7 +190,7 @@ export async function getProvidersWithLocations(
         },
       },
     },
-    orderBy: [{ name: "asc" }],
+    orderBy: [{ name: 'asc' }],
   };
 
   // Add pagination if provided
@@ -244,7 +244,7 @@ export async function getProviderPerformanceByLocation(params: {
   clinicId?: string;
   startDate: Date;
   endDate: Date;
-  providerType?: "dentist" | "hygienist";
+  providerType?: 'dentist' | 'hygienist';
 }): Promise<ProviderPerformanceMetrics[]> {
   const { providerId, locationId, clinicId, startDate, endDate, providerType } = params;
 
@@ -278,7 +278,7 @@ export async function getProviderPerformanceByLocation(params: {
   whereConditions.push(`dp.date <= $${values.length + 1}`);
   values.push(endDate);
 
-  const whereClause = whereConditions.length > 0 ? `WHERE ${whereConditions.join(" AND ")}` : "";
+  const whereClause = whereConditions.length > 0 ? `WHERE ${whereConditions.join(' AND ')}` : '';
 
   // Query for dentist performance (has location-specific data)
   const dentistQuery = `
@@ -334,7 +334,7 @@ export async function getProviderPerformanceByLocation(params: {
     JOIN provider_locations pl ON p.id = pl.provider_id AND pl.is_active = true
     JOIN locations l ON pl.location_id = l.id
     LEFT JOIN hygiene_production hp ON p.id = hp.provider_id
-    ${whereClause.replace(/dp\.date/g, "hp.date")}
+    ${whereClause.replace(/dp\.date/g, 'hp.date')}
     AND p.provider_type = 'hygienist'
     GROUP BY p.id, p.name, l.id, l.name
     HAVING COUNT(hp.id) > 0
@@ -343,7 +343,7 @@ export async function getProviderPerformanceByLocation(params: {
   try {
     let results: (RawDentistPerformanceRow | RawHygienistPerformanceRow)[] = [];
 
-    if (!providerType || providerType === "dentist") {
+    if (!providerType || providerType === 'dentist') {
       const dentistResults = (await prisma.$queryRawUnsafe(
         dentistQuery,
         ...values
@@ -351,7 +351,7 @@ export async function getProviderPerformanceByLocation(params: {
       results = [...results, ...dentistResults];
     }
 
-    if (!providerType || providerType === "hygienist") {
+    if (!providerType || providerType === 'hygienist') {
       const hygienistResults = (await prisma.$queryRawUnsafe(
         hygienistQuery,
         ...values,
@@ -368,22 +368,22 @@ export async function getProviderPerformanceByLocation(params: {
       locationName: row.location_name,
       periodStart: new Date(row.period_start),
       periodEnd: new Date(row.period_end),
-      totalProduction: Number.parseFloat(row.total_production || "0"),
-      avgDailyProduction: Number.parseFloat(row.avg_daily_production || "0"),
-      productionDays: Number.parseInt(String(row.production_days || "0")),
+      totalProduction: Number.parseFloat(row.total_production || '0'),
+      avgDailyProduction: Number.parseFloat(row.avg_daily_production || '0'),
+      productionDays: Number.parseInt(String(row.production_days || '0')),
       productionGoal: row.production_goal
         ? Number.parseFloat(String(row.production_goal))
         : undefined,
       variancePercentage:
         row.production_goal && Number.parseFloat(row.production_goal) !== 0
-          ? ((Number.parseFloat(row.total_production || "0") -
+          ? ((Number.parseFloat(row.total_production || '0') -
               Number.parseFloat(row.production_goal)) /
               Number.parseFloat(row.production_goal)) *
             100
           : undefined,
     }));
   } catch (error) {
-    console.error("Error fetching provider performance by location:", error);
+    console.error('Error fetching provider performance by location:', error);
     throw error;
   }
 }
@@ -476,8 +476,8 @@ export async function getProviderLocationSummary(
     });
 
     acc[locationKey].counts.total++;
-    if (pl.provider.providerType === "dentist") acc[locationKey].counts.dentists++;
-    if (pl.provider.providerType === "hygienist") acc[locationKey].counts.hygienists++;
+    if (pl.provider.providerType === 'dentist') acc[locationKey].counts.dentists++;
+    if (pl.provider.providerType === 'hygienist') acc[locationKey].counts.hygienists++;
     if (pl.isPrimary) acc[locationKey].counts.primary++;
 
     return acc;
@@ -518,7 +518,7 @@ export async function getProvidersWithLocationsPaginated(
   }
 
   if (!includeInactive) {
-    whereClause.status = "active";
+    whereClause.status = 'active';
   }
 
   // If filtering by location, we need to include providers who work at that location
@@ -557,7 +557,7 @@ export async function getProvidersWithLocationsPaginated(
                 },
               },
             },
-            orderBy: [{ isPrimary: "desc" }, { location: { name: "asc" } }],
+            orderBy: [{ isPrimary: 'desc' }, { location: { name: 'asc' } }],
           },
           _count: {
             select: {
@@ -569,7 +569,7 @@ export async function getProvidersWithLocationsPaginated(
             },
           },
         },
-        orderBy: [{ name: "asc" }],
+        orderBy: [{ name: 'asc' }],
       };
 
       // Add pagination if provided
