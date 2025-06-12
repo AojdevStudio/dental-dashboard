@@ -111,7 +111,7 @@ export function Sidebar({ className }: SidebarProps) {
 
   return (
     <nav
-      class={cn(
+      className={cn(
         'relative flex h-full flex-col border-r bg-background transition-all duration-300',
         isSidebarCollapsed ? 'w-16' : 'w-[280px]',
         className
@@ -119,30 +119,34 @@ export function Sidebar({ className }: SidebarProps) {
       aria-label="Main navigation"
     >
       {/* Logo/Brand */}
-      <div class="flex h-16 items-center justify-between border-b px-4">
-        {!isSidebarCollapsed && <h1 class="text-xl font-semibold">Dental Dashboard</h1>}
+      <div className="flex h-16 items-center justify-between border-b px-4">
+        {!isSidebarCollapsed && <h1 className="text-xl font-semibold">Dental Dashboard</h1>}
         <Button
           variant="ghost"
           size="icon"
           onClick={toggleSidebar}
           aria-label={isSidebarCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
-          class="h-8 w-8"
+          className="h-8 w-8"
         >
-          {isSidebarCollapsed ? <ChevronRight class="h-4 w-4" /> : <ChevronLeft class="h-4 w-4" />}
+          {isSidebarCollapsed ? (
+            <ChevronRight className="h-4 w-4" />
+          ) : (
+            <ChevronLeft className="h-4 w-4" />
+          )}
         </Button>
       </div>
 
       {/* Navigation */}
-      <ScrollArea class="flex-1 px-2 py-4">
+      <ScrollArea className="flex-1 px-2 py-4">
         <nav aria-label="Sidebar navigation">
           {navigation.map((section, sectionIndex) => (
-            <div key={section.id} class={cn(sectionIndex > 0 && 'mt-6')}>
+            <div key={section.id} className={cn(sectionIndex > 0 && 'mt-6')}>
               {section.title && !isSidebarCollapsed && (
-                <h2 class="mb-2 px-3 text-xs font-medium uppercase tracking-wider text-muted-foreground">
+                <h2 className="mb-2 px-3 text-xs font-medium uppercase tracking-wider text-muted-foreground">
                   {section.title}
                 </h2>
               )}
-              <ul class="space-y-1">
+              <ul className="space-y-1">
                 {section.items.map((item) => (
                   <li key={item.id}>
                     <NavItemComponent
@@ -154,7 +158,7 @@ export function Sidebar({ className }: SidebarProps) {
                     />
                     {/* Nested items */}
                     {item.children && expandedSections.includes(item.id) && !isSidebarCollapsed && (
-                      <ul class="mt-1 space-y-1">
+                      <ul className="mt-1 space-y-1">
                         {item.children.map((child) => (
                           <li key={child.id}>
                             <NavItemComponent
@@ -178,7 +182,7 @@ export function Sidebar({ className }: SidebarProps) {
       {/* Skip to main content link for accessibility */}
       <a
         href="#main-content"
-        class="sr-only focus:not-sr-only focus:absolute focus:left-20 focus:top-20 focus:z-50 focus:rounded-md focus:bg-background focus:px-4 focus:py-2 focus:outline-2 focus:outline-primary"
+        className="sr-only focus:not-sr-only focus:absolute focus:left-20 focus:top-20 focus:z-50 focus:rounded-md focus:bg-background focus:px-4 focus:py-2 focus:outline-2 focus:outline-primary"
       >
         Skip to main content
       </a>

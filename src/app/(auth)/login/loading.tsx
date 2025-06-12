@@ -26,37 +26,37 @@ import { Skeleton } from '@/components/ui/skeleton';
  */
 export default function LoginLoading() {
   return (
-    <div class="container relative min-h-screen flex-col items-center justify-center grid lg:max-w-none lg:grid-cols-2 lg:px-0">
+    <div className="container relative min-h-screen flex-col items-center justify-center grid lg:max-w-none lg:grid-cols-2 lg:px-0">
       {/* Left column - only visible on large screens */}
-      <div class="relative hidden h-full flex-col bg-muted p-10 text-white lg:flex dark:border-r">
-        <div class="absolute inset-0 bg-zinc-900" />
-        <div class="relative z-20 flex items-center text-lg font-medium">
-          <Skeleton class="h-6 w-6 mr-2" />
-          <Skeleton class="h-6 w-32" />
+      <div className="relative hidden h-full flex-col bg-muted p-10 text-white lg:flex dark:border-r">
+        <div className="absolute inset-0 bg-zinc-900" />
+        <div className="relative z-20 flex items-center text-lg font-medium">
+          <Skeleton className="h-6 w-6 mr-2" />
+          <Skeleton className="h-6 w-32" />
         </div>
-        <div class="relative z-20 mt-auto">
-          <Skeleton class="h-20 w-full" />
+        <div className="relative z-20 mt-auto">
+          <Skeleton className="h-20 w-full" />
         </div>
       </div>
 
       {/* Right column - login form skeleton */}
-      <div class="lg:p-8">
-        <div class="mx-auto flex w-full flex-col justify-center space-y-6 sm:w-[350px]">
+      <div className="lg:p-8">
+        <div className="mx-auto flex w-full flex-col justify-center space-y-6 sm:w-[350px]">
           {/* Header skeleton */}
-          <div class="flex flex-col space-y-2 text-center">
-            <Skeleton class="h-8 w-48 mx-auto" />
-            <Skeleton class="h-4 w-64 mx-auto" />
+          <div className="flex flex-col space-y-2 text-center">
+            <Skeleton className="h-8 w-48 mx-auto" />
+            <Skeleton className="h-4 w-64 mx-auto" />
           </div>
 
           {/* Form fields skeleton */}
-          <div class="space-y-4">
-            <Skeleton class="h-10 w-full" />
-            <Skeleton class="h-10 w-full" />
-            <Skeleton class="h-10 w-full" />
+          <div className="space-y-4">
+            <Skeleton className="h-10 w-full" />
+            <Skeleton className="h-10 w-full" />
+            <Skeleton className="h-10 w-full" />
           </div>
 
           {/* Submit button skeleton */}
-          <Skeleton class="h-16 w-full" />
+          <Skeleton className="h-16 w-full" />
         </div>
       </div>
     </div>

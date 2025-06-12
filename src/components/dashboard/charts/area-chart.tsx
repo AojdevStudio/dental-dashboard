@@ -37,8 +37,10 @@ export function AreaChart({
   loading,
   error,
   className,
-  formatYAxis = (value) => formatNumber(value),
-  formatTooltip = (value) => formatNumber(value),
+  formatYAxis = (value) =>
+    formatNumber(typeof value === 'string' ? Number.parseFloat(value) || 0 : value),
+  formatTooltip = (value) =>
+    formatNumber(typeof value === 'string' ? Number.parseFloat(value) || 0 : value),
   onDataPointClick,
   stacked = false,
   gradient = true,
@@ -78,10 +80,13 @@ export function AreaChart({
     return (
       <div style={chartTheme.tooltip.container}>
         <p style={chartTheme.tooltip.label}>
-          {config.xAxisKey === 'date' ? formatDate(label) : label}
+          {config.xAxisKey === 'date' ? formatDate(label || '') : label}
         </p>
         {payload.map((entry, index: number) => (
-          <p key={index} style={{ ...chartTheme.tooltip.value, color: entry.color }}>
+          <p
+            key={`${entry.name}-${index}`}
+            style={{ ...chartTheme.tooltip.value, color: entry.color }}
+          >
             {entry.name}: {formatTooltip(entry.value, entry.name)}
           </p>
         ))}
@@ -96,7 +101,7 @@ export function AreaChart({
       config={defaultConfig}
       loading={loading}
       error={error}
-      class={className}
+      className={className}
     >
       <ResponsiveContainer width="100%" height={defaultConfig.height}>
         <RechartsAreaChart
@@ -115,7 +120,7 @@ export function AreaChart({
           {gradient && (
             <defs>
               {(config.series || [{ dataKey: 'value' }]).map((series, index) => {
-                const color = series.color || colors[index];
+                const color = ('color' in series ? series.color : undefined) || colors[index];
                 return (
                   <linearGradient
                     key={`gradient-${series.dataKey}`}

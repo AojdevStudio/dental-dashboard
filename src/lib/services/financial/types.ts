@@ -1,6 +1,6 @@
 import type { Clinic, DataSource, Location, LocationFinancial } from '@prisma/client';
 
-export interface CreateFinancialData {
+export interface CreateFinancialData extends Record<string, unknown> {
   clinicId: string;
   locationId: string;
   date: Date;
@@ -13,7 +13,7 @@ export interface CreateFinancialData {
   dataSourceId?: string;
 }
 
-export interface UpdateFinancialData {
+export interface UpdateFinancialData extends Record<string, unknown> {
   production?: number;
   adjustments?: number;
   writeOffs?: number;

@@ -25,7 +25,7 @@ export default function LoginPage(): React.ReactElement {
    * Handles the form submission for sign-in.
    * @param {FormData} formData - The form data from the sign-in form.
    */
-  const handleSignIn = async (formData: FormData) => {
+  const handleSignIn = (formData: FormData) => {
     startTransition(async () => {
       try {
         const result = await signInWithVerification(formData);
@@ -56,7 +56,7 @@ export default function LoginPage(): React.ReactElement {
   /**
    * Handles OAuth sign in with Google
    */
-  const handleGoogleSignIn = async () => {
+  const handleGoogleSignIn = () => {
     startTransition(async () => {
       const result = await signInWithOAuth('google');
       if (result.error) {
@@ -68,46 +68,46 @@ export default function LoginPage(): React.ReactElement {
   };
 
   return (
-    <div class="min-h-screen flex font-sans">
+    <div className="min-h-screen flex font-sans">
       {/* Left side - Branding/Info */}
-      <div class="hidden lg:flex lg:w-1/2 bg-gradient-to-br from-blue-600 to-indigo-700 flex-col justify-start pt-12 px-12">
-        <div class="max-w-md">
-          <h1 class="text-4xl font-bold text-white mb-2 tracking-tight">
+      <div className="hidden lg:flex lg:w-1/2 bg-gradient-to-br from-blue-600 to-indigo-700 flex-col justify-start pt-12 px-12">
+        <div className="max-w-md">
+          <h1 className="text-4xl font-bold text-white mb-2 tracking-tight">
             Dental Analytics Dashboard
           </h1>
-          <div class="flex items-center mb-6">
-            <p class="text-sm uppercase tracking-wider text-blue-100 font-medium">Powered by</p>
-            <span class="mx-2 text-blue-300">|</span>
-            <p class="text-base font-semibold text-white">Unified Dental</p>
+          <div className="flex items-center mb-6">
+            <p className="text-sm uppercase tracking-wider text-blue-100 font-medium">Powered by</p>
+            <span className="mx-2 text-blue-300">|</span>
+            <p className="text-base font-semibold text-white">Unified Dental</p>
           </div>
-          <p class="text-xl text-blue-100 mb-8 leading-relaxed font-light">
+          <p className="text-xl text-blue-100 mb-8 leading-relaxed font-light">
             Track your practice performance, manage goals, and gain insights into your dental
             practice operations.
           </p>
-          <div class="space-y-4 text-blue-100 font-light">
-            <div class="flex items-center">
-              <div class="w-2 h-2 bg-blue-300 rounded-full mr-3" />
+          <div className="space-y-4 text-blue-100 font-light">
+            <div className="flex items-center">
+              <div className="w-2 h-2 bg-blue-300 rounded-full mr-3" />
               <span>Real-time metrics and KPI tracking</span>
             </div>
-            <div class="flex items-center">
-              <div class="w-2 h-2 bg-blue-300 rounded-full mr-3" />
+            <div className="flex items-center">
+              <div className="w-2 h-2 bg-blue-300 rounded-full mr-3" />
               <span>Google Sheets integration</span>
             </div>
-            <div class="flex items-center">
-              <div class="w-2 h-2 bg-blue-300 rounded-full mr-3" />
+            <div className="flex items-center">
+              <div className="w-2 h-2 bg-blue-300 rounded-full mr-3" />
               <span>Goal setting and progress monitoring</span>
             </div>
 
-            <div class="mt-12 flex justify-center">
-              <div class="relative bg-white/10 backdrop-blur-sm rounded-xl p-6 border border-white/20 shadow-xl overflow-hidden">
-                <div class="absolute inset-0 bg-gradient-to-br from-blue-500/20 to-indigo-600/20 z-0" />
+            <div className="mt-12 flex justify-center">
+              <div className="relative bg-white/10 backdrop-blur-sm rounded-xl p-6 border border-white/20 shadow-xl overflow-hidden">
+                <div className="absolute inset-0 bg-gradient-to-br from-blue-500/20 to-indigo-600/20 z-0" />
                 <img
                   src="/dashboard-analytics.svg"
                   alt="Dental Analytics Dashboard visualization"
-                  class="relative z-10 w-full max-w-xs opacity-90 hover:opacity-100 transition-opacity duration-300"
+                  className="relative z-10 w-full max-w-xs opacity-90 hover:opacity-100 transition-opacity duration-300"
                 />
-                <div class="absolute -bottom-6 -right-6 w-32 h-32 bg-blue-400/20 rounded-full blur-2xl z-0" />
-                <div class="absolute -top-6 -left-6 w-24 h-24 bg-indigo-400/20 rounded-full blur-2xl z-0" />
+                <div className="absolute -bottom-6 -right-6 w-32 h-32 bg-blue-400/20 rounded-full blur-2xl z-0" />
+                <div className="absolute -top-6 -left-6 w-24 h-24 bg-indigo-400/20 rounded-full blur-2xl z-0" />
               </div>
             </div>
           </div>
@@ -115,18 +115,20 @@ export default function LoginPage(): React.ReactElement {
       </div>
 
       {/* Right side - Login Form */}
-      <div class="w-full lg:w-1/2 flex flex-col justify-center px-8 sm:px-12 lg:px-16 xl:px-20 bg-white">
-        <div class="max-w-md w-full mx-auto">
-          <div class="mb-8">
-            <h2 class="text-3xl font-bold text-gray-900 mb-2 tracking-tight">Welcome back</h2>
-            <p class="text-gray-600 font-light">Sign in to access your dental practice dashboard</p>
+      <div className="w-full lg:w-1/2 flex flex-col justify-center px-8 sm:px-12 lg:px-16 xl:px-20 bg-white">
+        <div className="max-w-md w-full mx-auto">
+          <div className="mb-8">
+            <h2 className="text-3xl font-bold text-gray-900 mb-2 tracking-tight">Welcome back</h2>
+            <p className="text-gray-600 font-light">
+              Sign in to access your dental practice dashboard
+            </p>
           </div>
 
-          <form action={handleSignIn} class="space-y-6">
+          <form action={handleSignIn} className="space-y-6">
             <div>
               <label
-                for="email-address"
-                class="block text-sm font-medium text-gray-700 mb-2 tracking-wide"
+                htmlFor="email-address"
+                className="block text-sm font-medium text-gray-700 mb-2 tracking-wide"
               >
                 Email address
               </label>
@@ -136,15 +138,15 @@ export default function LoginPage(): React.ReactElement {
                 type="email"
                 autoComplete="email"
                 required={true}
-                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors"
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors"
                 placeholder="Enter your email"
               />
             </div>
 
             <div>
               <label
-                for="password"
-                class="block text-sm font-medium text-gray-700 mb-2 tracking-wide"
+                htmlFor="password"
+                className="block text-sm font-medium text-gray-700 mb-2 tracking-wide"
               >
                 Password
               </label>
@@ -154,44 +156,45 @@ export default function LoginPage(): React.ReactElement {
                 type="password"
                 autoComplete="current-password"
                 required={true}
-                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors"
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors"
                 placeholder="Enter your password"
               />
             </div>
 
             {error && (
-              <div class="bg-red-50 border border-red-200 rounded-lg p-4">
-                <p class="text-sm text-red-600">{error}</p>
+              <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+                <p className="text-sm text-red-600">{error}</p>
               </div>
             )}
 
             <button
               type="submit"
               disabled={isPending}
-              class="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 px-4 rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed tracking-wide"
+              className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 px-4 rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed tracking-wide"
             >
               {isPending ? 'Signing in...' : 'Sign in'}
             </button>
           </form>
 
-          <div class="mt-6">
-            <div class="relative">
-              <div class="absolute inset-0 flex items-center">
-                <div class="w-full border-t border-gray-300" />
+          <div className="mt-6">
+            <div className="relative">
+              <div className="absolute inset-0 flex items-center">
+                <div className="w-full border-t border-gray-300" />
               </div>
-              <div class="relative flex justify-center text-sm">
-                <span class="px-2 bg-white text-gray-500">Or continue with</span>
+              <div className="relative flex justify-center text-sm">
+                <span className="px-2 bg-white text-gray-500">Or continue with</span>
               </div>
             </div>
 
-            <div class="mt-6">
+            <div className="mt-6">
               <button
                 type="button"
                 onClick={handleGoogleSignIn}
                 disabled={isPending}
-                class="w-full flex items-center justify-center gap-3 bg-white hover:bg-gray-50 text-gray-700 font-medium py-3 px-4 rounded-lg border border-gray-300 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="w-full flex items-center justify-center gap-3 bg-white hover:bg-gray-50 text-gray-700 font-medium py-3 px-4 rounded-lg border border-gray-300 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                <svg class="w-5 h-5" viewBox="0 0 24 24">
+                <svg className="w-5 h-5" viewBox="0 0 24 24" aria-label="Google logo">
+                  <title>Google logo</title>
                   <path
                     fill="#4285F4"
                     d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
@@ -214,57 +217,57 @@ export default function LoginPage(): React.ReactElement {
             </div>
           </div>
 
-          <div class="mt-8 pt-6 border-t border-gray-200">
+          <div className="mt-8 pt-6 border-t border-gray-200">
             <button
               type="button"
               onClick={handleForgotPassword}
               disabled={isPending}
-              class="w-full bg-transparent hover:bg-gray-50 text-blue-600 font-medium py-3 px-4 rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed tracking-wide"
+              className="w-full bg-transparent hover:bg-gray-50 text-blue-600 font-medium py-3 px-4 rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed tracking-wide"
             >
               {isPending ? 'Processing...' : 'Forgot password?'}
             </button>
 
-            <div class="mt-4">
-              <p class="text-center text-sm text-gray-600 mb-4">
+            <div className="mt-4">
+              <p className="text-center text-sm text-gray-600 mb-4">
                 Don't have an account?{' '}
-                <a href="/register" class="font-medium text-blue-600 hover:text-blue-500">
+                <a href="/register" className="font-medium text-blue-600 hover:text-blue-500">
                   Sign up
                 </a>
               </p>
             </div>
 
-            <div class="mt-12 pt-6 border-t border-gray-200">
-              <div class="text-center">
-                <p class="text-sm text-gray-500 font-light">
+            <div className="mt-12 pt-6 border-t border-gray-200">
+              <div className="text-center">
+                <p className="text-sm text-gray-500 font-light">
                   © {new Date().getFullYear()} KC Ventures Consulting Group LLC
                 </p>
-                <div class="mt-2 flex items-center justify-center space-x-4">
+                <div className="mt-2 flex items-center justify-center space-x-4">
                   <a
                     href="https://unifiedental.com"
                     target="_blank"
                     rel="noopener noreferrer"
-                    class="text-sm text-blue-600 hover:text-blue-800 transition-colors"
+                    className="text-sm text-blue-600 hover:text-blue-800 transition-colors"
                   >
                     unifiedental.com
                   </a>
-                  <span class="text-gray-300">|</span>
+                  <span className="text-gray-300">|</span>
                   <a
                     href="tel:3466440193"
-                    class="text-sm text-blue-600 hover:text-blue-800 transition-colors"
+                    className="text-sm text-blue-600 hover:text-blue-800 transition-colors"
                   >
                     346-644-0193
                   </a>
-                  <span class="text-gray-300">|</span>
+                  <span className="text-gray-300">|</span>
                   <a
                     href="https://www.linkedin.com/in/ossieirondi/"
                     target="_blank"
                     rel="noopener noreferrer"
-                    class="text-sm text-blue-600 hover:text-blue-800 transition-colors"
+                    className="text-sm text-blue-600 hover:text-blue-800 transition-colors"
                   >
                     LinkedIn
                   </a>
                 </div>
-                <p class="mt-4 text-xs text-gray-400 max-w-md mx-auto">
+                <p className="mt-4 text-xs text-gray-400 max-w-md mx-auto">
                   "Simple solutions for complex dental needs" — Streamlining dental practice
                   management with unified, efficient tools.
                 </p>

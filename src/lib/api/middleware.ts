@@ -1,16 +1,13 @@
 import { type NextRequest, NextResponse } from 'next/server';
 import { type AuthContext, getAuthContext } from '../database/auth-context';
-import type { ApiResponse } from './utils';
 
-export type ApiHandler<TSuccessPayload = unknown> = (
+export type ApiHandler<_TSuccessPayload = unknown> = (
   request: Request,
   context: {
     params: Promise<Record<string, string | string[]>>;
     authContext: AuthContext;
   }
-) => Promise<
-  NextResponse<ApiResponse<TSuccessPayload>> | NextResponse<{ error: string; code?: string }>
->;
+) => Promise<NextResponse<unknown>>;
 
 /**
  * Wraps an API route handler with authentication and auth context

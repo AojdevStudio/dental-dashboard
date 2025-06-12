@@ -149,12 +149,144 @@ This is a **critical business understanding** for dental practice financials:
 - Inactive location references
 - Duplicate records in non-upsert mode
 
-## Data Source Integration
+## Data Source and Syncing
 
-### Sync Timestamp Management
-- **Rule**: Successful imports update the data_source.last_synced_at timestamp
-- **Condition**: Only updates if records were actually created or updated
-- **Error Handling**: Sync timestamp failures are logged as warnings, not errors
+### Sync Architecture
+
+The system does not use a direct, real-time integration with Google Sheets. Instead, it relies on a one-way data push mechanism initiated by a Google Apps Script.
+
+- **Data Source**: The single source of truth for raw financial data is Google Sheets.
+- **Trigger**: A Google Apps Script is manually or automatically run from within the Google Sheet environment.
+- **Process**:
+    1. The script reads the financial data from the sheet.
+    2. It detects the appropriate clinic (Baytown or Humble) based on the sheet's name.
+    3. It formats the data into a JSON payload.
+    4. It sends this payload via a `POST` request to a Supabase Edge Function (e.g., `/location-financial-import`) or directly to the Supabase REST API.
+- **Data Flow**: This is a one-way push: `Google Sheets -> Google Apps Script -> Supabase API`. There is no process for syncing data back from Supabase to Google Sheets.
+
+### Data Processing Rules
+
+The Supabase Edge Function (`/upload/supabase/functions/location-financial-import/index.ts`) is responsible for receiving the data from the Google Apps Script and implements comprehensive business logic validation for financial data integrity.
+
+#### Core Financial Calculations
+
+1. **Net Production Calculation**
+   ```typescript
+   netProduction = production - adjustments - writeOffs
+   ```
+
+2. **Total Collections Calculation**
+   ```typescript
+   totalCollections = patientIncome + insuranceIncome
+   ```
+
+#### Business Validation Rules
+
+##### 1. Production Value Validation
+- **Rule**: Production values can be negative if adjustments and write-offs exceed the day's gross production
+- **Threshold Warning**: Daily production > $100,000 triggers unusual value warning
+- **Implementation**: Basic range checking to catch unusually high daily production values
+- **Rationale**: While negative production is possible, daily production exceeding $100,000 is extremely unusual for most dental practices and may indicate:
+  - Data entry errors (extra zeros, wrong decimal placement)
+  - Accidentally importing weekly/monthly totals as daily values
+  - Multiple days of data combined into a single record
+  - Large insurance batch payments incorrectly recorded as production
+  - Importing procedure codes as dollar amounts
+
+##### 2. Financial Value Flexibility
+- **Rule**: All financial values (production, adjustments, writeOffs, patientIncome, insuranceIncome) can be positive or negative depending on business scenarios
+- **Implementation**: No hard constraints on positive/negative values
+- **Rationale**: 
+  - Production can be negative when adjustments/write-offs exceed gross production
+  - Income can be negative due to refunds, chargebacks, or payment reversals
+  - Adjustments and write-offs vary based on accounting practices
+  - Business scenarios are too diverse for rigid positive/negative rules
+
+##### 3. Collections vs Production Relationship
+- **Rule**: Collections can legitimately exceed production up to 2x the production amount
+- **Warning Threshold**: Collections > 2x production triggers verification warning (not error)
+- **Implementation**: 
+  ```typescript
+  if (totalCollections > production * 2 && production > 0) {
+    warnings.push(`Record ${recordIndex}: collections ($${totalCollections}) are more than 2x production ($${production}) - please verify data entry`);
+  }
+  ```
+
+#### Why Collections Can Exceed Production
+
+This is a **critical business understanding** for dental practice financials:
+
+1. **Timing Differences**: Procedures performed in one period may be collected in another
+2. **Payment Plans**: Patients may pay for previous treatments
+3. **Insurance Delays**: Insurance payments often arrive weeks/months after treatment
+4. **Multiple Treatment Collections**: Collecting for multiple procedures from different dates
+5. **Adjustments and Corrections**: Previous period adjustments affecting current collections
+
+**Reference**: [Dental Billing Collection Percentage Variables](https://dentalbilling.com/what-variables-affect-office-collections-percentage/)
+
+##### 4. Calculation Integrity Validation
+- **Net Production Verification**: Ensures calculated net production matches expected formula
+- **Total Collections Verification**: Ensures calculated total matches sum of income sources
+- **Tolerance**: 0.01 cent precision for floating-point calculations
+
+#### Performance and Security Rules
+
+##### 1. Request Size Limits
+- **Maximum Records**: 5,000 records per batch
+- **Rationale**: Prevents system abuse and ensures reasonable processing times
+
+##### 2. Timeout Protection
+- **Processing Timeout**: 2 minutes (120,000ms)
+- **Check Frequency**: Every 10 records during validation
+- **Implementation**: Proactive timeout detection prevents function timeouts
+
+##### 3. Batch Processing Optimization
+- **Existing Record Checks**: Batch lookup instead of individual queries
+- **Performance**: Reduces N+1 query problems (713 records: 1,426 queries → 3 queries)
+
+#### Location Validation Rules
+
+##### 1. Location Existence
+- **Rule**: All referenced locations must exist in the clinic's location registry
+- **Case Sensitivity**: Location matching is case-insensitive with trimmed whitespace
+- **Error Handling**: Missing locations generate validation errors
+
+##### 2. Location Status
+- **Rule**: Inactive locations trigger warnings but don't prevent processing
+- **Rationale**: Historical data may reference currently inactive locations
+
+#### Data Quality Assurance
+
+##### 1. Date Validation
+- **Rule**: All dates must be valid JavaScript Date objects
+- **Format**: ISO date strings are preferred
+- **Range**: No specific date range restrictions (allows historical data)
+
+##### 2. Duplicate Detection
+- **Upsert Mode**: Default behavior allows updating existing records
+- **Non-Upsert Mode**: Checks for existing records and warns about duplicates
+- **Key**: Combination of clinic_id, location_id, and date
+
+#### Error Classification
+
+##### Validation Errors (Processing Stops)
+- Invalid or missing required fields (date, locationName)
+- Negative financial values
+- Invalid date formats
+- Missing location references
+- Calculation mismatches
+
+##### Warnings (Processing Continues)
+- Unusually high production values
+- Collections > 2x production
+- Inactive location references
+- Duplicate records in non-upsert mode
+
+## Data Source Timestamp Management
+
+- **Rule**: A successful data import that creates or updates records will update the `data_source.last_synced_at` timestamp in Supabase.
+- **Condition**: This update only occurs if the script successfully processes records.
+- **Error Handling**: Failures during the API call or data processing in the Edge Function are logged but do not update the timestamp.
 
 ## Security Considerations
 

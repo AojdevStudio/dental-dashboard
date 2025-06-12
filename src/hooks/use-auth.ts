@@ -182,7 +182,7 @@ export function useAuth(): AuthState {
     dbUser,
     isLoading,
     isAuthenticated: !!user,
-    isSystemAdmin: dbUser?.isSystemAdmin,
+    isSystemAdmin: !!dbUser?.isSystemAdmin,
     signOut,
   };
 }

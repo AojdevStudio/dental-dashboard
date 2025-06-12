@@ -34,7 +34,7 @@ import { cookies } from 'next/headers';
  * const { data } = await supabase.from('profiles').select('*');
  */
 export async function createClient() {
-  const cookieStore = cookies();
+  const cookieStore = await cookies();
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 

@@ -53,7 +53,10 @@ export function BarChart({
   const mobile = isMobile(breakpoint);
   const margin = getResponsiveMargin(breakpoint);
 
-  const colors = getChartColors('dental', config.series?.length > 0 || config.data.length > 0);
+  const colors = getChartColors(
+    'dental',
+    (config.series?.length || 0) > 0 ? config.series?.length || 1 : config.data.length
+  );
 
   const defaultConfig: ChartConfig = {
     ...config,
@@ -87,7 +90,10 @@ export function BarChart({
           {config.xAxisKey === 'date' ? formatDate(label || '') : label}
         </p>
         {payload.map((entry, index: number) => (
-          <p key={index} style={{ ...chartTheme.tooltip.value, color: entry.color }}>
+          <p
+            key={`${entry.name}-${index}`}
+            style={{ ...chartTheme.tooltip.value, color: entry.color }}
+          >
             {entry.name}: {formatTooltip(entry.value, entry.name)}
           </p>
         ))}
@@ -146,8 +152,11 @@ export function BarChart({
           />
         )) || (
           <Bar dataKey="value" fill={colors[0]} animationDuration={defaultConfig.animationDuration}>
-            {defaultConfig.data.map((_entry, index) => (
-              <Cell key={`cell-${index}`} fill={colors[index % colors.length]} />
+            {defaultConfig.data.map((entry, index) => (
+              <Cell
+                key={`cell-${entry.name || entry.value || index}`}
+                fill={colors[index % colors.length]}
+              />
             ))}
           </Bar>
         )}
@@ -213,8 +222,11 @@ export function BarChart({
           />
         )) || (
           <Bar dataKey="value" fill={colors[0]} animationDuration={defaultConfig.animationDuration}>
-            {defaultConfig.data.map((_entry, index) => (
-              <Cell key={`cell-${index}`} fill={colors[index % colors.length]} />
+            {defaultConfig.data.map((entry, index) => (
+              <Cell
+                key={`cell-${entry.name || entry.value || index}`}
+                fill={colors[index % colors.length]}
+              />
             ))}
           </Bar>
         )}
@@ -229,7 +241,7 @@ export function BarChart({
       config={defaultConfig}
       loading={loading}
       error={error}
-      class={className}
+      className={className}
     >
       {ChartComponent}
     </ChartContainer>

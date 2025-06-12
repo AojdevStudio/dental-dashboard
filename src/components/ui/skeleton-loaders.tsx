@@ -7,12 +7,12 @@ import { Skeleton } from './skeleton';
 export function MetricCardSkeleton() {
   return (
     <Card>
-      <CardHeader class="pb-2">
-        <Skeleton class="h-4 w-24" />
+      <CardHeader className="pb-2">
+        <Skeleton className="h-4 w-24" />
       </CardHeader>
       <CardContent>
-        <Skeleton class="h-8 w-32 mb-1" />
-        <Skeleton class="h-3 w-20" />
+        <Skeleton className="h-8 w-32 mb-1" />
+        <Skeleton className="h-3 w-20" />
       </CardContent>
     </Card>
   );
@@ -23,17 +23,21 @@ export function MetricCardSkeleton() {
  */
 export function ChartSkeleton() {
   return (
-    <Card class="p-6">
-      <div class="space-y-4">
-        <div class="flex items-center justify-between">
-          <Skeleton class="h-6 w-32" />
-          <Skeleton class="h-8 w-24" />
+    <Card className="p-6">
+      <div className="space-y-4">
+        <div className="flex items-center justify-between">
+          <Skeleton className="h-6 w-32" />
+          <Skeleton className="h-8 w-24" />
         </div>
-        <div class="h-[350px] w-full relative">
+        <div className="h-[350px] w-full relative">
           {/* Chart bars */}
-          <div class="absolute bottom-0 left-0 right-0 flex items-end justify-around gap-2 h-full px-8">
-            {Array.from({ length: 7 }).map((_, i) => (
-              <Skeleton key={i} class="flex-1" style={{ height: `${Math.random() * 80 + 20}%` }} />
+          <div className="absolute bottom-0 left-0 right-0 flex items-end justify-around gap-2 h-full px-8">
+            {[0, 1, 2, 3, 4, 5, 6].map((id) => (
+              <Skeleton
+                key={`chart-bar-${id}`}
+                className="flex-1"
+                style={{ height: `${Math.random() * 80 + 20}%` }}
+              />
             ))}
           </div>
         </div>
@@ -47,25 +51,25 @@ export function ChartSkeleton() {
  */
 export function TableSkeleton({ rows = 5 }: { rows?: number }) {
   return (
-    <div class="w-full">
+    <div className="w-full">
       {/* Table header */}
-      <div class="border-b">
-        <div class="flex gap-4 p-4">
-          <Skeleton class="h-4 w-32" />
-          <Skeleton class="h-4 w-24" />
-          <Skeleton class="h-4 w-28" />
-          <Skeleton class="h-4 w-20 ml-auto" />
+      <div className="border-b">
+        <div className="flex gap-4 p-4">
+          <Skeleton className="h-4 w-32" />
+          <Skeleton className="h-4 w-24" />
+          <Skeleton className="h-4 w-28" />
+          <Skeleton className="h-4 w-20 ml-auto" />
         </div>
       </div>
 
       {/* Table rows */}
-      {Array.from({ length: rows }).map((_, i) => (
-        <div key={i} class="border-b">
-          <div class="flex gap-4 p-4">
-            <Skeleton class="h-4 w-32" />
-            <Skeleton class="h-4 w-24" />
-            <Skeleton class="h-4 w-28" />
-            <Skeleton class="h-4 w-16 ml-auto" />
+      {Array.from({ length: rows }, (_, i) => i).map((id) => (
+        <div key={`table-row-${id}`} className="border-b">
+          <div className="flex gap-4 p-4">
+            <Skeleton className="h-4 w-32" />
+            <Skeleton className="h-4 w-24" />
+            <Skeleton className="h-4 w-28" />
+            <Skeleton className="h-4 w-16 ml-auto" />
           </div>
         </div>
       ))}
@@ -78,28 +82,28 @@ export function TableSkeleton({ rows = 5 }: { rows?: number }) {
  */
 export function DashboardSkeleton() {
   return (
-    <div class="space-y-6">
+    <div className="space-y-6">
       {/* Header skeleton */}
-      <div class="flex items-center justify-between">
-        <Skeleton class="h-8 w-48" />
-        <div class="flex gap-2">
-          <Skeleton class="h-10 w-32" />
-          <Skeleton class="h-10 w-32" />
+      <div className="flex items-center justify-between">
+        <Skeleton className="h-8 w-48" />
+        <div className="flex gap-2">
+          <Skeleton className="h-10 w-32" />
+          <Skeleton className="h-10 w-32" />
         </div>
       </div>
 
       {/* Metric cards grid */}
-      <div class="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        {Array.from({ length: 4 }).map((_, i) => (
-          <MetricCardSkeleton key={i} />
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+        {[0, 1, 2, 3].map((id) => (
+          <MetricCardSkeleton key={`dashboard-metric-${id}`} />
         ))}
       </div>
 
       {/* Chart and table */}
-      <div class="grid gap-4 md:grid-cols-2">
+      <div className="grid gap-4 md:grid-cols-2">
         <ChartSkeleton />
-        <Card class="p-6">
-          <Skeleton class="h-6 w-32 mb-4" />
+        <Card className="p-6">
+          <Skeleton className="h-6 w-32 mb-4" />
           <TableSkeleton rows={3} />
         </Card>
       </div>
@@ -112,16 +116,16 @@ export function DashboardSkeleton() {
  */
 export function FormSkeleton({ fields = 4 }: { fields?: number }) {
   return (
-    <div class="space-y-6">
-      {Array.from({ length: fields }).map((_, i) => (
-        <div key={i} class="space-y-2">
-          <Skeleton class="h-4 w-24" />
-          <Skeleton class="h-10 w-full" />
+    <div className="space-y-6">
+      {Array.from({ length: fields }, (_, i) => i).map((id) => (
+        <div key={`form-field-${id}`} className="space-y-2">
+          <Skeleton className="h-4 w-24" />
+          <Skeleton className="h-10 w-full" />
         </div>
       ))}
-      <div class="flex gap-2 pt-4">
-        <Skeleton class="h-10 w-24" />
-        <Skeleton class="h-10 w-24" />
+      <div className="flex gap-2 pt-4">
+        <Skeleton className="h-10 w-24" />
+        <Skeleton className="h-10 w-24" />
       </div>
     </div>
   );
@@ -132,12 +136,12 @@ export function FormSkeleton({ fields = 4 }: { fields?: number }) {
  */
 export function UserCardSkeleton() {
   return (
-    <Card class="p-6">
-      <div class="flex items-center gap-4">
-        <Skeleton class="h-12 w-12 rounded-full" />
-        <div class="space-y-2">
-          <Skeleton class="h-5 w-32" />
-          <Skeleton class="h-4 w-24" />
+    <Card className="p-6">
+      <div className="flex items-center gap-4">
+        <Skeleton className="h-12 w-12 rounded-full" />
+        <div className="space-y-2">
+          <Skeleton className="h-5 w-32" />
+          <Skeleton className="h-4 w-24" />
         </div>
       </div>
     </Card>
@@ -149,16 +153,16 @@ export function UserCardSkeleton() {
  */
 export function GoalCardSkeleton() {
   return (
-    <Card class="p-6">
-      <div class="space-y-4">
-        <div class="flex items-center justify-between">
-          <Skeleton class="h-5 w-32" />
-          <Skeleton class="h-6 w-16" />
+    <Card className="p-6">
+      <div className="space-y-4">
+        <div className="flex items-center justify-between">
+          <Skeleton className="h-5 w-32" />
+          <Skeleton className="h-6 w-16" />
         </div>
-        <Skeleton class="h-2 w-full" />
-        <div class="flex justify-between">
-          <Skeleton class="h-4 w-24" />
-          <Skeleton class="h-4 w-20" />
+        <Skeleton className="h-2 w-full" />
+        <div className="flex justify-between">
+          <Skeleton className="h-4 w-24" />
+          <Skeleton className="h-4 w-20" />
         </div>
       </div>
     </Card>
@@ -170,15 +174,15 @@ export function GoalCardSkeleton() {
  */
 export function ProviderListSkeleton({ items = 5 }: { items?: number }) {
   return (
-    <div class="space-y-2">
-      {Array.from({ length: items }).map((_, i) => (
-        <div key={i} class="flex items-center gap-3 p-3 border rounded-lg">
-          <Skeleton class="h-10 w-10 rounded-full" />
-          <div class="flex-1 space-y-1">
-            <Skeleton class="h-4 w-32" />
-            <Skeleton class="h-3 w-24" />
+    <div className="space-y-2">
+      {Array.from({ length: items }, (_, i) => i).map((id) => (
+        <div key={`provider-item-${id}`} className="flex items-center gap-3 p-3 border rounded-lg">
+          <Skeleton className="h-10 w-10 rounded-full" />
+          <div className="flex-1 space-y-1">
+            <Skeleton className="h-4 w-32" />
+            <Skeleton className="h-3 w-24" />
           </div>
-          <Skeleton class="h-8 w-20" />
+          <Skeleton className="h-8 w-20" />
         </div>
       ))}
     </div>

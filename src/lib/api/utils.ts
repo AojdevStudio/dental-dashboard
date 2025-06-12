@@ -109,6 +109,25 @@ export function getPaginationParams(searchParams: URLSearchParams) {
 }
 
 /**
+ * Calculate pagination metadata
+ */
+export function calculatePaginationMetadata(total: number, page: number, limit: number) {
+  const totalPages = Math.ceil(total / limit);
+  const hasNextPage = page < totalPages;
+  const hasPrevPage = page > 1;
+  const nextOffset = hasNextPage ? page * limit : null;
+  const prevOffset = hasPrevPage ? (page - 2) * limit : null;
+
+  return {
+    totalPages,
+    hasNextPage,
+    hasPrevPage,
+    nextOffset,
+    prevOffset,
+  };
+}
+
+/**
  * Handle API errors consistently
  */
 export function handleApiError(error: unknown): NextResponse<ApiErrorPayload> {

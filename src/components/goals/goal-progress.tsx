@@ -85,21 +85,21 @@ export function GoalProgress({
   };
 
   return (
-    <div class={cn('space-y-1', className)}>
-      <div class="relative h-2 w-full overflow-hidden rounded-full">
+    <div className={cn('space-y-1', className)}>
+      <div className="relative h-2 w-full overflow-hidden rounded-full">
         {/* Background track */}
-        <div class={cn('h-full w-full', getBackgroundColor(status))} />
+        <div className={cn('h-full w-full', getBackgroundColor(status))} />
 
         {/* Progress fill */}
         <div
-          class={cn('absolute inset-y-0 left-0 w-full', getProgressColor(status))}
+          className={cn('absolute inset-y-0 left-0 w-full', getProgressColor(status))}
           style={{ width: `${validPercent}%` }}
         />
       </div>
 
       {/* Optional percentage label */}
       {showPercentage && (
-        <div class="text-xs text-right text-muted-foreground">{validPercent}%</div>
+        <div className="text-xs text-right text-muted-foreground">{validPercent}%</div>
       )}
     </div>
   );

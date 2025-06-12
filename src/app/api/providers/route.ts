@@ -1,8 +1,8 @@
 import { type ApiHandler, withAuth } from '@/lib/api/middleware';
-import { apiError, apiPaginated, handleApiError } from '@/lib/api/utils';
+import { apiError, apiPaginated, getPaginationParams, handleApiError } from '@/lib/api/utils';
 import type { AuthContext } from '@/lib/database/auth-context';
 import { getProvidersWithLocationsPaginated } from '@/lib/database/queries/providers';
-import { type NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 import { z } from 'zod';
 
 // Query parameter validation schema
@@ -15,40 +15,31 @@ const providersQuerySchema = z.object({
     .string()
     .transform((val) => val === 'true')
     .optional(),
-  page: z
-    .string()
-    .transform((val) => Math.max(1, Number.parseInt(val) || 1))
-    .optional(),
-  limit: z
-    .string()
-    .transform((val) => Math.min(100, Math.max(1, Number.parseInt(val) || 10)))
-    .optional(),
 });
 
 const getProvidersHandler: ApiHandler = async (
-  request: NextRequest,
-  { authContext }: { authContext: AuthContext }
+  request: Request,
+  { authContext }: { params: Promise<Record<string, string | string[]>>; authContext: AuthContext }
 ) => {
   try {
-    const searchParams = request.nextUrl.searchParams;
+    const url = new URL(request.url);
+    const searchParams = url.searchParams;
 
     // Parse and validate query parameters
     const queryParams = providersQuerySchema.parse(Object.fromEntries(searchParams.entries()));
 
-    const { page = 1, limit = 10, ...filterParams } = queryParams;
+    // Parse pagination parameters using utility
+    const { page, limit, offset } = getPaginationParams(searchParams);
 
     // Apply multi-tenant filtering - providers can only see providers from their clinic
     const filters = {
-      ...filterParams,
+      ...queryParams,
       clinicId:
-        filterParams.clinicId ||
+        queryParams.clinicId ||
         (authContext.clinicIds && authContext.clinicIds.length > 0
           ? authContext.clinicIds[0]
           : undefined),
     };
-
-    // Calculate pagination parameters for database query
-    const offset = (page - 1) * limit;
 
     // Fetch providers with database-level pagination
     const { providers: paginatedProviders, total } = await getProvidersWithLocationsPaginated({
@@ -76,8 +67,8 @@ const createProviderSchema = z.object({
 });
 
 const createProviderHandler: ApiHandler = async (
-  request: NextRequest,
-  { authContext }: { authContext: AuthContext }
+  request: Request,
+  { authContext }: { params: Promise<Record<string, string | string[]>>; authContext: AuthContext }
 ) => {
   try {
     const body = await request.json();

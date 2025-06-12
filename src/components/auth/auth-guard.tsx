@@ -41,10 +41,10 @@ export function AuthGuard({
   // Show loading state while checking auth
   if (isLoading) {
     return (
-      <div class="flex items-center justify-center min-h-screen">
-        <div class="text-center space-y-4">
-          <Loader2 class="h-8 w-8 animate-spin text-primary mx-auto" />
-          <p class="text-sm text-muted-foreground">Verifying authentication...</p>
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="text-center space-y-4">
+          <Loader2 className="h-8 w-8 animate-spin text-primary mx-auto" />
+          <p className="text-sm text-muted-foreground">Verifying authentication...</p>
         </div>
       </div>
     );
@@ -68,17 +68,17 @@ export function AuthGuard({
 
     if (!(hasDbUser || hasMetadataRole)) {
       return (
-        <div class="flex items-center justify-center min-h-screen">
-          <div class="text-center space-y-4 max-w-md mx-auto p-6">
-            <h2 class="text-lg font-semibold text-destructive">Account Setup Incomplete</h2>
-            <p class="text-sm text-muted-foreground">
+        <div className="flex items-center justify-center min-h-screen">
+          <div className="text-center space-y-4 max-w-md mx-auto p-6">
+            <h2 className="text-lg font-semibold text-destructive">Account Setup Incomplete</h2>
+            <p className="text-sm text-muted-foreground">
               Your account setup is incomplete. Please contact your administrator or try logging in
               again.
             </p>
             <button
               type="button"
               onClick={() => router.push('/login')}
-              class="text-sm text-primary hover:underline"
+              className="text-sm text-primary hover:underline"
             >
               Return to Login
             </button>

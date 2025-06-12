@@ -39,13 +39,14 @@ export type CreateMetricResponse = Awaited<ReturnType<typeof metricQueries.creat
  * Get metrics with filtering
  */
 export const GET = withAuth(async (request, { authContext }) => {
-  const searchParams = request.nextUrl.searchParams;
+  const url = new URL(request.url);
+  const searchParams = url.searchParams;
   const clinicId = searchParams.get('clinicId') || undefined;
   const providerId = searchParams.get('providerId') || undefined;
   const metricDefinitionId = searchParams.get('metricDefinitionId') || undefined;
   const sourceType = searchParams.get('sourceType') || undefined;
-  const { limit, offset } = getPaginationParams(request);
-  const dateRange = getDateRangeParams(request);
+  const { limit, offset } = getPaginationParams(searchParams);
+  const dateRange = getDateRangeParams(searchParams);
 
   const result = await metricQueries.getMetrics(
     authContext,
@@ -55,7 +56,7 @@ export const GET = withAuth(async (request, { authContext }) => {
       metricDefinitionId,
       sourceType,
       dateRange:
-        dateRange.startDate && dateRange.endDate
+        dateRange?.startDate && dateRange?.endDate
           ? {
               start: dateRange.startDate,
               end: dateRange.endDate,

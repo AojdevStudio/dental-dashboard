@@ -20,7 +20,8 @@ async function verifyMultiTenantTables() {
     ];
 
     for (const { name, model } of tables) {
-      const _count = await model.count();
+      const _count = await (model as any).count();
+      console.log(`${name}: ${_count} records`);
     }
   } catch (_error) {
     process.exit(1);

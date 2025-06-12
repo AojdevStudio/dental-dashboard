@@ -1,6 +1,24 @@
 import { prisma } from '@/lib/database/client';
-import type { ProviderFilters } from '@/types/providers';
-import type { Prisma } from '@prisma/client';
+import { Prisma } from '@prisma/client';
+
+/**
+ * Provider filter parameters for API requests
+ */
+export interface ProviderFilters {
+  search?: string;
+  providerType?: string;
+  status?: string;
+  locationId?: string;
+  page?: number;
+  limit?: number;
+  clinicId?: string;
+  providerId?: string;
+  includeInactive?: boolean;
+  pagination?: {
+    offset: number;
+    limit: number;
+  };
+}
 
 /**
  * Describes the raw row structure from the dentist performance query.
@@ -61,6 +79,161 @@ interface LocationSummaryValue {
 
 interface LocationSummaryAccumulator {
   [locationKey: string]: LocationSummaryValue;
+}
+
+/**
+ * Build common where clause for provider queries
+ */
+function buildProviderWhereClause(params: {
+  providerId?: string;
+  clinicId?: string;
+  providerType?: string;
+  status?: string;
+  includeInactive?: boolean;
+  locationId?: string;
+}): Prisma.ProviderWhereInput {
+  const {
+    providerId,
+    clinicId,
+    providerType,
+    status,
+    includeInactive = false,
+    locationId,
+  } = params;
+
+  const whereClause: Prisma.ProviderWhereInput = {};
+
+  if (providerId) {
+    whereClause.id = providerId;
+  }
+
+  if (clinicId) {
+    whereClause.clinicId = clinicId;
+  }
+
+  if (providerType) {
+    whereClause.providerType = providerType;
+  }
+
+  // Handle status filtering - explicit status parameter takes precedence
+  if (status) {
+    whereClause.status = status;
+  } else if (!includeInactive) {
+    whereClause.status = 'active';
+  }
+
+  // If filtering by location, we need to include providers who work at that location
+  if (locationId) {
+    whereClause.providerLocations = {
+      some: {
+        locationId,
+        isActive: true,
+      },
+    };
+  }
+
+  return whereClause;
+}
+
+// Use Prisma-generated type to ensure type safety for the complete query
+const providerQueryArgs = Prisma.validator<Prisma.ProviderFindManyArgs>()({
+  include: {
+    clinic: {
+      select: {
+        id: true,
+        name: true,
+      },
+    },
+    providerLocations: {
+      where: {
+        isActive: true,
+      },
+      include: {
+        location: {
+          select: {
+            id: true,
+            name: true,
+            address: true,
+          },
+        },
+      },
+      orderBy: [{ isPrimary: 'desc' }, { location: { name: 'asc' } }],
+    },
+    _count: {
+      select: {
+        providerLocations: {
+          where: { isActive: true },
+        },
+        hygieneProduction: true,
+        dentistProduction: true,
+      },
+    },
+  },
+  orderBy: [{ name: 'asc' }],
+});
+
+type RawProviderData = Prisma.ProviderGetPayload<typeof providerQueryArgs>;
+
+/**
+ * Build common query options for provider queries
+ */
+function buildProviderQueryOptions(
+  whereClause: Prisma.ProviderWhereInput,
+  pagination?: { offset: number; limit: number }
+) {
+  const baseOptions = {
+    ...providerQueryArgs,
+    where: whereClause,
+  };
+
+  // Add pagination if provided
+  if (pagination) {
+    return {
+      ...baseOptions,
+      skip: pagination.offset,
+      take: pagination.limit,
+    };
+  }
+
+  return baseOptions;
+}
+
+/**
+ * Transform raw provider data to ProviderWithLocations format
+ */
+function transformProviderData(providers: RawProviderData[]): ProviderWithLocations[] {
+  return providers.map((provider) => {
+    const locations = provider.providerLocations.map((pl) => ({
+      id: pl.id,
+      locationId: pl.location.id,
+      locationName: pl.location.name,
+      locationAddress: pl.location.address,
+      isPrimary: pl.isPrimary,
+      isActive: pl.isActive,
+      startDate: pl.startDate,
+      endDate: pl.endDate,
+    }));
+
+    const primaryLocation = provider.providerLocations.find((pl) => pl.isPrimary)?.location;
+
+    return {
+      id: provider.id,
+      name: provider.name,
+      firstName: provider.firstName,
+      lastName: provider.lastName,
+      email: provider.email,
+      providerType: provider.providerType,
+      status: provider.status,
+      clinic: provider.clinic,
+      locations,
+      primaryLocation,
+      _count: {
+        locations: provider._count.providerLocations,
+        hygieneProduction: provider._count.hygieneProduction,
+        dentistProduction: provider._count.dentistProduction,
+      },
+    };
+  });
 }
 
 export interface ProviderWithLocations {
@@ -124,115 +297,24 @@ export async function getProvidersWithLocations(
     locationId,
     providerId,
     providerType,
+    status,
     includeInactive = false,
     pagination,
   } = params || {};
 
-  const whereClause: Prisma.ProviderWhereInput = {};
+  const whereClause = buildProviderWhereClause({
+    providerId,
+    clinicId,
+    providerType,
+    status,
+    includeInactive,
+    locationId,
+  });
 
-  if (providerId) {
-    whereClause.id = providerId;
-  }
-
-  if (clinicId) {
-    whereClause.clinicId = clinicId;
-  }
-
-  if (providerType) {
-    whereClause.providerType = providerType;
-  }
-
-  if (!includeInactive) {
-    whereClause.status = 'active';
-  }
-
-  // If filtering by location, we need to include providers who work at that location
-  if (locationId) {
-    whereClause.providerLocations = {
-      some: {
-        locationId,
-        isActive: true,
-      },
-    };
-  }
-
-  const queryOptions: Prisma.ProviderFindManyArgs = {
-    where: whereClause,
-    include: {
-      clinic: {
-        select: {
-          id: true,
-          name: true,
-        },
-      },
-      providerLocations: {
-        where: {
-          isActive: true,
-        },
-        include: {
-          location: {
-            select: {
-              id: true,
-              name: true,
-              address: true,
-            },
-          },
-        },
-        orderBy: [{ isPrimary: 'desc' }, { location: { name: 'asc' } }],
-      },
-      _count: {
-        select: {
-          providerLocations: {
-            where: { isActive: true },
-          },
-          hygieneProduction: true,
-          dentistProduction: true,
-        },
-      },
-    },
-    orderBy: [{ name: 'asc' }],
-  };
-
-  // Add pagination if provided
-  if (pagination) {
-    queryOptions.skip = pagination.offset;
-    queryOptions.take = pagination.limit;
-  }
-
+  const queryOptions = buildProviderQueryOptions(whereClause, pagination);
   const providers = await prisma.provider.findMany(queryOptions);
 
-  return providers.map((provider) => {
-    const locations = provider.providerLocations.map((pl) => ({
-      id: pl.id,
-      locationId: pl.location.id,
-      locationName: pl.location.name,
-      locationAddress: pl.location.address,
-      isPrimary: pl.isPrimary,
-      isActive: pl.isActive,
-      startDate: pl.startDate,
-      endDate: pl.endDate,
-    }));
-
-    const primaryLocation = provider.providerLocations.find((pl) => pl.isPrimary)?.location;
-
-    return {
-      id: provider.id,
-      name: provider.name,
-      firstName: provider.firstName,
-      lastName: provider.lastName,
-      email: provider.email,
-      providerType: provider.providerType,
-      status: provider.status,
-      clinic: provider.clinic,
-      locations,
-      primaryLocation,
-      _count: {
-        locations: provider._count.providerLocations,
-        hygieneProduction: provider._count.hygieneProduction,
-        dentistProduction: provider._count.dentistProduction,
-      },
-    };
-  });
+  return transformProviderData(providers);
 }
 
 /**
@@ -385,7 +467,7 @@ export async function getProviderPerformanceByLocation(params: {
 /**
  * Get providers for a specific location
  */
-export async function getProvidersByLocation(
+export function getProvidersByLocation(
   locationId: string,
   params?: {
     providerType?: string;
@@ -499,123 +581,40 @@ export async function getProvidersWithLocationsPaginated(
     locationId,
     providerId,
     providerType,
+    status,
     includeInactive = false,
     pagination,
   } = params || {};
 
-  const whereClause: Prisma.ProviderWhereInput = {};
-
-  if (providerId) {
-    whereClause.id = providerId;
+  // Input validation for pagination parameters
+  if (pagination) {
+    if (pagination.offset < 0) {
+      throw new Error('Pagination offset cannot be negative');
+    }
+    if (pagination.limit <= 0) {
+      throw new Error('Pagination limit must be greater than 0');
+    }
+    if (pagination.limit > 1000) {
+      throw new Error('Pagination limit cannot exceed 1000 to prevent performance issues');
+    }
   }
 
-  if (clinicId) {
-    whereClause.clinicId = clinicId;
-  }
-
-  if (providerType) {
-    whereClause.providerType = providerType;
-  }
-
-  if (!includeInactive) {
-    whereClause.status = 'active';
-  }
-
-  // If filtering by location, we need to include providers who work at that location
-  if (locationId) {
-    whereClause.providerLocations = {
-      some: {
-        locationId,
-        isActive: true,
-      },
-    };
-  }
+  const whereClause = buildProviderWhereClause({
+    providerId,
+    clinicId,
+    providerType,
+    status,
+    includeInactive,
+    locationId,
+  });
 
   // Execute count and data queries in parallel for performance
   const [total, providers] = await Promise.all([
     prisma.provider.count({ where: whereClause }),
-    (async () => {
-      const queryOptions: Prisma.ProviderFindManyArgs = {
-        where: whereClause,
-        include: {
-          clinic: {
-            select: {
-              id: true,
-              name: true,
-            },
-          },
-          providerLocations: {
-            where: {
-              isActive: true,
-            },
-            include: {
-              location: {
-                select: {
-                  id: true,
-                  name: true,
-                  address: true,
-                },
-              },
-            },
-            orderBy: [{ isPrimary: 'desc' }, { location: { name: 'asc' } }],
-          },
-          _count: {
-            select: {
-              providerLocations: {
-                where: { isActive: true },
-              },
-              hygieneProduction: true,
-              dentistProduction: true,
-            },
-          },
-        },
-        orderBy: [{ name: 'asc' }],
-      };
-
-      // Add pagination if provided
-      if (pagination) {
-        queryOptions.skip = pagination.offset;
-        queryOptions.take = pagination.limit;
-      }
-
-      return prisma.provider.findMany(queryOptions);
-    })(),
+    prisma.provider.findMany(buildProviderQueryOptions(whereClause, pagination)),
   ]);
 
-  const mappedProviders = providers.map((provider) => {
-    const locations = provider.providerLocations.map((pl) => ({
-      id: pl.id,
-      locationId: pl.location.id,
-      locationName: pl.location.name,
-      locationAddress: pl.location.address,
-      isPrimary: pl.isPrimary,
-      isActive: pl.isActive,
-      startDate: pl.startDate,
-      endDate: pl.endDate,
-    }));
-
-    const primaryLocation = provider.providerLocations.find((pl) => pl.isPrimary)?.location;
-
-    return {
-      id: provider.id,
-      name: provider.name,
-      firstName: provider.firstName,
-      lastName: provider.lastName,
-      email: provider.email,
-      providerType: provider.providerType,
-      status: provider.status,
-      clinic: provider.clinic,
-      locations,
-      primaryLocation,
-      _count: {
-        locations: provider._count.providerLocations,
-        hygieneProduction: provider._count.hygieneProduction,
-        dentistProduction: provider._count.dentistProduction,
-      },
-    };
-  });
-
-  return { providers: mappedProviders, total };
+  return { providers: transformProviderData(providers), total };
 }
 
 /**

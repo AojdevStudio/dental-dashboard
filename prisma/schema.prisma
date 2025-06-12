@@ -33,6 +33,7 @@ model Clinic {
   dentistProduction DentistProduction[]
   locations Location[] // New: clinic can have multiple locations
   locationFinancials LocationFinancial[] // New: location financial data
+  metricAggregations MetricAggregation[]
 
   @@map("clinics")
 }
@@ -81,6 +82,7 @@ model Provider {
   hygieneProduction HygieneProduction[]
   dentistProduction DentistProduction[]
   providerLocations ProviderLocation[] // New: provider-location relationships
+  metricAggregations MetricAggregation[]
 
   @@map("providers")
 }
@@ -169,6 +171,7 @@ model MetricDefinition {
   columnMappings    ColumnMapping[]
   goals             Goal[]
   widgets           Widget[]
+  metricAggregations MetricAggregation[]
 
   @@map("metric_definitions")
 }
@@ -466,9 +469,15 @@ model MetricAggregation {
   createdAt          DateTime @default(now()) @map("created_at")
   updatedAt          DateTime @updatedAt @map("updated_at")
   
+  // Relations
+  clinic            Clinic            @relation(fields: [clinicId], references: [id])
+  metricDefinition  MetricDefinition  @relation(fields: [metricDefinitionId], references: [id])
+  provider          Provider?         @relation(fields: [providerId], references: [id])
+  
   @@unique([clinicId, metricDefinitionId, aggregationType, periodStart, providerId])
   @@index([clinicId, periodStart])
   @@index([metricDefinitionId])
+  @@index([providerId])
   @@map("metric_aggregations")
 }
 

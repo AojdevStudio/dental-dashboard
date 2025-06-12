@@ -126,6 +126,10 @@ describe('Security Tests', () => {
         (u) => u.role === 'clinic_admin' && u.clinicId === securityTestData.clinics[0].id
       );
 
+      if (!adminUser) {
+        throw new Error('Admin user not found for security test');
+      }
+
       const authContext = {
         userId: adminUser.id,
         authId: adminUser.authId,
@@ -169,6 +173,10 @@ describe('Security Tests', () => {
       const adminUser = securityTestData.users.find(
         (u) => u.role === 'clinic_admin' && u.clinicId === securityTestData.clinics[0].id
       );
+
+      if (!adminUser) {
+        throw new Error('Admin user not found for security test');
+      }
 
       const authContext = {
         userId: adminUser.id,
@@ -459,17 +467,17 @@ describe('Security Tests', () => {
         AND record_id = ${testClinicId}
         ORDER BY created_at DESC
         LIMIT 1
-      `) as unknown[];
+      `) as any[];
 
       expect(auditLog).toHaveLength(1);
-      expect(auditLog[0].action).toBe('INSERT');
+      expect(auditLog[0]?.action).toBe('INSERT');
 
       // Try to modify audit log (should fail)
       try {
         await prisma.$executeRaw`
           UPDATE audit_logs 
           SET action = 'TAMPERED' 
-          WHERE id = ${auditLog[0].id}
+          WHERE id = ${auditLog[0]?.id}
         `;
       } catch (error) {
         // Should fail due to permissions
@@ -478,10 +486,10 @@ describe('Security Tests', () => {
 
       // Verify log wasn't modified
       const verifyLog = (await prisma.$queryRaw`
-        SELECT * FROM audit_logs WHERE id = ${auditLog[0].id}
-      `) as unknown[];
+        SELECT * FROM audit_logs WHERE id = ${auditLog[0]?.id}
+      `) as any[];
 
-      expect(verifyLog[0].action).toBe('INSERT');
+      expect(verifyLog[0]?.action).toBe('INSERT');
 
       // Cleanup
       await prisma.clinic.delete({ where: { id: testClinicId } });

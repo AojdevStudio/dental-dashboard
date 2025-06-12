@@ -92,14 +92,16 @@ export async function signInWithVerification(
     if (dbUser.role !== 'system_admin' && (!userRoles || userRoles.length === 0)) {
       // Try to create a default role
       try {
-        await prisma.userClinicRole.create({
-          data: {
-            userId: dbUser.id,
-            clinicId: dbUser.clinicId,
-            role: 'staff',
-            isActive: true,
-          },
-        });
+        if (dbUser.clinicId) {
+          await prisma.userClinicRole.create({
+            data: {
+              userId: dbUser.id,
+              clinicId: dbUser.clinicId,
+              role: 'staff',
+              isActive: true,
+            },
+          });
+        }
       } catch (_roleError) {}
     }
 

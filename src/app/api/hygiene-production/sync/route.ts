@@ -84,9 +84,12 @@ async function processClinicRecords(
 
   // Create a minimal auth context for the clinic
   const authContext = {
-    user: { id: 'system', email: 'system@sync' },
+    userId: 'system',
+    authId: 'system',
     clinicIds: [clinicId],
-    roles: { [clinicId]: 'system' },
+    currentClinicId: clinicId,
+    role: 'system',
+    isSystemAdmin: true,
   };
 
   // Transform and upsert the records

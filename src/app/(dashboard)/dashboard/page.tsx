@@ -33,23 +33,23 @@ export default async function DashboardPage() {
     authContext = await getAuthContext();
   } catch (error) {
     return (
-      <Card class="max-w-md mx-auto mt-8">
+      <Card className="max-w-md mx-auto mt-8">
         <CardHeader>
           <CardTitle>Authentication Error</CardTitle>
           <CardDescription>
             An error occurred while verifying your authentication. Please try again.
           </CardDescription>
         </CardHeader>
-        <CardContent class="space-y-4">
-          <p class="text-sm text-muted-foreground">
+        <CardContent className="space-y-4">
+          <p className="text-sm text-muted-foreground">
             {error instanceof Error ? error.message : 'Unknown authentication error'}
           </p>
-          <div class="flex gap-2">
-            <a href="/login" class="text-primary hover:underline">
+          <div className="flex gap-2">
+            <a href="/login" className="text-primary hover:underline">
               Return to Login
             </a>
-            <span class="text-muted-foreground">•</span>
-            <a href="/dashboard" class="text-primary hover:underline">
+            <span className="text-muted-foreground">•</span>
+            <a href="/dashboard" className="text-primary hover:underline">
               Retry
             </a>
           </div>
@@ -60,13 +60,13 @@ export default async function DashboardPage() {
 
   if (!authContext) {
     return (
-      <Card class="max-w-md mx-auto mt-8">
+      <Card className="max-w-md mx-auto mt-8">
         <CardHeader>
           <CardTitle>Authentication Required</CardTitle>
           <CardDescription>Please log in to access the dashboard.</CardDescription>
         </CardHeader>
         <CardContent>
-          <a href="/login" class="text-primary hover:underline">
+          <a href="/login" className="text-primary hover:underline">
             Return to Login
           </a>
         </CardContent>
@@ -100,7 +100,7 @@ export default async function DashboardPage() {
   }
 
   return (
-    <div class="w-full space-y-6">
+    <div className="w-full space-y-6">
       <Suspense fallback={<DashboardSkeleton />}>
         <DashboardContent authContext={authContext} clinic={currentClinic} />
       </Suspense>
@@ -147,10 +147,10 @@ function DashboardContent({
   };
 
   return (
-    <div class="w-full space-y-6">
+    <div className="w-full space-y-6">
       <div>
-        <h1 class="text-3xl font-bold">Dashboard</h1>
-        <p class="text-muted-foreground mt-2">
+        <h1 className="text-3xl font-bold">Dashboard</h1>
+        <p className="text-muted-foreground mt-2">
           {authContext.isSystemAdmin && authContext.selectedClinicId === 'all'
             ? 'Viewing all clinics'
             : clinic
@@ -163,8 +163,8 @@ function DashboardContent({
       {clinic ? (
         <DashboardClient initialData={initialData} />
       ) : authContext.isSystemAdmin && authContext.selectedClinicId === 'all' ? (
-        <div class="space-y-4">
-          <h2 class="text-xl font-semibold">All Clinics Overview</h2>
+        <div className="space-y-4">
+          <h2 className="text-xl font-semibold">All Clinics Overview</h2>
           <AllClinicsOverview />
         </div>
       ) : (
@@ -211,7 +211,7 @@ async function AllClinicsOverview() {
   } catch (error) {
     // Return error state when clinic data cannot be fetched
     return (
-      <Card class="max-w-md mx-auto">
+      <Card className="max-w-md mx-auto">
         <CardHeader>
           <CardTitle>Data Loading Error</CardTitle>
           <CardDescription>
@@ -219,7 +219,7 @@ async function AllClinicsOverview() {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <p class="text-sm text-muted-foreground">
+          <p className="text-sm text-muted-foreground">
             {error instanceof Error ? error.message : 'Unknown database error'}
           </p>
         </CardContent>
@@ -228,26 +228,26 @@ async function AllClinicsOverview() {
   }
 
   return (
-    <div class="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+    <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
       {clinics.map((clinic) => (
         <Card key={clinic.id}>
           <CardHeader>
-            <CardTitle class="text-lg">{clinic.name}</CardTitle>
+            <CardTitle className="text-lg">{clinic.name}</CardTitle>
             <CardDescription>{clinic.location}</CardDescription>
           </CardHeader>
           <CardContent>
-            <div class="space-y-2 text-sm">
-              <div class="flex justify-between">
-                <span class="text-muted-foreground">Users:</span>
-                <span class="font-medium">{clinic._count.users}</span>
+            <div className="space-y-2 text-sm">
+              <div className="flex justify-between">
+                <span className="text-muted-foreground">Users:</span>
+                <span className="font-medium">{clinic._count.users}</span>
               </div>
-              <div class="flex justify-between">
-                <span class="text-muted-foreground">Providers:</span>
-                <span class="font-medium">{clinic._count.providers}</span>
+              <div className="flex justify-between">
+                <span className="text-muted-foreground">Providers:</span>
+                <span className="font-medium">{clinic._count.providers}</span>
               </div>
-              <div class="flex justify-between">
-                <span class="text-muted-foreground">Metrics:</span>
-                <span class="font-medium">{clinic._count.metrics}</span>
+              <div className="flex justify-between">
+                <span className="text-muted-foreground">Metrics:</span>
+                <span className="font-medium">{clinic._count.metrics}</span>
               </div>
             </div>
           </CardContent>

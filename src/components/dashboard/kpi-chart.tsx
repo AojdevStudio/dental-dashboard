@@ -88,11 +88,11 @@ export function KPIChart({
     return (
       <Card>
         <CardHeader>
-          <Skeleton class="h-5 w-40" />
-          {subtitle && <Skeleton class="h-4 w-60 mt-1" />}
+          <Skeleton className="h-5 w-40" />
+          {subtitle && <Skeleton className="h-4 w-60 mt-1" />}
         </CardHeader>
         <CardContent>
-          <Skeleton class="h-[200px] w-full" />
+          <Skeleton className="h-[200px] w-full" />
         </CardContent>
       </Card>
     );
@@ -102,17 +102,17 @@ export function KPIChart({
     <Card>
       <CardHeader>
         <CardTitle>{title}</CardTitle>
-        {subtitle && <p class="text-sm text-muted-foreground">{subtitle}</p>}
+        {subtitle && <p className="text-sm text-muted-foreground">{subtitle}</p>}
       </CardHeader>
       <CardContent>
         <Tabs defaultValue={defaultView}>
-          <TabsList class="mb-4">
+          <TabsList className="mb-4">
             <TabsTrigger value="daily">Daily</TabsTrigger>
             <TabsTrigger value="weekly">Weekly</TabsTrigger>
             <TabsTrigger value="monthly">Monthly</TabsTrigger>
           </TabsList>
 
-          <TabsContent value="daily" class="h-[200px]">
+          <TabsContent value="daily" className="h-[200px]">
             <ChartPlaceholder
               data={chartData.daily}
               valuePrefix={valuePrefix}
@@ -120,7 +120,7 @@ export function KPIChart({
             />
           </TabsContent>
 
-          <TabsContent value="weekly" class="h-[200px]">
+          <TabsContent value="weekly" className="h-[200px]">
             <ChartPlaceholder
               data={chartData.weekly}
               valuePrefix={valuePrefix}
@@ -128,7 +128,7 @@ export function KPIChart({
             />
           </TabsContent>
 
-          <TabsContent value="monthly" class="h-[200px]">
+          <TabsContent value="monthly" className="h-[200px]">
             <ChartPlaceholder
               data={chartData.monthly}
               valuePrefix={valuePrefix}
@@ -169,12 +169,12 @@ function ChartPlaceholder({
   const range = max - min;
 
   return (
-    <div class="flex flex-col h-full">
-      <div class="text-sm text-muted-foreground mb-2">
+    <div className="flex flex-col h-full">
+      <div className="text-sm text-muted-foreground mb-2">
         Placeholder chart: In production, use a chart library like Recharts
       </div>
 
-      <div class="flex items-end h-full space-x-1">
+      <div className="flex items-end h-full space-x-1">
         {data.map((point, i) => {
           // Scale the bar height based on the value
           const heightPercent =
@@ -183,15 +183,15 @@ function ChartPlaceholder({
               : ((point.value - min) / range) * 80 + 20; // Scale from 20% to 100%
 
           return (
-            <div key={i} class="flex flex-col items-center flex-1">
+            <div key={`${point.date}-${i}`} className="flex flex-col items-center flex-1">
               <div
-                class="bg-primary/90 w-full rounded-t"
+                className="bg-primary/90 w-full rounded-t"
                 style={{ height: `${heightPercent}%` }}
                 title={`${point.date}: ${valuePrefix}${point.value}${valueSuffix}`}
               />
               {/* Only show every nth label to avoid overcrowding */}
               {i % Math.ceil(data.length / 10) === 0 && (
-                <div class="text-xs text-muted-foreground mt-1 truncate w-full text-center">
+                <div className="text-xs text-muted-foreground mt-1 truncate w-full text-center">
                   {point.date}
                 </div>
               )}

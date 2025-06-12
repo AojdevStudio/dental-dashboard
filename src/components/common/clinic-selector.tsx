@@ -83,15 +83,15 @@ export function ClinicSelector({
   const selectedClinic = clinics.find((c) => c.id === selectedClinicId);
 
   return (
-    <div class={cn('flex items-center gap-2', className)}>
-      <Building2 class="h-4 w-4 text-muted-foreground" />
+    <div className={cn('flex items-center gap-2', className)}>
+      <Building2 className="h-4 w-4 text-muted-foreground" />
       <Select value={selectedClinicId} onValueChange={handleClinicChange}>
-        <SelectTrigger class="w-[200px]">
+        <SelectTrigger className="w-[200px]">
           <SelectValue>
             {selectedClinic ? (
-              <div class="flex flex-col items-start">
-                <span class="text-sm font-medium">{selectedClinic.name}</span>
-                <span class="text-xs text-muted-foreground">{selectedClinic.location}</span>
+              <div className="flex flex-col items-start">
+                <span className="text-sm font-medium">{selectedClinic.name}</span>
+                <span className="text-xs text-muted-foreground">{selectedClinic.location}</span>
               </div>
             ) : (
               'Select clinic...'
@@ -99,15 +99,15 @@ export function ClinicSelector({
           </SelectValue>
         </SelectTrigger>
         <SelectContent>
-          <SelectItem value="all" class="font-medium">
+          <SelectItem value="all" className="font-medium">
             All Clinics
           </SelectItem>
-          <div class="my-1 h-px bg-border" />
+          <div className="my-1 h-px bg-border" />
           {clinics.map((clinic) => (
             <SelectItem key={clinic.id} value={clinic.id}>
-              <div class="flex flex-col items-start">
-                <span class="text-sm font-medium">{clinic.name}</span>
-                <span class="text-xs text-muted-foreground">{clinic.location}</span>
+              <div className="flex flex-col items-start">
+                <span className="text-sm font-medium">{clinic.name}</span>
+                <span className="text-xs text-muted-foreground">{clinic.location}</span>
               </div>
             </SelectItem>
           ))}

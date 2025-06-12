@@ -83,12 +83,13 @@ export class FinancialRecordService extends BaseService {
       }
 
       // Merge current data with updates for calculations
+      // Convert Prisma Decimal types to numbers for calculator
       const mergedData = {
-        production: data.production ?? currentRecord.production,
-        adjustments: data.adjustments ?? currentRecord.adjustments,
-        writeOffs: data.writeOffs ?? currentRecord.writeOffs,
-        patientIncome: data.patientIncome ?? currentRecord.patientIncome,
-        insuranceIncome: data.insuranceIncome ?? currentRecord.insuranceIncome,
+        production: data.production ?? currentRecord.production.toNumber(),
+        adjustments: data.adjustments ?? currentRecord.adjustments.toNumber(),
+        writeOffs: data.writeOffs ?? currentRecord.writeOffs.toNumber(),
+        patientIncome: data.patientIncome ?? currentRecord.patientIncome.toNumber(),
+        insuranceIncome: data.insuranceIncome ?? currentRecord.insuranceIncome.toNumber(),
       };
 
       // Calculate derived fields
@@ -97,7 +98,13 @@ export class FinancialRecordService extends BaseService {
       const record = await prisma.locationFinancial.update({
         where: { id },
         data: {
-          ...data,
+          // Exclude dataSourceId from spread to avoid conflict with dataSource relation
+          production: data.production,
+          adjustments: data.adjustments,
+          writeOffs: data.writeOffs,
+          patientIncome: data.patientIncome,
+          insuranceIncome: data.insuranceIncome,
+          unearned: data.unearned,
           netProduction: derived.netProduction,
           totalCollections: derived.totalCollections,
           ...(data.dataSourceId && { dataSource: { connect: { id: data.dataSourceId } } }),

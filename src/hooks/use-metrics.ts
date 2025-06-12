@@ -76,7 +76,7 @@ export function useMetrics(filters: MetricFilters = {}) {
     if (filters.providerId) {
       params.append('providerId', filters.providerId);
     }
-    if (filters.metricIds?.length > 0) {
+    if (filters.metricIds && filters.metricIds.length > 0) {
       for (const id of filters.metricIds) {
         params.append('metricIds', id);
       }

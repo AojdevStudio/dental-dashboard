@@ -198,10 +198,10 @@ export function RegisterFormComprehensive() {
    * @memberof RegisterFormComprehensive
    */
   const renderStep1 = () => (
-    <div class="space-y-6">
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div class="space-y-2">
-          <Label for="email">Email Address *</Label>
+    <div className="space-y-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="space-y-2">
+          <Label htmlFor="email">Email Address *</Label>
           <Input
             id="email"
             type="email"
@@ -210,12 +210,12 @@ export function RegisterFormComprehensive() {
             placeholder="your@email.com"
             required={true}
             disabled={loading}
-            class="w-full"
+            className="w-full"
           />
         </div>
 
-        <div class="space-y-2">
-          <Label for="fullName">Full Name *</Label>
+        <div className="space-y-2">
+          <Label htmlFor="fullName">Full Name *</Label>
           <Input
             id="fullName"
             type="text"
@@ -224,13 +224,13 @@ export function RegisterFormComprehensive() {
             placeholder="Dr. Jane Smith"
             required={true}
             disabled={loading}
-            class="w-full"
+            className="w-full"
           />
         </div>
       </div>
 
-      <div class="space-y-2">
-        <Label for="phone">Phone Number</Label>
+      <div className="space-y-2">
+        <Label htmlFor="phone">Phone Number</Label>
         <Input
           id="phone"
           type="tel"
@@ -238,14 +238,14 @@ export function RegisterFormComprehensive() {
           onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
           placeholder="(555) 123-4567"
           disabled={loading}
-          class="w-full max-w-md"
+          className="w-full max-w-md"
         />
       </div>
 
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div class="space-y-2">
-          <Label for="password">Password *</Label>
-          <div class="relative">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="space-y-2">
+          <Label htmlFor="password">Password *</Label>
+          <div className="relative">
             <Input
               id="password"
               type={showPassword ? 'text' : 'password'}
@@ -258,16 +258,16 @@ export function RegisterFormComprehensive() {
             <button
               type="button"
               onClick={() => setShowPassword(!showPassword)}
-              class="absolute right-2 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
+              className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
             >
               {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
             </button>
           </div>
         </div>
 
-        <div class="space-y-2">
-          <Label for="confirmPassword">Confirm Password *</Label>
-          <div class="relative">
+        <div className="space-y-2">
+          <Label htmlFor="confirmPassword">Confirm Password *</Label>
+          <div className="relative">
             <Input
               id="confirmPassword"
               type={showConfirmPassword ? 'text' : 'password'}
@@ -280,7 +280,7 @@ export function RegisterFormComprehensive() {
             <button
               type="button"
               onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-              class="absolute right-2 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
+              className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
             >
               {showConfirmPassword ? <EyeOff size={18} /> : <Eye size={18} />}
             </button>
@@ -301,9 +301,9 @@ export function RegisterFormComprehensive() {
    * @memberof RegisterFormComprehensive
    */
   const renderStep2 = () => (
-    <div class="space-y-4">
-      <div class="space-y-2">
-        <Label for="role">Your Role *</Label>
+    <div className="space-y-4">
+      <div className="space-y-2">
+        <Label htmlFor="role">Your Role *</Label>
         <Select
           value={formData.role}
           onValueChange={(value: RegistrationFormData['role']) =>
@@ -323,7 +323,7 @@ export function RegisterFormComprehensive() {
         </Select>
       </div>
 
-      <div class="space-y-2">
+      <div className="space-y-2">
         <Label>Clinic Association *</Label>
         <RadioGroup
           value={formData.clinicMode}
@@ -331,15 +331,15 @@ export function RegisterFormComprehensive() {
             setFormData({ ...formData, clinicMode: value })
           }
         >
-          <div class="flex items-center space-x-2">
+          <div className="flex items-center space-x-2">
             <RadioGroupItem value="join" id="join" />
-            <Label for="join" class="font-normal cursor-pointer">
+            <Label htmlFor="join" className="font-normal cursor-pointer">
               Join an existing clinic
             </Label>
           </div>
-          <div class="flex items-center space-x-2">
+          <div className="flex items-center space-x-2">
             <RadioGroupItem value="create" id="create" />
-            <Label for="create" class="font-normal cursor-pointer">
+            <Label htmlFor="create" className="font-normal cursor-pointer">
               Create a new clinic
             </Label>
           </div>
@@ -347,8 +347,8 @@ export function RegisterFormComprehensive() {
       </div>
 
       {formData.clinicMode === 'join' ? (
-        <div class="space-y-2">
-          <Label for="clinicCode">Clinic Registration Code *</Label>
+        <div className="space-y-2">
+          <Label htmlFor="clinicCode">Clinic Registration Code *</Label>
           <Input
             id="clinicCode"
             type="text"
@@ -357,12 +357,12 @@ export function RegisterFormComprehensive() {
             placeholder="Enter the code provided by your clinic"
             disabled={loading}
           />
-          <p class="text-sm text-gray-500">Ask your clinic administrator for this code</p>
+          <p className="text-sm text-gray-500">Ask your clinic administrator for this code</p>
         </div>
       ) : (
-        <div class="space-y-4">
-          <div class="space-y-2">
-            <Label for="clinicName">Clinic Name *</Label>
+        <div className="space-y-4">
+          <div className="space-y-2">
+            <Label htmlFor="clinicName">Clinic Name *</Label>
             <Input
               id="clinicName"
               type="text"
@@ -382,8 +382,8 @@ export function RegisterFormComprehensive() {
             />
           </div>
 
-          <div class="space-y-2">
-            <Label for="clinicLocation">Clinic Location *</Label>
+          <div className="space-y-2">
+            <Label htmlFor="clinicLocation">Clinic Location *</Label>
             <Input
               id="clinicLocation"
               type="text"
@@ -403,8 +403,8 @@ export function RegisterFormComprehensive() {
             />
           </div>
 
-          <div class="space-y-2">
-            <Label for="practiceType">Practice Type *</Label>
+          <div className="space-y-2">
+            <Label htmlFor="practiceType">Practice Type *</Label>
             <Select
               value={formData.newClinic?.practiceType || ''}
               onValueChange={(value) =>
@@ -438,11 +438,11 @@ export function RegisterFormComprehensive() {
 
       {/* Provider-specific fields */}
       {formData.role === 'dentist' && (
-        <div class="space-y-4 pt-4 border-t">
-          <h4 class="font-medium">Provider Information</h4>
+        <div className="space-y-4 pt-4 border-t">
+          <h4 className="font-medium">Provider Information</h4>
 
-          <div class="space-y-2">
-            <Label for="licenseNumber">License Number</Label>
+          <div className="space-y-2">
+            <Label htmlFor="licenseNumber">License Number</Label>
             <Input
               id="licenseNumber"
               type="text"
@@ -463,8 +463,8 @@ export function RegisterFormComprehensive() {
             />
           </div>
 
-          <div class="space-y-2">
-            <Label for="providerType">Provider Type *</Label>
+          <div className="space-y-2">
+            <Label htmlFor="providerType">Provider Type *</Label>
             <Select
               value={formData.providerInfo?.providerType || ''}
               onValueChange={(value) =>
@@ -491,8 +491,8 @@ export function RegisterFormComprehensive() {
             </Select>
           </div>
 
-          <div class="space-y-2">
-            <Label for="employmentStatus">Employment Status *</Label>
+          <div className="space-y-2">
+            <Label htmlFor="employmentStatus">Employment Status *</Label>
             <Select
               value={formData.providerInfo?.employmentStatus || ''}
               onValueChange={(value) =>
@@ -534,9 +534,9 @@ export function RegisterFormComprehensive() {
    * @memberof RegisterFormComprehensive
    */
   const renderStep3 = () => (
-    <div class="space-y-4">
-      <div class="space-y-4">
-        <div class="flex items-start space-x-2">
+    <div className="space-y-4">
+      <div className="space-y-4">
+        <div className="flex items-start space-x-2">
           <Checkbox
             id="terms"
             checked={formData.termsAccepted}
@@ -545,19 +545,19 @@ export function RegisterFormComprehensive() {
             }
             disabled={loading}
           />
-          <div class="space-y-1">
-            <Label for="terms" class="font-normal cursor-pointer">
+          <div className="space-y-1">
+            <Label htmlFor="terms" className="font-normal cursor-pointer">
               I accept the{' '}
-              <Link href="/terms" class="text-blue-600 hover:underline">
+              <Link href="/terms" className="text-blue-600 hover:underline">
                 Terms of Service
               </Link>{' '}
               *
             </Label>
-            <p class="text-sm text-gray-500">You must accept the terms to continue</p>
+            <p className="text-sm text-gray-500">You must accept the terms to continue</p>
           </div>
         </div>
 
-        <div class="flex items-start space-x-2">
+        <div className="flex items-start space-x-2">
           <Checkbox
             id="privacy"
             checked={formData.privacyAccepted}
@@ -566,19 +566,19 @@ export function RegisterFormComprehensive() {
             }
             disabled={loading}
           />
-          <div class="space-y-1">
-            <Label for="privacy" class="font-normal cursor-pointer">
+          <div className="space-y-1">
+            <Label htmlFor="privacy" className="font-normal cursor-pointer">
               I accept the{' '}
-              <Link href="/privacy" class="text-blue-600 hover:underline">
+              <Link href="/privacy" className="text-blue-600 hover:underline">
                 Privacy Policy
               </Link>{' '}
               *
             </Label>
-            <p class="text-sm text-gray-500">We take your privacy seriously</p>
+            <p className="text-sm text-gray-500">We take your privacy seriously</p>
           </div>
         </div>
 
-        <div class="flex items-start space-x-2">
+        <div className="flex items-start space-x-2">
           <Checkbox
             id="marketing"
             checked={formData.marketingOptIn}
@@ -587,33 +587,33 @@ export function RegisterFormComprehensive() {
             }
             disabled={loading}
           />
-          <div class="space-y-1">
-            <Label for="marketing" class="font-normal cursor-pointer">
+          <div className="space-y-1">
+            <Label htmlFor="marketing" className="font-normal cursor-pointer">
               Send me updates about new features and dental practice tips
             </Label>
-            <p class="text-sm text-gray-500">You can unsubscribe at any time</p>
+            <p className="text-sm text-gray-500">You can unsubscribe at any time</p>
           </div>
         </div>
       </div>
 
-      <div class="bg-gray-50 rounded-lg p-4">
-        <h4 class="font-medium mb-2">Registration Summary</h4>
-        <dl class="space-y-1 text-sm">
-          <div class="flex justify-between">
-            <dt class="text-gray-600">Email:</dt>
-            <dd class="font-medium">{formData.email}</dd>
+      <div className="bg-gray-50 rounded-lg p-4">
+        <h4 className="font-medium mb-2">Registration Summary</h4>
+        <dl className="space-y-1 text-sm">
+          <div className="flex justify-between">
+            <dt className="text-gray-600">Email:</dt>
+            <dd className="font-medium">{formData.email}</dd>
           </div>
-          <div class="flex justify-between">
-            <dt class="text-gray-600">Name:</dt>
-            <dd class="font-medium">{formData.fullName}</dd>
+          <div className="flex justify-between">
+            <dt className="text-gray-600">Name:</dt>
+            <dd className="font-medium">{formData.fullName}</dd>
           </div>
-          <div class="flex justify-between">
-            <dt class="text-gray-600">Role:</dt>
-            <dd class="font-medium capitalize">{formData.role.replace('_', ' ')}</dd>
+          <div className="flex justify-between">
+            <dt className="text-gray-600">Role:</dt>
+            <dd className="font-medium capitalize">{formData.role.replace('_', ' ')}</dd>
           </div>
-          <div class="flex justify-between">
-            <dt class="text-gray-600">Clinic:</dt>
-            <dd class="font-medium">
+          <div className="flex justify-between">
+            <dt className="text-gray-600">Clinic:</dt>
+            <dd className="font-medium">
               {formData.clinicMode === 'join'
                 ? `Joining with code: ${formData.clinicRegistrationCode}`
                 : `Creating: ${formData.newClinic?.name}`}
@@ -625,17 +625,17 @@ export function RegisterFormComprehensive() {
   );
 
   return (
-    <div class="min-h-screen bg-gray-50 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
-      <div class="w-full max-w-4xl">
-        <div class="text-center mb-8">
-          <h1 class="text-3xl font-bold text-gray-900">Dental Analytics Dashboard</h1>
-          <p class="mt-2 text-lg text-gray-600">Complete your registration to get started</p>
+    <div className="min-h-screen bg-gray-50 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+      <div className="w-full max-w-4xl">
+        <div className="text-center mb-8">
+          <h1 className="text-3xl font-bold text-gray-900">Dental Analytics Dashboard</h1>
+          <p className="mt-2 text-lg text-gray-600">Complete your registration to get started</p>
         </div>
 
-        <Card class="w-full shadow-lg">
-          <CardHeader class="space-y-1 pb-6">
-            <CardTitle class="text-2xl">Create Your Account</CardTitle>
-            <CardDescription class="text-base">
+        <Card className="w-full shadow-lg">
+          <CardHeader className="space-y-1 pb-6">
+            <CardTitle className="text-2xl">Create Your Account</CardTitle>
+            <CardDescription className="text-base">
               Step {currentStep} of 3 -{' '}
               {currentStep === 1
                 ? 'Account Information'
@@ -647,7 +647,7 @@ export function RegisterFormComprehensive() {
           <CardContent>
             <form onSubmit={handleSubmit}>
               {error && (
-                <div class="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded mb-4">
+                <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded mb-4">
                   {error}
                 </div>
               )}
@@ -656,7 +656,7 @@ export function RegisterFormComprehensive() {
               {currentStep === 2 && renderStep2()}
               {currentStep === 3 && renderStep3()}
 
-              <div class="flex justify-between mt-6">
+              <div className="flex justify-between mt-6">
                 {currentStep > 1 && (
                   <Button
                     type="button"
@@ -668,7 +668,7 @@ export function RegisterFormComprehensive() {
                   </Button>
                 )}
 
-                <div class="ml-auto space-x-2">
+                <div className="ml-auto space-x-2">
                   {currentStep < 3 ? (
                     <Button type="button" onClick={handleNextStep} disabled={loading}>
                       Next
@@ -684,9 +684,9 @@ export function RegisterFormComprehensive() {
                 </div>
               </div>
 
-              <div class="text-center text-sm mt-6">
+              <div className="text-center text-sm mt-6">
                 Already have an account?{' '}
-                <Link href="/login" class="text-primary hover:underline">
+                <Link href="/login" className="text-primary hover:underline">
                   Sign in
                 </Link>
               </div>

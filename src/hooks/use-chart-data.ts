@@ -117,6 +117,9 @@ export function generateMockChartData(
       case 'treatments':
         value = Math.floor(Math.random() * 30) + 40;
         break;
+      default:
+        value = Math.floor(Math.random() * 100) + 50;
+        break;
     }
 
     data.push({

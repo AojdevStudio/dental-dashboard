@@ -353,10 +353,12 @@ export async function getMetricStatistics(
     max,
     avg,
     sum,
-    latest: {
-      value: latest.value,
-      date: latest.date,
-    },
+    latest: latest
+      ? {
+          value: latest.value,
+          date: latest.date,
+        }
+      : null,
   };
 }
 

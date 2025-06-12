@@ -35,8 +35,10 @@ export function LineChart({
   loading,
   error,
   className,
-  formatYAxis = (value) => formatNumber(value),
-  formatTooltip = (value) => formatNumber(value),
+  formatYAxis = (value) =>
+    formatNumber(typeof value === 'string' ? Number.parseFloat(value) || 0 : value),
+  formatTooltip = (value) =>
+    formatNumber(typeof value === 'string' ? Number.parseFloat(value) || 0 : value),
   onDataPointClick,
 }: LineChartProps) {
   const breakpoint = useBreakpoint();
@@ -74,10 +76,13 @@ export function LineChart({
     return (
       <div style={chartTheme.tooltip.container}>
         <p style={chartTheme.tooltip.label}>
-          {config.xAxisKey === 'date' ? formatDate(label) : label}
+          {config.xAxisKey === 'date' ? formatDate(label || '') : label}
         </p>
         {payload.map((entry, index: number) => (
-          <p key={index} style={{ ...chartTheme.tooltip.value, color: entry.color }}>
+          <p
+            key={`${entry.name}-${index}`}
+            style={{ ...chartTheme.tooltip.value, color: entry.color }}
+          >
             {entry.name}: {formatTooltip(entry.value, entry.name)}
           </p>
         ))}
@@ -92,7 +97,7 @@ export function LineChart({
       config={defaultConfig}
       loading={loading}
       error={error}
-      class={className}
+      className={className}
     >
       <ResponsiveContainer width="100%" height={defaultConfig.height}>
         <RechartsLineChart

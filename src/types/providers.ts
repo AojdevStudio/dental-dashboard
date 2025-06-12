@@ -5,20 +5,22 @@
  * including the enhanced ProviderWithLocations type that includes location relationships.
  */
 
-import type {
-  ProviderWithLocations as DBProviderWithLocations,
+// Re-export for other modules
+export type {
+  ProviderFilters,
   ProviderPerformanceMetrics,
 } from '@/lib/database/queries/providers';
 
-// Keep this for other modules that might be using the re-export
-export type { DBProviderWithLocations as ProviderWithLocations, ProviderPerformanceMetrics };
+// Import ProviderWithLocations for both local usage and re-export
+import type { ProviderWithLocations } from '@/lib/database/queries/providers';
+export type { ProviderWithLocations };
 
 /**
  * API response wrapper for paginated providers
  */
 export interface ProvidersApiResponse {
   success: boolean;
-  data: DBProviderWithLocations[];
+  data: ProviderWithLocations[];
   pagination: {
     total: number;
     page: number;
@@ -57,18 +59,6 @@ export interface ProvidersQueryParams {
   includeInactive?: boolean;
   page?: number;
   limit?: number;
-}
-
-/**
- * Enhanced provider filters with optional pagination support
- */
-export interface ProviderFilters {
-  clinicId?: string;
-  locationId?: string;
-  providerId?: string;
-  providerType?: 'dentist' | 'hygienist' | 'specialist' | 'other';
-  includeInactive?: boolean;
-  pagination?: PaginationParams;
 }
 
 /**

@@ -18,9 +18,12 @@ export async function GET(request: NextRequest) {
 
     // Create a minimal auth context for testing
     const authContext = {
-      user: { id: 'test', email: 'test@example.com' },
+      userId: 'test',
+      authId: 'test',
       clinicIds: [clinicId],
-      roles: { [clinicId]: 'admin' },
+      currentClinicId: clinicId,
+      role: 'admin',
+      isSystemAdmin: false,
     };
 
     // Get hygiene production data

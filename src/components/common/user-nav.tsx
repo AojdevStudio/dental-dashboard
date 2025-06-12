@@ -47,14 +47,16 @@ export function UserNav() {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild={true}>
-        <Button variant="ghost" class="flex items-center gap-2 px-3 py-2">
-          <UserIcon class="h-5 w-5 text-blue-600" />
-          <span class="font-medium text-gray-900 text-sm max-w-[120px] truncate">{user.email}</span>
+        <Button variant="ghost" className="flex items-center gap-2 px-3 py-2">
+          <UserIcon className="h-5 w-5 text-blue-600" />
+          <span className="font-medium text-gray-900 text-sm max-w-[120px] truncate">
+            {user.email}
+          </span>
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
-        <DropdownMenuItem onClick={handleSignOut} class="text-red-600 focus:bg-red-50">
-          <LogOut class="h-4 w-4 mr-2" /> Sign out
+        <DropdownMenuItem onClick={handleSignOut} className="text-red-600 focus:bg-red-50">
+          <LogOut className="h-4 w-4 mr-2" /> Sign out
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>

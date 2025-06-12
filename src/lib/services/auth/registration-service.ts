@@ -1,6 +1,7 @@
 import { randomBytes } from 'node:crypto';
 import { prisma } from '@/lib/database/prisma';
-import type { Prisma } from '@prisma/client';
+import type { Prisma, User } from '@prisma/client';
+import type { SupabaseClient, User as SupabaseUser } from '@supabase/supabase-js';
 
 // Type for registration request data
 export interface RegistrationData {
@@ -21,8 +22,8 @@ export interface RegistrationData {
 }
 
 interface RegistrationResult {
-  user: any;
-  authUser: any;
+  user: User;
+  authUser: SupabaseUser;
   clinicId: string;
   isNewClinic: boolean;
 }
@@ -33,7 +34,7 @@ function generateClinicCode(): string {
 }
 
 export class RegistrationService {
-  constructor(private supabase: any) {}
+  constructor(private supabase: SupabaseClient) {}
 
   async register(data: RegistrationData): Promise<RegistrationResult> {
     // Validate required fields
@@ -119,7 +120,7 @@ export class RegistrationService {
     return { clinicId: newClinic.id, isNewClinic: true };
   }
 
-  private async createAuthUser(data: RegistrationData): Promise<any> {
+  private async createAuthUser(data: RegistrationData): Promise<SupabaseUser> {
     const { data: authData, error: authError } = await this.supabase.auth.signUp({
       email: data.email,
       password: data.password,
@@ -142,11 +143,11 @@ export class RegistrationService {
 
   private async createDatabaseRecords(
     data: RegistrationData,
-    authUser: any,
+    authUser: SupabaseUser,
     clinicId: string,
     isNewClinic: boolean,
     tx: Prisma.TransactionClient
-  ): Promise<any> {
+  ): Promise<User> {
     // Create database user
     const dbUser = await tx.user.create({
       data: {

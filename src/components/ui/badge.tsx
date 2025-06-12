@@ -92,7 +92,7 @@ export interface BadgeProps
  * <Badge variant="outline" className="text-blue-500 border-blue-500">Info</Badge>
  */
 function Badge({ className, variant, ...props }: BadgeProps) {
-  return <div class={cn(badgeVariants({ variant }), className)} {...props} />;
+  return <div className={cn(badgeVariants({ variant }), className)} {...props} />;
 }
 
 /**

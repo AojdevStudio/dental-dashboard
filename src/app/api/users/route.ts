@@ -14,7 +14,7 @@ import {
 import type { ApiErrorPayload, ApiSuccessPayload } from '@/lib/api/utils';
 import * as userQueries from '@/lib/database/queries/users';
 import type { User } from '@prisma/client'; // Assuming User type is available
-import type { NextResponse, Request } from 'next/server';
+import type { NextResponse } from 'next/server';
 import { z } from 'zod';
 
 // Request/Response types

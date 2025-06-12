@@ -72,21 +72,21 @@ export function VarianceIndicator({
   // Get the appropriate icon based on variance direction
   const Icon = () => {
     if (isNeutral) {
-      return <Minus class="h-3 w-3" />;
+      return <Minus className="h-3 w-3" />;
     }
     if (isPositive) {
-      return <ArrowUp class="h-3 w-3" />;
+      return <ArrowUp className="h-3 w-3" />;
     }
-    return <ArrowDown class="h-3 w-3" />;
+    return <ArrowDown className="h-3 w-3" />;
   };
 
   return (
-    <div class={cn('flex items-center text-sm', className)}>
-      {label && <span class="text-muted-foreground mr-2">{label}:</span>}
+    <div className={cn('flex items-center text-sm', className)}>
+      {label && <span className="text-muted-foreground mr-2">{label}:</span>}
 
-      <div class={cn('flex items-center font-medium', getTextColorClass())}>
+      <div className={cn('flex items-center font-medium', getTextColorClass())}>
         {showIcon && (
-          <span class="mr-1">
+          <span className="mr-1">
             <Icon />
           </span>
         )}

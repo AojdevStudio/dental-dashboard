@@ -19,13 +19,13 @@ import { Sidebar } from './sidebar';
  */
 export function Navigation() {
   return (
-    <div class="flex flex-col min-h-screen">
+    <div className="flex flex-col min-h-screen">
       <Header />
-      <div class="flex flex-1">
-        <div class="hidden md:flex w-64 flex-col border-r">
+      <div className="flex flex-1">
+        <div className="hidden md:flex w-64 flex-col border-r">
           <Sidebar />
         </div>
-        <div class="flex-1 p-6">
+        <div className="flex-1 p-6">
           {/* Main content will be rendered here by layout.tsx */}
           {/* This is intentionally empty as it's a wrapper component */}
         </div>

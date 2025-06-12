@@ -12,7 +12,7 @@ export interface ImportOptions {
   dryRun?: boolean;
 }
 
-export interface ValidatedFinancialData {
+export interface ValidatedFinancialData extends Record<string, unknown> {
   clinicId: string;
   locationId: string;
   locationName: string;
@@ -77,7 +77,7 @@ export class FinancialImportPipeline extends BaseService {
       if (!validationResult.isValid || options.dryRun) {
         return {
           success: validationResult.isValid,
-          dryRun: options.dryRun,
+          dryRun: options.dryRun ?? false,
           validation: validationResult,
           message: options.dryRun ? 'Dry run completed successfully' : 'Validation failed',
         };

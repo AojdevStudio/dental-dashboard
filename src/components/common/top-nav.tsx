@@ -17,7 +17,7 @@ export function TopNav({
   showSearch = true,
   showNotifications = true,
 }: TopNavProps) {
-  const { user, isAuthenticated } = useAuth();
+  const { isAuthenticated } = useAuth();
 
   // Date range state
   const [dateRange, setDateRange] = React.useState<{
@@ -32,20 +32,20 @@ export function TopNav({
 
   return (
     <header
-      class={cn(
+      className={cn(
         'sticky top-0 z-50 flex h-16 items-center justify-between border-b bg-background px-4',
         className
       )}
     >
       {/* Left section - Search and Date Range */}
-      <div class="flex flex-1 items-center gap-4">
+      <div className="flex flex-1 items-center gap-4">
         {showSearch && (
-          <div class="relative max-w-md">
-            <Search class="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+          <div className="relative max-w-md">
+            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
             <Input
               type="search"
               placeholder="Search..."
-              class="w-full pl-10 pr-4"
+              className="w-full pl-10 pr-4"
               aria-label="Search"
             />
           </div>
@@ -56,13 +56,13 @@ export function TopNav({
             <PopoverTrigger asChild={true}>
               <Button
                 variant="outline"
-                class={cn(
+                className={cn(
                   'hidden md:flex items-center gap-2 justify-start text-left font-normal',
                   !dateRange.from && 'text-muted-foreground'
                 )}
                 aria-label="Select date range"
               >
-                <CalendarIcon class="h-4 w-4" />
+                <CalendarIcon className="h-4 w-4" />
                 {dateRange.from ? (
                   dateRange.to ? (
                     <>
@@ -76,7 +76,7 @@ export function TopNav({
                 )}
               </Button>
             </PopoverTrigger>
-            <PopoverContent class="w-auto p-0" align="start">
+            <PopoverContent className="w-auto p-0" align="start">
               <Calendar
                 initialFocus={true}
                 mode="range"
@@ -105,19 +105,21 @@ export function TopNav({
       </div>
 
       {/* Right section - Actions and User */}
-      <div class="flex items-center gap-2">
+      <div className="flex items-center gap-2">
         {showNotifications && (
-          <Button variant="ghost" size="icon" class="relative" aria-label="Notifications">
-            <Bell class="h-5 w-5 text-destructive" />
-            <span class="absolute -right-1 -top-1 text-xs font-semibold text-destructive">3</span>
+          <Button variant="ghost" size="icon" className="relative" aria-label="Notifications">
+            <Bell className="h-5 w-5 text-destructive" />
+            <span className="absolute -right-1 -top-1 text-xs font-semibold text-destructive">
+              3
+            </span>
           </Button>
         )}
 
         <Button variant="ghost" size="icon" aria-label="Settings">
-          <Settings class="h-5 w-5" />
+          <Settings className="h-5 w-5" />
         </Button>
 
-        <div class="ml-2 border-l pl-2">
+        <div className="ml-2 border-l pl-2">
           {isAuthenticated ? (
             <UserNav />
           ) : (

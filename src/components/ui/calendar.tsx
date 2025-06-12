@@ -131,7 +131,7 @@ function Calendar({
   return (
     <DayPicker
       showOutsideDays={showOutsideDays}
-      class={cn('w-fit', className)}
+      className={cn('w-fit', className)}
       classNames={mergedClassNames}
       components={mergedComponents}
       {...props}

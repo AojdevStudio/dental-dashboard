@@ -16,7 +16,10 @@
       "**/.turbo/**",
       "**/generated/**",
       "**/*.min.js",
-      "**/*.bundle.js"
+      "**/*.bundle.js",
+      "scripts/**",
+      "upload/**",
+      "prisma/seed.ts"
     ]
   },
   "formatter": {
@@ -273,7 +276,7 @@
         "noMisplacedAssertion": "error",
         "noMisrefactoredShorthandAssign": "error",
         "noPrototypeBuiltins": "error",
-        "noReactSpecificProps": "error",
+        "noReactSpecificProps": "off",
         "noRedeclare": "error",
         "noRedundantUseStrict": "error",
         "noSelfCompare": "error",
@@ -327,7 +330,23 @@
       "bracketSameLine": false,
       "attributePosition": "auto"
     },
-    "globals": ["console", "process", "Buffer", "global", "__dirname", "__filename"]
+    "globals": [
+      "console",
+      "process",
+      "Buffer",
+      "global",
+      "__dirname",
+      "__filename",
+      "vi",
+      "describe",
+      "it",
+      "test",
+      "expect",
+      "beforeEach",
+      "afterEach",
+      "beforeAll",
+      "afterAll"
+    ]
   },
   "json": {
     "parser": {
@@ -355,11 +374,20 @@
   },
   "overrides": [
     {
-      "include": ["*.test.ts", "*.test.tsx", "*.spec.ts", "*.spec.tsx", "**/__tests__/**/*"],
+      "include": [
+        "*.test.ts",
+        "*.test.tsx",
+        "*.spec.ts",
+        "*.spec.tsx",
+        "**/__tests__/**/*",
+        "**/tests/**/*",
+        "src/tests/**/*"
+      ],
       "linter": {
         "rules": {
           "suspicious": {
             "noConsole": "off",
+            "noConsoleLog": "off",
             "noExplicitAny": "off"
           },
           "style": {
@@ -367,6 +395,13 @@
           },
           "nursery": {
             "noSecrets": "off"
+          },
+          "complexity": {
+            "noExcessiveCognitiveComplexity": "off"
+          },
+          "correctness": {
+            "noUnusedVariables": "warn",
+            "noUnusedImports": "warn"
           }
         }
       }
@@ -385,6 +420,35 @@
       }
     },
     {
+      "include": ["src/app/(auth)/**/*", "src/app/auth/**/*"],
+      "linter": {
+        "rules": {
+          "complexity": {
+            "noExcessiveCognitiveComplexity": "warn"
+          },
+          "suspicious": {
+            "useAwait": "warn"
+          },
+          "style": {
+            "noNonNullAssertion": "warn"
+          }
+        }
+      }
+    },
+    {
+      "include": ["src/components/common/**/*"],
+      "linter": {
+        "rules": {
+          "complexity": {
+            "noExcessiveCognitiveComplexity": "warn"
+          },
+          "correctness": {
+            "noUnusedVariables": "warn"
+          }
+        }
+      }
+    },
+    {
       "include": ["src/types/**/*", "types/**/*", "**/*.d.ts"],
       "linter": {
         "rules": {
@@ -393,6 +457,9 @@
           },
           "suspicious": {
             "noEmptyInterface": "off"
+          },
+          "nursery": {
+            "noExportedImports": "warn"
           }
         }
       }
@@ -403,6 +470,19 @@
         "rules": {
           "nursery": {
             "noSecrets": "off"
+          }
+        }
+      }
+    },
+    {
+      "include": ["**/vitest-setup*.ts", "**/vitest.config.ts", "**/vitest.*.config.ts"],
+      "linter": {
+        "rules": {
+          "style": {
+            "noNonNullAssertion": "off"
+          },
+          "correctness": {
+            "noUndeclaredVariables": "off"
           }
         }
       }

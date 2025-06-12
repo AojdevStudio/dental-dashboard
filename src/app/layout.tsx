@@ -77,7 +77,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body class={`${geistSans.variable} ${geistMono.variable} antialiased`}>
+      <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
         <Providers>{children}</Providers>
         {process.env.NODE_ENV === 'development' && <StagewiseToolbar config={stagewiseConfig} />}
       </body>

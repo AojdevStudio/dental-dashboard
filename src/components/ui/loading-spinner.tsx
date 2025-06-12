@@ -14,5 +14,5 @@ export function LoadingSpinner({ size = 'md', className }: LoadingSpinnerProps) 
     lg: 'h-8 w-8',
   };
 
-  return <Loader2 class={cn('animate-spin', sizeClasses[size], className)} />;
+  return <Loader2 className={cn('animate-spin', sizeClasses[size], className)} />;
 }

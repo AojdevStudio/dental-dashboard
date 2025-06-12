@@ -1,3 +1,5 @@
+import type { AuthContext } from '@/lib/database/auth-context';
+
 /**
  * Base service class providing common functionality for all services
  */
@@ -13,8 +15,8 @@ export abstract class BaseService {
   /**
    * Validate that auth context is properly provided
    */
-  protected validateAuthContext(authContext: any): void {
-    if (!authContext?.user?.id) {
+  protected validateAuthContext(authContext: AuthContext | null | undefined): void {
+    if (!authContext?.userId) {
       throw new Error('Valid authentication context is required');
     }
   }
@@ -22,7 +24,7 @@ export abstract class BaseService {
   /**
    * Validate required parameters
    */
-  protected validateRequired(params: Record<string, any>, requiredFields: string[]): void {
+  protected validateRequired<T extends Record<string, unknown>>(params: T, requiredFields: string[]): void {
     const missing = requiredFields.filter(
       (field) => params[field] === undefined || params[field] === null || params[field] === ''
     );

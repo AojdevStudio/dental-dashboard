@@ -43,12 +43,12 @@ export default function ResetPasswordError({
   }, []);
 
   return (
-    <div class="min-h-screen flex flex-col items-center justify-center bg-[#121212] relative overflow-hidden w-full rounded-xl">
-      <div class="relative z-10 w-full max-w-sm rounded-3xl bg-gradient-to-r from-[#ffffff10] to-[#121212] backdrop-blur-sm shadow-2xl p-8 flex flex-col items-center">
-        <div class="flex items-center justify-center w-24 h-24 rounded-full bg-red-500/20 mb-6 shadow-lg">
+    <div className="min-h-screen flex flex-col items-center justify-center bg-[#121212] relative overflow-hidden w-full rounded-xl">
+      <div className="relative z-10 w-full max-w-sm rounded-3xl bg-gradient-to-r from-[#ffffff10] to-[#121212] backdrop-blur-sm shadow-2xl p-8 flex flex-col items-center">
+        <div className="flex items-center justify-center w-24 h-24 rounded-full bg-red-500/20 mb-6 shadow-lg">
           <svg
             xmlns="http://www.w3.org/2000/svg"
-            class="h-12 w-12 text-red-500"
+            className="h-12 w-12 text-red-500"
             fill="none"
             viewBox="0 0 24 24"
             stroke="currentColor"
@@ -63,21 +63,21 @@ export default function ResetPasswordError({
           </svg>
         </div>
 
-        <h2 class="text-2xl font-semibold text-white mb-4 text-center">Something went wrong</h2>
+        <h2 className="text-2xl font-semibold text-white mb-4 text-center">Something went wrong</h2>
 
-        <p class="text-gray-300 mb-6 text-center">
+        <p className="text-gray-300 mb-6 text-center">
           We encountered an error while trying to process your password reset request.
         </p>
 
-        <div class="flex flex-col w-full gap-4">
+        <div className="flex flex-col w-full gap-4">
           <Button
             onClick={reset}
-            class="w-full bg-white/10 text-white font-medium px-5 py-3 rounded-full shadow hover:bg-white/20 transition mb-3 text-sm"
+            className="w-full bg-white/10 text-white font-medium px-5 py-3 rounded-full shadow hover:bg-white/20 transition mb-3 text-sm"
           >
             Try again
           </Button>
 
-          <a href="/login" class="w-full text-center text-sm text-gray-400 hover:text-white">
+          <a href="/login" className="w-full text-center text-sm text-gray-400 hover:text-white">
             Return to login
           </a>
         </div>

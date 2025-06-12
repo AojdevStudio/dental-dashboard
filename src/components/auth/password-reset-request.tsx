@@ -61,23 +61,23 @@ export function PasswordResetRequest(): React.ReactElement {
   };
 
   return (
-    <div class="min-h-screen flex flex-col items-center justify-center bg-gray-50 px-4 sm:px-6 lg:px-8 font-sans">
-      <div class="max-w-md w-full space-y-8 bg-white p-8 rounded-xl shadow-md">
+    <div className="min-h-screen flex flex-col items-center justify-center bg-gray-50 px-4 sm:px-6 lg:px-8 font-sans">
+      <div className="max-w-md w-full space-y-8 bg-white p-8 rounded-xl shadow-md">
         <div>
-          <h2 class="mt-6 text-center text-3xl font-bold text-gray-900 tracking-tight">
+          <h2 className="mt-6 text-center text-3xl font-bold text-gray-900 tracking-tight">
             Reset your password
           </h2>
-          <p class="mt-2 text-center text-sm text-gray-600">
+          <p className="mt-2 text-center text-sm text-gray-600">
             Enter your email address and we'll send you a link to reset your password.
           </p>
         </div>
 
         {submitStatus === 'success' ? (
-          <div class="rounded-md bg-green-50 p-4 mt-8">
-            <div class="flex">
-              <div class="flex-shrink-0">
+          <div className="rounded-md bg-green-50 p-4 mt-8">
+            <div className="flex">
+              <div className="flex-shrink-0">
                 <svg
-                  class="h-5 w-5 text-green-400"
+                  className="h-5 w-5 text-green-400"
                   xmlns="http://www.w3.org/2000/svg"
                   viewBox="0 0 20 20"
                   fill="currentColor"
@@ -90,18 +90,18 @@ export function PasswordResetRequest(): React.ReactElement {
                   />
                 </svg>
               </div>
-              <div class="ml-3">
-                <h3 class="text-sm font-medium text-green-800">Reset link sent</h3>
-                <div class="mt-2 text-sm text-green-700">
+              <div className="ml-3">
+                <h3 className="text-sm font-medium text-green-800">Reset link sent</h3>
+                <div className="mt-2 text-sm text-green-700">
                   <p>
                     If an account exists with this email, you'll receive a password reset link
                     shortly. Please check your email and follow the instructions.
                   </p>
                 </div>
-                <div class="mt-4">
+                <div className="mt-4">
                   <Link
                     href="/login"
-                    class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-blue-600 bg-blue-50 hover:bg-blue-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                    className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-blue-600 bg-blue-50 hover:bg-blue-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
                   >
                     Return to login
                   </Link>
@@ -110,11 +110,11 @@ export function PasswordResetRequest(): React.ReactElement {
             </div>
           </div>
         ) : (
-          <form class="mt-8 space-y-6" onSubmit={handleSubmit}>
+          <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
             <div>
               <label
-                for="email-address"
-                class="block text-sm font-medium text-gray-700 mb-2 tracking-wide"
+                htmlFor="email-address"
+                className="block text-sm font-medium text-gray-700 mb-2 tracking-wide"
               >
                 Email address
               </label>
@@ -124,7 +124,7 @@ export function PasswordResetRequest(): React.ReactElement {
                 type="email"
                 autoComplete="email"
                 required={true}
-                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors"
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors"
                 placeholder="Enter your email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
@@ -133,11 +133,11 @@ export function PasswordResetRequest(): React.ReactElement {
             </div>
 
             {submitStatus === 'error' && (
-              <div class="rounded-md bg-red-50 p-4">
-                <div class="flex">
-                  <div class="flex-shrink-0">
+              <div className="rounded-md bg-red-50 p-4">
+                <div className="flex">
+                  <div className="flex-shrink-0">
                     <svg
-                      class="h-5 w-5 text-red-400"
+                      className="h-5 w-5 text-red-400"
                       xmlns="http://www.w3.org/2000/svg"
                       viewBox="0 0 20 20"
                       fill="currentColor"
@@ -150,9 +150,9 @@ export function PasswordResetRequest(): React.ReactElement {
                       />
                     </svg>
                   </div>
-                  <div class="ml-3">
-                    <h3 class="text-sm font-medium text-red-800">Error</h3>
-                    <div class="mt-2 text-sm text-red-700">
+                  <div className="ml-3">
+                    <h3 className="text-sm font-medium text-red-800">Error</h3>
+                    <div className="mt-2 text-sm text-red-700">
                       <p>{errorMessage}</p>
                     </div>
                   </div>
@@ -160,18 +160,18 @@ export function PasswordResetRequest(): React.ReactElement {
               </div>
             )}
 
-            <div class="flex flex-col space-y-4">
+            <div className="flex flex-col space-y-4">
               <button
                 type="submit"
                 disabled={isSubmitting}
-                class="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 px-4 rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed tracking-wide"
+                className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 px-4 rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed tracking-wide"
               >
                 {isSubmitting ? 'Sending...' : 'Send reset link'}
               </button>
 
               <Link
                 href="/login"
-                class="w-full bg-transparent hover:bg-gray-50 text-blue-600 font-medium py-3 px-4 rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 text-center tracking-wide"
+                className="w-full bg-transparent hover:bg-gray-50 text-blue-600 font-medium py-3 px-4 rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 text-center tracking-wide"
               >
                 Back to login
               </Link>

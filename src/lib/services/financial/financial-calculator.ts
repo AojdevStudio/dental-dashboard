@@ -78,7 +78,7 @@ export class FinancialCalculatorService {
   /**
    * Validate and normalize numeric input
    */
-  normalizeNumericInput(value: any): number {
+  normalizeNumericInput(value: unknown): number {
     const num = Number.parseFloat(value?.toString() || '0');
     return Number.isNaN(num) ? 0 : Math.max(0, num);
   }

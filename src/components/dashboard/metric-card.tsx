@@ -81,12 +81,12 @@ export function MetricCard({
   if (isLoading) {
     return (
       <Card>
-        <CardHeader class="pb-2">
-          <Skeleton class="h-4 w-32" />
+        <CardHeader className="pb-2">
+          <Skeleton className="h-4 w-32" />
         </CardHeader>
         <CardContent>
-          <Skeleton class="h-10 w-20 mb-2" />
-          <Skeleton class="h-4 w-40" />
+          <Skeleton className="h-10 w-20 mb-2" />
+          <Skeleton className="h-4 w-40" />
         </CardContent>
       </Card>
     );
@@ -94,33 +94,33 @@ export function MetricCard({
 
   return (
     <Card>
-      <CardHeader class="pb-2">
-        <CardTitle class="text-sm font-medium text-muted-foreground flex items-center">
-          {icon && <span class="mr-2">{icon}</span>}
+      <CardHeader className="pb-2">
+        <CardTitle className="text-sm font-medium text-muted-foreground flex items-center">
+          {icon && <span className="mr-2">{icon}</span>}
           {title}
         </CardTitle>
       </CardHeader>
       <CardContent>
-        <div class="text-2xl font-bold">{value}</div>
+        <div className="text-2xl font-bold">{value}</div>
 
         {/* Description and change percentage */}
-        <div class="flex items-center mt-1">
+        <div className="flex items-center mt-1">
           {changePercent !== undefined && (
             <div
-              class={cn(
+              className={cn(
                 'text-xs font-medium mr-2 flex items-center',
                 isPositive && 'text-green-500',
                 isNegative && 'text-red-500'
               )}
             >
-              {direction === 'increase' && <ArrowUp class="mr-1 h-3 w-3" />}
-              {direction === 'decrease' && <ArrowDown class="mr-1 h-3 w-3" />}
-              {direction === 'neutral' && <Minus class="mr-1 h-3 w-3" />}
+              {direction === 'increase' && <ArrowUp className="mr-1 h-3 w-3" />}
+              {direction === 'decrease' && <ArrowDown className="mr-1 h-3 w-3" />}
+              {direction === 'neutral' && <Minus className="mr-1 h-3 w-3" />}
               {Math.abs(changePercent)}%
             </div>
           )}
 
-          {description && <p class="text-xs text-muted-foreground">{description}</p>}
+          {description && <p className="text-xs text-muted-foreground">{description}</p>}
         </div>
       </CardContent>
     </Card>

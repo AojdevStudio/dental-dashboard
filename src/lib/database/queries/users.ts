@@ -40,6 +40,9 @@ export async function getUserById(authContext: AuthContext, userId: string) {
   }
 
   // Validate access
+  if (!user.clinicId) {
+    throw new Error('User has no clinic association');
+  }
   const hasAccess = await validateClinicAccess(authContext, user.clinicId);
   if (!hasAccess) {
     throw new Error('Access denied to this user');
@@ -101,23 +104,32 @@ export async function getUsersByClinic(authContext: AuthContext, clinicId: strin
       clinicId,
       isActive: true,
     },
-    include: {
-      user: {
-        include: {
-          clinic: true,
-        },
-      },
-    },
     orderBy: {
       createdAt: 'desc',
     },
   });
 
-  return userRoles.map((ur) => ({
-    ...(ur.user || {}),
-    clinicRole: ur.role,
-    roleId: ur.id,
-  }));
+  // Fetch user data separately since relations aren't defined yet
+  const userIds = userRoles.map((ur) => ur.userId);
+  const users = await prisma.user.findMany({
+    where: {
+      id: { in: userIds },
+    },
+  });
+
+  // Create a map for quick lookup
+  const userMap = new Map(users.map((user) => [user.id, user]));
+
+  return userRoles
+    .map((ur) => {
+      const user = userMap.get(ur.userId);
+      return {
+        ...user,
+        clinicRole: ur.role,
+        roleId: ur.id,
+      };
+    })
+    .filter((item) => item.id); // Filter out any items where user wasn't found
 }
 
 /**
@@ -194,7 +206,7 @@ export async function updateUser(authContext: AuthContext, userId: string, input
     (await prisma.userClinicRole.findFirst({
       where: {
         userId: authContext.userId,
-        clinicId: user.clinicId,
+        clinicId: user.clinicId || undefined,
         role: 'clinic_admin',
         isActive: true,
       },
@@ -232,7 +244,7 @@ export async function deleteUser(authContext: AuthContext, userId: string) {
     (await prisma.userClinicRole.findFirst({
       where: {
         userId: authContext.userId,
-        clinicId: user.clinicId,
+        clinicId: user.clinicId || undefined,
         role: 'clinic_admin',
         isActive: true,
       },
@@ -266,7 +278,7 @@ export async function getUserClinicRoles(authContext: AuthContext, userId?: stri
       where: { id: targetUserId },
     });
 
-    if (!(targetUser && authContext.clinicIds.includes(targetUser.clinicId))) {
+    if (!(targetUser?.clinicId && authContext.clinicIds.includes(targetUser.clinicId))) {
       throw new Error('Access denied');
     }
   }
@@ -275,9 +287,6 @@ export async function getUserClinicRoles(authContext: AuthContext, userId?: stri
     where: {
       userId: targetUserId,
       isActive: true,
-    },
-    include: {
-      clinic: true,
     },
     orderBy: {
       createdAt: 'desc',

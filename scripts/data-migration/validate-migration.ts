@@ -124,7 +124,7 @@ class MigrationValidator {
     const usersWithInvalidClinic = await prisma.user.findMany({
       where: {
         clinic: {
-          is: null,
+          is: undefined,
         },
       },
       select: { id: true, email: true },
@@ -229,7 +229,7 @@ class MigrationValidator {
     const orphanedProviders = await prisma.provider.findMany({
       where: {
         clinic: {
-          is: null,
+          is: undefined,
         },
       },
       select: { id: true, name: true },
@@ -288,7 +288,7 @@ class MigrationValidator {
     const dashboardsWithInvalidUser = await prisma.dashboard.findMany({
       where: {
         user: {
-          is: null,
+          is: undefined,
         },
       },
       select: { id: true, name: true },
@@ -308,7 +308,7 @@ class MigrationValidator {
     const orphanedWidgets = await prisma.widget.count({
       where: {
         dashboard: {
-          is: null,
+          is: undefined,
         },
       },
     });

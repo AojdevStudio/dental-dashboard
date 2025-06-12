@@ -146,26 +146,26 @@ const trackingFrequencyOptions = [
  */
 export function GoalForm({ goal, onSubmit, onCancel, isLoading = false }: GoalFormProps) {
   // Create a form with default values
-  const defaultValues = goal
+  const defaultValues: Partial<GoalFormValues> = goal
     ? {
         title: goal.title,
-        description: goal.description || '',
+        description: goal.description || undefined,
         category: goal.category,
         target: goal.target,
-        unit: goal.unit || '',
+        unit: goal.unit || undefined,
         dateRange: {
           from: goal.startDate,
           to: goal.endDate,
         },
-        trackingFrequency: goal.trackingFrequency,
+        trackingFrequency: goal.trackingFrequency as 'daily' | 'weekly' | 'monthly',
         reminderEnabled: goal.reminderEnabled,
       }
     : {
         title: '',
-        description: '',
-        category: 'financial' as GoalCategory,
+        description: undefined,
+        category: 'financial',
         target: 0,
-        unit: '',
+        unit: undefined,
         dateRange: {
           from: startOfMonth(new Date()),
           to: endOfMonth(addMonths(new Date(), 2)),
@@ -186,16 +186,16 @@ export function GoalForm({ goal, onSubmit, onCancel, isLoading = false }: GoalFo
   };
 
   return (
-    <Card class="w-full max-w-2xl mx-auto">
+    <Card className="w-full max-w-2xl mx-auto">
       <CardHeader>
         <CardTitle>{goal ? 'Edit Goal' : 'Create New Goal'}</CardTitle>
       </CardHeader>
       <CardContent>
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(handleSubmit)} class="space-y-6">
+          <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
             {/* Basic Information Section */}
-            <div class="space-y-4">
-              <h3 class="text-sm font-medium">Basic Information</h3>
+            <div className="space-y-4">
+              <h3 className="text-sm font-medium">Basic Information</h3>
 
               {/* Title Field */}
               <FormField
@@ -264,10 +264,10 @@ export function GoalForm({ goal, onSubmit, onCancel, isLoading = false }: GoalFo
             <Separator />
 
             {/* Target Section */}
-            <div class="space-y-4">
-              <h3 class="text-sm font-medium">Target</h3>
+            <div className="space-y-4">
+              <h3 className="text-sm font-medium">Target</h3>
 
-              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {/* Target Value Field */}
                 <FormField
                   control={form.control}
@@ -330,8 +330,8 @@ export function GoalForm({ goal, onSubmit, onCancel, isLoading = false }: GoalFo
             <Separator />
 
             {/* Tracking Section */}
-            <div class="space-y-4">
-              <h3 class="text-sm font-medium">Tracking</h3>
+            <div className="space-y-4">
+              <h3 className="text-sm font-medium">Tracking</h3>
 
               {/* Tracking Frequency Field */}
               <FormField
@@ -365,16 +365,16 @@ export function GoalForm({ goal, onSubmit, onCancel, isLoading = false }: GoalFo
                 control={form.control}
                 name="reminderEnabled"
                 render={({ field }) => (
-                  <FormItem class="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
+                  <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
                     <FormControl>
                       <input
                         type="checkbox"
                         checked={field.value}
                         onChange={field.onChange}
-                        class="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary"
+                        className="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary"
                       />
                     </FormControl>
-                    <div class="space-y-1 leading-none">
+                    <div className="space-y-1 leading-none">
                       <FormLabel>Enable Reminders</FormLabel>
                       <FormDescription>Receive notifications about goal progress</FormDescription>
                     </div>
@@ -387,7 +387,7 @@ export function GoalForm({ goal, onSubmit, onCancel, isLoading = false }: GoalFo
           </form>
         </Form>
       </CardContent>
-      <CardFooter class="flex justify-between">
+      <CardFooter className="flex justify-between">
         {onCancel && (
           <Button variant="outline" onClick={onCancel} disabled={isLoading}>
             Cancel

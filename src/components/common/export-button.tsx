@@ -89,14 +89,14 @@ export function ExportButton({
     <DropdownMenu>
       <DropdownMenuTrigger asChild={true}>
         <Button variant="outline" disabled={disabled || isExporting}>
-          <FileDown class="mr-2 h-4 w-4" />
+          <FileDown className="mr-2 h-4 w-4" />
           {children || 'Export'}
           {isExporting && (
-            <span class="ml-2 animate-pulse">Exporting {exportFormat?.toUpperCase()}...</span>
+            <span className="ml-2 animate-pulse">Exporting {exportFormat?.toUpperCase()}...</span>
           )}
           {exportSuccess && !isExporting && (
-            <span class="ml-2 text-green-500 flex items-center">
-              <Check class="h-4 w-4 mr-1" />
+            <span className="ml-2 text-green-500 flex items-center">
+              <Check className="h-4 w-4 mr-1" />
               Done
             </span>
           )}

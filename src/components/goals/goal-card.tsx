@@ -129,15 +129,15 @@ export function GoalCard({ goal, onEdit, onViewDetails, isLoading = false }: Goa
   const CategoryIcon = () => {
     switch (goal.category) {
       case 'financial':
-        return <DollarSign class="h-4 w-4" />;
+        return <DollarSign className="h-4 w-4" />;
       case 'patient':
-        return <Users class="h-4 w-4" />;
+        return <Users className="h-4 w-4" />;
       case 'productivity':
-        return <Clock class="h-4 w-4" />;
+        return <Clock className="h-4 w-4" />;
       case 'retention':
-        return <Target class="h-4 w-4" />;
+        return <Target className="h-4 w-4" />;
       default:
-        return <BarChart3 class="h-4 w-4" />;
+        return <BarChart3 className="h-4 w-4" />;
     }
   };
 
@@ -146,18 +146,18 @@ export function GoalCard({ goal, onEdit, onViewDetails, isLoading = false }: Goa
     return (
       <Card>
         <CardHeader>
-          <Skeleton class="h-5 w-40" />
+          <Skeleton className="h-5 w-40" />
         </CardHeader>
         <CardContent>
-          <div class="space-y-4">
-            <Skeleton class="h-4 w-full" />
-            <Skeleton class="h-6 w-3/4" />
-            <Skeleton class="h-4 w-28" />
-            <Skeleton class="h-2 w-full" />
+          <div className="space-y-4">
+            <Skeleton className="h-4 w-full" />
+            <Skeleton className="h-6 w-3/4" />
+            <Skeleton className="h-4 w-28" />
+            <Skeleton className="h-2 w-full" />
           </div>
         </CardContent>
         <CardFooter>
-          <Skeleton class="h-9 w-20" />
+          <Skeleton className="h-9 w-20" />
         </CardFooter>
       </Card>
     );
@@ -165,28 +165,28 @@ export function GoalCard({ goal, onEdit, onViewDetails, isLoading = false }: Goa
 
   return (
     <Card>
-      <CardHeader class="pb-2">
-        <div class="flex items-center justify-between">
-          <CardTitle class="text-base font-medium flex items-center gap-2">
+      <CardHeader className="pb-2">
+        <div className="flex items-center justify-between">
+          <CardTitle className="text-base font-medium flex items-center gap-2">
             <CategoryIcon />
             {goal.title}
           </CardTitle>
           <Badge {...getStatusBadgeProps(goal.status)}>{goal.status.replace('_', ' ')}</Badge>
         </div>
       </CardHeader>
-      <CardContent class="space-y-4">
+      <CardContent className="space-y-4">
         {/* Target and current values */}
-        <div class="flex justify-between items-baseline">
-          <div class="text-2xl font-bold">{formatValue(goal.current)}</div>
-          <div class="text-sm text-muted-foreground">Target: {formatValue(goal.target)}</div>
+        <div className="flex justify-between items-baseline">
+          <div className="text-2xl font-bold">{formatValue(goal.current)}</div>
+          <div className="text-sm text-muted-foreground">Target: {formatValue(goal.target)}</div>
         </div>
 
         {/* Progress bar */}
         <GoalProgress percent={progressPercent} status={goal.status} />
 
         {/* Date range */}
-        <div class="flex items-center text-sm text-muted-foreground">
-          <CalendarClock class="h-3 w-3 mr-1" />
+        <div className="flex items-center text-sm text-muted-foreground">
+          <CalendarClock className="h-3 w-3 mr-1" />
           <span>
             {goal.startDate.toLocaleDateString()} - {goal.endDate.toLocaleDateString()}
           </span>
@@ -197,9 +197,9 @@ export function GoalCard({ goal, onEdit, onViewDetails, isLoading = false }: Goa
           <VarianceIndicator variance={goal.variance} label="Variance from expected" />
         )}
       </CardContent>
-      <CardFooter class="flex justify-between pt-0">
-        <Button variant="ghost" size="sm" onClick={onEdit} class="text-muted-foreground">
-          <Edit class="h-3 w-3 mr-1" />
+      <CardFooter className="flex justify-between pt-0">
+        <Button variant="ghost" size="sm" onClick={onEdit} className="text-muted-foreground">
+          <Edit className="h-3 w-3 mr-1" />
           Edit
         </Button>
 

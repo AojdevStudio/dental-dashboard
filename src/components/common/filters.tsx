@@ -163,11 +163,11 @@ export function MultiSelectCombobox({
       <PopoverTrigger asChild={true}>
         <Button
           variant="outline"
-          class={cn('w-full justify-between', disabled && 'opacity-50 cursor-not-allowed')}
+          className={cn('w-full justify-between', disabled && 'opacity-50 cursor-not-allowed')}
           disabled={disabled}
         >
           {selectedValues.length > 0 ? (
-            <div class="flex flex-wrap gap-1 mr-2">
+            <div className="flex flex-wrap gap-1 mr-2">
               {selectedValues.length <= 2 ? (
                 selectedLabels.join(', ')
               ) : (
@@ -175,23 +175,23 @@ export function MultiSelectCombobox({
               )}
             </div>
           ) : (
-            <span class="text-muted-foreground">{placeholder}</span>
+            <span className="text-muted-foreground">{placeholder}</span>
           )}
-          <Filter class="ml-2 h-4 w-4 shrink-0 opacity-50" />
+          <Filter className="ml-2 h-4 w-4 shrink-0 opacity-50" />
         </Button>
       </PopoverTrigger>
-      <PopoverContent class="w-full p-0" align="start">
-        <div class="flex flex-col">
-          <div class="flex items-center border-b px-3">
-            <Search class="mr-2 h-4 w-4 shrink-0 opacity-50" />
+      <PopoverContent className="w-full p-0" align="start">
+        <div className="flex flex-col">
+          <div className="flex items-center border-b px-3">
+            <Search className="mr-2 h-4 w-4 shrink-0 opacity-50" />
             <input
               placeholder={searchPlaceholder}
-              class="flex h-10 w-full rounded-md bg-transparent py-3 text-sm outline-none placeholder:text-muted-foreground disabled:cursor-not-allowed disabled:opacity-50"
+              className="flex h-10 w-full rounded-md bg-transparent py-3 text-sm outline-none placeholder:text-muted-foreground disabled:cursor-not-allowed disabled:opacity-50"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
             />
           </div>
-          <div class="max-h-[300px] overflow-y-auto">
+          <div className="max-h-[300px] overflow-y-auto">
             {filteredItems.length > 0 ? (
               filteredItems.map((item) => {
                 /**
@@ -218,7 +218,7 @@ export function MultiSelectCombobox({
                 return (
                   <div
                     key={item.value}
-                    class="flex items-center px-3 py-2 cursor-pointer hover:bg-accent"
+                    className="flex items-center px-3 py-2 cursor-pointer hover:bg-accent"
                     onClick={handleItemSelect}
                     onKeyDown={handleKeyDown}
                     // biome-ignore lint/a11y/useSemanticElements: Custom combobox requires role="option" on div elements per ARIA spec
@@ -228,7 +228,7 @@ export function MultiSelectCombobox({
                     aria-label={`${selectedValues.includes(item.value) ? 'Deselect' : 'Select'} ${item.label}`}
                   >
                     <div
-                      class={cn(
+                      className={cn(
                         'mr-2 flex h-4 w-4 items-center justify-center rounded-sm border',
                         selectedValues.includes(item.value)
                           ? 'bg-primary border-primary'
@@ -236,7 +236,7 @@ export function MultiSelectCombobox({
                       )}
                     >
                       {selectedValues.includes(item.value) && (
-                        <Check class="h-3 w-3 text-primary-foreground" />
+                        <Check className="h-3 w-3 text-primary-foreground" />
                       )}
                     </div>
                     <span>{item.label}</span>
@@ -244,7 +244,7 @@ export function MultiSelectCombobox({
                 );
               })
             ) : (
-              <div class="px-3 py-2 text-muted-foreground">{emptyMessage}</div>
+              <div className="px-3 py-2 text-muted-foreground">{emptyMessage}</div>
             )}
           </div>
         </div>
@@ -289,10 +289,10 @@ export function TimePeriodFilter() {
   }, [startDate, endDate]);
 
   return (
-    <div class="flex flex-col sm:flex-row gap-2">
+    <div className="flex flex-col sm:flex-row gap-2">
       {/* Time period type selector dropdown */}
       <Select value={timePeriod} onValueChange={(value) => setTimePeriod(value as TimePeriod)}>
-        <SelectTrigger class="w-full sm:w-[180px]">
+        <SelectTrigger className="w-full sm:w-[180px]">
           <SelectValue placeholder="Select time period" />
         </SelectTrigger>
         <SelectContent>
@@ -310,12 +310,12 @@ export function TimePeriodFilter() {
           <PopoverTrigger asChild={true}>
             <Button
               variant="outline"
-              class={cn(
+              className={cn(
                 'w-full sm:w-[280px] justify-start text-left font-normal',
                 !date && 'text-muted-foreground'
               )}
             >
-              <CalendarIcon class="mr-2 h-4 w-4" />
+              <CalendarIcon className="mr-2 h-4 w-4" />
               {/* Display formatted date range or prompt */}
               {date?.from ? (
                 date.to ? (
@@ -330,7 +330,7 @@ export function TimePeriodFilter() {
               )}
             </Button>
           </PopoverTrigger>
-          <PopoverContent class="w-auto p-0" align="start">
+          <PopoverContent className="w-auto p-0" align="start">
             {/* Calendar component for date range selection */}
             <Calendar
               initialFocus={true}
@@ -381,7 +381,7 @@ export function ClinicFilter() {
   }));
 
   return (
-    <div class="w-full">
+    <div className="w-full">
       <MultiSelectCombobox
         items={clinicOptions}
         selectedValues={selectedClinics}
@@ -419,7 +419,7 @@ export function ProviderFilter() {
   }));
 
   return (
-    <div class="w-full">
+    <div className="w-full">
       <MultiSelectCombobox
         items={providerOptions}
         selectedValues={selectedProviders}
@@ -462,10 +462,6 @@ export function FilterBar() {
     endDate,
     selectedClinics,
     selectedProviders,
-    setTimePeriod,
-    setDateRange,
-    setSelectedClinics,
-    setSelectedProviders,
     clearFilters,
     resetToDefaults,
   } = useFilterStore();
@@ -531,44 +527,44 @@ export function FilterBar() {
     (selectedProviders.length > 0 ? 1 : 0); // Count if any providers are selected
 
   return (
-    <div ref={filterBarRef} class="w-full space-y-2">
+    <div ref={filterBarRef} className="w-full space-y-2">
       {/* Filter bar toggle button with filter count badge */}
-      <div class="flex items-center justify-between">
+      <div className="flex items-center justify-between">
         <Button
           variant="outline"
           size="sm"
           onClick={() => setIsExpanded(!isExpanded)}
-          class="flex items-center gap-2"
+          className="flex items-center gap-2"
         >
-          <Filter class="h-4 w-4" />
+          <Filter className="h-4 w-4" />
           <span>Filters</span>
           {activeFilterCount > 0 && (
-            <Badge variant="secondary" class="ml-1">
+            <Badge variant="secondary" className="ml-1">
               {activeFilterCount}
             </Badge>
           )}
-          {isExpanded ? <ChevronUp class="h-4 w-4" /> : <ChevronDown class="h-4 w-4" />}
+          {isExpanded ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
         </Button>
 
         {/* Reset and clear buttons - only shown when filters are active */}
         {activeFilterCount > 0 && (
-          <div class="flex items-center gap-2">
+          <div className="flex items-center gap-2">
             <Button
               variant="ghost"
               size="sm"
               onClick={clearFilters}
-              class="flex items-center gap-1 text-muted-foreground"
+              className="flex items-center gap-1 text-muted-foreground"
             >
-              <X class="h-3 w-3" />
+              <X className="h-3 w-3" />
               <span>Clear</span>
             </Button>
             <Button
               variant="ghost"
               size="sm"
               onClick={resetToDefaults}
-              class="flex items-center gap-1 text-muted-foreground"
+              className="flex items-center gap-1 text-muted-foreground"
             >
-              <RotateCcw class="h-3 w-3" />
+              <RotateCcw className="h-3 w-3" />
               <span>Reset</span>
             </Button>
           </div>
@@ -583,16 +579,16 @@ export function FilterBar() {
             animate={{ height: 'auto', opacity: 1 }}
             exit={{ height: 0, opacity: 0 }}
             transition={{ duration: 0.2 }}
-            class="overflow-hidden"
+            className="overflow-hidden"
           >
             <Card>
-              <CardContent class="p-4">
+              <CardContent className="p-4">
                 <Accordion
                   type="single"
                   collapsible={true}
                   value={activeAccordion || undefined}
                   onValueChange={(value) => setActiveAccordion(value)}
-                  class="w-full"
+                  className="w-full"
                 >
                   {/* Time period filter section */}
                   <AccordionItem value="time-period">
@@ -640,6 +636,7 @@ function Check(props: React.SVGProps<SVGSVGElement>) {
       strokeLinejoin="round"
       {...props}
     >
+      <title>Check mark</title>
       <polyline points="20 6 9 17 4 12" />
     </svg>
   );
@@ -657,6 +654,7 @@ function Search(props: React.SVGProps<SVGSVGElement>) {
       strokeLinejoin="round"
       {...props}
     >
+      <title>Search</title>
       <circle cx="11" cy="11" r="8" />
       <path d="m21 21-4.3-4.3" />
     </svg>

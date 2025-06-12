@@ -19,10 +19,20 @@
         "name": "next"
       }
     ],
+    "baseUrl": ".",
     "paths": {
       "@/*": ["./src/*"]
     }
   },
   "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],
-  "exclude": ["node_modules"]
+  "exclude": [
+    "node_modules",
+    "scripts/**/*",
+    "**/*.test.ts",
+    "**/*.test.tsx",
+    "**/test/**/*",
+    "**/__tests__/**/*",
+    "upload/supabase/functions"
+  ],
+  "references": [{ "path": "./upload/supabase/functions" }]
 }

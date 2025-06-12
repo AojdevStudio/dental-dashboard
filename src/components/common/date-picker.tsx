@@ -18,13 +18,11 @@ import * as React from 'react';
  * Interface for DatePicker component properties
  *
  * @property {Date} [date] - The currently selected date
- * @property {(date: Date) => void} [onDateChange] - Callback for date selection
  * @property {string} [placeholder] - Placeholder text when no date is selected
  * @property {boolean} [disabled] - Whether the date picker is disabled
  */
 interface DatePickerProps {
   date?: Date;
-  onDateChange?: (date: Date) => void;
   placeholder?: string;
   disabled?: boolean;
 }
@@ -44,7 +42,6 @@ interface DatePickerProps {
  */
 export function DatePicker({
   date,
-  onDateChange,
   placeholder = 'Select date',
   disabled = false,
 }: DatePickerProps) {
@@ -52,17 +49,17 @@ export function DatePicker({
     <div>
       <Button
         variant="outline"
-        class={cn(
+        className={cn(
           'w-full justify-start text-left font-normal',
           !date && 'text-muted-foreground',
           disabled && 'opacity-50 cursor-not-allowed'
         )}
         disabled={disabled}
       >
-        <CalendarIcon class="mr-2 h-4 w-4" />
+        <CalendarIcon className="mr-2 h-4 w-4" />
         {date ? format(date, 'PPP') : <span>{placeholder}</span>}
       </Button>
-      <div class="w-auto p-0" />
+      <div className="w-auto p-0" />
     </div>
   );
 }
@@ -125,14 +122,14 @@ export function DateRangePicker({
     <div>
       <Button
         variant="outline"
-        class={cn(
+        className={cn(
           'w-full justify-start text-left font-normal',
           !range.from && 'text-muted-foreground',
           disabled && 'opacity-50 cursor-not-allowed'
         )}
         disabled={disabled}
       >
-        <CalendarIcon class="mr-2 h-4 w-4" />
+        <CalendarIcon className="mr-2 h-4 w-4" />
         {range.from ? (
           range.to ? (
             <>
@@ -145,7 +142,7 @@ export function DateRangePicker({
           <span>{placeholder}</span>
         )}
       </Button>
-      <div class="w-auto p-0" />
+      <div className="w-auto p-0" />
     </div>
   );
 }

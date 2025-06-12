@@ -24,11 +24,12 @@ export type GetAggregatedMetricsResponse = Awaited<
  * Get aggregated metrics with various groupings
  */
 export const GET = withAuth(async (request, { authContext }) => {
-  const searchParams = request.nextUrl.searchParams;
-  const dateRange = getDateRangeParams(request);
+  const url = new URL(request.url);
+  const searchParams = url.searchParams;
+  const dateRange = getDateRangeParams(searchParams);
 
   // Validate required parameters
-  if (!(dateRange.startDate && dateRange.endDate)) {
+  if (!dateRange) {
     return apiError('Start date and end date are required', 400);
   }
 

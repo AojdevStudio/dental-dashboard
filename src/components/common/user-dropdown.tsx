@@ -53,37 +53,39 @@ export function UserDropdown({ user, className }: UserDropdownProps) {
       <DropdownMenuTrigger asChild={true}>
         <Button
           variant="ghost"
-          class={cn('relative h-10 w-10 rounded-full', className)}
+          className={cn('relative h-10 w-10 rounded-full', className)}
           aria-label="User menu"
         >
-          <Avatar class="h-10 w-10">
-            <AvatarFallback class="bg-primary/10">{getUserInitials()}</AvatarFallback>
+          <Avatar className="h-10 w-10">
+            <AvatarFallback className="bg-primary/10">{getUserInitials()}</AvatarFallback>
           </Avatar>
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent class="w-56" align="end" forceMount={true}>
-        <DropdownMenuLabel class="font-normal">
-          <div class="flex flex-col space-y-1">
-            {user?.name && <p class="text-sm font-medium leading-none">{user.name}</p>}
-            {user?.email && <p class="text-xs leading-none text-muted-foreground">{user.email}</p>}
+      <DropdownMenuContent className="w-56" align="end" forceMount={true}>
+        <DropdownMenuLabel className="font-normal">
+          <div className="flex flex-col space-y-1">
+            {user?.name && <p className="text-sm font-medium leading-none">{user.name}</p>}
+            {user?.email && (
+              <p className="text-xs leading-none text-muted-foreground">{user.email}</p>
+            )}
           </div>
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
-        <DropdownMenuItem onClick={() => router.push('/settings')} class="cursor-pointer">
-          <User class="mr-2 h-4 w-4" aria-hidden="true" />
+        <DropdownMenuItem onClick={() => router.push('/settings')} className="cursor-pointer">
+          <User className="mr-2 h-4 w-4" aria-hidden="true" />
           <span>Profile</span>
         </DropdownMenuItem>
-        <DropdownMenuItem onClick={() => router.push('/settings')} class="cursor-pointer">
-          <Settings class="mr-2 h-4 w-4" aria-hidden="true" />
+        <DropdownMenuItem onClick={() => router.push('/settings')} className="cursor-pointer">
+          <Settings className="mr-2 h-4 w-4" aria-hidden="true" />
           <span>Settings</span>
         </DropdownMenuItem>
         <DropdownMenuSeparator />
         <DropdownMenuItem
           onClick={handleLogout}
-          class="cursor-pointer text-destructive focus:text-destructive"
+          className="cursor-pointer text-destructive focus:text-destructive"
           disabled={isLoggingOut}
         >
-          <LogOut class="mr-2 h-4 w-4" aria-hidden="true" />
+          <LogOut className="mr-2 h-4 w-4" aria-hidden="true" />
           <span>{isLoggingOut ? 'Logging out...' : 'Log out'}</span>
         </DropdownMenuItem>
       </DropdownMenuContent>

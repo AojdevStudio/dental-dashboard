@@ -6,6 +6,7 @@ import { cn } from '@/lib/utils';
 import { ChevronDown } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import type React from 'react';
 
 interface NavItemComponentProps {
   item: NavItem;
@@ -42,21 +43,24 @@ export function NavItemComponent({
     <>
       {item.icon && (
         <item.icon
-          class={cn('h-5 w-5 flex-shrink-0', isActive ? 'text-primary' : 'text-muted-foreground')}
+          className={cn(
+            'h-5 w-5 flex-shrink-0',
+            isActive ? 'text-primary' : 'text-muted-foreground'
+          )}
           aria-hidden="true"
         />
       )}
       {!isCollapsed && (
         <>
-          <span class={cn('flex-1 truncate', isNested ? 'text-sm' : '')}>{item.title}</span>
+          <span className={cn('flex-1 truncate', isNested ? 'text-sm' : '')}>{item.title}</span>
           {item.badge && (
-            <Badge variant="secondary" class="ml-auto">
+            <Badge variant="secondary" className="ml-auto">
               {item.badge}
             </Badge>
           )}
           {hasChildren && (
             <ChevronDown
-              class={cn('h-4 w-4 transition-transform', isExpanded && 'rotate-180')}
+              className={cn('h-4 w-4 transition-transform', isExpanded && 'rotate-180')}
               aria-hidden="true"
             />
           )}
@@ -78,7 +82,7 @@ export function NavItemComponent({
       <a
         href={item.href}
         onClick={handleClick}
-        class={className}
+        className={className}
         target={item.external ? '_blank' : undefined}
         rel={item.external ? 'noopener noreferrer' : undefined}
         aria-current={isActive ? 'page' : undefined}
@@ -94,7 +98,7 @@ export function NavItemComponent({
     <Link
       href={item.href}
       onClick={handleClick}
-      class={className}
+      className={className}
       aria-current={isActive ? 'page' : undefined}
       aria-disabled={item.disabled}
     >

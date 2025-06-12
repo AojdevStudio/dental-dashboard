@@ -173,22 +173,22 @@ export default function DashboardClient({ initialData }: DashboardClientProps) {
   };
 
   return (
-    <div class="space-y-4">
+    <div className="space-y-4">
       {/* Controls */}
-      <div class="flex items-center justify-between">
-        <div class="flex items-center gap-2">
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-2">
           <Button variant="outline" size="sm" onClick={handleRefresh} disabled={refreshing}>
-            <RefreshCw class={`h-4 w-4 mr-2 ${refreshing ? 'animate-spin' : ''}`} />
+            <RefreshCw className={`h-4 w-4 mr-2 ${refreshing ? 'animate-spin' : ''}`} />
             Refresh
           </Button>
           <Button variant="outline" size="sm" onClick={layout.toggleEditMode}>
-            <Settings class="h-4 w-4 mr-2" />
+            <Settings className="h-4 w-4 mr-2" />
             {layout.isEditing ? 'Done Editing' : 'Edit Layout'}
           </Button>
         </div>
         {layout.isEditing && (
           <Button size="sm" onClick={() => {}}>
-            <Plus class="h-4 w-4 mr-2" />
+            <Plus className="h-4 w-4 mr-2" />
             Add Widget
           </Button>
         )}
