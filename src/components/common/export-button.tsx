@@ -5,17 +5,17 @@
  * functionality for exporting dashboard data in various formats (PDF, CSV).
  */
 
-"use client";
+'use client';
 
-import { Button } from "@/components/ui/button";
+import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { Check, FileDown } from "lucide-react";
-import * as React from "react";
+} from '@/components/ui/dropdown-menu';
+import { Check, FileDown } from 'lucide-react';
+import * as React from 'react';
 
 /**
  * Interface for ExportButton component properties
@@ -67,9 +67,9 @@ export function ExportButton({
       setExportFormat(format);
       setExportSuccess(false);
 
-      if (format === "pdf" && onExportPdf) {
+      if (format === 'pdf' && onExportPdf) {
         await onExportPdf();
-      } else if (format === "csv" && onExportCsv) {
+      } else if (format === 'csv' && onExportCsv) {
         await onExportCsv();
       }
 
@@ -79,8 +79,7 @@ export function ExportButton({
       setTimeout(() => {
         setExportSuccess(false);
       }, 2000);
-    } catch (error) {
-      console.error(`Error exporting ${format}:`, error);
+    } catch (_error) {
     } finally {
       setIsExporting(false);
     }
@@ -88,10 +87,10 @@ export function ExportButton({
 
   return (
     <DropdownMenu>
-      <DropdownMenuTrigger asChild>
+      <DropdownMenuTrigger asChild={true}>
         <Button variant="outline" disabled={disabled || isExporting}>
           <FileDown className="mr-2 h-4 w-4" />
-          {children || "Export"}
+          {children || 'Export'}
           {isExporting && (
             <span className="ml-2 animate-pulse">Exporting {exportFormat?.toUpperCase()}...</span>
           )}
@@ -105,13 +104,13 @@ export function ExportButton({
       </DropdownMenuTrigger>
       <DropdownMenuContent>
         <DropdownMenuItem
-          onClick={() => handleExport("pdf")}
+          onClick={() => handleExport('pdf')}
           disabled={isExporting || !onExportPdf}
         >
           Export as PDF
         </DropdownMenuItem>
         <DropdownMenuItem
-          onClick={() => handleExport("csv")}
+          onClick={() => handleExport('csv')}
           disabled={isExporting || !onExportCsv}
         >
           Export as CSV

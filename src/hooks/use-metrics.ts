@@ -1,6 +1,6 @@
-import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { useAuth } from "./use-auth";
-import { useClinics } from "./use-clinics";
+import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { useAuth } from './use-auth';
+import { useClinics } from './use-clinics';
 
 /**
  * Metric value type
@@ -55,8 +55,8 @@ export function useMetrics(filters: MetricFilters = {}) {
   const queryClient = useQueryClient();
 
   // Create a stable query key based on filters
-  const metricsQueryKey = ["metrics", selectedClinicId, filters];
-  const aggregatedQueryKey = ["metrics", "aggregated", selectedClinicId, filters];
+  const metricsQueryKey = ['metrics', selectedClinicId, filters];
+  const aggregatedQueryKey = ['metrics', 'aggregated', selectedClinicId, filters];
 
   /**
    * Fetch raw metrics from the API
@@ -64,20 +64,28 @@ export function useMetrics(filters: MetricFilters = {}) {
   const fetchMetrics = async (): Promise<MetricValue[]> => {
     const params = new URLSearchParams();
 
-    if (selectedClinicId) params.append("clinicId", selectedClinicId);
-    if (filters.startDate) params.append("startDate", filters.startDate);
-    if (filters.endDate) params.append("endDate", filters.endDate);
-    if (filters.providerId) params.append("providerId", filters.providerId);
-    if (filters.metricIds?.length) {
+    if (selectedClinicId) {
+      params.append('clinicId', selectedClinicId);
+    }
+    if (filters.startDate) {
+      params.append('startDate', filters.startDate);
+    }
+    if (filters.endDate) {
+      params.append('endDate', filters.endDate);
+    }
+    if (filters.providerId) {
+      params.append('providerId', filters.providerId);
+    }
+    if (filters.metricIds && filters.metricIds.length > 0) {
       for (const id of filters.metricIds) {
-        params.append("metricIds", id);
+        params.append('metricIds', id);
       }
     }
 
     const response = await fetch(`/api/metrics?${params.toString()}`);
 
     if (!response.ok) {
-      throw new Error("Failed to fetch metrics");
+      throw new Error('Failed to fetch metrics');
     }
 
     const data = await response.json();
@@ -90,15 +98,23 @@ export function useMetrics(filters: MetricFilters = {}) {
   const fetchAggregatedMetrics = async (): Promise<AggregatedMetrics> => {
     const params = new URLSearchParams();
 
-    if (selectedClinicId) params.append("clinicId", selectedClinicId);
-    if (filters.startDate) params.append("startDate", filters.startDate);
-    if (filters.endDate) params.append("endDate", filters.endDate);
-    if (filters.providerId) params.append("providerId", filters.providerId);
+    if (selectedClinicId) {
+      params.append('clinicId', selectedClinicId);
+    }
+    if (filters.startDate) {
+      params.append('startDate', filters.startDate);
+    }
+    if (filters.endDate) {
+      params.append('endDate', filters.endDate);
+    }
+    if (filters.providerId) {
+      params.append('providerId', filters.providerId);
+    }
 
     const response = await fetch(`/api/metrics/aggregated?${params.toString()}`);
 
     if (!response.ok) {
-      throw new Error("Failed to fetch aggregated metrics");
+      throw new Error('Failed to fetch aggregated metrics');
     }
 
     return response.json();
@@ -131,7 +147,7 @@ export function useMetrics(filters: MetricFilters = {}) {
    */
   const prefetchMetrics = async (dateRange: { startDate: string; endDate: string }) => {
     await queryClient.prefetchQuery({
-      queryKey: ["metrics", selectedClinicId, { ...filters, ...dateRange }],
+      queryKey: ['metrics', selectedClinicId, { ...filters, ...dateRange }],
       queryFn: fetchMetrics,
       staleTime: 5 * 60 * 1000,
     });
@@ -141,7 +157,7 @@ export function useMetrics(filters: MetricFilters = {}) {
    * Invalidate all metrics queries
    */
   const invalidateMetrics = () => {
-    queryClient.invalidateQueries({ queryKey: ["metrics"] });
+    queryClient.invalidateQueries({ queryKey: ['metrics'] });
   };
 
   return {

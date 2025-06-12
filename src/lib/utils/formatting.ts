@@ -3,21 +3,21 @@ export function formatDate(date: Date): string {
 }
 
 export function formatCurrency(amount: number): string {
-  return new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format(amount);
+  return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(amount);
 }
 
 export function formatPercentage(value: number): string {
-  return new Intl.NumberFormat("en-US", { style: "percent", maximumFractionDigits: 2 }).format(
+  return new Intl.NumberFormat('en-US', { style: 'percent', maximumFractionDigits: 2 }).format(
     value
   );
 }
 
 export function formatNumber(value: number): string {
-  return new Intl.NumberFormat("en-US").format(value);
+  return new Intl.NumberFormat('en-US').format(value);
 }
 
 export function formatPhoneNumber(phoneNumber: string): string {
-  const cleaned = `${phoneNumber}`.replace(/\D/g, "");
+  const cleaned = `${phoneNumber}`.replace(/\D/g, '');
   const match = cleaned.match(/^(\d{3})(\d{3})(\d{4})$/);
   if (match) {
     return `(${match[1]}) ${match[2]}-${match[3]}`;
@@ -26,7 +26,7 @@ export function formatPhoneNumber(phoneNumber: string): string {
 }
 
 export function formatAddress(address: string): string {
-  return address.replace(/,/g, "\n");
+  return address.replace(/,/g, '\n');
 }
 
 export function formatName(firstName: string, lastName: string): string {
@@ -42,11 +42,11 @@ export function formatDateTime(date: Date): string {
 }
 
 export function formatBoolean(value: boolean): string {
-  return value ? "Yes" : "No";
+  return value ? 'Yes' : 'No';
 }
 
 export function formatArray(array: unknown[]): string {
-  return array.join(", ");
+  return array.join(', ');
 }
 
 export function formatObject(obj: object): string {
@@ -54,11 +54,11 @@ export function formatObject(obj: object): string {
 }
 
 export function formatNull(): string {
-  return "N/A";
+  return 'N/A';
 }
 
 export function formatUndefined(): string {
-  return "N/A";
+  return 'N/A';
 }
 
 export function formatError(error: Error): string {
@@ -78,59 +78,59 @@ export function formatBigInt(bigInt: bigint): string {
 }
 
 export function formatNaN(): string {
-  return "NaN";
+  return 'NaN';
 }
 
 export function formatInfinity(): string {
-  return "Infinity";
+  return 'Infinity';
 }
 
 export function formatNegativeInfinity(): string {
-  return "-Infinity";
+  return '-Infinity';
 }
 
 export function formatZero(): string {
-  return "0";
+  return '0';
 }
 
 export function formatEmptyString(): string {
-  return "";
+  return '';
 }
 
 export function formatWhitespace(): string {
-  return " ";
+  return ' ';
 }
 
 export function formatNewline(): string {
-  return "\n";
+  return '\n';
 }
 
 export function formatTab(): string {
-  return "\t";
+  return '\t';
 }
 
 export function formatCarriageReturn(): string {
-  return "\r";
+  return '\r';
 }
 
 export function formatVerticalTab(): string {
-  return "\v";
+  return '\v';
 }
 
 export function formatFormFeed(): string {
-  return "\f";
+  return '\f';
 }
 
 export function formatBackspace(): string {
-  return "\b";
+  return '\b';
 }
 
 export function formatAlert(): string {
-  return "a";
+  return 'a';
 }
 
 export function formatEscape(): string {
-  return "e";
+  return 'e';
 }
 
 export function formatUnicode(unicode: string): string {

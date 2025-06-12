@@ -7,13 +7,13 @@
  * this would be connected to real data sources and metrics.
  */
 
-"use client";
+'use client';
 
-import { FilterBar } from "@/components/common/filters";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Separator } from "@/components/ui/separator";
-import { useFilterParams } from "@/hooks/use-filters";
-import React from "react";
+import { FilterBar } from '@/components/common/filters';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Separator } from '@/components/ui/separator';
+import { useFilterParams } from '@/hooks/use-filters';
+import { Suspense } from 'react';
 
 /**
  * Dashboard Example Component
@@ -61,7 +61,9 @@ export function DashboardExample() {
       </div>
 
       {/* Filter Bar component for selecting clinics, providers, and time periods */}
-      <FilterBar />
+      <Suspense fallback={<div className="h-20 w-full animate-pulse rounded-lg bg-muted" />}>
+        <FilterBar />
+      </Suspense>
 
       {/* Debug card displaying the current filter parameters */}
       <Card>

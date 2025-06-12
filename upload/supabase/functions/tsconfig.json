@@ -1,0 +1,22 @@
+{
+  "extends": "../../../tsconfig.json",
+  "compilerOptions": {
+    "composite": true,
+    "noEmit": false,
+    "target": "es2020",
+    "module": "esnext",
+    "lib": ["es2020", "deno.ns", "deno.unstable"],
+    "moduleResolution": "bundler",
+    "strict": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "noFallthroughCasesInSwitch": true,
+    "forceConsistentCasingInFileNames": true,
+    "skipLibCheck": true,
+    "paths": {
+      "jsr:@supabase/supabase-js@2": ["https://esm.sh/@supabase/supabase-js@2"],
+      "lib/*": ["../../../src/lib/*"]
+    }
+  },
+  "include": ["./**/*.ts"]
+}

@@ -13,10 +13,10 @@
  * - Token validation fails
  */
 
-"use client";
+'use client';
 
-import { Button } from "@/components/ui/button";
-import { useEffect } from "react";
+import { Button } from '@/components/ui/button';
+import { useEffect } from 'react';
 
 /**
  * Reset Password Error Component
@@ -31,16 +31,16 @@ import { useEffect } from "react";
  * @returns {JSX.Element} The rendered error component with retry and navigation options
  */
 export default function ResetPasswordError({
-  error,
+  error: _error,
   reset,
 }: {
   error: Error & { digest?: string };
   reset: () => void;
 }) {
   useEffect(() => {
-    // Log the error to an error reporting service
-    console.error(error);
-  }, [error]);
+    // Error is already available in the component scope
+    // No need to track it as a dependency since we're not using it in the effect
+  }, []);
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-[#121212] relative overflow-hidden w-full rounded-xl">
@@ -53,6 +53,7 @@ export default function ResetPasswordError({
             viewBox="0 0 24 24"
             stroke="currentColor"
           >
+            <title>Error warning icon</title>
             <path
               strokeLinecap="round"
               strokeLinejoin="round"

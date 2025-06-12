@@ -1,14 +1,14 @@
-import { DataMigration } from "@/scripts/data-migration/migrate-to-uuid";
-import { MigrationValidator } from "@/scripts/data-migration/validate-migration";
-import { PrismaClient } from "@prisma/client";
-import { v4 as uuidv4 } from "uuid";
+import { DataMigration } from '@/scripts/data-migration/migrate-to-uuid';
+import { MigrationValidator } from '@/scripts/data-migration/validate-migration';
+import { PrismaClient } from '@prisma/client';
+import { v4 as uuidv4 } from 'uuid';
 /**
  * @vitest-environment node
  */
-import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 // Mock Prisma Client
-vi.mock("@prisma/client", () => ({
+vi.mock('@prisma/client', () => ({
   PrismaClient: vi.fn(() => ({
     $connect: vi.fn(),
     $disconnect: vi.fn(),
@@ -35,7 +35,7 @@ vi.mock("@prisma/client", () => ({
   })),
 }));
 
-describe("Data Migration", () => {
+describe('Data Migration', () => {
   let prisma: PrismaClient;
   let migration: DataMigration;
 
@@ -49,11 +49,11 @@ describe("Data Migration", () => {
     await prisma.$disconnect();
   });
 
-  describe("User Migration", () => {
-    it("should migrate users with UUIDs", async () => {
+  describe('User Migration', () => {
+    it('should migrate users with UUIDs', async () => {
       const testUsers = [
-        { id: "user1", email: "user1@example.com", name: "User 1", uuidId: null },
-        { id: "user2", email: "user2@example.com", name: "User 2", uuidId: null },
+        { id: 'user1', email: 'user1@example.com', name: 'User 1', uuidId: null },
+        { id: 'user2', email: 'user2@example.com', name: 'User 2', uuidId: null },
       ];
 
       prisma.user.count.mockResolvedValue(2);
@@ -83,10 +83,10 @@ describe("Data Migration", () => {
       expect(prisma.user.findMany).toHaveBeenCalled();
     });
 
-    it("should handle users that already have UUIDs", async () => {
+    it('should handle users that already have UUIDs', async () => {
       const testUsers = [
-        { id: "user1", email: "user1@example.com", name: "User 1", uuidId: uuidv4() },
-        { id: "user2", email: "user2@example.com", name: "User 2", uuidId: null },
+        { id: 'user1', email: 'user1@example.com', name: 'User 1', uuidId: uuidv4() },
+        { id: 'user2', email: 'user2@example.com', name: 'User 2', uuidId: null },
       ];
 
       prisma.user.count.mockResolvedValue(2);
@@ -115,23 +115,23 @@ describe("Data Migration", () => {
       await migration.migrateUsers();
     });
 
-    it("should handle migration errors gracefully", async () => {
-      const testUsers = [{ id: "user1", email: "user1@example.com", name: "User 1", uuidId: null }];
+    it('should handle migration errors gracefully', async () => {
+      const testUsers = [{ id: 'user1', email: 'user1@example.com', name: 'User 1', uuidId: null }];
 
       prisma.user.count.mockResolvedValue(1);
       prisma.user.findMany.mockResolvedValueOnce(testUsers).mockResolvedValueOnce([]);
 
-      prisma.$transaction.mockRejectedValue(new Error("Database error"));
+      prisma.$transaction.mockRejectedValue(new Error('Database error'));
 
-      await expect(migration.migrateUsers()).rejects.toThrow("Database error");
+      await expect(migration.migrateUsers()).rejects.toThrow('Database error');
     });
   });
 
-  describe("Clinic Migration", () => {
-    it("should migrate clinics with UUIDs", async () => {
+  describe('Clinic Migration', () => {
+    it('should migrate clinics with UUIDs', async () => {
       const testClinics = [
-        { id: "clinic1", name: "Clinic 1", location: "Location 1", uuidId: null },
-        { id: "clinic2", name: "Clinic 2", location: "Location 2", uuidId: null },
+        { id: 'clinic1', name: 'Clinic 1', location: 'Location 1', uuidId: null },
+        { id: 'clinic2', name: 'Clinic 2', location: 'Location 2', uuidId: null },
       ];
 
       prisma.clinic.count.mockResolvedValue(2);
@@ -161,16 +161,16 @@ describe("Data Migration", () => {
     });
   });
 
-  describe("Dashboard Migration", () => {
-    it("should migrate dashboards with user UUID references", async () => {
+  describe('Dashboard Migration', () => {
+    it('should migrate dashboards with user UUID references', async () => {
       const userUuid = uuidv4();
       const testDashboards = [
         {
-          id: "dash1",
-          name: "Dashboard 1",
-          userId: "user1",
+          id: 'dash1',
+          name: 'Dashboard 1',
+          userId: 'user1',
           uuidId: null,
-          user: { id: "user1", uuidId: userUuid },
+          user: { id: 'user1', uuidId: userUuid },
         },
       ];
 
@@ -190,7 +190,7 @@ describe("Data Migration", () => {
           await callback(tx);
 
           expect(tx.dashboard.update).toHaveBeenCalledWith({
-            where: { id: "dash1" },
+            where: { id: 'dash1' },
             data: expect.objectContaining({
               uuidId: expect.any(String),
               userUuidId: userUuid,
@@ -202,14 +202,14 @@ describe("Data Migration", () => {
       await migration.migrateDashboards();
     });
 
-    it("should fail if user has no UUID", async () => {
+    it('should fail if user has no UUID', async () => {
       const testDashboards = [
         {
-          id: "dash1",
-          name: "Dashboard 1",
-          userId: "user1",
+          id: 'dash1',
+          name: 'Dashboard 1',
+          userId: 'user1',
           uuidId: null,
-          user: { id: "user1", uuidId: null }, // User without UUID
+          user: { id: 'user1', uuidId: null }, // User without UUID
         },
       ];
 
@@ -230,7 +230,7 @@ describe("Data Migration", () => {
           // Simulate error handling in transaction
           try {
             await callback(tx);
-          } catch (error) {
+          } catch (_error) {
             // Expected error
           }
 
@@ -243,8 +243,8 @@ describe("Data Migration", () => {
     });
   });
 
-  describe("Batch Processing", () => {
-    it("should process large datasets in batches", async () => {
+  describe('Batch Processing', () => {
+    it('should process large datasets in batches', async () => {
       const BATCH_SIZE = 1000;
       const TOTAL_USERS = 2500;
 
@@ -290,7 +290,7 @@ describe("Data Migration", () => {
   });
 });
 
-describe("Migration Validation", () => {
+describe('Migration Validation', () => {
   let prisma: PrismaClient;
   let validator: MigrationValidator;
 
@@ -300,15 +300,15 @@ describe("Migration Validation", () => {
     vi.clearAllMocks();
   });
 
-  describe("User Validation", () => {
-    it("should validate all users have UUIDs", async () => {
+  describe('User Validation', () => {
+    it('should validate all users have UUIDs', async () => {
       prisma.user.count
         .mockResolvedValueOnce(10) // Total users
         .mockResolvedValueOnce(10); // Users with UUID
 
       prisma.user.findMany.mockResolvedValue([
-        { id: "user1", uuidId: uuidv4() },
-        { id: "user2", uuidId: uuidv4() },
+        { id: 'user1', uuidId: uuidv4() },
+        { id: 'user2', uuidId: uuidv4() },
       ]);
 
       prisma.idMapping.count.mockResolvedValue(10);
@@ -321,7 +321,7 @@ describe("Migration Validation", () => {
       expect(prisma.user.count).toHaveBeenCalled();
     });
 
-    it("should detect users without UUIDs", async () => {
+    it('should detect users without UUIDs', async () => {
       prisma.user.count
         .mockResolvedValueOnce(10) // Total users
         .mockResolvedValueOnce(8); // Users with UUID (2 missing)
@@ -336,7 +336,7 @@ describe("Migration Validation", () => {
       expect(prisma.user.count).toHaveBeenCalledTimes(2);
     });
 
-    it("should detect duplicate UUIDs", async () => {
+    it('should detect duplicate UUIDs', async () => {
       const duplicateUuid = uuidv4();
 
       prisma.user.count
@@ -344,9 +344,9 @@ describe("Migration Validation", () => {
         .mockResolvedValueOnce(3); // Users with UUID
 
       prisma.user.findMany.mockResolvedValue([
-        { id: "user1", uuidId: duplicateUuid },
-        { id: "user2", uuidId: duplicateUuid }, // Duplicate!
-        { id: "user3", uuidId: uuidv4() },
+        { id: 'user1', uuidId: duplicateUuid },
+        { id: 'user2', uuidId: duplicateUuid }, // Duplicate!
+        { id: 'user3', uuidId: uuidv4() },
       ]);
 
       prisma.idMapping.count.mockResolvedValue(3);
@@ -359,9 +359,9 @@ describe("Migration Validation", () => {
     });
   });
 
-  describe("Relationship Validation", () => {
-    it("should detect orphaned providers", async () => {
-      prisma.provider.findMany.mockResolvedValue([{ id: "provider1", name: "Orphaned Provider" }]);
+  describe('Relationship Validation', () => {
+    it('should detect orphaned providers', async () => {
+      prisma.provider.findMany.mockResolvedValue([{ id: 'provider1', name: 'Orphaned Provider' }]);
 
       prisma.provider.count.mockResolvedValue(1);
       prisma.metricValue.findMany.mockResolvedValue([]);
@@ -377,13 +377,13 @@ describe("Migration Validation", () => {
       });
     });
 
-    it("should validate dashboard-user relationships", async () => {
+    it('should validate dashboard-user relationships', async () => {
       prisma.provider.findMany.mockResolvedValue([]);
       prisma.provider.count.mockResolvedValue(0);
       prisma.metricValue.findMany.mockResolvedValue([]);
       prisma.metricValue.count.mockResolvedValue(0);
 
-      prisma.dashboard.findMany.mockResolvedValue([{ id: "dash1", name: "Orphaned Dashboard" }]);
+      prisma.dashboard.findMany.mockResolvedValue([{ id: 'dash1', name: 'Orphaned Dashboard' }]);
 
       prisma.widget.count.mockResolvedValue(0);
 
@@ -396,13 +396,13 @@ describe("Migration Validation", () => {
     });
   });
 
-  describe("Data Integrity Validation", () => {
-    it("should detect future timestamps", async () => {
+  describe('Data Integrity Validation', () => {
+    it('should detect future timestamps', async () => {
       prisma.$queryRaw
         .mockResolvedValueOnce([
-          { table_name: "users", count: BigInt(0) },
-          { table_name: "clinics", count: BigInt(2) }, // 2 records with future timestamps
-          { table_name: "providers", count: BigInt(0) },
+          { table_name: 'users', count: BigInt(0) },
+          { table_name: 'clinics', count: BigInt(2) }, // 2 records with future timestamps
+          { table_name: 'providers', count: BigInt(0) },
         ])
         .mockResolvedValueOnce([{ count: BigInt(0) }]);
 
@@ -413,12 +413,12 @@ describe("Migration Validation", () => {
       expect(prisma.$queryRaw).toHaveBeenCalled();
     });
 
-    it("should validate required fields", async () => {
+    it('should validate required fields', async () => {
       prisma.$queryRaw
         .mockResolvedValueOnce([
-          { table_name: "users", count: BigInt(0) },
-          { table_name: "clinics", count: BigInt(0) },
-          { table_name: "providers", count: BigInt(0) },
+          { table_name: 'users', count: BigInt(0) },
+          { table_name: 'clinics', count: BigInt(0) },
+          { table_name: 'providers', count: BigInt(0) },
         ])
         .mockResolvedValueOnce([{ count: BigInt(0) }]);
 

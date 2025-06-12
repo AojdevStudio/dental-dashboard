@@ -14,7 +14,7 @@
  * actual login form, creating a smooth visual transition when the real content loads.
  */
 
-import { Skeleton } from "@/components/ui/skeleton";
+import { Skeleton } from '@/components/ui/skeleton';
 
 /**
  * Login Loading Component

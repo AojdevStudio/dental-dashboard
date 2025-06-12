@@ -2,9 +2,9 @@
  * Integrations Page
  * Main page for managing data integrations and connections
  */
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { FileSpreadsheet } from "lucide-react";
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { FileSpreadsheet } from 'lucide-react';
 
 export default function IntegrationsPage() {
   return (
@@ -26,7 +26,7 @@ export default function IntegrationsPage() {
             <CardDescription>Data synchronization handled via automated scripts</CardDescription>
           </CardHeader>
           <CardContent>
-            <Button disabled className="w-full">
+            <Button disabled={true} className="w-full">
               Managed by Admin
             </Button>
           </CardContent>
@@ -40,7 +40,7 @@ export default function IntegrationsPage() {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <Button disabled className="w-full">
+            <Button disabled={true} className="w-full">
               Coming Soon
             </Button>
           </CardContent>
@@ -52,7 +52,7 @@ export default function IntegrationsPage() {
             <CardDescription>Connect your digital imaging systems (Coming Soon)</CardDescription>
           </CardHeader>
           <CardContent>
-            <Button disabled className="w-full">
+            <Button disabled={true} className="w-full">
               Coming Soon
             </Button>
           </CardContent>

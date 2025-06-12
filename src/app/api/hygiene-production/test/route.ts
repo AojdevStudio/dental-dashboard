@@ -1,7 +1,7 @@
-import { ApiResponse } from "@/lib/api/utils";
-import { prisma } from "@/lib/database/client";
-import { getHygieneProduction } from "@/lib/database/queries/hygiene-production";
-import type { NextRequest } from "next/server";
+import { apiError, apiSuccess } from '@/lib/api/utils';
+import { prisma } from '@/lib/database/client';
+import { getHygieneProduction } from '@/lib/database/queries/hygiene-production';
+import type { NextRequest } from 'next/server';
 
 /**
  * Test endpoint to verify hygiene production data
@@ -9,18 +9,21 @@ import type { NextRequest } from "next/server";
 export async function GET(request: NextRequest) {
   try {
     const searchParams = request.nextUrl.searchParams;
-    const date = searchParams.get("date");
-    const clinicId = searchParams.get("clinicId");
+    const date = searchParams.get('date');
+    const clinicId = searchParams.get('clinicId');
 
     if (!clinicId) {
-      return ApiResponse.error("clinicId parameter is required", 400);
+      return apiError('clinicId parameter is required', 400);
     }
 
     // Create a minimal auth context for testing
     const authContext = {
-      user: { id: "test", email: "test@example.com" },
+      userId: 'test',
+      authId: 'test',
       clinicIds: [clinicId],
-      roles: { [clinicId]: "admin" },
+      currentClinicId: clinicId,
+      role: 'admin',
+      isSystemAdmin: false,
     };
 
     // Get hygiene production data
@@ -46,7 +49,7 @@ export async function GET(request: NextRequest) {
           })
         : [];
 
-    return ApiResponse.success({
+    return apiSuccess({
       clinic,
       providers,
       records: records.map((record) => ({
@@ -75,7 +78,6 @@ export async function GET(request: NextRequest) {
       },
     });
   } catch (error) {
-    console.error("Test endpoint error:", error);
-    return ApiResponse.error(error instanceof Error ? error.message : "Internal server error", 500);
+    return apiError(error instanceof Error ? error.message : 'Internal server error', 500);
   }
 }

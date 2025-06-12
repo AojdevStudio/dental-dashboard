@@ -4,18 +4,18 @@
  * Configures the test environment for integration tests
  */
 
-import dotenv from "dotenv";
-import { afterAll, beforeAll } from "vitest";
+import dotenv from 'dotenv';
+import { afterAll, beforeAll } from 'vitest';
 
 // Load test environment variables
-dotenv.config({ path: ".env.test" });
+dotenv.config({ path: '.env.test' });
 
 // Verify required environment variables
 const requiredEnvVars = [
-  "DATABASE_URL",
-  "NEXT_PUBLIC_SUPABASE_URL",
-  "NEXT_PUBLIC_SUPABASE_ANON_KEY",
-  "SUPABASE_SERVICE_KEY",
+  'DATABASE_URL',
+  'NEXT_PUBLIC_SUPABASE_URL',
+  'NEXT_PUBLIC_SUPABASE_ANON_KEY',
+  'SUPABASE_SERVICE_KEY',
 ];
 
 beforeAll(() => {
@@ -24,37 +24,31 @@ beforeAll(() => {
 
   if (missingVars.length > 0) {
     throw new Error(
-      `Missing required environment variables for integration tests: ${missingVars.join(", ")}\nPlease create a .env.test file with test database credentials.`
+      `Missing required environment variables for integration tests: ${missingVars.join(', ')}\nPlease create a .env.test file with test database credentials.`
     );
   }
 
   // Verify we're using a test database
   const dbUrl = process.env.DATABASE_URL!;
-  if (!dbUrl.includes("test") && !dbUrl.includes("localhost")) {
+  if (!(dbUrl.includes('test') || dbUrl.includes('localhost'))) {
     throw new Error(
-      "Integration tests must use a test database. " +
-        "Please ensure DATABASE_URL points to a test database."
+      'Integration tests must use a test database. ' +
+        'Please ensure DATABASE_URL points to a test database.'
     );
   }
-
-  console.log("Integration test environment configured");
-  console.log(`Database: ${dbUrl.split("@")[1]?.split("/")[0] || "unknown"}`);
 });
 
-afterAll(() => {
-  // Global cleanup if needed
-  console.log("Integration tests completed");
-});
+afterAll(() => {});
 
 // Mock next/navigation for API route tests
-vi.mock("next/navigation", () => ({
+vi.mock('next/navigation', () => ({
   useRouter: () => ({
     push: vi.fn(),
     replace: vi.fn(),
     refresh: vi.fn(),
   }),
   useSearchParams: () => new URLSearchParams(),
-  usePathname: () => "/test",
+  usePathname: () => '/test',
 }));
 
 // Set test timeouts

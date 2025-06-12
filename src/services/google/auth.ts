@@ -5,7 +5,7 @@
  * generating authorization URLs, handling callback responses, and refreshing tokens.
  * This service uses the Google APIs Node.js client library.
  */
-import { google } from "googleapis";
+import { google } from 'googleapis';
 
 /**
  * OAuth2 client configured with credentials from environment variables
@@ -53,14 +53,14 @@ interface TokenData {
  */
 export function generateAuthUrl(dataSourceId?: string): string {
   const scopes = [
-    "https://www.googleapis.com/auth/spreadsheets",
-    "https://www.googleapis.com/auth/drive.readonly",
+    'https://www.googleapis.com/auth/spreadsheets',
+    'https://www.googleapis.com/auth/drive.readonly',
   ];
 
   return oauth2Client.generateAuthUrl({
-    access_type: "offline",
+    access_type: 'offline',
     scope: scopes,
-    prompt: "consent",
+    prompt: 'consent',
     state: dataSourceId,
   });
 }
@@ -125,8 +125,8 @@ export async function refreshAccessToken(refreshToken: string): Promise<{
   oauth2Client.setCredentials({ refresh_token: refreshToken });
   await oauth2Client.getAccessToken();
 
-  if (!oauth2Client.credentials.access_token || !oauth2Client.credentials.expiry_date) {
-    throw new Error("Failed to refresh access token or get expiry date.");
+  if (!(oauth2Client.credentials.access_token && oauth2Client.credentials.expiry_date)) {
+    throw new Error('Failed to refresh access token or get expiry date.');
   }
 
   return {

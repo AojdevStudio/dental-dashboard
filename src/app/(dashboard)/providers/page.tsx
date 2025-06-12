@@ -1,8 +1,8 @@
-"use client";
+'use client';
 
-import { useProviders } from "@/hooks/use-providers";
-import ProvidersError from "./error";
-import Loading from "./loading";
+import { useProviders } from '@/hooks/use-providers';
+import ProvidersError from './error';
+import Loading from './loading';
 
 export default function ProvidersPage() {
   const { providers, isLoading, isError, pagination } = useProviders();

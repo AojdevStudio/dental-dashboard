@@ -8,26 +8,26 @@
  * own state for form data, current step, loading status, and errors.
  * It uses various UI components from Shadcn/ui for its layout and inputs.
  */
-"use client";
+'use client';
 
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
-import { Building2, Eye, EyeOff, UserPlus } from "lucide-react";
-import Link from "next/link";
-import { useRouter } from "next/navigation";
-import type * as React from "react";
-import { useState } from "react";
+} from '@/components/ui/select';
+import { Eye, EyeOff } from 'lucide-react';
+import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import type * as React from 'react';
+import { useState } from 'react';
 
 interface RegistrationFormData {
   // Core fields
@@ -38,8 +38,8 @@ interface RegistrationFormData {
   phone?: string;
 
   // Role and clinic
-  role: "admin" | "office_manager" | "dentist" | "front_desk";
-  clinicMode: "join" | "create";
+  role: 'admin' | 'office_manager' | 'dentist' | 'front_desk';
+  clinicMode: 'join' | 'create';
   primaryClinicId?: string;
   clinicRegistrationCode?: string;
 
@@ -91,13 +91,13 @@ export function RegisterFormComprehensive() {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   const [formData, setFormData] = useState<RegistrationFormData>({
-    email: "",
-    password: "",
-    confirmPassword: "",
-    fullName: "",
-    phone: "",
-    role: "office_manager",
-    clinicMode: "join",
+    email: '',
+    password: '',
+    confirmPassword: '',
+    fullName: '',
+    phone: '',
+    role: 'office_manager',
+    clinicMode: 'join',
     termsAccepted: false,
     privacyAccepted: false,
     marketingOptIn: false,
@@ -114,21 +114,16 @@ export function RegisterFormComprehensive() {
   const handleNextStep = () => {
     // Validate current step
     if (currentStep === 1) {
-      if (
-        !formData.email ||
-        !formData.password ||
-        !formData.confirmPassword ||
-        !formData.fullName
-      ) {
-        setError("Please fill in all required fields");
+      if (!(formData.email && formData.password && formData.confirmPassword && formData.fullName)) {
+        setError('Please fill in all required fields');
         return;
       }
       if (formData.password !== formData.confirmPassword) {
-        setError("Passwords do not match");
+        setError('Passwords do not match');
         return;
       }
       if (formData.password.length < 8) {
-        setError("Password must be at least 8 characters");
+        setError('Password must be at least 8 characters');
         return;
       }
     }
@@ -164,8 +159,8 @@ export function RegisterFormComprehensive() {
     e.preventDefault();
 
     // Final validation
-    if (!formData.termsAccepted || !formData.privacyAccepted) {
-      setError("You must accept the terms and privacy policy");
+    if (!(formData.termsAccepted && formData.privacyAccepted)) {
+      setError('You must accept the terms and privacy policy');
       return;
     }
 
@@ -173,22 +168,22 @@ export function RegisterFormComprehensive() {
     setError(null);
 
     try {
-      const response = await fetch("/api/auth/register-comprehensive", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
+      const response = await fetch('/api/auth/register-comprehensive', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(formData),
       });
 
       const result = await response.json();
 
-      if (!response.ok) {
-        setError(result.error || "Registration failed");
-      } else {
+      if (response.ok) {
         // Success - redirect to login with success message
         router.push(`/login?registered=true&email=${encodeURIComponent(formData.email)}`);
+      } else {
+        setError(result.error || 'Registration failed');
       }
-    } catch (err) {
-      setError("An unexpected error occurred. Please try again.");
+    } catch (_err) {
+      setError('An unexpected error occurred. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -213,7 +208,7 @@ export function RegisterFormComprehensive() {
             value={formData.email}
             onChange={(e) => setFormData({ ...formData, email: e.target.value })}
             placeholder="your@email.com"
-            required
+            required={true}
             disabled={loading}
             className="w-full"
           />
@@ -227,7 +222,7 @@ export function RegisterFormComprehensive() {
             value={formData.fullName}
             onChange={(e) => setFormData({ ...formData, fullName: e.target.value })}
             placeholder="Dr. Jane Smith"
-            required
+            required={true}
             disabled={loading}
             className="w-full"
           />
@@ -253,11 +248,11 @@ export function RegisterFormComprehensive() {
           <div className="relative">
             <Input
               id="password"
-              type={showPassword ? "text" : "password"}
+              type={showPassword ? 'text' : 'password'}
               value={formData.password}
               onChange={(e) => setFormData({ ...formData, password: e.target.value })}
               placeholder="Minimum 8 characters"
-              required
+              required={true}
               disabled={loading}
             />
             <button
@@ -275,11 +270,11 @@ export function RegisterFormComprehensive() {
           <div className="relative">
             <Input
               id="confirmPassword"
-              type={showConfirmPassword ? "text" : "password"}
+              type={showConfirmPassword ? 'text' : 'password'}
               value={formData.confirmPassword}
               onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })}
               placeholder="Confirm your password"
-              required
+              required={true}
               disabled={loading}
             />
             <button
@@ -311,7 +306,7 @@ export function RegisterFormComprehensive() {
         <Label htmlFor="role">Your Role *</Label>
         <Select
           value={formData.role}
-          onValueChange={(value: RegistrationFormData["role"]) =>
+          onValueChange={(value: RegistrationFormData['role']) =>
             setFormData({ ...formData, role: value })
           }
           disabled={loading}
@@ -332,7 +327,7 @@ export function RegisterFormComprehensive() {
         <Label>Clinic Association *</Label>
         <RadioGroup
           value={formData.clinicMode}
-          onValueChange={(value: RegistrationFormData["clinicMode"]) =>
+          onValueChange={(value: RegistrationFormData['clinicMode']) =>
             setFormData({ ...formData, clinicMode: value })
           }
         >
@@ -351,13 +346,13 @@ export function RegisterFormComprehensive() {
         </RadioGroup>
       </div>
 
-      {formData.clinicMode === "join" ? (
+      {formData.clinicMode === 'join' ? (
         <div className="space-y-2">
           <Label htmlFor="clinicCode">Clinic Registration Code *</Label>
           <Input
             id="clinicCode"
             type="text"
-            value={formData.clinicRegistrationCode || ""}
+            value={formData.clinicRegistrationCode || ''}
             onChange={(e) => setFormData({ ...formData, clinicRegistrationCode: e.target.value })}
             placeholder="Enter the code provided by your clinic"
             disabled={loading}
@@ -371,14 +366,14 @@ export function RegisterFormComprehensive() {
             <Input
               id="clinicName"
               type="text"
-              value={formData.newClinic?.name || ""}
+              value={formData.newClinic?.name || ''}
               onChange={(e) =>
                 setFormData({
                   ...formData,
                   newClinic: {
                     name: e.target.value,
-                    location: formData.newClinic?.location || "",
-                    practiceType: formData.newClinic?.practiceType || "",
+                    location: formData.newClinic?.location || '',
+                    practiceType: formData.newClinic?.practiceType || '',
                   },
                 })
               }
@@ -392,14 +387,14 @@ export function RegisterFormComprehensive() {
             <Input
               id="clinicLocation"
               type="text"
-              value={formData.newClinic?.location || ""}
+              value={formData.newClinic?.location || ''}
               onChange={(e) =>
                 setFormData({
                   ...formData,
                   newClinic: {
-                    name: formData.newClinic?.name || "",
+                    name: formData.newClinic?.name || '',
                     location: e.target.value,
-                    practiceType: formData.newClinic?.practiceType || "",
+                    practiceType: formData.newClinic?.practiceType || '',
                   },
                 })
               }
@@ -411,13 +406,13 @@ export function RegisterFormComprehensive() {
           <div className="space-y-2">
             <Label htmlFor="practiceType">Practice Type *</Label>
             <Select
-              value={formData.newClinic?.practiceType || ""}
+              value={formData.newClinic?.practiceType || ''}
               onValueChange={(value) =>
                 setFormData({
                   ...formData,
                   newClinic: {
-                    name: formData.newClinic?.name || "",
-                    location: formData.newClinic?.location || "",
+                    name: formData.newClinic?.name || '',
+                    location: formData.newClinic?.location || '',
                     practiceType: value,
                   },
                 })
@@ -442,7 +437,7 @@ export function RegisterFormComprehensive() {
       )}
 
       {/* Provider-specific fields */}
-      {formData.role === "dentist" && (
+      {formData.role === 'dentist' && (
         <div className="space-y-4 pt-4 border-t">
           <h4 className="font-medium">Provider Information</h4>
 
@@ -451,15 +446,15 @@ export function RegisterFormComprehensive() {
             <Input
               id="licenseNumber"
               type="text"
-              value={formData.providerInfo?.licenseNumber || ""}
+              value={formData.providerInfo?.licenseNumber || ''}
               onChange={(e) =>
                 setFormData({
                   ...formData,
                   providerInfo: {
                     licenseNumber: e.target.value,
                     specialties: formData.providerInfo?.specialties || [],
-                    providerType: formData.providerInfo?.providerType || "",
-                    employmentStatus: formData.providerInfo?.employmentStatus || "",
+                    providerType: formData.providerInfo?.providerType || '',
+                    employmentStatus: formData.providerInfo?.employmentStatus || '',
                   },
                 })
               }
@@ -471,15 +466,15 @@ export function RegisterFormComprehensive() {
           <div className="space-y-2">
             <Label htmlFor="providerType">Provider Type *</Label>
             <Select
-              value={formData.providerInfo?.providerType || ""}
+              value={formData.providerInfo?.providerType || ''}
               onValueChange={(value) =>
                 setFormData({
                   ...formData,
                   providerInfo: {
-                    licenseNumber: formData.providerInfo?.licenseNumber || "",
+                    licenseNumber: formData.providerInfo?.licenseNumber || '',
                     specialties: formData.providerInfo?.specialties || [],
                     providerType: value,
-                    employmentStatus: formData.providerInfo?.employmentStatus || "",
+                    employmentStatus: formData.providerInfo?.employmentStatus || '',
                   },
                 })
               }
@@ -499,14 +494,14 @@ export function RegisterFormComprehensive() {
           <div className="space-y-2">
             <Label htmlFor="employmentStatus">Employment Status *</Label>
             <Select
-              value={formData.providerInfo?.employmentStatus || ""}
+              value={formData.providerInfo?.employmentStatus || ''}
               onValueChange={(value) =>
                 setFormData({
                   ...formData,
                   providerInfo: {
-                    licenseNumber: formData.providerInfo?.licenseNumber || "",
+                    licenseNumber: formData.providerInfo?.licenseNumber || '',
                     specialties: formData.providerInfo?.specialties || [],
-                    providerType: formData.providerInfo?.providerType || "",
+                    providerType: formData.providerInfo?.providerType || '',
                     employmentStatus: value,
                   },
                 })
@@ -552,10 +547,10 @@ export function RegisterFormComprehensive() {
           />
           <div className="space-y-1">
             <Label htmlFor="terms" className="font-normal cursor-pointer">
-              I accept the{" "}
+              I accept the{' '}
               <Link href="/terms" className="text-blue-600 hover:underline">
                 Terms of Service
-              </Link>{" "}
+              </Link>{' '}
               *
             </Label>
             <p className="text-sm text-gray-500">You must accept the terms to continue</p>
@@ -573,10 +568,10 @@ export function RegisterFormComprehensive() {
           />
           <div className="space-y-1">
             <Label htmlFor="privacy" className="font-normal cursor-pointer">
-              I accept the{" "}
+              I accept the{' '}
               <Link href="/privacy" className="text-blue-600 hover:underline">
                 Privacy Policy
-              </Link>{" "}
+              </Link>{' '}
               *
             </Label>
             <p className="text-sm text-gray-500">We take your privacy seriously</p>
@@ -614,12 +609,12 @@ export function RegisterFormComprehensive() {
           </div>
           <div className="flex justify-between">
             <dt className="text-gray-600">Role:</dt>
-            <dd className="font-medium capitalize">{formData.role.replace("_", " ")}</dd>
+            <dd className="font-medium capitalize">{formData.role.replace('_', ' ')}</dd>
           </div>
           <div className="flex justify-between">
             <dt className="text-gray-600">Clinic:</dt>
             <dd className="font-medium">
-              {formData.clinicMode === "join"
+              {formData.clinicMode === 'join'
                 ? `Joining with code: ${formData.clinicRegistrationCode}`
                 : `Creating: ${formData.newClinic?.name}`}
             </dd>
@@ -641,12 +636,12 @@ export function RegisterFormComprehensive() {
           <CardHeader className="space-y-1 pb-6">
             <CardTitle className="text-2xl">Create Your Account</CardTitle>
             <CardDescription className="text-base">
-              Step {currentStep} of 3 -{" "}
+              Step {currentStep} of 3 -{' '}
               {currentStep === 1
-                ? "Account Information"
+                ? 'Account Information'
                 : currentStep === 2
-                  ? "Role & Clinic Setup"
-                  : "Review & Complete"}
+                  ? 'Role & Clinic Setup'
+                  : 'Review & Complete'}
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -683,14 +678,14 @@ export function RegisterFormComprehensive() {
                       type="submit"
                       disabled={loading || !formData.termsAccepted || !formData.privacyAccepted}
                     >
-                      {loading ? "Creating Account..." : "Complete Registration"}
+                      {loading ? 'Creating Account...' : 'Complete Registration'}
                     </Button>
                   )}
                 </div>
               </div>
 
               <div className="text-center text-sm mt-6">
-                Already have an account?{" "}
+                Already have an account?{' '}
                 <Link href="/login" className="text-primary hover:underline">
                   Sign in
                 </Link>

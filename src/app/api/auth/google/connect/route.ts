@@ -10,11 +10,11 @@
  * with a specific data source in the application.
  */
 
-import { withAuth } from "@/lib/api/middleware";
-import { apiError, ApiError as ApiErrorClass, type ApiResponse } from "@/lib/api/utils";
-import * as googleSheetsQueries from "@/lib/database/queries/google-sheets";
-import { generateAuthUrl } from "@/services/google/auth";
-import { type NextRequest, NextResponse } from "next/server";
+import { withAuth } from '@/lib/api/middleware';
+import { apiError } from '@/lib/api/utils';
+import * as googleSheetsQueries from '@/lib/database/queries/google-sheets';
+import { generateAuthUrl } from '@/services/google/auth';
+import { NextResponse } from 'next/server';
 
 /**
  * Handles GET requests to initiate Google OAuth authentication.
@@ -36,41 +36,33 @@ import { type NextRequest, NextResponse } from "next/server";
  *   - 403: Forbidden if user doesn't have access
  *   - 500: Server error if environment is misconfigured or URL generation fails
  */
-export const GET = withAuth<null>(
-  async (
-    request: Request,
-    { authContext }
-  ): Promise<NextResponse<ApiResponse<null> | ApiResponse<never>>> => {
-    const { searchParams } = new URL(request.url);
-    const dataSourceId = searchParams.get("dataSourceId");
+export const GET = withAuth(
+  async (request, { authContext }) => {
+    const url = new URL(request.url);
+    const dataSourceId = url.searchParams.get('dataSourceId');
 
     if (!dataSourceId) {
-      return apiError("dataSourceId is required", 400);
+      return apiError('dataSourceId is required', 400);
     }
 
     // Verify the data source exists and user has access
     const dataSource = await googleSheetsQueries.getDataSourceById(authContext, dataSourceId);
 
     if (!dataSource) {
-      return apiError("Data source not found", 404);
+      return apiError('Data source not found', 404);
     }
 
     const googleRedirectUri = process.env.GOOGLE_REDIRECT_URI;
     if (!googleRedirectUri) {
-      console.error("GOOGLE_REDIRECT_URI is not set in environment variables.");
-      return apiError("Server configuration error", 500);
+      return apiError('Server configuration error', 500);
     }
 
     try {
       // Generate auth URL with dataSourceId in state
       const authorizationUrl = generateAuthUrl(dataSourceId);
-      return NextResponse.json<ApiResponse<null>>(
-        { success: true, data: null },
-        { status: 302, headers: { Location: authorizationUrl } }
-      );
-    } catch (error) {
-      console.error("Failed to generate Google authorization URL:", error);
-      return apiError("Failed to initiate Google authentication", 500);
+      return NextResponse.redirect(authorizationUrl);
+    } catch (_error) {
+      return apiError('Failed to initiate Google authentication', 500);
     }
   },
   {

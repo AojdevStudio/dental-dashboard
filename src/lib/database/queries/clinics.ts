@@ -3,9 +3,9 @@
  * Multi-tenant aware clinic operations
  */
 
-import type { Prisma } from "@prisma/client";
-import { type AuthContext, isClinicAdmin, validateClinicAccess } from "../auth-context";
-import { prisma } from "../client";
+import type { Prisma } from '@prisma/client';
+import { type AuthContext, isClinicAdmin, validateClinicAccess } from '../auth-context';
+import { prisma } from '../client';
 
 export interface CreateClinicInput {
   name: string;
@@ -37,7 +37,7 @@ export async function getClinics(
   };
 
   if (!options?.includeInactive) {
-    where.status = "active";
+    where.status = 'active';
   }
 
   const [clinics, total] = await Promise.all([
@@ -53,7 +53,7 @@ export async function getClinics(
           },
         },
       },
-      orderBy: { name: "asc" },
+      orderBy: { name: 'asc' },
       take: options?.limit,
       skip: options?.offset,
     }),
@@ -78,7 +78,7 @@ export async function getClinicById(
   // Validate access
   const hasAccess = await validateClinicAccess(authContext, clinicId);
   if (!hasAccess) {
-    throw new Error("Access denied to this clinic");
+    throw new Error('Access denied to this clinic');
   }
 
   const clinic = await prisma.clinic.findUnique({
@@ -86,19 +86,19 @@ export async function getClinicById(
     include: {
       providers: options?.includeProviders
         ? {
-            where: { status: "active" },
-            orderBy: { name: "asc" },
+            where: { status: 'active' },
+            orderBy: { name: 'asc' },
           }
         : false,
       users: options?.includeUsers
         ? {
-            orderBy: { name: "asc" },
+            orderBy: { name: 'asc' },
           }
         : false,
       metrics: options?.includeMetrics
         ? {
             take: 100,
-            orderBy: { createdAt: "desc" },
+            orderBy: { createdAt: 'desc' },
             include: {
               metricDefinition: true,
             },
@@ -130,7 +130,7 @@ export async function getClinicDashboardData(
   // Validate access
   const hasAccess = await validateClinicAccess(authContext, clinicId);
   if (!hasAccess) {
-    throw new Error("Access denied to this clinic");
+    throw new Error('Access denied to this clinic');
   }
 
   const metricsWhere: Prisma.MetricValueWhereInput = {
@@ -165,7 +165,7 @@ export async function getClinicDashboardData(
         metricDefinition: true,
         provider: true,
       },
-      orderBy: { date: "desc" },
+      orderBy: { date: 'desc' },
       take: 500, // Limit for performance
     }),
 
@@ -179,14 +179,14 @@ export async function getClinicDashboardData(
         metricDefinition: true,
         provider: true,
       },
-      orderBy: { startDate: "desc" },
+      orderBy: { startDate: 'desc' },
     }),
 
     // Active providers
     prisma.provider.findMany({
       where: {
         clinicId,
-        status: "active",
+        status: 'active',
       },
       include: {
         _count: {
@@ -196,7 +196,7 @@ export async function getClinicDashboardData(
           },
         },
       },
-      orderBy: { name: "asc" },
+      orderBy: { name: 'asc' },
     }),
   ]);
 
@@ -213,25 +213,25 @@ export async function getClinicDashboardData(
  */
 export async function createClinic(authContext: AuthContext, input: CreateClinicInput) {
   // Only system/super admins can create clinics
-  if (authContext.role !== "admin" && authContext.role !== "system") {
-    throw new Error("Only administrators can create clinics");
+  if (authContext.role !== 'admin' && authContext.role !== 'system') {
+    throw new Error('Only administrators can create clinics');
   }
 
   const clinic = await prisma.clinic.create({
     data: {
       name: input.name,
       location: input.location,
-      status: input.status || "active",
+      status: input.status || 'active',
     },
   });
 
   // Grant the creating user admin access to the new clinic
-  if (authContext.userId !== "system") {
+  if (authContext.userId !== 'system') {
     await prisma.userClinicRole.create({
       data: {
         userId: authContext.userId,
         clinicId: clinic.id,
-        role: "clinic_admin",
+        role: 'clinic_admin',
         createdBy: authContext.userId,
       },
     });
@@ -251,7 +251,7 @@ export async function updateClinic(
   // Check if user is clinic admin
   const isAdmin = await isClinicAdmin(authContext, clinicId);
   if (!isAdmin) {
-    throw new Error("Only clinic administrators can update clinic information");
+    throw new Error('Only clinic administrators can update clinic information');
   }
 
   return prisma.clinic.update({
@@ -274,7 +274,7 @@ export async function getClinicStatistics(
   // Validate access
   const hasAccess = await validateClinicAccess(authContext, clinicId);
   if (!hasAccess) {
-    throw new Error("Access denied to this clinic");
+    throw new Error('Access denied to this clinic');
   }
 
   const dateFilter =
@@ -300,7 +300,7 @@ export async function getClinicStatistics(
     prisma.provider.count({
       where: {
         clinicId,
-        status: "active",
+        status: 'active',
       },
     }),
 
@@ -322,7 +322,7 @@ export async function getClinicStatistics(
 
     // Recent activity (last 30 days)
     prisma.metricValue.groupBy({
-      by: ["date"],
+      by: ['date'],
       where: {
         clinicId,
         date: {
@@ -331,7 +331,7 @@ export async function getClinicStatistics(
       },
       _count: true,
       orderBy: {
-        date: "desc",
+        date: 'desc',
       },
     }),
   ]);
@@ -363,7 +363,7 @@ export async function getClinicProviders(
   // Validate access
   const hasAccess = await validateClinicAccess(authContext, clinicId);
   if (!hasAccess) {
-    throw new Error("Access denied to this clinic");
+    throw new Error('Access denied to this clinic');
   }
 
   const where: Prisma.ProviderWhereInput = {
@@ -371,7 +371,7 @@ export async function getClinicProviders(
   };
 
   if (!options?.includeInactive) {
-    where.status = "active";
+    where.status = 'active';
   }
 
   const providers = await prisma.provider.findMany({
@@ -403,14 +403,14 @@ export async function getClinicProviders(
                 }
               : undefined,
             take: 10,
-            orderBy: { date: "desc" },
+            orderBy: { date: 'desc' },
             include: {
               metricDefinition: true,
             },
           }
         : false,
     },
-    orderBy: { name: "asc" },
+    orderBy: { name: 'asc' },
   });
 
   return providers;
@@ -435,8 +435,8 @@ export async function searchClinics(
       },
       {
         OR: [
-          { name: { contains: query, mode: "insensitive" } },
-          { location: { contains: query, mode: "insensitive" } },
+          { name: { contains: query, mode: 'insensitive' } },
+          { location: { contains: query, mode: 'insensitive' } },
         ],
       },
     ],
@@ -445,6 +445,6 @@ export async function searchClinics(
   return prisma.clinic.findMany({
     where,
     take: options?.limit || 10,
-    orderBy: { name: "asc" },
+    orderBy: { name: 'asc' },
   });
 }

@@ -7,12 +7,12 @@
  * and Integrations.
  */
 
-import type { Metadata } from "next";
-import Link from "next/link";
+import type { Metadata } from 'next';
+import Link from 'next/link';
 
 export const metadata: Metadata = {
-  title: "Settings - Dashboard",
-  description: "Manage your application and account settings.",
+  title: 'Settings - Dashboard',
+  description: 'Manage your application and account settings.',
 };
 
 /**

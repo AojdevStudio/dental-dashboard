@@ -6,25 +6,23 @@
  * interface with range selection capabilities.
  */
 
-"use client";
+'use client';
 
-import { Button } from "@/components/ui/button";
-import { cn } from "@/lib/utils";
-import { format } from "date-fns";
-import { Calendar as CalendarIcon } from "lucide-react";
-import * as React from "react";
+import { Button } from '@/components/ui/button';
+import { cn } from '@/lib/utils';
+import { format } from 'date-fns';
+import { Calendar as CalendarIcon } from 'lucide-react';
+import * as React from 'react';
 
 /**
  * Interface for DatePicker component properties
  *
  * @property {Date} [date] - The currently selected date
- * @property {(date: Date) => void} [onDateChange] - Callback for date selection
  * @property {string} [placeholder] - Placeholder text when no date is selected
  * @property {boolean} [disabled] - Whether the date picker is disabled
  */
 interface DatePickerProps {
   date?: Date;
-  onDateChange?: (date: Date) => void;
   placeholder?: string;
   disabled?: boolean;
 }
@@ -44,8 +42,7 @@ interface DatePickerProps {
  */
 export function DatePicker({
   date,
-  onDateChange,
-  placeholder = "Select date",
+  placeholder = 'Select date',
   disabled = false,
 }: DatePickerProps) {
   return (
@@ -53,14 +50,14 @@ export function DatePicker({
       <Button
         variant="outline"
         className={cn(
-          "w-full justify-start text-left font-normal",
-          !date && "text-muted-foreground",
-          disabled && "opacity-50 cursor-not-allowed"
+          'w-full justify-start text-left font-normal',
+          !date && 'text-muted-foreground',
+          disabled && 'opacity-50 cursor-not-allowed'
         )}
         disabled={disabled}
       >
         <CalendarIcon className="mr-2 h-4 w-4" />
-        {date ? format(date, "PPP") : <span>{placeholder}</span>}
+        {date ? format(date, 'PPP') : <span>{placeholder}</span>}
       </Button>
       <div className="w-auto p-0" />
     </div>
@@ -89,7 +86,7 @@ export function DateRangePicker({
   from,
   to,
   onRangeChange,
-  placeholder = "Select date range",
+  placeholder = 'Select date range',
   disabled = false,
 }: {
   from?: Date;
@@ -98,7 +95,7 @@ export function DateRangePicker({
   placeholder?: string;
   disabled?: boolean;
 }) {
-  const [isOpen, setIsOpen] = React.useState(false);
+  const [_isOpen, _setIsOpen] = React.useState(false);
   const [range, setRange] = React.useState<{ from: Date; to?: Date }>({
     from: from || new Date(),
     to: to,
@@ -126,9 +123,9 @@ export function DateRangePicker({
       <Button
         variant="outline"
         className={cn(
-          "w-full justify-start text-left font-normal",
-          !range.from && "text-muted-foreground",
-          disabled && "opacity-50 cursor-not-allowed"
+          'w-full justify-start text-left font-normal',
+          !range.from && 'text-muted-foreground',
+          disabled && 'opacity-50 cursor-not-allowed'
         )}
         disabled={disabled}
       >
@@ -136,10 +133,10 @@ export function DateRangePicker({
         {range.from ? (
           range.to ? (
             <>
-              {format(range.from, "PPP")} - {format(range.to, "PPP")}
+              {format(range.from, 'PPP')} - {format(range.to, 'PPP')}
             </>
           ) : (
-            format(range.from, "PPP")
+            format(range.from, 'PPP')
           )
         ) : (
           <span>{placeholder}</span>

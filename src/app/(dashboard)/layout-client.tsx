@@ -1,8 +1,10 @@
-"use client";
+'use client';
 
-import { AuthGuard } from "@/components/auth/auth-guard";
-import { DashboardLayout as Layout } from "@/components/common/dashboard-layout";
-import { Providers } from "./providers";
+import type React from 'react';
+
+import { AuthGuard } from '@/components/auth/auth-guard';
+import { DashboardLayout as Layout } from '@/components/common/dashboard-layout';
+import { Providers } from './providers';
 
 interface DashboardLayoutProps {
   children: React.ReactNode;
@@ -13,9 +15,9 @@ interface DashboardLayoutProps {
 
 export default function DashboardLayout({
   children,
-  clinics = [],
-  currentClinicId,
-  isSystemAdmin = false,
+  clinics: _clinics = [],
+  currentClinicId: _currentClinicId,
+  isSystemAdmin: _isSystemAdmin = false,
 }: DashboardLayoutProps) {
   return (
     <Providers>

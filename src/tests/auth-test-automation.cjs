@@ -7,10 +7,10 @@
  * by making HTTP requests to various endpoints and verifying responses.
  */
 
-const http = require("node:http");
-const https = require("node:https");
+const http = require('node:http');
+const https = require('node:https');
 
-const BASE_URL = "http://localhost:3000";
+const BASE_URL = 'http://localhost:3000';
 
 /**
  * Makes an HTTP request and returns a promise with the response
@@ -23,22 +23,22 @@ function makeRequest(url, options = {}) {
     const urlObj = new URL(url);
     const requestOptions = {
       hostname: urlObj.hostname,
-      port: urlObj.port || (urlObj.protocol === "https:" ? 443 : 80),
+      port: urlObj.port || (urlObj.protocol === 'https:' ? 443 : 80),
       path: urlObj.pathname + urlObj.search,
-      method: options.method || "GET",
+      method: options.method || 'GET',
       headers: options.headers || {},
       ...options,
     };
 
-    const client = urlObj.protocol === "https:" ? https : http;
+    const client = urlObj.protocol === 'https:' ? https : http;
 
     const req = client.request(requestOptions, (res) => {
-      let body = "";
-      res.on("data", (chunk) => {
+      let body = '';
+      res.on('data', (chunk) => {
         body += chunk;
       });
 
-      res.on("end", () => {
+      res.on('end', () => {
         resolve({
           statusCode: res.statusCode,
           headers: res.headers,
@@ -47,7 +47,7 @@ function makeRequest(url, options = {}) {
       });
     });
 
-    req.on("error", (err) => {
+    req.on('error', (err) => {
       reject(err);
     });
 
@@ -64,23 +64,16 @@ function makeRequest(url, options = {}) {
  * @param {string} testName - Name of the test
  * @param {Function} testFn - Test function that returns a promise
  */
-async function runTest(testName, testFn) {
+async function runTest(_testName, testFn) {
   try {
-    console.log(`🧪 Running: ${testName}`);
     const result = await testFn();
     if (result.passed) {
-      console.log(`✅ PASSED: ${testName}`);
       if (result.details) {
-        console.log(`   Details: ${result.details}`);
       }
     } else {
-      console.log(`❌ FAILED: ${testName}`);
-      console.log(`   Reason: ${result.reason}`);
     }
     return result.passed;
-  } catch (error) {
-    console.log(`❌ ERROR: ${testName}`);
-    console.log(`   Error: ${error.message}`);
+  } catch (_error) {
     return false;
   }
 }
@@ -93,7 +86,7 @@ async function testServerRunning() {
   return {
     passed: response.statusCode === 200,
     reason: response.statusCode !== 200 ? `Server returned ${response.statusCode}` : null,
-    details: "Development server is accessible",
+    details: 'Development server is accessible',
   };
 }
 
@@ -103,14 +96,14 @@ async function testServerRunning() {
 async function testLoginPageAccessible() {
   const response = await makeRequest(`${BASE_URL}/login`);
   const hasLoginForm =
-    response.body.includes("email") &&
-    response.body.includes("password") &&
-    response.body.includes("Sign in");
+    response.body.includes('email') &&
+    response.body.includes('password') &&
+    response.body.includes('Sign in');
 
   return {
     passed: response.statusCode === 200 && hasLoginForm,
-    reason: !hasLoginForm ? "Login form elements not found" : null,
-    details: "Login page contains email, password fields and sign in button",
+    reason: hasLoginForm ? null : 'Login form elements not found',
+    details: 'Login page contains email, password fields and sign in button',
   };
 }
 
@@ -122,8 +115,8 @@ async function testProtectedRouteRedirection(route) {
 
   // Check if response contains redirect indicators
   const hasRedirect =
-    response.body.includes("NEXT_REDIRECT") ||
-    response.body.includes("redirect") ||
+    response.body.includes('NEXT_REDIRECT') ||
+    response.body.includes('redirect') ||
     response.statusCode === 307 ||
     response.statusCode === 302;
 
@@ -146,14 +139,14 @@ async function testEnvironmentConfig() {
   const response = await makeRequest(`${BASE_URL}/login`);
 
   const hasEnvError =
-    response.body.includes("Missing Supabase environment variables") ||
-    response.body.includes("NEXT_PUBLIC_SUPABASE_URL") ||
-    response.body.includes("environment variable");
+    response.body.includes('Missing Supabase environment variables') ||
+    response.body.includes('NEXT_PUBLIC_SUPABASE_URL') ||
+    response.body.includes('environment variable');
 
   return {
     passed: !hasEnvError && response.statusCode === 200,
-    reason: hasEnvError ? "Environment configuration errors detected" : null,
-    details: "No environment variable errors detected",
+    reason: hasEnvError ? 'Environment configuration errors detected' : null,
+    details: 'No environment variable errors detected',
   };
 }
 
@@ -166,14 +159,14 @@ async function testMiddlewareFunction() {
 
   // Root should redirect to login for unauthenticated users
   const isRedirecting =
-    response.body.includes("NEXT_REDIRECT") ||
-    response.body.includes("/login") ||
+    response.body.includes('NEXT_REDIRECT') ||
+    response.body.includes('/login') ||
     response.statusCode === 307;
 
   return {
     passed: isRedirecting,
-    reason: !isRedirecting ? "Root path not redirecting to login" : null,
-    details: "Middleware correctly redirects unauthenticated users",
+    reason: isRedirecting ? null : 'Root path not redirecting to login',
+    details: 'Middleware correctly redirects unauthenticated users',
   };
 }
 
@@ -181,7 +174,7 @@ async function testMiddlewareFunction() {
  * Test API routes accessibility
  */
 async function testAPIRoutes() {
-  const routes = ["/api/auth/session", "/api/auth/callback"];
+  const routes = ['/api/auth/session', '/api/auth/callback'];
 
   let allPassed = true;
   const details = [];
@@ -205,8 +198,8 @@ async function testAPIRoutes() {
 
   return {
     passed: allPassed,
-    reason: !allPassed ? "Some API routes returned server errors" : null,
-    details: details.join(", "),
+    reason: allPassed ? null : 'Some API routes returned server errors',
+    details: details.join(', '),
   };
 }
 
@@ -214,18 +207,16 @@ async function testAPIRoutes() {
  * Main test runner
  */
 async function runAllTests() {
-  console.log("🚀 Starting Authentication Flow Tests\n");
-
   const tests = [
-    ["Server Running", testServerRunning],
-    ["Environment Configuration", testEnvironmentConfig],
-    ["Login Page Accessible", testLoginPageAccessible],
-    ["Middleware Function", testMiddlewareFunction],
-    ["Protected Route: /dashboard", () => testProtectedRouteRedirection("/dashboard")],
-    ["Protected Route: /goals", () => testProtectedRouteRedirection("/goals")],
-    ["Protected Route: /settings", () => testProtectedRouteRedirection("/settings")],
-    ["Protected Route: /reports", () => testProtectedRouteRedirection("/reports")],
-    ["API Routes", testAPIRoutes],
+    ['Server Running', testServerRunning],
+    ['Environment Configuration', testEnvironmentConfig],
+    ['Login Page Accessible', testLoginPageAccessible],
+    ['Middleware Function', testMiddlewareFunction],
+    ['Protected Route: /dashboard', () => testProtectedRouteRedirection('/dashboard')],
+    ['Protected Route: /goals', () => testProtectedRouteRedirection('/goals')],
+    ['Protected Route: /settings', () => testProtectedRouteRedirection('/settings')],
+    ['Protected Route: /reports', () => testProtectedRouteRedirection('/reports')],
+    ['API Routes', testAPIRoutes],
   ];
 
   let passedTests = 0;
@@ -233,21 +224,13 @@ async function runAllTests() {
 
   for (const [testName, testFn] of tests) {
     const passed = await runTest(testName, testFn);
-    if (passed) passedTests++;
-    console.log(""); // Empty line for readability
+    if (passed) {
+      passedTests++;
+    }
   }
 
-  console.log("📊 Test Results Summary");
-  console.log("========================");
-  console.log(`Total Tests: ${totalTests}`);
-  console.log(`Passed: ${passedTests}`);
-  console.log(`Failed: ${totalTests - passedTests}`);
-  console.log(`Success Rate: ${Math.round((passedTests / totalTests) * 100)}%`);
-
   if (passedTests === totalTests) {
-    console.log("\n🎉 All tests passed! Authentication system is working correctly.");
   } else {
-    console.log("\n⚠️  Some tests failed. Please review the results above.");
   }
 
   return passedTests === totalTests;

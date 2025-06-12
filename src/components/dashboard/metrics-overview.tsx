@@ -1,10 +1,10 @@
-"use client";
+'use client';
 
-import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { ChartSkeleton, MetricCardSkeleton } from "@/components/ui/skeleton-loaders";
-import { useMetrics } from "@/hooks/use-metrics";
-import { AlertCircle } from "lucide-react";
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { ChartSkeleton, MetricCardSkeleton } from '@/components/ui/skeleton-loaders';
+import { useMetrics } from '@/hooks/use-metrics';
+import { AlertCircle } from 'lucide-react';
 
 /**
  * MetricsOverview Component
@@ -44,8 +44,8 @@ export function MetricsOverview() {
     return (
       <div className="space-y-6">
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-          {Array.from({ length: 4 }).map((_, i) => (
-            <MetricCardSkeleton key={i} />
+          {[0, 1, 2, 3].map((id) => (
+            <MetricCardSkeleton key={`metric-skeleton-${id}`} />
           ))}
         </div>
         <ChartSkeleton />
@@ -99,10 +99,10 @@ export function MetricsOverview() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
-              ${latestMetric?.value.toLocaleString() || "N/A"}
+              ${latestMetric?.value.toLocaleString() || 'N/A'}
             </div>
             <p className="text-xs text-muted-foreground">
-              {latestMetric ? new Date(latestMetric.date).toLocaleDateString() : "No data"}
+              {latestMetric ? new Date(latestMetric.date).toLocaleDateString() : 'No data'}
             </p>
           </CardContent>
         </Card>
@@ -112,8 +112,8 @@ export function MetricsOverview() {
             <CardTitle className="text-sm font-medium">Trend</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className={`text-2xl font-bold ${trend >= 0 ? "text-green-600" : "text-red-600"}`}>
-              {trend >= 0 ? "+" : ""}
+            <div className={`text-2xl font-bold ${trend >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+              {trend >= 0 ? '+' : ''}
               {trend.toFixed(1)}%
             </div>
             <p className="text-xs text-muted-foreground">vs previous period</p>

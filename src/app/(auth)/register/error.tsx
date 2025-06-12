@@ -12,7 +12,7 @@
  * - Server-side rendering encounters an error
  */
 
-"use client";
+'use client';
 
 /**
  * Signup Error Component

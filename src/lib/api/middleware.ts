@@ -1,24 +1,13 @@
-/**
- * API Route Middleware
- * Provides authentication and auth context for API routes
- */
+import { type NextRequest, NextResponse } from 'next/server';
+import { type AuthContext, getAuthContext } from '../database/auth-context';
 
-import { handleApiError } from "./utils";
-import type { ApiResponse } from "./utils";
-import { type AuthContext, getAuthContext } from "../database/auth-context";
-import { createClient } from "@supabase/supabase-js";
-import { cookies } from "next/headers";
-import { type NextRequest, NextResponse } from "next/server";
-
-export type ApiHandler<TSuccessPayload = unknown> = (
+export type ApiHandler<_TSuccessPayload = unknown> = (
   request: Request,
   context: {
-    params?: Record<string, string | string[]>;
+    params: Promise<Record<string, string | string[]>>;
     authContext: AuthContext;
   }
-) => Promise<
-  NextResponse<ApiResponse<TSuccessPayload>> | NextResponse<{ error: string; code?: string }>
->;
+) => Promise<NextResponse<unknown>>;
 
 /**
  * Wraps an API route handler with authentication and auth context
@@ -31,10 +20,10 @@ export function withAuth<TSuccessPayload = unknown>(
   }
 ): (
   request: Request,
-  context: { params?: Record<string, string | string[]> }
+  context: { params: Promise<Record<string, string | string[]>> }
 ) => Promise<NextResponse> {
-  return async (req: Request, context: { params?: Record<string, string | string[]> }) => {
-    const nextRequest = req as NextRequest;
+  return async (req: Request, context: { params: Promise<Record<string, string | string[]>> }) => {
+    const _nextRequest = req as NextRequest;
     try {
       // Get auth context
       // Note: getAuthContext relies on cookies(), which needs NextRequest. This cast should be fine.
@@ -42,29 +31,29 @@ export function withAuth<TSuccessPayload = unknown>(
       const authContext = await getAuthContext();
 
       if (!authContext) {
-        return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+        return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
       }
 
       // Check admin requirements
-      if (options?.requireAdmin && authContext.role !== "admin") {
-        return NextResponse.json({ error: "Admin access required" }, { status: 403 });
+      if (options?.requireAdmin && authContext.role !== 'admin') {
+        return NextResponse.json({ error: 'Admin access required' }, { status: 403 });
       }
 
       // Check clinic admin requirements
       if (options?.requireClinicAdmin) {
         const clinicId =
-          (req as NextRequest).nextUrl.searchParams.get("clinicId") ||
-          (req as NextRequest).headers.get("x-clinic-id");
+          (req as NextRequest).nextUrl.searchParams.get('clinicId') ||
+          (req as NextRequest).headers.get('x-clinic-id');
 
         if (!clinicId) {
-          return NextResponse.json({ error: "Clinic ID required" }, { status: 400 });
+          return NextResponse.json({ error: 'Clinic ID required' }, { status: 400 });
         }
 
-        const { isClinicAdmin } = await import("../database/auth-context");
+        const { isClinicAdmin } = await import('../database/auth-context');
         const isAdmin = await isClinicAdmin(authContext, clinicId);
 
         if (!isAdmin) {
-          return NextResponse.json({ error: "Clinic admin access required" }, { status: 403 });
+          return NextResponse.json({ error: 'Clinic admin access required' }, { status: 403 });
         }
       }
 
@@ -75,21 +64,19 @@ export function withAuth<TSuccessPayload = unknown>(
         authContext,
       });
     } catch (error) {
-      console.error("API route error:", error);
-
       // Handle specific error types
       if (error instanceof Error) {
-        if (error.message.includes("Access denied")) {
+        if (error.message.includes('Access denied')) {
           return NextResponse.json({ error: error.message }, { status: 403 });
         }
 
-        if (error.message.includes("not found")) {
+        if (error.message.includes('not found')) {
           return NextResponse.json({ error: error.message }, { status: 404 });
         }
       }
 
       // Generic error response
-      return NextResponse.json({ error: "Internal server error" }, { status: 500 });
+      return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
     }
   };
 }
@@ -99,12 +86,16 @@ export function withAuth<TSuccessPayload = unknown>(
  */
 export function getClinicId(request: NextRequest): string | null {
   // Check URL params
-  const urlClinicId = request.nextUrl.searchParams.get("clinicId");
-  if (urlClinicId) return urlClinicId;
+  const urlClinicId = request.nextUrl.searchParams.get('clinicId');
+  if (urlClinicId) {
+    return urlClinicId;
+  }
 
   // Check headers
-  const headerClinicId = request.headers.get("x-clinic-id");
-  if (headerClinicId) return headerClinicId;
+  const headerClinicId = request.headers.get('x-clinic-id');
+  if (headerClinicId) {
+    return headerClinicId;
+  }
 
   // Check body for POST/PUT requests
   // Note: This would need to be handled in the route handler
@@ -121,8 +112,8 @@ export function getDateRangeParams(request: NextRequest): {
   endDate?: Date;
 } {
   const searchParams = request.nextUrl.searchParams;
-  const start = searchParams.get("startDate");
-  const end = searchParams.get("endDate");
+  const start = searchParams.get('startDate');
+  const end = searchParams.get('endDate');
 
   return {
     startDate: start ? new Date(start) : undefined,
@@ -142,7 +133,7 @@ export async function validateBody<T>(
   try {
     const body = await request.json();
     return schema.parse(body);
-  } catch (error) {
-    throw new Error("Invalid request body");
+  } catch (_error) {
+    throw new Error('Invalid request body');
   }
 }

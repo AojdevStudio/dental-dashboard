@@ -6,11 +6,11 @@
  * time periods, and other properties.
  */
 
-"use client";
+'use client';
 
-import { DateRangePicker } from "@/components/common/date-picker";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { DateRangePicker } from '@/components/common/date-picker';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import {
   Form,
   FormControl,
@@ -19,27 +19,26 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
+} from '@/components/ui/form';
+import { Input } from '@/components/ui/input';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
-import { Separator } from "@/components/ui/separator";
-import { Textarea } from "@/components/ui/textarea";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { addMonths, endOfMonth, startOfMonth } from "date-fns";
-import * as React from "react";
-import { useForm } from "react-hook-form";
-import * as z from "zod";
+} from '@/components/ui/select';
+import { Separator } from '@/components/ui/separator';
+import { Textarea } from '@/components/ui/textarea';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { addMonths, endOfMonth, startOfMonth } from 'date-fns';
+import { useForm } from 'react-hook-form';
+import * as z from 'zod';
 
 /**
  * Goal category types
  */
-type GoalCategory = "financial" | "patient" | "productivity" | "retention" | "other";
+type GoalCategory = 'financial' | 'patient' | 'productivity' | 'retention' | 'other';
 
 /**
  * Schema for goal form validation
@@ -47,20 +46,20 @@ type GoalCategory = "financial" | "patient" | "productivity" | "retention" | "ot
 const goalFormSchema = z.object({
   title: z
     .string()
-    .min(3, { message: "Title must be at least 3 characters" })
-    .max(100, { message: "Title must not exceed 100 characters" }),
+    .min(3, { message: 'Title must be at least 3 characters' })
+    .max(100, { message: 'Title must not exceed 100 characters' }),
   description: z
     .string()
-    .max(500, { message: "Description must not exceed 500 characters" })
+    .max(500, { message: 'Description must not exceed 500 characters' })
     .optional(),
-  category: z.enum(["financial", "patient", "productivity", "retention", "other"]),
-  target: z.number().positive({ message: "Target must be a positive number" }),
-  unit: z.string().max(10, { message: "Unit must not exceed 10 characters" }).optional(),
+  category: z.enum(['financial', 'patient', 'productivity', 'retention', 'other']),
+  target: z.number().positive({ message: 'Target must be a positive number' }),
+  unit: z.string().max(10, { message: 'Unit must not exceed 10 characters' }).optional(),
   dateRange: z.object({
     from: z.date(),
     to: z.date(),
   }),
-  trackingFrequency: z.enum(["daily", "weekly", "monthly"]),
+  trackingFrequency: z.enum(['daily', 'weekly', 'monthly']),
   reminderEnabled: z.boolean(),
 });
 
@@ -92,7 +91,7 @@ interface ExistingGoal {
   unit?: string;
   startDate: Date;
   endDate: Date;
-  trackingFrequency: "daily" | "weekly" | "monthly";
+  trackingFrequency: 'daily' | 'weekly' | 'monthly';
   reminderEnabled: boolean;
 }
 
@@ -115,20 +114,20 @@ interface GoalFormProps {
  * Category options for the form select
  */
 const categoryOptions = [
-  { value: "financial", label: "Financial" },
-  { value: "patient", label: "Patient" },
-  { value: "productivity", label: "Productivity" },
-  { value: "retention", label: "Retention" },
-  { value: "other", label: "Other" },
+  { value: 'financial', label: 'Financial' },
+  { value: 'patient', label: 'Patient' },
+  { value: 'productivity', label: 'Productivity' },
+  { value: 'retention', label: 'Retention' },
+  { value: 'other', label: 'Other' },
 ];
 
 /**
  * Tracking frequency options for the form select
  */
 const trackingFrequencyOptions = [
-  { value: "daily", label: "Daily" },
-  { value: "weekly", label: "Weekly" },
-  { value: "monthly", label: "Monthly" },
+  { value: 'daily', label: 'Daily' },
+  { value: 'weekly', label: 'Weekly' },
+  { value: 'monthly', label: 'Monthly' },
 ];
 
 /**
@@ -147,31 +146,31 @@ const trackingFrequencyOptions = [
  */
 export function GoalForm({ goal, onSubmit, onCancel, isLoading = false }: GoalFormProps) {
   // Create a form with default values
-  const defaultValues = goal
+  const defaultValues: Partial<GoalFormValues> = goal
     ? {
         title: goal.title,
-        description: goal.description || "",
+        description: goal.description || undefined,
         category: goal.category,
         target: goal.target,
-        unit: goal.unit || "",
+        unit: goal.unit || undefined,
         dateRange: {
           from: goal.startDate,
           to: goal.endDate,
         },
-        trackingFrequency: goal.trackingFrequency,
+        trackingFrequency: goal.trackingFrequency as 'daily' | 'weekly' | 'monthly',
         reminderEnabled: goal.reminderEnabled,
       }
     : {
-        title: "",
-        description: "",
-        category: "financial" as GoalCategory,
+        title: '',
+        description: undefined,
+        category: 'financial',
         target: 0,
-        unit: "",
+        unit: undefined,
         dateRange: {
           from: startOfMonth(new Date()),
           to: endOfMonth(addMonths(new Date(), 2)),
         },
-        trackingFrequency: "monthly",
+        trackingFrequency: 'monthly',
         reminderEnabled: false,
       };
 
@@ -189,7 +188,7 @@ export function GoalForm({ goal, onSubmit, onCancel, isLoading = false }: GoalFo
   return (
     <Card className="w-full max-w-2xl mx-auto">
       <CardHeader>
-        <CardTitle>{goal ? "Edit Goal" : "Create New Goal"}</CardTitle>
+        <CardTitle>{goal ? 'Edit Goal' : 'Create New Goal'}</CardTitle>
       </CardHeader>
       <CardContent>
         <Form {...form}>
@@ -396,7 +395,7 @@ export function GoalForm({ goal, onSubmit, onCancel, isLoading = false }: GoalFo
         )}
 
         <Button type="submit" onClick={form.handleSubmit(handleSubmit)} disabled={isLoading}>
-          {isLoading ? "Saving..." : goal ? "Save Changes" : "Create Goal"}
+          {isLoading ? 'Saving...' : goal ? 'Save Changes' : 'Create Goal'}
         </Button>
       </CardFooter>
     </Card>

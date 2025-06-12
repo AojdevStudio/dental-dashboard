@@ -1,13 +1,5 @@
-/**
- * @fileoverview Pre-built skeleton loading components for common UI patterns
- *
- * This file provides ready-to-use skeleton loading components for various
- * sections of the application, ensuring consistent loading states across
- * the dashboard while improving perceived performance.
- */
-
-import { Card, CardContent, CardHeader } from "./card";
-import { Skeleton } from "./skeleton";
+import { Card, CardContent, CardHeader } from './card';
+import { Skeleton } from './skeleton';
 
 /**
  * MetricCardSkeleton - Loading state for metric cards
@@ -40,9 +32,9 @@ export function ChartSkeleton() {
         <div className="h-[350px] w-full relative">
           {/* Chart bars */}
           <div className="absolute bottom-0 left-0 right-0 flex items-end justify-around gap-2 h-full px-8">
-            {Array.from({ length: 7 }).map((_, i) => (
+            {[0, 1, 2, 3, 4, 5, 6].map((id) => (
               <Skeleton
-                key={i}
+                key={`chart-bar-${id}`}
                 className="flex-1"
                 style={{ height: `${Math.random() * 80 + 20}%` }}
               />
@@ -71,8 +63,8 @@ export function TableSkeleton({ rows = 5 }: { rows?: number }) {
       </div>
 
       {/* Table rows */}
-      {Array.from({ length: rows }).map((_, i) => (
-        <div key={i} className="border-b">
+      {Array.from({ length: rows }, (_, i) => i).map((id) => (
+        <div key={`table-row-${id}`} className="border-b">
           <div className="flex gap-4 p-4">
             <Skeleton className="h-4 w-32" />
             <Skeleton className="h-4 w-24" />
@@ -102,8 +94,8 @@ export function DashboardSkeleton() {
 
       {/* Metric cards grid */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        {Array.from({ length: 4 }).map((_, i) => (
-          <MetricCardSkeleton key={i} />
+        {[0, 1, 2, 3].map((id) => (
+          <MetricCardSkeleton key={`dashboard-metric-${id}`} />
         ))}
       </div>
 
@@ -125,8 +117,8 @@ export function DashboardSkeleton() {
 export function FormSkeleton({ fields = 4 }: { fields?: number }) {
   return (
     <div className="space-y-6">
-      {Array.from({ length: fields }).map((_, i) => (
-        <div key={i} className="space-y-2">
+      {Array.from({ length: fields }, (_, i) => i).map((id) => (
+        <div key={`form-field-${id}`} className="space-y-2">
           <Skeleton className="h-4 w-24" />
           <Skeleton className="h-10 w-full" />
         </div>
@@ -183,8 +175,8 @@ export function GoalCardSkeleton() {
 export function ProviderListSkeleton({ items = 5 }: { items?: number }) {
   return (
     <div className="space-y-2">
-      {Array.from({ length: items }).map((_, i) => (
-        <div key={i} className="flex items-center gap-3 p-3 border rounded-lg">
+      {Array.from({ length: items }, (_, i) => i).map((id) => (
+        <div key={`provider-item-${id}`} className="flex items-center gap-3 p-3 border rounded-lg">
           <Skeleton className="h-10 w-10 rounded-full" />
           <div className="flex-1 space-y-1">
             <Skeleton className="h-4 w-32" />

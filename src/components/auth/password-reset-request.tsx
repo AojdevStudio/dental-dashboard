@@ -5,10 +5,12 @@
  * It handles form validation, submission, and feedback states.
  */
 
-"use client";
+'use client';
 
-import Link from "next/link";
-import { useState } from "react";
+import type React from 'react';
+
+import Link from 'next/link';
+import { useState } from 'react';
 
 /**
  * Password Reset Request Component
@@ -19,10 +21,10 @@ import { useState } from "react";
  * @returns {React.ReactElement} The rendered password reset request form
  */
 export function PasswordResetRequest(): React.ReactElement {
-  const [email, setEmail] = useState("");
+  const [email, setEmail] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [submitStatus, setSubmitStatus] = useState<"idle" | "success" | "error">("idle");
-  const [errorMessage, setErrorMessage] = useState("");
+  const [submitStatus, setSubmitStatus] = useState<'idle' | 'success' | 'error'>('idle');
+  const [errorMessage, setErrorMessage] = useState('');
 
   /**
    * Handles the form submission for password reset request.
@@ -33,15 +35,15 @@ export function PasswordResetRequest(): React.ReactElement {
     e.preventDefault();
 
     // Basic email validation
-    if (!email || !email.includes("@")) {
-      setErrorMessage("Please enter a valid email address");
-      setSubmitStatus("error");
+    if (!email?.includes('@')) {
+      setErrorMessage('Please enter a valid email address');
+      setSubmitStatus('error');
       return;
     }
 
     setIsSubmitting(true);
-    setSubmitStatus("idle");
-    setErrorMessage("");
+    setSubmitStatus('idle');
+    setErrorMessage('');
 
     try {
       // In a real implementation, this would call an API endpoint
@@ -49,10 +51,10 @@ export function PasswordResetRequest(): React.ReactElement {
       await new Promise((resolve) => setTimeout(resolve, 1000));
 
       // Simulate successful submission
-      setSubmitStatus("success");
-    } catch (error) {
-      setSubmitStatus("error");
-      setErrorMessage("An error occurred. Please try again later.");
+      setSubmitStatus('success');
+    } catch (_error) {
+      setSubmitStatus('error');
+      setErrorMessage('An error occurred. Please try again later.');
     } finally {
       setIsSubmitting(false);
     }
@@ -70,7 +72,7 @@ export function PasswordResetRequest(): React.ReactElement {
           </p>
         </div>
 
-        {submitStatus === "success" ? (
+        {submitStatus === 'success' ? (
           <div className="rounded-md bg-green-50 p-4 mt-8">
             <div className="flex">
               <div className="flex-shrink-0">
@@ -121,7 +123,7 @@ export function PasswordResetRequest(): React.ReactElement {
                 name="email"
                 type="email"
                 autoComplete="email"
-                required
+                required={true}
                 className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors"
                 placeholder="Enter your email"
                 value={email}
@@ -130,7 +132,7 @@ export function PasswordResetRequest(): React.ReactElement {
               />
             </div>
 
-            {submitStatus === "error" && (
+            {submitStatus === 'error' && (
               <div className="rounded-md bg-red-50 p-4">
                 <div className="flex">
                   <div className="flex-shrink-0">
@@ -164,7 +166,7 @@ export function PasswordResetRequest(): React.ReactElement {
                 disabled={isSubmitting}
                 className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 px-4 rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed tracking-wide"
               >
-                {isSubmitting ? "Sending..." : "Send reset link"}
+                {isSubmitting ? 'Sending...' : 'Send reset link'}
               </button>
 
               <Link

@@ -1,13 +1,13 @@
-import { createClient } from "@/lib/supabase/client";
-import type { AuthChangeEvent, Session, User } from "@supabase/supabase-js";
-import { usePathname, useRouter } from "next/navigation";
+import { createClient } from '@/lib/supabase/client';
+import type { AuthChangeEvent, Session, User } from '@supabase/supabase-js';
+import { usePathname, useRouter } from 'next/navigation';
 /**
  * Authentication hook for managing user authentication state
  *
  * Provides a centralized way to access authentication state and methods throughout the application.
  * This hook wraps around Supabase Auth and provides a simpler API for common authentication operations.
  */
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from 'react';
 
 /**
  * Database user information from the session API
@@ -90,7 +90,7 @@ export function useAuth(): AuthState {
   const supabase = createClient();
 
   const router = useRouter();
-  const pathname = usePathname();
+  const _pathname = usePathname();
 
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
@@ -107,7 +107,7 @@ export function useAuth(): AuthState {
     }
 
     try {
-      const response = await fetch("/api/auth/session");
+      const response = await fetch('/api/auth/session');
       const data = await response.json();
 
       if (data.authenticated && data.user?.dbUser) {
@@ -115,8 +115,7 @@ export function useAuth(): AuthState {
       } else {
         setDbUser(null);
       }
-    } catch (error) {
-      console.error("Error fetching database user:", error);
+    } catch (_error) {
       setDbUser(null);
     }
   }, []);
@@ -134,8 +133,7 @@ export function useAuth(): AuthState {
 
         // Fetch database user information
         await fetchDbUser(session?.user ?? null);
-      } catch (error) {
-        console.error("Error getting initial session:", error);
+      } catch (_error) {
       } finally {
         setIsLoading(false);
       }
@@ -147,7 +145,7 @@ export function useAuth(): AuthState {
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange(
-      async (event: AuthChangeEvent, currentSession: Session | null) => {
+      async (_event: AuthChangeEvent, currentSession: Session | null) => {
         setSession(currentSession);
         setUser(currentSession?.user ?? null);
 
@@ -174,10 +172,8 @@ export function useAuth(): AuthState {
       setDbUser(null);
 
       // Redirect to login page after sign out
-      router.push("/login");
-    } catch (error) {
-      console.error("Error signing out:", error);
-    }
+      router.push('/login');
+    } catch (_error) {}
   };
 
   return {
@@ -186,7 +182,7 @@ export function useAuth(): AuthState {
     dbUser,
     isLoading,
     isAuthenticated: !!user,
-    isSystemAdmin: dbUser?.isSystemAdmin || false,
+    isSystemAdmin: !!dbUser?.isSystemAdmin,
     signOut,
   };
 }

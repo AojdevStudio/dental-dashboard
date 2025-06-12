@@ -1,26 +1,25 @@
-import { withAuth } from "@/lib/api/middleware";
-import { ApiError } from "@/lib/api/utils";
-import { prisma } from "@/lib/database/prisma";
-import { type NextRequest, NextResponse } from "next/server";
+import { withAuth } from '@/lib/api/middleware';
+import { ApiError } from '@/lib/api/utils';
+import { prisma } from '@/lib/database/prisma';
+import { NextResponse } from 'next/server';
 
 /**
  * GET /api/test/data-source
  * Get test data source for the current user
  */
-export const GET = withAuth(async (request, { authContext }) => {
+export const GET = withAuth(async (_request, { authContext }) => {
   try {
     const dataSource = await prisma.dataSource.findFirst({
       where: {
         clinicId: authContext.clinicId,
-        name: { contains: "Test Google Sheets Connection" },
+        name: { contains: 'Test Google Sheets Connection' },
       },
-      orderBy: { createdAt: "desc" },
+      orderBy: { createdAt: 'desc' },
     });
 
     return NextResponse.json({ dataSource });
-  } catch (error) {
-    console.error("Failed to fetch data source:", error);
-    throw new ApiError("Failed to fetch data source", 500);
+  } catch (_error) {
+    throw new ApiError('Failed to fetch data source', 500);
   }
 });
 
@@ -28,17 +27,17 @@ export const GET = withAuth(async (request, { authContext }) => {
  * POST /api/test/data-source
  * Create a test data source for Google Sheets integration
  */
-export const POST = withAuth(async (request, { authContext }) => {
+export const POST = withAuth(async (_request, { authContext }) => {
   try {
     // Create a test data source
     const dataSource = await prisma.dataSource.create({
       data: {
-        name: "Test Google Sheets Connection",
+        name: 'Test Google Sheets Connection',
         spreadsheetId: `test-${Date.now()}`,
-        sheetName: "Sheet1",
-        syncFrequency: "manual",
-        connectionStatus: "pending",
-        accessToken: "pending",
+        sheetName: 'Sheet1',
+        syncFrequency: 'manual',
+        connectionStatus: 'pending',
+        accessToken: 'pending',
         clinicId: authContext.clinicId,
       },
     });
@@ -53,8 +52,7 @@ export const POST = withAuth(async (request, { authContext }) => {
         clinicId: dataSource.clinicId,
       },
     });
-  } catch (error) {
-    console.error("Failed to create data source:", error);
-    throw new ApiError("Failed to create data source", 500);
+  } catch (_error) {
+    throw new ApiError('Failed to create data source', 500);
   }
 });

@@ -1,6 +1,6 @@
-import type { CSSProperties } from "react";
+import type { CSSProperties } from 'react';
 
-export type ChartType = "line" | "bar" | "pie" | "doughnut" | "area";
+export type ChartType = 'line' | 'bar' | 'pie' | 'doughnut' | 'area';
 
 export interface ChartDataPoint {
   name: string;
@@ -14,7 +14,7 @@ export interface ChartSeries {
   dataKey: string;
   name: string;
   color?: string;
-  type?: "monotone" | "linear" | "natural";
+  type?: 'monotone' | 'linear' | 'natural';
   stackId?: string;
 }
 
@@ -90,7 +90,7 @@ export type ChartTheme = {
 };
 
 export interface ChartExportOptions {
-  format: "png" | "svg" | "pdf";
+  format: 'png' | 'svg' | 'pdf';
   filename?: string;
   quality?: number;
   scale?: number;

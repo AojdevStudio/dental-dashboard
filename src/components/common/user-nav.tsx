@@ -1,17 +1,16 @@
-"use client";
+'use client';
 
-import { Button } from "@/components/ui/button";
+import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { useAuth } from "@/hooks/use-auth";
-import { LogOut, User as UserIcon } from "lucide-react";
-import React from "react";
+} from '@/components/ui/dropdown-menu';
+import { useAuth } from '@/hooks/use-auth';
+import { LogOut, User as UserIcon } from 'lucide-react';
 
-import { signOutWithCleanup } from "@/app/auth/actions";
+import { signOutWithCleanup } from '@/app/auth/actions';
 
 /**
  * UserNav Component
@@ -25,8 +24,12 @@ export function UserNav() {
   const { user, isLoading, isAuthenticated } = useAuth();
 
   // If still loading auth state, show nothing
-  if (isLoading) return null;
-  if (!isAuthenticated || !user) return null;
+  if (isLoading) {
+    return null;
+  }
+  if (!(isAuthenticated && user)) {
+    return null;
+  }
 
   /**
    * Handles the sign-out action with complete session cleanup
@@ -35,16 +38,15 @@ export function UserNav() {
     try {
       // Use server action for proper cleanup
       await signOutWithCleanup();
-    } catch (error) {
-      console.error("Sign-out error:", error);
+    } catch (_error) {
       // Even on error, try to redirect to login
-      window.location.href = "/login";
+      window.location.href = '/login';
     }
   };
 
   return (
     <DropdownMenu>
-      <DropdownMenuTrigger asChild>
+      <DropdownMenuTrigger asChild={true}>
         <Button variant="ghost" className="flex items-center gap-2 px-3 py-2">
           <UserIcon className="h-5 w-5 text-blue-600" />
           <span className="font-medium text-gray-900 text-sm max-w-[120px] truncate">

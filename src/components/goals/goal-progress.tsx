@@ -6,15 +6,14 @@
  * color-coding based on the goal's status.
  */
 
-"use client";
+'use client';
 
-import { cn } from "@/lib/utils";
-import * as React from "react";
+import { cn } from '@/lib/utils';
 
 /**
  * Goal status types
  */
-type GoalStatus = "on_track" | "at_risk" | "off_track" | "achieved" | "not_started";
+type GoalStatus = 'on_track' | 'at_risk' | 'off_track' | 'achieved' | 'not_started';
 
 /**
  * Interface for GoalProgress component properties
@@ -46,7 +45,7 @@ interface GoalProgressProps {
  */
 export function GoalProgress({
   percent,
-  status = "on_track",
+  status = 'on_track',
   showPercentage = false,
   className,
 }: GoalProgressProps) {
@@ -56,44 +55,44 @@ export function GoalProgress({
   // Determine progress bar color based on status
   const getProgressColor = (status: GoalStatus) => {
     switch (status) {
-      case "on_track":
-        return "bg-green-500";
-      case "at_risk":
-        return "bg-amber-500";
-      case "off_track":
-        return "bg-red-500";
-      case "achieved":
-        return "bg-blue-500";
+      case 'on_track':
+        return 'bg-green-500';
+      case 'at_risk':
+        return 'bg-amber-500';
+      case 'off_track':
+        return 'bg-red-500';
+      case 'achieved':
+        return 'bg-blue-500';
       default:
-        return "bg-slate-500";
+        return 'bg-slate-500';
     }
   };
 
   // Determine background color based on status
   const getBackgroundColor = (status: GoalStatus) => {
     switch (status) {
-      case "on_track":
-        return "bg-green-100";
-      case "at_risk":
-        return "bg-amber-100";
-      case "off_track":
-        return "bg-red-100";
-      case "achieved":
-        return "bg-blue-100";
+      case 'on_track':
+        return 'bg-green-100';
+      case 'at_risk':
+        return 'bg-amber-100';
+      case 'off_track':
+        return 'bg-red-100';
+      case 'achieved':
+        return 'bg-blue-100';
       default:
-        return "bg-slate-100";
+        return 'bg-slate-100';
     }
   };
 
   return (
-    <div className={cn("space-y-1", className)}>
+    <div className={cn('space-y-1', className)}>
       <div className="relative h-2 w-full overflow-hidden rounded-full">
         {/* Background track */}
-        <div className={cn("h-full w-full", getBackgroundColor(status))} />
+        <div className={cn('h-full w-full', getBackgroundColor(status))} />
 
         {/* Progress fill */}
         <div
-          className={cn("absolute inset-y-0 left-0 w-full", getProgressColor(status))}
+          className={cn('absolute inset-y-0 left-0 w-full', getProgressColor(status))}
           style={{ width: `${validPercent}%` }}
         />
       </div>

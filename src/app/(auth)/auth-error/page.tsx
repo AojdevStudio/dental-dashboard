@@ -13,15 +13,15 @@
  * - The OAuth provider returns an error
  */
 
-import type { Metadata } from "next";
+import type { Metadata } from 'next';
 
 /**
  * Metadata for the Authentication Error page
  * Defines the page title and description for SEO and browser tabs
  */
 export const metadata: Metadata = {
-  title: "Authentication Error",
-  description: "Something went wrong during authentication",
+  title: 'Authentication Error',
+  description: 'Something went wrong during authentication',
 };
 
 /**
@@ -36,7 +36,7 @@ export default function AuthErrorPage() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-[#121212]">
       <div className="bg-white/10 rounded-xl p-8 max-w-md w-full text-center">
-        {" "}
+        {' '}
         <h2 className="text-2xl font-semibold text-red-400 mb-4">Authentication Error</h2>
         <p className="text-gray-300 mb-6">
           We encountered an error during the authentication process. This could happen if:

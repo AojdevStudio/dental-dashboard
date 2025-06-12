@@ -6,11 +6,10 @@
  * menu, providing consistent navigation and branding across the application.
  */
 
-"use client";
+'use client';
 
-import Link from "next/link";
-import * as React from "react";
-import { UserNav } from "./user-nav";
+import Link from 'next/link';
+import { UserNav } from './user-nav';
 
 /**
  * Header Component

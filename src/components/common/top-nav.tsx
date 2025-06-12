@@ -1,17 +1,15 @@
-"use client";
-
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Calendar } from "@/components/ui/calendar";
-import { Input } from "@/components/ui/input";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { useAuth } from "@/hooks/use-auth";
-import type { TopNavProps } from "@/lib/types/layout";
-import { cn } from "@/lib/utils";
-import { format } from "date-fns";
-import { Bell, Calendar as CalendarIcon, Search, Settings } from "lucide-react";
-import * as React from "react";
-import { UserNav } from "./user-nav";
+'use client';
+import { Button } from '@/components/ui/button';
+import { Calendar } from '@/components/ui/calendar';
+import { Input } from '@/components/ui/input';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { useAuth } from '@/hooks/use-auth';
+import type { TopNavProps } from '@/lib/types/layout';
+import { cn } from '@/lib/utils';
+import { format } from 'date-fns';
+import { Bell, Calendar as CalendarIcon, Search, Settings } from 'lucide-react';
+import * as React from 'react';
+import { UserNav } from './user-nav';
 
 export function TopNav({
   className,
@@ -19,7 +17,7 @@ export function TopNav({
   showSearch = true,
   showNotifications = true,
 }: TopNavProps) {
-  const { user, isAuthenticated } = useAuth();
+  const { isAuthenticated } = useAuth();
 
   // Date range state
   const [dateRange, setDateRange] = React.useState<{
@@ -35,7 +33,7 @@ export function TopNav({
   return (
     <header
       className={cn(
-        "sticky top-0 z-50 flex h-16 items-center justify-between border-b bg-background px-4",
+        'sticky top-0 z-50 flex h-16 items-center justify-between border-b bg-background px-4',
         className
       )}
     >
@@ -55,12 +53,12 @@ export function TopNav({
 
         {showDateRangePicker && (
           <Popover open={isDatePickerOpen} onOpenChange={setIsDatePickerOpen}>
-            <PopoverTrigger asChild>
+            <PopoverTrigger asChild={true}>
               <Button
                 variant="outline"
                 className={cn(
-                  "hidden md:flex items-center gap-2 justify-start text-left font-normal",
-                  !dateRange.from && "text-muted-foreground"
+                  'hidden md:flex items-center gap-2 justify-start text-left font-normal',
+                  !dateRange.from && 'text-muted-foreground'
                 )}
                 aria-label="Select date range"
               >
@@ -68,10 +66,10 @@ export function TopNav({
                 {dateRange.from ? (
                   dateRange.to ? (
                     <>
-                      {format(dateRange.from, "MMM d")} - {format(dateRange.to, "MMM d, yyyy")}
+                      {format(dateRange.from, 'MMM d')} - {format(dateRange.to, 'MMM d, yyyy')}
                     </>
                   ) : (
-                    format(dateRange.from, "MMM d, yyyy")
+                    format(dateRange.from, 'MMM d, yyyy')
                   )
                 ) : (
                   <span>Pick a date range</span>
@@ -80,7 +78,7 @@ export function TopNav({
             </PopoverTrigger>
             <PopoverContent className="w-auto p-0" align="start">
               <Calendar
-                initialFocus
+                initialFocus={true}
                 mode="range"
                 defaultMonth={dateRange.from}
                 selected={{

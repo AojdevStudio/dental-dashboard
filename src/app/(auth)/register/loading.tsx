@@ -1,20 +1,4 @@
-/**
- * Signup Loading Component
- *
- * This component is automatically rendered by Next.js during the loading state
- * of the signup page. It provides a skeleton UI that mimics the structure of the
- * signup form, giving users visual feedback while the actual page is loading.
- *
- * This component is part of Next.js' loading UI system and is displayed when:
- * - The signup page is being server-side rendered
- * - Data is being fetched for the signup page
- * - The page is being hydrated on the client
- *
- * The skeleton UI maintains the same layout and approximate dimensions as the
- * actual signup form, creating a smooth visual transition when the real content loads.
- */
-
-import { Skeleton } from "@/components/ui/skeleton";
+import { Skeleton } from '@/components/ui/skeleton';
 
 /**
  * Signup Loading Component

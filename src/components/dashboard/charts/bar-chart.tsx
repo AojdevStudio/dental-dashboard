@@ -1,9 +1,9 @@
-"use client";
+'use client';
 
-import type { ChartConfig } from "@/lib/types/charts";
-import { formatCurrency, formatDate, formatNumber, truncateLabel } from "@/lib/utils/chart-helpers";
-import { chartTheme, getChartColors } from "@/lib/utils/color-schemes";
-import { getResponsiveMargin, isMobile, useBreakpoint } from "@/lib/utils/responsive-helpers";
+import type { ChartConfig } from '@/lib/types/charts';
+import { formatDate, formatNumber, truncateLabel } from '@/lib/utils/chart-helpers';
+import { chartTheme, getChartColors } from '@/lib/utils/color-schemes';
+import { getResponsiveMargin, isMobile, useBreakpoint } from '@/lib/utils/responsive-helpers';
 import {
   Bar,
   CartesianGrid,
@@ -14,8 +14,8 @@ import {
   Tooltip,
   XAxis,
   YAxis,
-} from "recharts";
-import { ChartContainer } from "../chart-container";
+} from 'recharts';
+import { ChartContainer } from '../chart-container';
 
 interface BarChartProps {
   config: ChartConfig;
@@ -32,7 +32,7 @@ interface BarChartProps {
 }
 
 const safeFormatNumber = (value: string | number): string => {
-  const numValue = typeof value === "string" ? Number.parseFloat(value) || 0 : value;
+  const numValue = typeof value === 'string' ? Number.parseFloat(value) || 0 : value;
   return formatNumber(numValue);
 };
 
@@ -53,7 +53,10 @@ export function BarChart({
   const mobile = isMobile(breakpoint);
   const margin = getResponsiveMargin(breakpoint);
 
-  const colors = getChartColors("dental", config.series?.length || config.data.length);
+  const colors = getChartColors(
+    'dental',
+    (config.series?.length || 0) > 0 ? config.series?.length || 1 : config.data.length
+  );
 
   const defaultConfig: ChartConfig = {
     ...config,
@@ -77,15 +80,20 @@ export function BarChart({
     }>;
     label?: string;
   }) => {
-    if (!active || !payload || !payload.length) return null;
+    if (!(active && payload && payload.length > 0)) {
+      return null;
+    }
 
     return (
       <div style={chartTheme.tooltip.container}>
         <p style={chartTheme.tooltip.label}>
-          {config.xAxisKey === "date" ? formatDate(label || "") : label}
+          {config.xAxisKey === 'date' ? formatDate(label || '') : label}
         </p>
         {payload.map((entry, index: number) => (
-          <p key={index} style={{ ...chartTheme.tooltip.value, color: entry.color }}>
+          <p
+            key={`${entry.name}-${index}`}
+            style={{ ...chartTheme.tooltip.value, color: entry.color }}
+          >
             {entry.name}: {formatTooltip(entry.value, entry.name)}
           </p>
         ))}
@@ -121,7 +129,7 @@ export function BarChart({
 
         <YAxis
           type="category"
-          dataKey={config.xAxisKey || "name"}
+          dataKey={config.xAxisKey || 'name'}
           tick={{ ...chartTheme.axis.style }}
           tickFormatter={(value) => truncateLabel(value, mobile ? 10 : 20)}
           width={mobile ? 80 : 100}
@@ -139,13 +147,16 @@ export function BarChart({
             dataKey={series.dataKey}
             name={series.name}
             fill={series.color || colors[index]}
-            stackId={stacked ? "stack" : undefined}
+            stackId={stacked ? 'stack' : undefined}
             animationDuration={defaultConfig.animationDuration}
           />
         )) || (
           <Bar dataKey="value" fill={colors[0]} animationDuration={defaultConfig.animationDuration}>
             {defaultConfig.data.map((entry, index) => (
-              <Cell key={`cell-${index}`} fill={colors[index % colors.length]} />
+              <Cell
+                key={`cell-${entry.name || entry.value || index}`}
+                fill={colors[index % colors.length]}
+              />
             ))}
           </Bar>
         )}
@@ -175,16 +186,16 @@ export function BarChart({
         )}
 
         <XAxis
-          dataKey={config.xAxisKey || "name"}
+          dataKey={config.xAxisKey || 'name'}
           tick={{ ...chartTheme.axis.style }}
           tickFormatter={(value) => {
-            if (config.xAxisKey === "date") {
-              return formatDate(value, mobile ? "MMM" : "MMM dd");
+            if (config.xAxisKey === 'date') {
+              return formatDate(value, mobile ? 'MMM' : 'MMM dd');
             }
             return truncateLabel(value, mobile ? 10 : 20);
           }}
           angle={mobile ? -45 : 0}
-          textAnchor={mobile ? "end" : "middle"}
+          textAnchor={mobile ? 'end' : 'middle'}
           height={mobile ? 60 : 30}
         />
 
@@ -212,7 +223,10 @@ export function BarChart({
         )) || (
           <Bar dataKey="value" fill={colors[0]} animationDuration={defaultConfig.animationDuration}>
             {defaultConfig.data.map((entry, index) => (
-              <Cell key={`cell-${index}`} fill={colors[index % colors.length]} />
+              <Cell
+                key={`cell-${entry.name || entry.value || index}`}
+                fill={colors[index % colors.length]}
+              />
             ))}
           </Bar>
         )}

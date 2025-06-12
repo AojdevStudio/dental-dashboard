@@ -10,16 +10,16 @@
  * provide a complete user registration flow, including email verification.
  */
 
-import { RegisterFormComprehensive } from "@/components/auth/register-form-comprehensive";
-import type { Metadata } from "next";
+import { RegisterFormComprehensive } from '@/components/auth/register-form-comprehensive';
+import type { Metadata } from 'next';
 
 /**
  * Metadata for the sign up page
  * Defines the page title and description for SEO and browser tabs
  */
 export const metadata: Metadata = {
-  title: "Sign Up - Dental Analytics Dashboard",
-  description: "Create your account and set up your dental practice",
+  title: 'Sign Up - Dental Analytics Dashboard',
+  description: 'Create your account and set up your dental practice',
 };
 
 /**

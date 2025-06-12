@@ -5,26 +5,25 @@
  * dental dashboard. It shows goal details, progress, and status information.
  */
 
-"use client";
+'use client';
 
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { Skeleton } from "@/components/ui/skeleton";
-import { BarChart3, CalendarClock, Clock, DollarSign, Edit, Target, Users } from "lucide-react";
-import * as React from "react";
-import { GoalProgress } from "./goal-progress";
-import { VarianceIndicator } from "./variance-indicator";
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import { Skeleton } from '@/components/ui/skeleton';
+import { BarChart3, CalendarClock, Clock, DollarSign, Edit, Target, Users } from 'lucide-react';
+import { GoalProgress } from './goal-progress';
+import { VarianceIndicator } from './variance-indicator';
 
 /**
  * Goal category types
  */
-type GoalCategory = "financial" | "patient" | "productivity" | "retention" | "other";
+type GoalCategory = 'financial' | 'patient' | 'productivity' | 'retention' | 'other';
 
 /**
  * Goal status types
  */
-type GoalStatus = "on_track" | "at_risk" | "off_track" | "achieved" | "not_started";
+type GoalStatus = 'on_track' | 'at_risk' | 'off_track' | 'achieved' | 'not_started';
 
 /**
  * Interface for Goal object
@@ -86,13 +85,13 @@ interface GoalCardProps {
 export function GoalCard({ goal, onEdit, onViewDetails, isLoading = false }: GoalCardProps) {
   // Helper function to format values with the goal's unit
   const formatValue = (value: number) => {
-    if (goal.unit === "$") {
+    if (goal.unit === '$') {
       return `$${value.toLocaleString()}`;
     }
-    if (goal.unit === "%") {
+    if (goal.unit === '%') {
       return `${value}%`;
     }
-    return `${value.toLocaleString()}${goal.unit ? ` ${goal.unit}` : ""}`;
+    return `${value.toLocaleString()}${goal.unit ? ` ${goal.unit}` : ''}`;
   };
 
   // Calculate progress percentage
@@ -101,27 +100,27 @@ export function GoalCard({ goal, onEdit, onViewDetails, isLoading = false }: Goa
   // Helper to get status badge color
   const getStatusBadgeProps = (status: GoalStatus) => {
     switch (status) {
-      case "on_track":
+      case 'on_track':
         return {
-          variant: "outline" as const,
-          className: "bg-green-50 text-green-700 border-green-200",
+          variant: 'outline' as const,
+          className: 'bg-green-50 text-green-700 border-green-200',
         };
-      case "at_risk":
+      case 'at_risk':
         return {
-          variant: "outline" as const,
-          className: "bg-amber-50 text-amber-700 border-amber-200",
+          variant: 'outline' as const,
+          className: 'bg-amber-50 text-amber-700 border-amber-200',
         };
-      case "off_track":
-        return { variant: "outline" as const, className: "bg-red-50 text-red-700 border-red-200" };
-      case "achieved":
+      case 'off_track':
+        return { variant: 'outline' as const, className: 'bg-red-50 text-red-700 border-red-200' };
+      case 'achieved':
         return {
-          variant: "outline" as const,
-          className: "bg-blue-50 text-blue-700 border-blue-200",
+          variant: 'outline' as const,
+          className: 'bg-blue-50 text-blue-700 border-blue-200',
         };
       default:
         return {
-          variant: "outline" as const,
-          className: "bg-slate-50 text-slate-700 border-slate-200",
+          variant: 'outline' as const,
+          className: 'bg-slate-50 text-slate-700 border-slate-200',
         };
     }
   };
@@ -129,13 +128,13 @@ export function GoalCard({ goal, onEdit, onViewDetails, isLoading = false }: Goa
   // Helper to get category icon
   const CategoryIcon = () => {
     switch (goal.category) {
-      case "financial":
+      case 'financial':
         return <DollarSign className="h-4 w-4" />;
-      case "patient":
+      case 'patient':
         return <Users className="h-4 w-4" />;
-      case "productivity":
+      case 'productivity':
         return <Clock className="h-4 w-4" />;
-      case "retention":
+      case 'retention':
         return <Target className="h-4 w-4" />;
       default:
         return <BarChart3 className="h-4 w-4" />;
@@ -172,7 +171,7 @@ export function GoalCard({ goal, onEdit, onViewDetails, isLoading = false }: Goa
             <CategoryIcon />
             {goal.title}
           </CardTitle>
-          <Badge {...getStatusBadgeProps(goal.status)}>{goal.status.replace("_", " ")}</Badge>
+          <Badge {...getStatusBadgeProps(goal.status)}>{goal.status.replace('_', ' ')}</Badge>
         </div>
       </CardHeader>
       <CardContent className="space-y-4">

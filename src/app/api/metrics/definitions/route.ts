@@ -3,16 +3,16 @@
  * Get available metric definitions
  */
 
-import { withAuth } from "@/lib/api/middleware";
+import { withAuth } from '@/lib/api/middleware';
 import {
-  apiSuccess,
-  apiError,
   ApiError as ApiErrorClass,
-  type ApiSuccessPayload,
   type ApiErrorPayload,
-} from "@/lib/api/utils";
-import * as metricQueries from "@/lib/database/queries/metrics";
-import type { NextRequest, NextResponse } from "next/server";
+  type ApiSuccessPayload,
+  apiError,
+  apiSuccess,
+} from '@/lib/api/utils';
+import * as metricQueries from '@/lib/database/queries/metrics';
+import type { NextRequest, NextResponse } from 'next/server';
 
 export type GetMetricDefinitionsResponse = Awaited<
   ReturnType<typeof metricQueries.getMetricDefinitions>
@@ -28,15 +28,15 @@ export const GET = withAuth<GetMetricDefinitionsResponse>(
     { authContext }
   ): Promise<NextResponse<ApiSuccessPayload<GetMetricDefinitionsResponse> | ApiErrorPayload>> => {
     const searchParams = (request as unknown as NextRequest).nextUrl.searchParams;
-    const category = searchParams.get("category") || undefined;
-    const dataType = searchParams.get("dataType") || undefined;
-    const isComposite = searchParams.get("isComposite");
+    const category = searchParams.get('category') || undefined;
+    const dataType = searchParams.get('dataType') || undefined;
+    const isComposite = searchParams.get('isComposite');
 
     try {
       const definitions = await metricQueries.getMetricDefinitions(authContext, {
         category,
         dataType,
-        isComposite: isComposite === null ? undefined : isComposite === "true",
+        isComposite: isComposite === null ? undefined : isComposite === 'true',
       });
 
       return apiSuccess(definitions);
@@ -44,7 +44,7 @@ export const GET = withAuth<GetMetricDefinitionsResponse>(
       if (error instanceof ApiErrorClass) {
         return apiError(error.message, error.statusCode, error.code);
       }
-      if (error instanceof Error && error.message.includes("Access denied")) {
+      if (error instanceof Error && error.message.includes('Access denied')) {
         return apiError(error.message, 403);
       }
       throw error;

@@ -1,9 +1,9 @@
-"use client";
+'use client';
 
-import type { ChartConfig } from "@/lib/types/charts";
-import { formatCurrency, formatDate, formatNumber, truncateLabel } from "@/lib/utils/chart-helpers";
-import { adjustColorBrightness, chartTheme, getChartColors } from "@/lib/utils/color-schemes";
-import { getResponsiveMargin, isMobile, useBreakpoint } from "@/lib/utils/responsive-helpers";
+import type { ChartConfig } from '@/lib/types/charts';
+import { formatDate, formatNumber, truncateLabel } from '@/lib/utils/chart-helpers';
+import { chartTheme, getChartColors } from '@/lib/utils/color-schemes';
+import { getResponsiveMargin, isMobile, useBreakpoint } from '@/lib/utils/responsive-helpers';
 import {
   Area,
   CartesianGrid,
@@ -13,8 +13,8 @@ import {
   Tooltip,
   XAxis,
   YAxis,
-} from "recharts";
-import { ChartContainer } from "../chart-container";
+} from 'recharts';
+import { ChartContainer } from '../chart-container';
 
 interface AreaChartProps {
   config: ChartConfig;
@@ -37,8 +37,10 @@ export function AreaChart({
   loading,
   error,
   className,
-  formatYAxis = (value) => formatNumber(value),
-  formatTooltip = (value) => formatNumber(value),
+  formatYAxis = (value) =>
+    formatNumber(typeof value === 'string' ? Number.parseFloat(value) || 0 : value),
+  formatTooltip = (value) =>
+    formatNumber(typeof value === 'string' ? Number.parseFloat(value) || 0 : value),
   onDataPointClick,
   stacked = false,
   gradient = true,
@@ -47,7 +49,7 @@ export function AreaChart({
   const mobile = isMobile(breakpoint);
   const margin = getResponsiveMargin(breakpoint);
 
-  const colors = getChartColors("dental", config.series?.length || 1);
+  const colors = getChartColors('dental', config.series?.length || 1);
 
   const defaultConfig: ChartConfig = {
     ...config,
@@ -71,15 +73,20 @@ export function AreaChart({
     }>;
     label?: string;
   }) => {
-    if (!active || !payload || !payload.length) return null;
+    if (!(active && payload && payload.length > 0)) {
+      return null;
+    }
 
     return (
       <div style={chartTheme.tooltip.container}>
         <p style={chartTheme.tooltip.label}>
-          {config.xAxisKey === "date" ? formatDate(label) : label}
+          {config.xAxisKey === 'date' ? formatDate(label || '') : label}
         </p>
         {payload.map((entry, index: number) => (
-          <p key={index} style={{ ...chartTheme.tooltip.value, color: entry.color }}>
+          <p
+            key={`${entry.name}-${index}`}
+            style={{ ...chartTheme.tooltip.value, color: entry.color }}
+          >
             {entry.name}: {formatTooltip(entry.value, entry.name)}
           </p>
         ))}
@@ -112,8 +119,8 @@ export function AreaChart({
         >
           {gradient && (
             <defs>
-              {(config.series || [{ dataKey: "value" }]).map((series, index) => {
-                const color = series.color || colors[index];
+              {(config.series || [{ dataKey: 'value' }]).map((series, index) => {
+                const color = ('color' in series ? series.color : undefined) || colors[index];
                 return (
                   <linearGradient
                     key={`gradient-${series.dataKey}`}
@@ -140,16 +147,16 @@ export function AreaChart({
           )}
 
           <XAxis
-            dataKey={config.xAxisKey || "name"}
+            dataKey={config.xAxisKey || 'name'}
             tick={{ ...chartTheme.axis.style }}
             tickFormatter={(value) => {
-              if (config.xAxisKey === "date") {
-                return formatDate(value, mobile ? "MMM" : "MMM dd");
+              if (config.xAxisKey === 'date') {
+                return formatDate(value, mobile ? 'MMM' : 'MMM dd');
               }
               return truncateLabel(value, mobile ? 10 : 20);
             }}
             angle={mobile ? -45 : 0}
-            textAnchor={mobile ? "end" : "middle"}
+            textAnchor={mobile ? 'end' : 'middle'}
             height={mobile ? 60 : 30}
           />
 
@@ -168,7 +175,7 @@ export function AreaChart({
           {config.series?.map((series, index) => (
             <Area
               key={series.dataKey}
-              type={series.type || "monotone"}
+              type={series.type || 'monotone'}
               dataKey={series.dataKey}
               name={series.name}
               stroke={series.color || colors[index]}
@@ -184,7 +191,7 @@ export function AreaChart({
               dataKey="value"
               stroke={colors[0]}
               strokeWidth={2}
-              fill={gradient ? "url(#gradient-value)" : colors[0]}
+              fill={gradient ? 'url(#gradient-value)' : colors[0]}
               fillOpacity={gradient ? 1 : 0.6}
               animationDuration={defaultConfig.animationDuration}
             />

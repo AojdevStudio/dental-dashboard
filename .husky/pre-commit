@@ -1,0 +1,8 @@
+# Run Biome check and auto-fix issues
+pnpm biome:fix
+
+# Run tests to ensure nothing is broken
+pnpm test --run
+
+# Add any fixed files back to the commit
+git add .

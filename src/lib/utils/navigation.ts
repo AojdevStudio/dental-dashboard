@@ -1,9 +1,9 @@
-"use client";
+'use client';
 
-import type { NavigationState } from "@/lib/types/navigation";
-import { useCallback, useEffect, useState } from "react";
+import type { NavigationState } from '@/lib/types/navigation';
+import { useCallback, useEffect, useState } from 'react';
 
-const STORAGE_KEY = "dashboard-navigation-state";
+const STORAGE_KEY = 'dashboard-navigation-state';
 
 export function useNavigationState() {
   const [state, setState] = useState<NavigationState>({
@@ -19,9 +19,7 @@ export function useNavigationState() {
       try {
         const parsed = JSON.parse(savedState);
         setState(parsed);
-      } catch (error) {
-        console.error("Failed to parse navigation state:", error);
-      }
+      } catch (_error) {}
     }
   }, []);
 

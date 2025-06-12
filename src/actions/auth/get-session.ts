@@ -1,7 +1,7 @@
-"use server";
+'use server';
 
-import { createClient } from "@/lib/auth/session";
-import { redirect } from "next/navigation";
+import { createClient } from '@/lib/auth/session';
+import { redirect } from 'next/navigation';
 
 /**
  * Retrieves the current user session from Supabase Auth.
@@ -11,7 +11,7 @@ import { redirect } from "next/navigation";
  */
 export async function getSession() {
   const supabase = await createClient();
-  const { data, error } = await supabase.auth.getSession();
+  const { data } = await supabase.auth.getSession();
 
   return { session: data.session };
 }
@@ -24,7 +24,7 @@ export async function getSession() {
  */
 export async function getUser() {
   const supabase = await createClient();
-  const { data, error } = await supabase.auth.getUser();
+  const { data } = await supabase.auth.getUser();
 
   return { user: data.user };
 }
@@ -40,7 +40,7 @@ export async function requireAuth() {
   const { user } = await getUser();
 
   if (!user) {
-    redirect("/login");
+    redirect('/login');
   }
 
   return user;
@@ -56,5 +56,5 @@ export async function requireAuth() {
 export async function signOut() {
   const supabase = await createClient();
   await supabase.auth.signOut();
-  redirect("/login");
+  redirect('/login');
 }

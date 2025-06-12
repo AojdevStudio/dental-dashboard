@@ -1,4 +1,4 @@
-import { NextResponse } from "next/server";
+import { NextResponse } from 'next/server';
 
 /**
  * Cache control strategies for different types of data
@@ -6,29 +6,29 @@ import { NextResponse } from "next/server";
 export const CacheStrategies = {
   // Static data that rarely changes
   STATIC: {
-    "Cache-Control": "public, max-age=86400, stale-while-revalidate=604800", // 1 day, stale for 7 days
+    'Cache-Control': 'public, max-age=86400, stale-while-revalidate=604800', // 1 day, stale for 7 days
   },
 
   // User-specific data that should be cached privately
   PRIVATE: {
-    "Cache-Control": "private, max-age=300, stale-while-revalidate=600", // 5 minutes, stale for 10 minutes
+    'Cache-Control': 'private, max-age=300, stale-while-revalidate=600', // 5 minutes, stale for 10 minutes
   },
 
   // Frequently updated data
   DYNAMIC: {
-    "Cache-Control": "private, max-age=60, stale-while-revalidate=120", // 1 minute, stale for 2 minutes
+    'Cache-Control': 'private, max-age=60, stale-while-revalidate=120', // 1 minute, stale for 2 minutes
   },
 
   // Real-time data that shouldn't be cached
   NO_CACHE: {
-    "Cache-Control": "no-cache, no-store, must-revalidate",
-    Pragma: "no-cache",
-    Expires: "0",
+    'Cache-Control': 'no-cache, no-store, must-revalidate',
+    Pragma: 'no-cache',
+    Expires: '0',
   },
 
   // Immutable data (with version/hash in URL)
   IMMUTABLE: {
-    "Cache-Control": "public, max-age=31536000, immutable", // 1 year
+    'Cache-Control': 'public, max-age=31536000, immutable', // 1 year
   },
 } as const;
 
@@ -41,7 +41,7 @@ export const CacheStrategies = {
  */
 export function withCacheHeaders<T extends NextResponse>(
   response: T,
-  strategy: keyof typeof CacheStrategies = "PRIVATE"
+  strategy: keyof typeof CacheStrategies = 'PRIVATE'
 ): T {
   const headers = CacheStrategies[strategy];
 
@@ -62,7 +62,7 @@ export function withCacheHeaders<T extends NextResponse>(
  */
 export function cachedJson(
   data: unknown,
-  strategy: keyof typeof CacheStrategies = "PRIVATE",
+  strategy: keyof typeof CacheStrategies = 'PRIVATE',
   status = 200
 ): NextResponse {
   const response = NextResponse.json(data, { status });
@@ -77,7 +77,7 @@ export function cachedJson(
  * @returns The response with ETag header
  */
 export function withETag<T extends NextResponse>(response: T, etag: string): T {
-  response.headers.set("ETag", `"${etag}"`);
+  response.headers.set('ETag', `"${etag}"`);
   return response;
 }
 
@@ -89,7 +89,7 @@ export function withETag<T extends NextResponse>(response: T, etag: string): T {
  * @returns True if ETags match (304 Not Modified should be returned)
  */
 export function isNotModified(request: Request, currentETag: string): boolean {
-  const ifNoneMatch = request.headers.get("If-None-Match");
+  const ifNoneMatch = request.headers.get('If-None-Match');
   return ifNoneMatch === `"${currentETag}"`;
 }
 

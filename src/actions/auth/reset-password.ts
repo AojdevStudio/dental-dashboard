@@ -1,6 +1,6 @@
-"use server";
+'use server';
 
-import { createClient } from "@/lib/auth/session";
+import { createClient } from '@/lib/auth/session';
 
 /**
  * Initiates the password reset process for a user account.
@@ -15,14 +15,14 @@ export async function resetPassword(email: string) {
   const supabase = await createClient();
 
   const { error } = await supabase.auth.resetPasswordForEmail(email, {
-    redirectTo: `${process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000"}/auth/reset-password/confirm`,
+    redirectTo: `${process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'}/auth/reset-password/confirm`,
   });
 
   if (error) {
     return { error: error.message };
   }
 
-  return { success: true, message: "Password reset link sent to your email" };
+  return { success: true, message: 'Password reset link sent to your email' };
 }
 
 /**
@@ -45,5 +45,5 @@ export async function updatePassword(password: string) {
     return { error: error.message };
   }
 
-  return { success: true, message: "Password updated successfully" };
+  return { success: true, message: 'Password updated successfully' };
 }

@@ -1,11 +1,11 @@
-"use client";
+'use client';
 
-import { Button } from "@/components/ui/button";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import type { SidebarProps } from "@/lib/types/layout";
-import type { NavSection } from "@/lib/types/navigation";
-import { cn } from "@/lib/utils";
-import { useNavigationState } from "@/lib/utils/navigation";
+import { Button } from '@/components/ui/button';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import type { SidebarProps } from '@/lib/types/layout';
+import type { NavSection } from '@/lib/types/navigation';
+import { cn } from '@/lib/utils';
+import { useNavigationState } from '@/lib/utils/navigation';
 import {
   ChevronLeft,
   ChevronRight,
@@ -16,88 +16,88 @@ import {
   Target,
   TrendingUp,
   Users,
-} from "lucide-react";
-import { NavItemComponent } from "./nav-item";
+} from 'lucide-react';
+import { NavItemComponent } from './nav-item';
 
 // Define the navigation structure
 const navigation: NavSection[] = [
   {
-    id: "main",
+    id: 'main',
     items: [
       {
-        id: "dashboard",
-        title: "Dashboard",
-        href: "/dashboard",
+        id: 'dashboard',
+        title: 'Dashboard',
+        href: '/dashboard',
         icon: LayoutDashboard,
       },
       {
-        id: "production",
-        title: "Production",
-        href: "/production",
+        id: 'production',
+        title: 'Production',
+        href: '/production',
         icon: TrendingUp,
         children: [
           {
-            id: "dentist-production",
-            title: "Dentist Production",
-            href: "/production/dentist",
+            id: 'dentist-production',
+            title: 'Dentist Production',
+            href: '/production/dentist',
           },
           {
-            id: "hygienist-production",
-            title: "Hygienist Production",
-            href: "/production/hygienist",
+            id: 'hygienist-production',
+            title: 'Hygienist Production',
+            href: '/production/hygienist',
           },
         ],
       },
       {
-        id: "providers",
-        title: "Providers",
-        href: "/providers",
+        id: 'providers',
+        title: 'Providers',
+        href: '/providers',
         icon: Users,
       },
       {
-        id: "reports",
-        title: "Reports",
-        href: "/reports",
+        id: 'reports',
+        title: 'Reports',
+        href: '/reports',
         icon: FileText,
       },
       {
-        id: "goals",
-        title: "Goals",
-        href: "/goals",
+        id: 'goals',
+        title: 'Goals',
+        href: '/goals',
         icon: Target,
       },
     ],
   },
   {
-    id: "system",
-    title: "System",
+    id: 'system',
+    title: 'System',
     items: [
       {
-        id: "integrations",
-        title: "Integrations",
-        href: "/integrations",
+        id: 'integrations',
+        title: 'Integrations',
+        href: '/integrations',
         icon: Link2,
       },
       {
-        id: "settings",
-        title: "Settings",
-        href: "/settings",
+        id: 'settings',
+        title: 'Settings',
+        href: '/settings',
         icon: Settings,
         children: [
           {
-            id: "clinic-settings",
-            title: "Clinic",
-            href: "/settings/clinic",
+            id: 'clinic-settings',
+            title: 'Clinic',
+            href: '/settings/clinic',
           },
           {
-            id: "user-settings",
-            title: "Users",
-            href: "/settings/users",
+            id: 'user-settings',
+            title: 'Users',
+            href: '/settings/users',
           },
           {
-            id: "provider-settings",
-            title: "Providers",
-            href: "/settings/providers",
+            id: 'provider-settings',
+            title: 'Providers',
+            href: '/settings/providers',
           },
         ],
       },
@@ -112,8 +112,8 @@ export function Sidebar({ className }: SidebarProps) {
   return (
     <nav
       className={cn(
-        "relative flex h-full flex-col border-r bg-background transition-all duration-300",
-        isSidebarCollapsed ? "w-16" : "w-[280px]",
+        'relative flex h-full flex-col border-r bg-background transition-all duration-300',
+        isSidebarCollapsed ? 'w-16' : 'w-[280px]',
         className
       )}
       aria-label="Main navigation"
@@ -125,7 +125,7 @@ export function Sidebar({ className }: SidebarProps) {
           variant="ghost"
           size="icon"
           onClick={toggleSidebar}
-          aria-label={isSidebarCollapsed ? "Expand sidebar" : "Collapse sidebar"}
+          aria-label={isSidebarCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
           className="h-8 w-8"
         >
           {isSidebarCollapsed ? (
@@ -140,7 +140,7 @@ export function Sidebar({ className }: SidebarProps) {
       <ScrollArea className="flex-1 px-2 py-4">
         <nav aria-label="Sidebar navigation">
           {navigation.map((section, sectionIndex) => (
-            <div key={section.id} className={cn(sectionIndex > 0 && "mt-6")}>
+            <div key={section.id} className={cn(sectionIndex > 0 && 'mt-6')}>
               {section.title && !isSidebarCollapsed && (
                 <h2 className="mb-2 px-3 text-xs font-medium uppercase tracking-wider text-muted-foreground">
                   {section.title}
@@ -164,7 +164,7 @@ export function Sidebar({ className }: SidebarProps) {
                             <NavItemComponent
                               item={child}
                               isCollapsed={isSidebarCollapsed}
-                              isNested
+                              isNested={true}
                               onItemClick={setActiveItem}
                             />
                           </li>

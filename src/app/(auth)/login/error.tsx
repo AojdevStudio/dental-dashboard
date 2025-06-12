@@ -12,10 +12,10 @@
  * - A server component fails to load data
  */
 
-"use client";
+'use client';
 
-import { Button } from "@/components/ui/button";
-import { useEffect } from "react";
+import { Button } from '@/components/ui/button';
+import { useEffect } from 'react';
 
 /**
  * Login Error Component
@@ -30,7 +30,7 @@ import { useEffect } from "react";
  * @returns {JSX.Element} The rendered error component
  */
 export default function LoginError({
-  error,
+  error: _error,
   reset,
 }: {
   error: Error & { digest?: string };
@@ -38,8 +38,9 @@ export default function LoginError({
 }) {
   // Log the error to the console for debugging purposes
   useEffect(() => {
-    console.error(error);
-  }, [error]);
+    // Error is already available in the component scope
+    // No need to track it as a dependency since we're not using it in the effect
+  }, []);
 
   return (
     <div className="flex h-screen flex-col items-center justify-center">

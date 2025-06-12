@@ -1,6 +1,7 @@
-import { getAuthContext } from "@/lib/database/auth-context";
-import { prisma } from "@/lib/database/prisma";
-import DashboardLayout from "./layout-client";
+import { getAuthContext } from '@/lib/database/auth-context';
+import { prisma } from '@/lib/database/prisma';
+import type React from 'react';
+import DashboardLayout from './layout-client';
 
 export default async function DashboardLayoutServer({
   children,
@@ -10,32 +11,32 @@ export default async function DashboardLayoutServer({
   const authContext = await getAuthContext();
 
   // Get user's accessible clinics
-  let clinics = [];
+  let clinics: Array<{ id: string; name: string; location: string }> = [];
   if (authContext) {
     if (authContext.isSystemAdmin) {
       // System admins can see all clinics
       clinics = await prisma.clinic.findMany({
-        where: { status: "active" },
+        where: { status: 'active' },
         select: {
           id: true,
           name: true,
           location: true,
         },
-        orderBy: { name: "asc" },
+        orderBy: { name: 'asc' },
       });
     } else {
       // Regular users see only their accessible clinics
       clinics = await prisma.clinic.findMany({
         where: {
           id: { in: authContext.clinicIds },
-          status: "active",
+          status: 'active',
         },
         select: {
           id: true,
           name: true,
           location: true,
         },
-        orderBy: { name: "asc" },
+        orderBy: { name: 'asc' },
       });
     }
   }
@@ -44,7 +45,7 @@ export default async function DashboardLayoutServer({
     <DashboardLayout
       clinics={clinics}
       currentClinicId={authContext?.selectedClinicId}
-      isSystemAdmin={authContext?.isSystemAdmin || false}
+      isSystemAdmin={authContext?.isSystemAdmin}
     >
       {children}
     </DashboardLayout>

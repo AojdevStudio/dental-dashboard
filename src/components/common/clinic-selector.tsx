@@ -1,4 +1,4 @@
-"use client";
+'use client';
 
 import {
   Select,
@@ -6,11 +6,11 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
-import { cn } from "@/lib/utils";
-import { Building2 } from "lucide-react";
-import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+} from '@/components/ui/select';
+import { cn } from '@/lib/utils';
+import { Building2 } from 'lucide-react';
+import { useRouter } from 'next/navigation';
+import { useEffect, useState } from 'react';
 
 interface Clinic {
   id: string;
@@ -33,7 +33,7 @@ export function ClinicSelector({
 }: ClinicSelectorProps) {
   const router = useRouter();
   const [selectedClinicId, setSelectedClinicId] = useState<string>(
-    currentClinicId || clinics[0]?.id || ""
+    currentClinicId || clinics[0]?.id || ''
   );
 
   useEffect(() => {
@@ -47,20 +47,20 @@ export function ClinicSelector({
 
     try {
       // Call API to update selected clinic on server
-      const response = await fetch("/api/clinics/switch", {
-        method: "POST",
+      const response = await fetch('/api/clinics/switch', {
+        method: 'POST',
         headers: {
-          "Content-Type": "application/json",
+          'Content-Type': 'application/json',
         },
         body: JSON.stringify({ clinicId }),
       });
 
       if (!response.ok) {
-        throw new Error("Failed to switch clinic");
+        throw new Error('Failed to switch clinic');
       }
 
       // Store selected clinic in session storage as backup
-      sessionStorage.setItem("selectedClinicId", clinicId);
+      sessionStorage.setItem('selectedClinicId', clinicId);
 
       // Call the onChange callback if provided
       if (onClinicChange) {
@@ -69,10 +69,9 @@ export function ClinicSelector({
 
       // Trigger a page refresh to update context
       router.refresh();
-    } catch (error) {
-      console.error("Error switching clinic:", error);
+    } catch (_error) {
       // Revert selection on error
-      setSelectedClinicId(currentClinicId || clinics[0]?.id || "");
+      setSelectedClinicId(currentClinicId || clinics[0]?.id || '');
     }
   };
 
@@ -84,7 +83,7 @@ export function ClinicSelector({
   const selectedClinic = clinics.find((c) => c.id === selectedClinicId);
 
   return (
-    <div className={cn("flex items-center gap-2", className)}>
+    <div className={cn('flex items-center gap-2', className)}>
       <Building2 className="h-4 w-4 text-muted-foreground" />
       <Select value={selectedClinicId} onValueChange={handleClinicChange}>
         <SelectTrigger className="w-[200px]">
@@ -95,7 +94,7 @@ export function ClinicSelector({
                 <span className="text-xs text-muted-foreground">{selectedClinic.location}</span>
               </div>
             ) : (
-              "Select clinic..."
+              'Select clinic...'
             )}
           </SelectValue>
         </SelectTrigger>

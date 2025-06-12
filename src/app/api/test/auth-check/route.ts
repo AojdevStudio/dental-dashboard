@@ -1,5 +1,5 @@
-import { createClient } from "@/lib/supabase/server";
-import { NextResponse } from "next/server";
+import { createClient } from '@/lib/supabase/server';
+import { NextResponse } from 'next/server';
 
 export async function GET() {
   try {
@@ -19,15 +19,15 @@ export async function GET() {
     if (!user) {
       return NextResponse.json({
         authenticated: false,
-        message: "No user session found",
+        message: 'No user session found',
       });
     }
 
     // Get user details from the database
     const { data: userData, error: dbError } = await supabase
-      .from("users")
-      .select("id, email, clinicId, authId")
-      .eq("authId", user.id)
+      .from('users')
+      .select('id, email, clinicId, authId')
+      .eq('authId', user.id)
       .single();
 
     return NextResponse.json({
@@ -42,7 +42,7 @@ export async function GET() {
   } catch (error) {
     return NextResponse.json({
       authenticated: false,
-      error: error instanceof Error ? error.message : "Unknown error",
+      error: error instanceof Error ? error.message : 'Unknown error',
     });
   }
 }

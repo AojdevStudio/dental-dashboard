@@ -6,11 +6,11 @@
  * and allows users to create a new password with confirmation.
  */
 
-"use client";
+'use client';
 
-import { Button } from "@/components/ui/button";
-import type React from "react";
-import { useState } from "react";
+import { Button } from '@/components/ui/button';
+import type React from 'react';
+import { useState } from 'react';
 
 /**
  * Password Reset Confirmation Component
@@ -21,8 +21,8 @@ import { useState } from "react";
  * @returns {React.ReactElement} The rendered password reset confirmation form
  */
 export function PasswordResetConfirm(): React.ReactElement {
-  const [password, setPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
+  const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
 
@@ -37,13 +37,13 @@ export function PasswordResetConfirm(): React.ReactElement {
 
     // Basic validation
     if (password !== confirmPassword) {
-      setError("Passwords do not match");
+      setError('Passwords do not match');
       setIsLoading(false);
       return;
     }
 
     if (password.length < 8) {
-      setError("Password must be at least 8 characters long");
+      setError('Password must be at least 8 characters long');
       setIsLoading(false);
       return;
     }
@@ -55,9 +55,9 @@ export function PasswordResetConfirm(): React.ReactElement {
       await new Promise((resolve) => setTimeout(resolve, 1000));
 
       // For now, just show a success message
-      alert("Password reset functionality will be implemented in a future update.");
-    } catch (err) {
-      setError("An error occurred. Please try again.");
+      alert('Password reset functionality will be implemented in a future update.');
+    } catch (_err) {
+      setError('An error occurred. Please try again.');
     } finally {
       setIsLoading(false);
     }
@@ -83,7 +83,7 @@ export function PasswordResetConfirm(): React.ReactElement {
                 id="password"
                 name="password"
                 type="password"
-                required
+                required={true}
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 className="mt-1 appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm"
@@ -99,7 +99,7 @@ export function PasswordResetConfirm(): React.ReactElement {
                 id="confirmPassword"
                 name="confirmPassword"
                 type="password"
-                required
+                required={true}
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
                 className="mt-1 appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm"
@@ -120,7 +120,7 @@ export function PasswordResetConfirm(): React.ReactElement {
               disabled={isLoading}
               className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50"
             >
-              {isLoading ? "Resetting..." : "Reset Password"}
+              {isLoading ? 'Resetting...' : 'Reset Password'}
             </Button>
           </div>
         </form>

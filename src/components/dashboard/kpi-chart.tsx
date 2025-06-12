@@ -5,12 +5,11 @@
  * indicators (KPIs) with trend visualization in the dashboard interface.
  */
 
-"use client";
+'use client';
 
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Skeleton } from "@/components/ui/skeleton";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import * as React from "react";
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Skeleton } from '@/components/ui/skeleton';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 /**
  * Sample data for chart visualization
@@ -18,7 +17,7 @@ import * as React from "react";
  */
 const sampleChartData = {
   daily: Array.from({ length: 30 }, (_, i) => ({
-    date: new Date(2025, 4, i + 1).toISOString().split("T")[0],
+    date: new Date(2025, 4, i + 1).toISOString().split('T')[0],
     value: Math.floor(Math.random() * 100) + 50,
   })),
   weekly: Array.from({ length: 12 }, (_, i) => ({
@@ -26,7 +25,7 @@ const sampleChartData = {
     value: Math.floor(Math.random() * 100) + 50,
   })),
   monthly: Array.from({ length: 12 }, (_, i) => ({
-    date: new Date(2025, i, 1).toLocaleString("default", { month: "short" }),
+    date: new Date(2025, i, 1).toLocaleString('default', { month: 'short' }),
     value: Math.floor(Math.random() * 100) + 50,
   })),
 };
@@ -47,7 +46,7 @@ interface KPIChartProps {
   subtitle?: string;
   isLoading?: boolean;
   data?: Array<{ date: string; value: number }>;
-  defaultView?: "daily" | "weekly" | "monthly";
+  defaultView?: 'daily' | 'weekly' | 'monthly';
   valuePrefix?: string;
   valueSuffix?: string;
 }
@@ -70,9 +69,9 @@ export function KPIChart({
   subtitle,
   isLoading = false,
   data,
-  defaultView = "monthly",
-  valuePrefix = "",
-  valueSuffix = "",
+  defaultView = 'monthly',
+  valuePrefix = '',
+  valueSuffix = '',
 }: KPIChartProps) {
   // If no data is provided, use the sample data
   // If data is provided, use it for all time periods
@@ -156,8 +155,8 @@ export function KPIChart({
  */
 function ChartPlaceholder({
   data,
-  valuePrefix = "",
-  valueSuffix = "",
+  valuePrefix = '',
+  valueSuffix = '',
 }: {
   data: Array<{ date: string; value: number }>;
   valuePrefix?: string;
@@ -184,7 +183,7 @@ function ChartPlaceholder({
               : ((point.value - min) / range) * 80 + 20; // Scale from 20% to 100%
 
           return (
-            <div key={i} className="flex flex-col items-center flex-1">
+            <div key={`${point.date}-${i}`} className="flex flex-col items-center flex-1">
               <div
                 className="bg-primary/90 w-full rounded-t"
                 style={{ height: `${heightPercent}%` }}

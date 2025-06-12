@@ -7,9 +7,9 @@
  * or when the client-side callback handling is not sufficient.
  */
 
-import { createClient } from "@/lib/auth/session";
-import { NextResponse } from "next/server";
-import type { NextRequest } from "next/server";
+import { createClient } from '@/lib/auth/session';
+import { NextResponse } from 'next/server';
+import type { NextRequest } from 'next/server';
 
 /**
  * Handles GET requests to the auth callback endpoint.
@@ -22,8 +22,8 @@ import type { NextRequest } from "next/server";
  */
 export async function GET(request: NextRequest) {
   const requestUrl = new URL(request.url);
-  const code = requestUrl.searchParams.get("code");
-  const origin = requestUrl.origin;
+  const code = requestUrl.searchParams.get('code');
+  const _origin = requestUrl.origin;
 
   if (code) {
     const supabase = await createClient();
@@ -41,5 +41,5 @@ export async function GET(request: NextRequest) {
   }
 
   // If no code is provided, return error
-  return NextResponse.json({ error: "No code provided" }, { status: 400 });
+  return NextResponse.json({ error: 'No code provided' }, { status: 400 });
 }

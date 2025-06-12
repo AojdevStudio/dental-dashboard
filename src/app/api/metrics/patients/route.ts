@@ -1,4 +1,4 @@
 // Placeholder for Patient Metrics API
-export async function GET(request: Request) {
-  return Response.json({ message: "Patient Metrics" });
+export function GET(_request: Request) {
+  return Response.json({ message: 'Patient Metrics' });
 }

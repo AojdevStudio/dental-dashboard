@@ -11,16 +11,16 @@
  * This page completes the password reset flow that begins with the reset-password request page.
  */
 
-import { PasswordResetConfirm } from "@/components/auth/password-reset-confirm";
-import type { Metadata } from "next";
+import { PasswordResetConfirm } from '@/components/auth/password-reset-confirm';
+import type { Metadata } from 'next';
 
 /**
  * Metadata for the reset password confirmation page
  * Defines the page title and description for SEO and browser tabs
  */
 export const metadata: Metadata = {
-  title: "Reset Password Confirmation | Unified Dental Dashboard",
-  description: "Create a new password for your Unified Dental Dashboard account",
+  title: 'Reset Password Confirmation | Unified Dental Dashboard',
+  description: 'Create a new password for your Unified Dental Dashboard account',
 };
 
 /**

@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState } from 'react';
 
 export const breakpoints = {
   xs: 0,
@@ -6,18 +6,28 @@ export const breakpoints = {
   md: 768,
   lg: 1024,
   xl: 1280,
-  "2xl": 1536,
+  '2xl': 1536,
 } as const;
 
 export type Breakpoint = keyof typeof breakpoints;
 
 export const getBreakpoint = (width: number): Breakpoint => {
-  if (width >= breakpoints["2xl"]) return "2xl";
-  if (width >= breakpoints.xl) return "xl";
-  if (width >= breakpoints.lg) return "lg";
-  if (width >= breakpoints.md) return "md";
-  if (width >= breakpoints.sm) return "sm";
-  return "xs";
+  if (width >= breakpoints['2xl']) {
+    return '2xl';
+  }
+  if (width >= breakpoints.xl) {
+    return 'xl';
+  }
+  if (width >= breakpoints.lg) {
+    return 'lg';
+  }
+  if (width >= breakpoints.md) {
+    return 'md';
+  }
+  if (width >= breakpoints.sm) {
+    return 'sm';
+  }
+  return 'xs';
 };
 
 /**
@@ -37,8 +47,8 @@ export const useBreakpoint = () => {
 
     // Set initial breakpoint after component mounts
     handleResize();
-    window.addEventListener("resize", handleResize);
-    return () => window.removeEventListener("resize", handleResize);
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
   }, []);
 
   return breakpoint;
@@ -64,8 +74,8 @@ export const useMediaQuery = (query: string): boolean => {
       setMatches(event.matches);
     };
 
-    media.addEventListener("change", listener);
-    return () => media.removeEventListener("change", listener);
+    media.addEventListener('change', listener);
+    return () => media.removeEventListener('change', listener);
   }, [query]);
 
   return matches;
@@ -78,15 +88,15 @@ export const getGridColumns = (breakpoint: Breakpoint | undefined): number => {
     md: 3,
     lg: 4,
     xl: 4,
-    "2xl": 5,
+    '2xl': 5,
   };
   // Default to 'lg' if breakpoint is undefined (SSR safe)
-  return columns[breakpoint || "lg"];
+  return columns[breakpoint || 'lg'];
 };
 
 export const getChartHeight = (
   breakpoint: Breakpoint | undefined,
-  type: "small" | "medium" | "large" = "medium"
+  type: 'small' | 'medium' | 'large' = 'medium'
 ): number => {
   const heights: Record<Breakpoint, Record<string, number>> = {
     xs: { small: 200, medium: 250, large: 300 },
@@ -94,10 +104,10 @@ export const getChartHeight = (
     md: { small: 250, medium: 350, large: 400 },
     lg: { small: 300, medium: 400, large: 500 },
     xl: { small: 300, medium: 400, large: 500 },
-    "2xl": { small: 350, medium: 450, large: 550 },
+    '2xl': { small: 350, medium: 450, large: 550 },
   };
   // Default to 'lg' if breakpoint is undefined (SSR safe)
-  return heights[breakpoint || "lg"][type];
+  return heights[breakpoint || 'lg'][type];
 };
 
 export const useContainerDimensions = (ref: React.RefObject<HTMLElement>) => {
@@ -105,7 +115,9 @@ export const useContainerDimensions = (ref: React.RefObject<HTMLElement>) => {
 
   useEffect(() => {
     const element = ref.current;
-    if (!element) return;
+    if (!element) {
+      return;
+    }
 
     const resizeObserver = new ResizeObserver((entries) => {
       for (const entry of entries) {
@@ -131,7 +143,7 @@ export const getResponsiveValue = <T>(
     return defaultValue;
   }
 
-  const breakpointOrder: Breakpoint[] = ["xs", "sm", "md", "lg", "xl", "2xl"];
+  const breakpointOrder: Breakpoint[] = ['xs', 'sm', 'md', 'lg', 'xl', '2xl'];
   const currentIndex = breakpointOrder.indexOf(breakpoint);
 
   // Look for exact match first
@@ -160,10 +172,10 @@ export const calculateResponsiveFontSize = (
     md: 0.95,
     lg: 1,
     xl: 1.05,
-    "2xl": 1.1,
+    '2xl': 1.1,
   };
   // Default to 'lg' if breakpoint is undefined (SSR safe)
-  return Math.round(baseFontSize * scales[breakpoint || "lg"]);
+  return Math.round(baseFontSize * scales[breakpoint || 'lg']);
 };
 
 export const getResponsiveMargin = (
@@ -176,33 +188,39 @@ export const getResponsiveMargin = (
       md: { top: 20, right: 30, bottom: 40, left: 40 },
       lg: { top: 20, right: 40, bottom: 40, left: 50 },
       xl: { top: 20, right: 50, bottom: 40, left: 60 },
-      "2xl": { top: 20, right: 60, bottom: 40, left: 70 },
+      '2xl': { top: 20, right: 60, bottom: 40, left: 70 },
     };
   // Default to 'lg' if breakpoint is undefined (SSR safe)
-  return margins[breakpoint || "lg"];
+  return margins[breakpoint || 'lg'];
 };
 
 export const isMobile = (breakpoint: Breakpoint | undefined): boolean => {
-  if (!breakpoint) return false; // Default to false for SSR safety
-  return breakpoint === "xs" || breakpoint === "sm";
+  if (!breakpoint) {
+    return false; // Default to false for SSR safety
+  }
+  return breakpoint === 'xs' || breakpoint === 'sm';
 };
 
 export const isTablet = (breakpoint: Breakpoint | undefined): boolean => {
-  if (!breakpoint) return false; // Default to false for SSR safety
-  return breakpoint === "md";
+  if (!breakpoint) {
+    return false; // Default to false for SSR safety
+  }
+  return breakpoint === 'md';
 };
 
 export const isDesktop = (breakpoint: Breakpoint | undefined): boolean => {
-  if (!breakpoint) return true; // Default to true for SSR safety (assume desktop)
-  return breakpoint === "lg" || breakpoint === "xl" || breakpoint === "2xl";
+  if (!breakpoint) {
+    return true; // Default to true for SSR safety (assume desktop)
+  }
+  return breakpoint === 'lg' || breakpoint === 'xl' || breakpoint === '2xl';
 };
 
 export const getComponentSize = (
   breakpoint: Breakpoint | undefined,
-  defaultSize: "small" | "medium" | "large"
-): "small" | "medium" | "large" => {
+  defaultSize: 'small' | 'medium' | 'large'
+): 'small' | 'medium' | 'large' => {
   if (isMobile(breakpoint)) {
-    return defaultSize === "large" ? "medium" : "small";
+    return defaultSize === 'large' ? 'medium' : 'small';
   }
   return defaultSize;
 };

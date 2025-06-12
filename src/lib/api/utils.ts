@@ -1,5 +1,5 @@
-import { NextResponse } from "next/server";
-import { ZodError } from "zod";
+import { NextResponse } from 'next/server';
+import { ZodError } from 'zod';
 
 /**
  * Custom error class for API errors
@@ -11,7 +11,7 @@ export class ApiError extends Error {
     public code?: string
   ) {
     super(message);
-    this.name = "ApiError";
+    this.name = 'ApiError';
   }
 }
 
@@ -101,40 +101,57 @@ export function apiPaginated<T>(
  * Parse pagination parameters from search params
  */
 export function getPaginationParams(searchParams: URLSearchParams) {
-  const limit = Math.min(Number.parseInt(searchParams.get("limit") || "10"), 100);
-  const page = Math.max(Number.parseInt(searchParams.get("page") || "1"), 1);
+  const limit = Math.min(Number.parseInt(searchParams.get('limit') || '10'), 100);
+  const page = Math.max(Number.parseInt(searchParams.get('page') || '1'), 1);
   const offset = (page - 1) * limit;
 
   return { limit, page, offset };
 }
 
 /**
+ * Calculate pagination metadata
+ */
+export function calculatePaginationMetadata(total: number, page: number, limit: number) {
+  const totalPages = Math.ceil(total / limit);
+  const hasNextPage = page < totalPages;
+  const hasPrevPage = page > 1;
+  const nextOffset = hasNextPage ? page * limit : null;
+  const prevOffset = hasPrevPage ? (page - 2) * limit : null;
+
+  return {
+    totalPages,
+    hasNextPage,
+    hasPrevPage,
+    nextOffset,
+    prevOffset,
+  };
+}
+
+/**
  * Handle API errors consistently
  */
 export function handleApiError(error: unknown): NextResponse<ApiErrorPayload> {
-  console.error("API Error:", error);
-
   if (error instanceof ApiError) {
     return apiError(error.message, error.statusCode, error.code);
   }
 
   if (error instanceof ZodError) {
-    return apiError("Invalid request data", 400, "VALIDATION_ERROR");
+    return apiError('Invalid request data', 400, 'VALIDATION_ERROR');
   }
 
   if (error instanceof Error) {
     // Check for specific error messages
-    if (error.message.includes("Access denied")) {
-      return apiError(error.message, 403, "ACCESS_DENIED");
+    if (error.message.includes('Access denied')) {
+      return apiError(error.message, 403, 'ACCESS_DENIED');
     }
-    if (error.message.includes("not found")) {
-      return apiError(error.message, 404, "NOT_FOUND");
+    if (error.message.includes('not found')) {
+      return apiError(error.message, 404, 'NOT_FOUND');
     }
 
-    return apiError(error.message, 500, "INTERNAL_ERROR");
+    return apiError(error.message, 500, 'INTERNAL_ERROR');
   }
 
-  return apiError("An unexpected error occurred", 500, "UNKNOWN_ERROR");
+  return apiError('An unexpected error occurred', 500, 'UNKNOWN_ERROR');
 }
 
 /**
@@ -149,10 +166,10 @@ export function isValidUuid(id: string): boolean {
  * Parse and validate date range parameters
  */
 export function getDateRangeParams(searchParams: URLSearchParams) {
-  const startDate = searchParams.get("startDate");
-  const endDate = searchParams.get("endDate");
+  const startDate = searchParams.get('startDate');
+  const endDate = searchParams.get('endDate');
 
-  if (!startDate || !endDate) {
+  if (!(startDate && endDate)) {
     return null;
   }
 
@@ -160,11 +177,11 @@ export function getDateRangeParams(searchParams: URLSearchParams) {
   const end = new Date(endDate);
 
   if (Number.isNaN(start.getTime()) || Number.isNaN(end.getTime())) {
-    throw new ApiError("Invalid date format", 400, "INVALID_DATE");
+    throw new ApiError('Invalid date format', 400, 'INVALID_DATE');
   }
 
   if (start > end) {
-    throw new ApiError("Start date must be before end date", 400, "INVALID_DATE_RANGE");
+    throw new ApiError('Start date must be before end date', 400, 'INVALID_DATE_RANGE');
   }
 
   return { startDate: start, endDate: end };
@@ -174,8 +191,8 @@ export function getDateRangeParams(searchParams: URLSearchParams) {
  * Parse and validate sort parameters
  */
 export function getSortParams(searchParams: URLSearchParams, allowedFields: string[]) {
-  const sortBy = searchParams.get("sortBy");
-  const sortOrder = searchParams.get("sortOrder");
+  const sortBy = searchParams.get('sortBy');
+  const sortOrder = searchParams.get('sortOrder');
 
   if (!sortBy) {
     return null;
@@ -183,13 +200,13 @@ export function getSortParams(searchParams: URLSearchParams, allowedFields: stri
 
   if (!allowedFields.includes(sortBy)) {
     throw new ApiError(
-      `Invalid sort field. Allowed: ${allowedFields.join(", ")}`,
+      `Invalid sort field. Allowed: ${allowedFields.join(', ')}`,
       400,
-      "INVALID_SORT_FIELD"
+      'INVALID_SORT_FIELD'
     );
   }
 
-  const order = sortOrder?.toLowerCase() === "desc" ? "desc" : "asc";
+  const order = sortOrder?.toLowerCase() === 'desc' ? 'desc' : 'asc';
 
   return { sortBy, sortOrder: order };
 }

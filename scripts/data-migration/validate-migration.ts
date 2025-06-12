@@ -3,9 +3,9 @@
  * Validates data integrity after migration
  */
 
-import { PrismaClient } from "@prisma/client";
-import * as fs from "fs/promises";
-import * as path from "path";
+import * as fs from 'node:fs/promises';
+import * as path from 'node:path';
+import { PrismaClient } from '@prisma/client';
 
 const prisma = new PrismaClient();
 
@@ -15,13 +15,13 @@ interface ValidationResult {
     name: string;
     passed: boolean;
     message: string;
-    details?: any;
+    details?: Record<string, unknown>;
   }>;
 }
 
 interface ValidationReport {
   timestamp: Date;
-  overallStatus: "passed" | "failed" | "warning";
+  overallStatus: 'passed' | 'failed' | 'warning';
   results: ValidationResult[];
   summary: {
     totalChecks: number;
@@ -38,7 +38,7 @@ class MigrationValidator {
   constructor() {
     this.report = {
       timestamp: new Date(),
-      overallStatus: "passed",
+      overallStatus: 'passed',
       results: [],
       summary: {
         totalChecks: 0,
@@ -49,7 +49,13 @@ class MigrationValidator {
     };
   }
 
-  private addCheck(table: string, name: string, passed: boolean, message: string, details?: any) {
+  private addCheck(
+    table: string,
+    name: string,
+    passed: boolean,
+    message: string,
+    details?: Record<string, unknown>
+  ) {
     let tableResult = this.results.find((r) => r.table === table);
     if (!tableResult) {
       tableResult = { table, checks: [] };
@@ -63,13 +69,12 @@ class MigrationValidator {
       this.report.summary.passed++;
     } else {
       this.report.summary.failed++;
-      this.report.overallStatus = "failed";
+      this.report.overallStatus = 'failed';
     }
   }
 
   async validateUsers() {
-    console.log("\n=== Validating Users ===");
-    const table = "users";
+    const table = 'users';
 
     // Check 1: All users have UUIDs
     const totalUsers = await prisma.user.count();
@@ -79,7 +84,7 @@ class MigrationValidator {
 
     this.addCheck(
       table,
-      "UUID Population",
+      'UUID Population',
       totalUsers === usersWithUuid,
       `${usersWithUuid}/${totalUsers} users have UUIDs`,
       { missing: totalUsers - usersWithUuid }
@@ -96,20 +101,20 @@ class MigrationValidator {
 
     this.addCheck(
       table,
-      "UUID Uniqueness",
+      'UUID Uniqueness',
       hasUniqueUuids,
-      hasUniqueUuids ? "All UUIDs are unique" : "Duplicate UUIDs found",
+      hasUniqueUuids ? 'All UUIDs are unique' : 'Duplicate UUIDs found',
       { duplicates: users.length - uuidSet.size }
     );
 
     // Check 3: ID mappings exist for all users
     const userMappings = await prisma.idMapping.count({
-      where: { tableName: "users" },
+      where: { tableName: 'users' },
     });
 
     this.addCheck(
       table,
-      "ID Mappings",
+      'ID Mappings',
       userMappings === totalUsers,
       `${userMappings}/${totalUsers} users have ID mappings`,
       { missing: totalUsers - userMappings }
@@ -119,7 +124,7 @@ class MigrationValidator {
     const usersWithInvalidClinic = await prisma.user.findMany({
       where: {
         clinic: {
-          is: null,
+          is: undefined,
         },
       },
       select: { id: true, email: true },
@@ -127,10 +132,10 @@ class MigrationValidator {
 
     this.addCheck(
       table,
-      "Clinic References",
+      'Clinic References',
       usersWithInvalidClinic.length === 0,
       usersWithInvalidClinic.length === 0
-        ? "All users have valid clinic references"
+        ? 'All users have valid clinic references'
         : `${usersWithInvalidClinic.length} users have invalid clinic references`,
       { invalidUsers: usersWithInvalidClinic }
     );
@@ -145,18 +150,17 @@ class MigrationValidator {
 
     this.addCheck(
       table,
-      "Role Assignments",
+      'Role Assignments',
       usersWithoutRoles.length === 0,
       usersWithoutRoles.length === 0
-        ? "All users have role assignments"
+        ? 'All users have role assignments'
         : `${usersWithoutRoles.length} users without role assignments`,
       { usersWithoutRoles }
     );
   }
 
   async validateClinics() {
-    console.log("\n=== Validating Clinics ===");
-    const table = "clinics";
+    const table = 'clinics';
 
     // Check 1: All clinics have UUIDs
     const totalClinics = await prisma.clinic.count();
@@ -166,7 +170,7 @@ class MigrationValidator {
 
     this.addCheck(
       table,
-      "UUID Population",
+      'UUID Population',
       totalClinics === clinicsWithUuid,
       `${clinicsWithUuid}/${totalClinics} clinics have UUIDs`,
       { missing: totalClinics - clinicsWithUuid }
@@ -174,12 +178,12 @@ class MigrationValidator {
 
     // Check 2: ID mappings exist
     const clinicMappings = await prisma.idMapping.count({
-      where: { tableName: "clinics" },
+      where: { tableName: 'clinics' },
     });
 
     this.addCheck(
       table,
-      "ID Mappings",
+      'ID Mappings',
       clinicMappings === totalClinics,
       `${clinicMappings}/${totalClinics} clinics have ID mappings`,
       { missing: totalClinics - clinicMappings }
@@ -209,24 +213,23 @@ class MigrationValidator {
 
     this.addCheck(
       table,
-      "Data Association",
+      'Data Association',
       emptyClinics.length === 0,
       emptyClinics.length === 0
-        ? "All clinics have associated data"
+        ? 'All clinics have associated data'
         : `${emptyClinics.length} clinics have no associated data`,
       { emptyClinics: emptyClinics.map((c) => ({ id: c.id, name: c.name })) }
     );
   }
 
   async validateRelationships() {
-    console.log("\n=== Validating Relationships ===");
-    const table = "relationships";
+    const table = 'relationships';
 
     // Check 1: Provider-Clinic relationships
     const orphanedProviders = await prisma.provider.findMany({
       where: {
         clinic: {
-          is: null,
+          is: undefined,
         },
       },
       select: { id: true, name: true },
@@ -234,10 +237,10 @@ class MigrationValidator {
 
     this.addCheck(
       table,
-      "Provider-Clinic",
+      'Provider-Clinic',
       orphanedProviders.length === 0,
       orphanedProviders.length === 0
-        ? "All providers have valid clinic references"
+        ? 'All providers have valid clinic references'
         : `${orphanedProviders.length} orphaned providers found`,
       { orphanedProviders }
     );
@@ -273,10 +276,10 @@ class MigrationValidator {
 
     this.addCheck(
       table,
-      "MetricValue-Clinic",
+      'MetricValue-Clinic',
       orphanedMetricCount === 0,
       orphanedMetricCount === 0
-        ? "All metric values have valid clinic references"
+        ? 'All metric values have valid clinic references'
         : `${orphanedMetricCount} orphaned metric values found`,
       { count: orphanedMetricCount, sample: orphanedMetrics }
     );
@@ -285,7 +288,7 @@ class MigrationValidator {
     const dashboardsWithInvalidUser = await prisma.dashboard.findMany({
       where: {
         user: {
-          is: null,
+          is: undefined,
         },
       },
       select: { id: true, name: true },
@@ -293,10 +296,10 @@ class MigrationValidator {
 
     this.addCheck(
       table,
-      "Dashboard-User",
+      'Dashboard-User',
       dashboardsWithInvalidUser.length === 0,
       dashboardsWithInvalidUser.length === 0
-        ? "All dashboards have valid user references"
+        ? 'All dashboards have valid user references'
         : `${dashboardsWithInvalidUser.length} dashboards with invalid user references`,
       { dashboardsWithInvalidUser }
     );
@@ -305,24 +308,23 @@ class MigrationValidator {
     const orphanedWidgets = await prisma.widget.count({
       where: {
         dashboard: {
-          is: null,
+          is: undefined,
         },
       },
     });
 
     this.addCheck(
       table,
-      "Widget-Dashboard",
+      'Widget-Dashboard',
       orphanedWidgets === 0,
       orphanedWidgets === 0
-        ? "All widgets have valid dashboard references"
+        ? 'All widgets have valid dashboard references'
         : `${orphanedWidgets} orphaned widgets found`
     );
   }
 
   async validateDataIntegrity() {
-    console.log("\n=== Validating Data Integrity ===");
-    const table = "data_integrity";
+    const table = 'data_integrity';
 
     // Check 1: Consistent timestamps
     const futureTimestamps = await prisma.$queryRaw<Array<{ table_name: string; count: bigint }>>`
@@ -337,9 +339,9 @@ class MigrationValidator {
 
     this.addCheck(
       table,
-      "Timestamp Validity",
+      'Timestamp Validity',
       !hasFutureTimestamps,
-      !hasFutureTimestamps ? "All timestamps are valid" : "Found records with future timestamps",
+      hasFutureTimestamps ? 'Found records with future timestamps' : 'All timestamps are valid',
       { futureTimestamps: futureTimestamps.filter((r) => Number(r.count) > 0) }
     );
 
@@ -352,10 +354,10 @@ class MigrationValidator {
 
     this.addCheck(
       table,
-      "Required Fields",
+      'Required Fields',
       usersWithMissingData === 0,
       usersWithMissingData === 0
-        ? "All required fields are populated"
+        ? 'All required fields are populated'
         : `${usersWithMissingData} users with missing required fields`
     );
 
@@ -370,17 +372,16 @@ class MigrationValidator {
 
     this.addCheck(
       table,
-      "Enum Validation",
+      'Enum Validation',
       !hasInvalidRoles,
-      !hasInvalidRoles
-        ? "All enum values are valid"
-        : `${invalidRoles[0].count} users with invalid roles`
+      hasInvalidRoles
+        ? `${invalidRoles[0].count} users with invalid roles`
+        : 'All enum values are valid'
     );
   }
 
   async validatePerformance() {
-    console.log("\n=== Validating Performance ===");
-    const table = "performance";
+    const table = 'performance';
 
     // Check 1: Index usage
     const indexes = await prisma.$queryRaw<Array<{ tablename: string; indexname: string }>>`
@@ -391,11 +392,11 @@ class MigrationValidator {
     `;
 
     const expectedIndexes = [
-      "idx_user_clinic_roles_user_auth",
-      "idx_user_clinic_roles_clinic_active",
-      "idx_users_auth_id",
-      "idx_data_sources_clinic",
-      "idx_providers_clinic",
+      'idx_user_clinic_roles_user_auth',
+      'idx_user_clinic_roles_clinic_active',
+      'idx_users_auth_id',
+      'idx_data_sources_clinic',
+      'idx_providers_clinic',
     ];
 
     const foundIndexes = indexes.map((i) => i.indexname);
@@ -403,10 +404,10 @@ class MigrationValidator {
 
     this.addCheck(
       table,
-      "Required Indexes",
+      'Required Indexes',
       missingIndexes.length === 0,
       missingIndexes.length === 0
-        ? "All required indexes are present"
+        ? 'All required indexes are present'
         : `${missingIndexes.length} required indexes are missing`,
       { missingIndexes }
     );
@@ -432,9 +433,9 @@ class MigrationValidator {
 
     this.addCheck(
       table,
-      "Table Sizes",
+      'Table Sizes',
       true, // Informational check
-      "Table size information collected",
+      'Table size information collected',
       { tableSizes: tableSizes.slice(0, 10) } // Top 10 tables
     );
   }
@@ -442,43 +443,27 @@ class MigrationValidator {
   async generateReport() {
     this.report.results = this.results;
 
-    const reportDir = path.join(process.cwd(), "migration-logs");
+    const reportDir = path.join(process.cwd(), 'migration-logs');
     await fs.mkdir(reportDir, { recursive: true });
 
     const reportPath = path.join(
       reportDir,
-      `validation-report-${this.report.timestamp.toISOString().replace(/[:.]/g, "-")}.json`
+      `validation-report-${this.report.timestamp.toISOString().replace(/[:.]/g, '-')}.json`
     );
 
     await fs.writeFile(reportPath, JSON.stringify(this.report, null, 2));
 
-    // Console output
-    console.log("\n=== Validation Report Summary ===");
-    console.log(`Overall Status: ${this.report.overallStatus.toUpperCase()}`);
-    console.log(`Total Checks: ${this.report.summary.totalChecks}`);
-    console.log(`Passed: ${this.report.summary.passed}`);
-    console.log(`Failed: ${this.report.summary.failed}`);
-    console.log(`Warnings: ${this.report.summary.warnings}`);
-
     if (this.report.summary.failed > 0) {
-      console.log("\n=== Failed Checks ===");
       this.results.forEach((result) => {
         const failedChecks = result.checks.filter((c) => !c.passed);
         if (failedChecks.length > 0) {
-          console.log(`\n${result.table}:`);
           failedChecks.forEach((check) => {
-            console.log(`  ✗ ${check.name}: ${check.message}`);
             if (check.details) {
-              console.log(
-                `    Details: ${JSON.stringify(check.details, null, 2).replace(/\n/g, "\n    ")}`
-              );
             }
           });
         }
       });
     }
-
-    console.log(`\nFull report saved to: ${reportPath}`);
   }
 
   async run() {
@@ -491,8 +476,7 @@ class MigrationValidator {
 
       await this.generateReport();
     } catch (error) {
-      console.error("Validation failed:", error);
-      this.report.overallStatus = "failed";
+      this.report.overallStatus = 'failed';
       await this.generateReport();
       throw error;
     } finally {
@@ -504,8 +488,7 @@ class MigrationValidator {
 // Run validator if called directly
 if (require.main === module) {
   const validator = new MigrationValidator();
-  validator.run().catch((error) => {
-    console.error("Fatal validation error:", error);
+  validator.run().catch((_error) => {
     process.exit(1);
   });
 }

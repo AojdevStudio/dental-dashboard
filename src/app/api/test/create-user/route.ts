@@ -1,6 +1,6 @@
-import { prisma } from "@/lib/database/prisma";
-import { createClient } from "@/lib/supabase/server";
-import { NextResponse } from "next/server";
+import { prisma } from '@/lib/database/prisma';
+import { createClient } from '@/lib/supabase/server';
+import { NextResponse } from 'next/server';
 
 export async function POST() {
   try {
@@ -14,7 +14,7 @@ export async function POST() {
     if (authError || !user) {
       return NextResponse.json(
         {
-          error: "Not authenticated",
+          error: 'Not authenticated',
           authError: authError?.message,
         },
         { status: 401 }
@@ -28,22 +28,22 @@ export async function POST() {
 
     if (existingUser) {
       return NextResponse.json({
-        message: "User already exists",
+        message: 'User already exists',
         user: existingUser,
       });
     }
 
     // First, we need a clinic. Let's check if one exists or create a test one
     let clinic = await prisma.clinic.findFirst({
-      where: { name: "Test Clinic" },
+      where: { name: 'Test Clinic' },
     });
 
     if (!clinic) {
       clinic = await prisma.clinic.create({
         data: {
-          name: "Test Clinic",
-          location: "Test Location",
-          status: "active",
+          name: 'Test Clinic',
+          location: 'Test Location',
+          status: 'active',
         },
       });
     }
@@ -51,9 +51,9 @@ export async function POST() {
     // Create the user in the database
     const newUser = await prisma.user.create({
       data: {
-        email: user.email || "",
-        name: user.email?.split("@")[0] || "Test User",
-        role: "office_manager",
+        email: user.email || '',
+        name: user.email?.split('@')[0] || 'Test User',
+        role: 'office_manager',
         authId: user.id,
         clinicId: clinic.id,
       },
@@ -61,16 +61,15 @@ export async function POST() {
 
     return NextResponse.json({
       success: true,
-      message: "User created successfully",
+      message: 'User created successfully',
       user: newUser,
       clinic: clinic,
     });
   } catch (error) {
-    console.error("Failed to create user:", error);
     return NextResponse.json(
       {
-        error: "Failed to create user",
-        details: error instanceof Error ? error.message : "Unknown error",
+        error: 'Failed to create user',
+        details: error instanceof Error ? error.message : 'Unknown error',
       },
       { status: 500 }
     );

@@ -1,13 +1,13 @@
-import { prisma } from "@/lib/database/prisma";
-import { type NextRequest, NextResponse } from "next/server";
+import { prisma } from '@/lib/database/prisma';
+import { type NextRequest, NextResponse } from 'next/server';
 
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
     const { authId, email, name, clinicName, role } = body;
 
-    if (!authId || !email || !name || !clinicName || !role) {
-      return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
+    if (!(authId && email && name && clinicName && role)) {
+      return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
     }
 
     // Start a transaction to create clinic and user
@@ -22,8 +22,8 @@ export async function POST(request: NextRequest) {
           data: {
             id: `clinic-${Date.now()}`,
             name: clinicName,
-            location: "To be updated",
-            status: "active",
+            location: 'To be updated',
+            status: 'active',
           },
         });
       }
@@ -46,7 +46,7 @@ export async function POST(request: NextRequest) {
           id: `ucr-${Date.now()}`,
           userId: user.id,
           clinicId: clinic.id,
-          role: role === "admin" || role === "dentist" ? "clinic_admin" : "staff",
+          role: role === 'admin' || role === 'dentist' ? 'clinic_admin' : 'staff',
           isActive: true,
         },
       });
@@ -56,12 +56,11 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({
       success: true,
-      message: "Profile created successfully",
+      message: 'Profile created successfully',
       user: result.user,
       clinic: result.clinic,
     });
-  } catch (error) {
-    console.error("Error completing signup:", error);
-    return NextResponse.json({ error: "Failed to create profile" }, { status: 500 });
+  } catch (_error) {
+    return NextResponse.json({ error: 'Failed to create profile' }, { status: 500 });
   }
 }

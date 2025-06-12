@@ -3,11 +3,11 @@
  * Multi-tenant aware metrics endpoints
  */
 
-import { cachedJson } from "@/lib/api/cache-headers";
-import { withAuth } from "@/lib/api/middleware";
-import { ApiError, ApiResponse, getDateRangeParams, getPaginationParams } from "@/lib/api/utils";
-import * as metricQueries from "@/lib/database/queries/metrics";
-import { z } from "zod";
+import { cachedJson } from '@/lib/api/cache-headers';
+import { withAuth } from '@/lib/api/middleware';
+import { apiCreated, apiError, getDateRangeParams, getPaginationParams } from '@/lib/api/utils';
+import * as metricQueries from '@/lib/database/queries/metrics';
+import { z } from 'zod';
 
 // Request schemas
 const createMetricSchema = z.object({
@@ -16,16 +16,16 @@ const createMetricSchema = z.object({
   value: z.string(),
   clinicId: z.string().cuid(),
   providerId: z.string().cuid().optional(),
-  sourceType: z.enum(["manual", "spreadsheet", "form"]),
+  sourceType: z.enum(['manual', 'spreadsheet', 'form']),
   sourceSheet: z.string().optional(),
   externalId: z.string().optional(),
 });
 
-const aggregationSchema = z.object({
+const _aggregationSchema = z.object({
   clinicId: z.string().cuid(),
   metricDefinitionId: z.string().cuid().optional(),
   providerId: z.string().cuid().optional(),
-  aggregationType: z.enum(["daily", "weekly", "monthly", "quarterly", "yearly"]),
+  aggregationType: z.enum(['daily', 'weekly', 'monthly', 'quarterly', 'yearly']),
 });
 
 export type GetMetricsResponse = Awaited<ReturnType<typeof metricQueries.getMetrics>>;
@@ -39,13 +39,14 @@ export type CreateMetricResponse = Awaited<ReturnType<typeof metricQueries.creat
  * Get metrics with filtering
  */
 export const GET = withAuth(async (request, { authContext }) => {
-  const searchParams = request.nextUrl.searchParams;
-  const clinicId = searchParams.get("clinicId") || undefined;
-  const providerId = searchParams.get("providerId") || undefined;
-  const metricDefinitionId = searchParams.get("metricDefinitionId") || undefined;
-  const sourceType = searchParams.get("sourceType") || undefined;
-  const { limit, offset } = getPaginationParams(request);
-  const dateRange = getDateRangeParams(request);
+  const url = new URL(request.url);
+  const searchParams = url.searchParams;
+  const clinicId = searchParams.get('clinicId') || undefined;
+  const providerId = searchParams.get('providerId') || undefined;
+  const metricDefinitionId = searchParams.get('metricDefinitionId') || undefined;
+  const sourceType = searchParams.get('sourceType') || undefined;
+  const { limit, offset } = getPaginationParams(searchParams);
+  const dateRange = getDateRangeParams(searchParams);
 
   const result = await metricQueries.getMetrics(
     authContext,
@@ -55,7 +56,7 @@ export const GET = withAuth(async (request, { authContext }) => {
       metricDefinitionId,
       sourceType,
       dateRange:
-        dateRange.startDate && dateRange.endDate
+        dateRange?.startDate && dateRange?.endDate
           ? {
               start: dateRange.startDate,
               end: dateRange.endDate,
@@ -65,8 +66,8 @@ export const GET = withAuth(async (request, { authContext }) => {
     {
       limit,
       offset,
-      orderBy: (searchParams.get("orderBy") as "date" | "value" | "createdAt") || "date",
-      orderDir: (searchParams.get("orderDir") as "asc" | "desc") || "desc",
+      orderBy: (searchParams.get('orderBy') as 'date' | 'value' | 'createdAt') || 'date',
+      orderDir: (searchParams.get('orderDir') as 'asc' | 'desc') || 'desc',
     }
   );
 
@@ -80,7 +81,7 @@ export const GET = withAuth(async (request, { authContext }) => {
         limit,
       },
     },
-    "DYNAMIC"
+    'DYNAMIC'
   );
 });
 
@@ -94,8 +95,8 @@ export const POST = withAuth(async (request, { authContext }) => {
   try {
     const rawBody = await request.json();
     body = createMetricSchema.parse(rawBody);
-  } catch (error) {
-    return ApiError.badRequest("Invalid request body");
+  } catch (_error) {
+    return apiError('Invalid request body', 400);
   }
 
   // Convert date string to Date object
@@ -106,17 +107,17 @@ export const POST = withAuth(async (request, { authContext }) => {
 
   try {
     const metric = await metricQueries.createMetric(authContext, metricData);
-    return ApiResponse.created(metric);
+    return apiCreated(metric);
   } catch (error) {
     if (error instanceof Error) {
-      if (error.message.includes("Access denied")) {
-        return ApiError.forbidden(error.message);
+      if (error.message.includes('Access denied')) {
+        return apiError(error.message, 403);
       }
-      if (error.message.includes("Insufficient permissions")) {
-        return ApiError.forbidden(error.message);
+      if (error.message.includes('Insufficient permissions')) {
+        return apiError(error.message, 403);
       }
-      if (error.message.includes("Invalid metric definition")) {
-        return ApiError.badRequest(error.message);
+      if (error.message.includes('Invalid metric definition')) {
+        return apiError(error.message, 400);
       }
     }
     throw error;

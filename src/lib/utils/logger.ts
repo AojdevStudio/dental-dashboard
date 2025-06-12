@@ -15,9 +15,9 @@
  * - debug: Detailed information for development and troubleshooting (level 3)
  */
 
-import path from "node:path";
-import winston from "winston";
-import { format } from "winston";
+import path from 'node:path';
+import winston from 'winston';
+import { format } from 'winston';
 
 /**
  * Determines the current execution environment
@@ -25,7 +25,7 @@ import { format } from "winston";
  *
  * @type {string}
  */
-const environment = process.env.NODE_ENV || "development";
+const environment = process.env.NODE_ENV || 'development';
 
 /**
  * Determines the appropriate log level based on the current environment
@@ -38,12 +38,12 @@ const environment = process.env.NODE_ENV || "development";
  */
 const getLogLevel = () => {
   switch (environment) {
-    case "production":
-      return "warn";
-    case "test":
-      return "info";
+    case 'production':
+      return 'warn';
+    case 'test':
+      return 'info';
     default:
-      return "debug";
+      return 'debug';
   }
 };
 
@@ -57,23 +57,23 @@ const getLogLevel = () => {
  */
 const humanReadableFormat = format.printf(({ level, message, timestamp, ...metadata }) => {
   // Convert metadata to a readable string, but only if it exists
-  let metadataStr = "";
+  let metadataStr = '';
   if (Object.keys(metadata).length > 0) {
     // Format metadata in a more readable way
     metadataStr = `\nDetails: ${Object.entries(metadata)
       .map(([key, value]) => {
         // Handle error objects specially
-        if (key === "error" && value instanceof Error) {
+        if (key === 'error' && value instanceof Error) {
           return `${key}: ${value.message}`;
         }
         // Handle stack traces specially
-        if (key === "stack") {
+        if (key === 'stack') {
           return `stack trace: ${value}`;
         }
         // For other values, convert to string representation
         return `${key}: ${JSON.stringify(value)}`;
       })
-      .join(", ")}`;
+      .join(', ')}`;
   }
 
   return `${timestamp} [${level.toUpperCase()}] ${message}${metadataStr}`;
@@ -90,13 +90,13 @@ const humanReadableFormat = format.printf(({ level, message, timestamp, ...metad
  * @type {winston.Logform.Format}
  */
 const customFormat = format.combine(
-  format.timestamp({ format: "YYYY-MM-DD HH:mm:ss" }),
+  format.timestamp({ format: 'YYYY-MM-DD HH:mm:ss' }),
   format.colorize({
     colors: {
-      error: "red",
-      warn: "yellow",
-      info: "green",
-      debug: "blue",
+      error: 'red',
+      warn: 'yellow',
+      info: 'green',
+      debug: 'blue',
     },
   }),
   humanReadableFormat
@@ -120,15 +120,15 @@ const transports = [];
 transports.push(new winston.transports.Console());
 
 // Add file transports in production
-if (environment === "production") {
+if (environment === 'production') {
   // Ensure logs directory exists
-  const logsDir = path.join(process.cwd(), "logs");
+  const logsDir = path.join(process.cwd(), 'logs');
 
   // Add file transport for errors
   transports.push(
     new winston.transports.File({
-      filename: path.join(logsDir, "error.log"),
-      level: "error",
+      filename: path.join(logsDir, 'error.log'),
+      level: 'error',
       maxsize: 5242880, // 5MB
       maxFiles: 5,
     })
@@ -137,7 +137,7 @@ if (environment === "production") {
   // Add file transport for all logs
   transports.push(
     new winston.transports.File({
-      filename: path.join(logsDir, "combined.log"),
+      filename: path.join(logsDir, 'combined.log'),
       maxsize: 5242880, // 5MB
       maxFiles: 5,
     })
@@ -171,10 +171,10 @@ const logger = winston.createLogger({
   transports,
   // Handle uncaught exceptions
   exceptionHandlers:
-    environment === "production"
+    environment === 'production'
       ? [
           new winston.transports.File({
-            filename: path.join(process.cwd(), "logs", "exceptions.log"),
+            filename: path.join(process.cwd(), 'logs', 'exceptions.log'),
             maxsize: 5242880, // 5MB
             maxFiles: 5,
           }),
@@ -193,10 +193,10 @@ const logger = winston.createLogger({
  * This ensures that promise-related issues are always captured even if they're
  * not properly caught in the application code.
  */
-if (environment === "production") {
+if (environment === 'production') {
   logger.rejections.handle(
     new winston.transports.File({
-      filename: path.join(process.cwd(), "logs", "rejections.log"),
+      filename: path.join(process.cwd(), 'logs', 'rejections.log'),
       maxsize: 5242880, // 5MB
       maxFiles: 5,
     })

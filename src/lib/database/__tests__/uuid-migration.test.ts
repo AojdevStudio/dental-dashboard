@@ -1,18 +1,18 @@
+import { PrismaClient } from '@prisma/client';
 /**
  * @vitest-environment node
  */
-import { afterAll, beforeAll, describe, expect, it } from "vitest";
-import { PrismaClient } from "@prisma/client";
+import { afterAll, describe, expect, it } from 'vitest';
 
 const prisma = new PrismaClient();
 
-describe("Phase 2: UUID Migration", () => {
+describe('Phase 2: UUID Migration', () => {
   afterAll(async () => {
     await prisma.$disconnect();
   });
 
-  describe("Schema Changes Verification", () => {
-    it("should have added UUID fields to User table", async () => {
+  describe('Schema Changes Verification', () => {
+    it('should have added UUID fields to User table', async () => {
       const columns = await prisma.$queryRaw`
         SELECT column_name, data_type, is_nullable
         FROM information_schema.columns
@@ -25,13 +25,13 @@ describe("Phase 2: UUID Migration", () => {
       expect(columns).toHaveLength(2);
       expect(columns).toEqual(
         expect.arrayContaining([
-          expect.objectContaining({ column_name: "auth_id", is_nullable: "YES" }),
-          expect.objectContaining({ column_name: "uuid_id", is_nullable: "YES" }),
+          expect.objectContaining({ column_name: 'auth_id', is_nullable: 'YES' }),
+          expect.objectContaining({ column_name: 'uuid_id', is_nullable: 'YES' }),
         ])
       );
     });
 
-    it("should have added UUID field to Clinic table", async () => {
+    it('should have added UUID field to Clinic table', async () => {
       const columns = await prisma.$queryRaw`
         SELECT column_name, data_type, is_nullable
         FROM information_schema.columns
@@ -42,12 +42,12 @@ describe("Phase 2: UUID Migration", () => {
 
       expect(columns).toHaveLength(1);
       expect(columns[0]).toMatchObject({
-        column_name: "uuid_id",
-        is_nullable: "YES",
+        column_name: 'uuid_id',
+        is_nullable: 'YES',
       });
     });
 
-    it("should have added UUID fields to Dashboard table", async () => {
+    it('should have added UUID fields to Dashboard table', async () => {
       const columns = await prisma.$queryRaw`
         SELECT column_name, data_type, is_nullable
         FROM information_schema.columns
@@ -60,13 +60,13 @@ describe("Phase 2: UUID Migration", () => {
       expect(columns).toHaveLength(2);
       expect(columns).toEqual(
         expect.arrayContaining([
-          expect.objectContaining({ column_name: "user_uuid_id", is_nullable: "YES" }),
-          expect.objectContaining({ column_name: "uuid_id", is_nullable: "YES" }),
+          expect.objectContaining({ column_name: 'user_uuid_id', is_nullable: 'YES' }),
+          expect.objectContaining({ column_name: 'uuid_id', is_nullable: 'YES' }),
         ])
       );
     });
 
-    it("should have created id_mappings table", async () => {
+    it('should have created id_mappings table', async () => {
       const tableInfo = await prisma.$queryRaw`
         SELECT table_name 
         FROM information_schema.tables 
@@ -78,8 +78,8 @@ describe("Phase 2: UUID Migration", () => {
     });
   });
 
-  describe("Unique Constraints Verification", () => {
-    it("should have unique constraints on UUID fields", async () => {
+  describe('Unique Constraints Verification', () => {
+    it('should have unique constraints on UUID fields', async () => {
       const constraints = await prisma.$queryRaw`
         SELECT conname, conrelid::regclass::text as table_name
         FROM pg_constraint
@@ -90,35 +90,35 @@ describe("Phase 2: UUID Migration", () => {
       `;
 
       const constraintNames = (constraints as Array<{ conname: string }>).map((c) => c.conname);
-      expect(constraintNames).toContain("users_auth_id_key");
-      expect(constraintNames).toContain("users_uuid_id_key");
-      expect(constraintNames).toContain("clinics_uuid_id_key");
-      expect(constraintNames).toContain("dashboards_uuid_id_key");
+      expect(constraintNames).toContain('users_auth_id_key');
+      expect(constraintNames).toContain('users_uuid_id_key');
+      expect(constraintNames).toContain('clinics_uuid_id_key');
+      expect(constraintNames).toContain('dashboards_uuid_id_key');
     });
   });
 
-  describe("ID Mapping Functionality", () => {
-    it("should be able to create and query ID mappings", async () => {
+  describe('ID Mapping Functionality', () => {
+    it('should be able to create and query ID mappings', async () => {
       const testMapping = await prisma.idMapping.create({
         data: {
-          tableName: "test_table",
-          oldId: "old-cuid-123",
-          newId: "new-uuid-456",
+          tableName: 'test_table',
+          oldId: 'old-cuid-123',
+          newId: 'new-uuid-456',
         },
       });
 
       expect(testMapping.id).toBeDefined();
-      expect(testMapping.tableName).toBe("test_table");
-      expect(testMapping.oldId).toBe("old-cuid-123");
-      expect(testMapping.newId).toBe("new-uuid-456");
+      expect(testMapping.tableName).toBe('test_table');
+      expect(testMapping.oldId).toBe('old-cuid-123');
+      expect(testMapping.newId).toBe('new-uuid-456');
 
       // Test unique constraint
       await expect(
         prisma.idMapping.create({
           data: {
-            tableName: "test_table",
-            oldId: "old-cuid-123",
-            newId: "different-uuid",
+            tableName: 'test_table',
+            oldId: 'old-cuid-123',
+            newId: 'different-uuid',
           },
         })
       ).rejects.toThrow();
@@ -128,15 +128,15 @@ describe("Phase 2: UUID Migration", () => {
     });
   });
 
-  describe("UUID Field Population", () => {
-    it("should handle UUID population for User model", async () => {
+  describe('UUID Field Population', () => {
+    it('should handle UUID population for User model', async () => {
       // Create test user without UUID
       const testUser = await prisma.user.create({
         data: {
           email: `test-${Date.now()}@example.com`,
-          name: "Test User",
-          role: "admin",
-          clinicId: "test-clinic-id",
+          name: 'Test User',
+          role: 'admin',
+          clinicId: 'test-clinic-id',
         },
       });
 
@@ -154,18 +154,18 @@ describe("Phase 2: UUID Migration", () => {
     });
   });
 
-  describe("Dashboard User UUID Relationship", () => {
-    it("should support dual ID references", async () => {
+  describe('Dashboard User UUID Relationship', () => {
+    it('should support dual ID references', async () => {
       const testDashboard = await prisma.dashboard.create({
         data: {
-          name: "Test Dashboard",
-          userId: "test-user-cuid",
-          userUuidId: "test-user-uuid",
+          name: 'Test Dashboard',
+          userId: 'test-user-cuid',
+          userUuidId: 'test-user-uuid',
         },
       });
 
-      expect(testDashboard.userId).toBe("test-user-cuid");
-      expect(testDashboard.userUuidId).toBe("test-user-uuid");
+      expect(testDashboard.userId).toBe('test-user-cuid');
+      expect(testDashboard.userUuidId).toBe('test-user-uuid');
 
       // Clean up
       await prisma.dashboard.delete({ where: { id: testDashboard.id } });

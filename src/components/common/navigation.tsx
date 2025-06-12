@@ -5,11 +5,9 @@
  * and header into a complete navigation system for the dashboard interface.
  */
 
-"use client";
-
-import * as React from "react";
-import { Header } from "./header";
-import { Sidebar } from "./sidebar";
+'use client';
+import { Header } from './header';
+import { Sidebar } from './sidebar';
 
 /**
  * Navigation Component

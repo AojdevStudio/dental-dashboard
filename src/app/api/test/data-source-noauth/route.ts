@@ -1,6 +1,6 @@
-import { prisma } from "@/lib/database/prisma";
-import { createClient } from "@/lib/supabase/server";
-import { NextResponse } from "next/server";
+import { prisma } from '@/lib/database/prisma';
+import { createClient } from '@/lib/supabase/server';
+import { NextResponse } from 'next/server';
 
 export async function POST() {
   try {
@@ -14,7 +14,7 @@ export async function POST() {
     if (authError || !user) {
       return NextResponse.json(
         {
-          error: "User not authenticated",
+          error: 'User not authenticated',
           authError: authError?.message,
         },
         { status: 401 }
@@ -30,7 +30,7 @@ export async function POST() {
     if (!dbUser) {
       return NextResponse.json(
         {
-          error: "User not found in database",
+          error: 'User not found in database',
           authId: user.id,
         },
         { status: 404 }
@@ -40,12 +40,12 @@ export async function POST() {
     // Create test data source
     const dataSource = await prisma.dataSource.create({
       data: {
-        name: "Test Google Sheets Connection",
+        name: 'Test Google Sheets Connection',
         spreadsheetId: `test-${Date.now()}`,
-        sheetName: "Sheet1",
-        syncFrequency: "manual",
-        connectionStatus: "pending",
-        accessToken: "pending",
+        sheetName: 'Sheet1',
+        syncFrequency: 'manual',
+        connectionStatus: 'pending',
+        accessToken: 'pending',
         clinicId: dbUser.clinicId,
       },
     });
@@ -61,11 +61,10 @@ export async function POST() {
       },
     });
   } catch (error) {
-    console.error("Failed to create data source:", error);
     return NextResponse.json(
       {
-        error: "Failed to create data source",
-        details: error instanceof Error ? error.message : "Unknown error",
+        error: 'Failed to create data source',
+        details: error instanceof Error ? error.message : 'Unknown error',
       },
       { status: 500 }
     );

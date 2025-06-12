@@ -131,26 +131,26 @@
   .focus-visible\:outline-primary:focus-visible {
     @apply outline-2 outline-offset-2 outline-primary;
   }
-  
+
   /* Smooth transitions for sidebar collapse */
   .sidebar-transition {
     @apply transition-all duration-300 ease-in-out;
   }
-  
+
   /* Main content area scrollbar styling */
   .custom-scrollbar::-webkit-scrollbar {
     width: 8px;
     height: 8px;
   }
-  
+
   .custom-scrollbar::-webkit-scrollbar-track {
     @apply bg-muted;
   }
-  
+
   .custom-scrollbar::-webkit-scrollbar-thumb {
     @apply bg-muted-foreground/30 rounded-full;
   }
-  
+
   .custom-scrollbar::-webkit-scrollbar-thumb:hover {
     @apply bg-muted-foreground/50;
   }

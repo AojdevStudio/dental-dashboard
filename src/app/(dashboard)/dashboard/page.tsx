@@ -10,14 +10,13 @@
  * user experience by showing a loading state that matches the final UI structure.
  */
 
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Skeleton } from "@/components/ui/skeleton";
-import { DashboardSkeleton } from "@/components/ui/skeleton-loaders";
-import type { Prisma } from "@prisma/client";
-import { type AuthContext, getAuthContext } from "@/lib/database/auth-context";
-import { prisma } from "@/lib/database/prisma";
-import { Suspense } from "react";
-import DashboardClient from "./dashboard-client";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { DashboardSkeleton } from '@/components/ui/skeleton-loaders';
+import { type AuthContext, getAuthContext } from '@/lib/database/auth-context';
+import { prisma } from '@/lib/database/prisma';
+import type { Prisma } from '@prisma/client';
+import { Suspense } from 'react';
+import DashboardClient from './dashboard-client';
 
 /**
  * Dashboard Page Component
@@ -43,7 +42,7 @@ export default async function DashboardPage() {
         </CardHeader>
         <CardContent className="space-y-4">
           <p className="text-sm text-muted-foreground">
-            {error instanceof Error ? error.message : "Unknown authentication error"}
+            {error instanceof Error ? error.message : 'Unknown authentication error'}
           </p>
           <div className="flex gap-2">
             <a href="/login" className="text-primary hover:underline">
@@ -76,8 +75,8 @@ export default async function DashboardPage() {
   }
 
   // Get the current clinic information
-  let currentClinic = null;
-  if (authContext.selectedClinicId && authContext.selectedClinicId !== "all") {
+  let currentClinic: ClinicWithCounts | null = null;
+  if (authContext.selectedClinicId && authContext.selectedClinicId !== 'all') {
     try {
       currentClinic = await prisma.clinic.findUnique({
         where: { id: authContext.selectedClinicId },
@@ -94,8 +93,7 @@ export default async function DashboardPage() {
           },
         },
       });
-    } catch (error) {
-      console.error("Error fetching clinic data:", error);
+    } catch (_error) {
       // Continue with currentClinic as null - the UI will handle the fallback
       // This ensures the app remains stable even if the clinic query fails
     }
@@ -133,7 +131,7 @@ type ClinicWithCounts = Prisma.ClinicGetPayload<{
  *
  * @returns {JSX.Element} The rendered dashboard content
  */
-async function DashboardContent({
+function DashboardContent({
   authContext,
   clinic,
 }: {
@@ -144,7 +142,7 @@ async function DashboardContent({
   const initialData = {
     clinic,
     isSystemAdmin: authContext.isSystemAdmin ?? false,
-    selectedClinicId: authContext.selectedClinicId ?? "all",
+    selectedClinicId: authContext.selectedClinicId ?? 'all',
     userId: authContext.userId,
   };
 
@@ -153,18 +151,18 @@ async function DashboardContent({
       <div>
         <h1 className="text-3xl font-bold">Dashboard</h1>
         <p className="text-muted-foreground mt-2">
-          {authContext.isSystemAdmin && authContext.selectedClinicId === "all"
-            ? "Viewing all clinics"
+          {authContext.isSystemAdmin && authContext.selectedClinicId === 'all'
+            ? 'Viewing all clinics'
             : clinic
               ? `${clinic.name} - ${clinic.location}`
-              : "Select a clinic to view metrics"}
+              : 'Select a clinic to view metrics'}
         </p>
       </div>
 
       {/* Main Dashboard Content */}
       {clinic ? (
         <DashboardClient initialData={initialData} />
-      ) : authContext.isSystemAdmin && authContext.selectedClinicId === "all" ? (
+      ) : authContext.isSystemAdmin && authContext.selectedClinicId === 'all' ? (
         <div className="space-y-4">
           <h2 className="text-xl font-semibold">All Clinics Overview</h2>
           <AllClinicsOverview />
@@ -195,7 +193,7 @@ async function AllClinicsOverview() {
 
   try {
     clinics = await prisma.clinic.findMany({
-      where: { status: "active" },
+      where: { status: 'active' },
       select: {
         id: true,
         name: true,
@@ -208,10 +206,9 @@ async function AllClinicsOverview() {
           },
         },
       },
-      orderBy: { name: "asc" },
+      orderBy: { name: 'asc' },
     });
   } catch (error) {
-    console.error("Error fetching clinics data:", error);
     // Return error state when clinic data cannot be fetched
     return (
       <Card className="max-w-md mx-auto">
@@ -223,7 +220,7 @@ async function AllClinicsOverview() {
         </CardHeader>
         <CardContent>
           <p className="text-sm text-muted-foreground">
-            {error instanceof Error ? error.message : "Unknown database error"}
+            {error instanceof Error ? error.message : 'Unknown database error'}
           </p>
         </CardContent>
       </Card>

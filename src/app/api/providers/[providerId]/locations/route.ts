@@ -1,6 +1,5 @@
-import type { Prisma } from "@prisma/client";
-import { prisma } from "@/lib/database/client";
-import { type NextRequest, NextResponse } from "next/server";
+import { prisma } from '@/lib/database/client';
+import { type NextRequest, NextResponse } from 'next/server';
 
 interface ProviderLocationWhereInput {
   providerId: string;
@@ -14,11 +13,14 @@ interface ProviderLocationUpdateData {
   endDate?: Date | null;
 }
 
-export async function GET(request: NextRequest, { params }: { params: { providerId: string } }) {
+export async function GET(
+  request: NextRequest,
+  { params }: { params: Promise<{ providerId: string }> }
+) {
   try {
-    const { providerId } = params;
+    const { providerId } = await params;
     const { searchParams } = new URL(request.url);
-    const includeInactive = searchParams.get("includeInactive") === "true";
+    const includeInactive = searchParams.get('includeInactive') === 'true';
 
     // Verify provider exists
     const provider = await prisma.provider.findUnique({
@@ -30,7 +32,7 @@ export async function GET(request: NextRequest, { params }: { params: { provider
       return NextResponse.json(
         {
           success: false,
-          error: "Provider not found",
+          error: 'Provider not found',
         },
         { status: 404 }
       );
@@ -57,8 +59,8 @@ export async function GET(request: NextRequest, { params }: { params: { provider
         },
       },
       orderBy: [
-        { isPrimary: "desc" }, // Primary locations first
-        { location: { name: "asc" } },
+        { isPrimary: 'desc' }, // Primary locations first
+        { location: { name: 'asc' } },
       ],
     });
 
@@ -85,21 +87,23 @@ export async function GET(request: NextRequest, { params }: { params: { provider
       },
     });
   } catch (error) {
-    console.error("Error fetching provider locations:", error);
     return NextResponse.json(
       {
         success: false,
-        error: "Failed to fetch provider locations",
-        details: error instanceof Error ? error.message : "Unknown error",
+        error: 'Failed to fetch provider locations',
+        details: error instanceof Error ? error.message : 'Unknown error',
       },
       { status: 500 }
     );
   }
 }
 
-export async function POST(request: NextRequest, { params }: { params: { providerId: string } }) {
+export async function POST(
+  request: NextRequest,
+  { params }: { params: Promise<{ providerId: string }> }
+) {
   try {
-    const { providerId } = params;
+    const { providerId } = await params;
     const body = await request.json();
     const { locationId, isPrimary = false, isActive = true, startDate, endDate } = body;
 
@@ -108,7 +112,7 @@ export async function POST(request: NextRequest, { params }: { params: { provide
       return NextResponse.json(
         {
           success: false,
-          error: "locationId is required",
+          error: 'locationId is required',
         },
         { status: 400 }
       );
@@ -123,7 +127,7 @@ export async function POST(request: NextRequest, { params }: { params: { provide
       return NextResponse.json(
         {
           success: false,
-          error: "Provider not found",
+          error: 'Provider not found',
         },
         { status: 404 }
       );
@@ -138,7 +142,7 @@ export async function POST(request: NextRequest, { params }: { params: { provide
       return NextResponse.json(
         {
           success: false,
-          error: "Location not found",
+          error: 'Location not found',
         },
         { status: 404 }
       );
@@ -158,7 +162,7 @@ export async function POST(request: NextRequest, { params }: { params: { provide
       return NextResponse.json(
         {
           success: false,
-          error: "Provider is already assigned to this location",
+          error: 'Provider is already assigned to this location',
         },
         { status: 409 }
       );
@@ -211,26 +215,28 @@ export async function POST(request: NextRequest, { params }: { params: { provide
       {
         success: true,
         data: providerLocation,
-        message: "Provider-location relationship created successfully",
+        message: 'Provider-location relationship created successfully',
       },
       { status: 201 }
     );
   } catch (error) {
-    console.error("Error creating provider-location relationship:", error);
     return NextResponse.json(
       {
         success: false,
-        error: "Failed to create provider-location relationship",
-        details: error instanceof Error ? error.message : "Unknown error",
+        error: 'Failed to create provider-location relationship',
+        details: error instanceof Error ? error.message : 'Unknown error',
       },
       { status: 500 }
     );
   }
 }
 
-export async function PATCH(request: NextRequest, { params }: { params: { providerId: string } }) {
+export async function PATCH(
+  request: NextRequest,
+  { params }: { params: Promise<{ providerId: string }> }
+) {
   try {
-    const { providerId } = params;
+    const { providerId } = await params;
     const body = await request.json();
     const { relationshipId, isPrimary, isActive, startDate, endDate } = body;
 
@@ -239,7 +245,7 @@ export async function PATCH(request: NextRequest, { params }: { params: { provid
       return NextResponse.json(
         {
           success: false,
-          error: "relationshipId is required",
+          error: 'relationshipId is required',
         },
         { status: 400 }
       );
@@ -257,7 +263,7 @@ export async function PATCH(request: NextRequest, { params }: { params: { provid
       return NextResponse.json(
         {
           success: false,
-          error: "Provider-location relationship not found",
+          error: 'Provider-location relationship not found',
         },
         { status: 404 }
       );
@@ -279,10 +285,18 @@ export async function PATCH(request: NextRequest, { params }: { params: { provid
 
     // Build update data
     const updateData: ProviderLocationUpdateData = {};
-    if (isPrimary !== undefined) updateData.isPrimary = isPrimary;
-    if (isActive !== undefined) updateData.isActive = isActive;
-    if (startDate !== undefined) updateData.startDate = new Date(startDate);
-    if (endDate !== undefined) updateData.endDate = endDate ? new Date(endDate) : null;
+    if (isPrimary !== undefined) {
+      updateData.isPrimary = isPrimary;
+    }
+    if (isActive !== undefined) {
+      updateData.isActive = isActive;
+    }
+    if (startDate !== undefined) {
+      updateData.startDate = new Date(startDate);
+    }
+    if (endDate !== undefined) {
+      updateData.endDate = endDate ? new Date(endDate) : null;
+    }
 
     // Update the relationship
     const updatedRelation = await prisma.providerLocation.update({
@@ -311,15 +325,14 @@ export async function PATCH(request: NextRequest, { params }: { params: { provid
     return NextResponse.json({
       success: true,
       data: updatedRelation,
-      message: "Provider-location relationship updated successfully",
+      message: 'Provider-location relationship updated successfully',
     });
   } catch (error) {
-    console.error("Error updating provider-location relationship:", error);
     return NextResponse.json(
       {
         success: false,
-        error: "Failed to update provider-location relationship",
-        details: error instanceof Error ? error.message : "Unknown error",
+        error: 'Failed to update provider-location relationship',
+        details: error instanceof Error ? error.message : 'Unknown error',
       },
       { status: 500 }
     );

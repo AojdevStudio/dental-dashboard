@@ -1,9 +1,9 @@
-"use client";
+'use client';
 
-import type { ChartConfig } from "@/lib/types/charts";
-import { formatCurrency, formatNumber, formatPercentage } from "@/lib/utils/chart-helpers";
-import { chartTheme, getChartColors } from "@/lib/utils/color-schemes";
-import { isMobile, useBreakpoint } from "@/lib/utils/responsive-helpers";
+import type { ChartConfig } from '@/lib/types/charts';
+import { formatNumber } from '@/lib/utils/chart-helpers';
+import { chartTheme, getChartColors } from '@/lib/utils/color-schemes';
+import { isMobile, useBreakpoint } from '@/lib/utils/responsive-helpers';
 import {
   Cell,
   Legend,
@@ -11,8 +11,8 @@ import {
   PieChart as RechartsPieChart,
   ResponsiveContainer,
   Tooltip,
-} from "recharts";
-import { ChartContainer } from "../chart-container";
+} from 'recharts';
+import { ChartContainer } from '../chart-container';
 
 interface PieChartProps {
   config: ChartConfig;
@@ -25,7 +25,6 @@ interface PieChartProps {
   onDataPointClick?: (data: Record<string, unknown>) => void;
   isDoughnut?: boolean;
   showPercentage?: boolean;
-  labelLine?: boolean;
 }
 
 export function PieChart({
@@ -35,16 +34,16 @@ export function PieChart({
   loading,
   error,
   className,
-  formatTooltip = (value) => formatNumber(value),
+  formatTooltip = (value) =>
+    formatNumber(typeof value === 'string' ? Number.parseFloat(value) || 0 : value),
   onDataPointClick,
   isDoughnut = false,
   showPercentage = true,
-  labelLine = true,
 }: PieChartProps) {
   const breakpoint = useBreakpoint();
   const mobile = isMobile(breakpoint);
 
-  const colors = getChartColors("dental", config.data.length);
+  const colors = getChartColors('dental', config.data.length);
 
   const defaultConfig: ChartConfig = {
     ...config,
@@ -68,7 +67,9 @@ export function PieChart({
       payload: Record<string, unknown>;
     }>;
   }) => {
-    if (!active || !payload || !payload.length) return null;
+    if (!(active && payload && payload.length > 0)) {
+      return null;
+    }
 
     const data = payload[0];
     const percentage = (data.value / total) * 100;
@@ -76,7 +77,7 @@ export function PieChart({
     return (
       <div style={chartTheme.tooltip.container}>
         <p style={chartTheme.tooltip.label}>{data.name}</p>
-        <p style={{ ...chartTheme.tooltip.value, color: data.payload.fill }}>
+        <p style={{ ...chartTheme.tooltip.value, color: data.payload.fill as string }}>
           {formatTooltip(data.value, data.name)}
           {showPercentage && ` (${percentage.toFixed(1)}%)`}
         </p>
@@ -91,7 +92,6 @@ export function PieChart({
     innerRadius,
     outerRadius,
     value,
-    index,
   }: {
     cx: number;
     cy: number;
@@ -100,9 +100,10 @@ export function PieChart({
     outerRadius: number;
     percent: number;
     value: number;
-    index: number;
   }) => {
-    if (mobile) return null;
+    if (mobile) {
+      return null;
+    }
 
     const RADIAN = Math.PI / 180;
     const radius = innerRadius + (outerRadius - innerRadius) * 0.5;
@@ -110,14 +111,16 @@ export function PieChart({
     const y = cy + radius * Math.sin(-midAngle * RADIAN);
     const percentage = (value / total) * 100;
 
-    if (percentage < 5) return null; // Don't show label for small slices
+    if (percentage < 5) {
+      return null; // Don't show label for small slices
+    }
 
     return (
       <text
         x={x}
         y={y}
         fill="white"
-        textAnchor={x > cx ? "start" : "end"}
+        textAnchor={x > cx ? 'start' : 'end'}
         dominantBaseline="central"
         fontSize={12}
         fontWeight={600}
@@ -137,11 +140,11 @@ export function PieChart({
     const { payload } = props;
 
     return (
-      <ul className={`flex ${mobile ? "flex-col" : "flex-wrap"} gap-2 justify-center mt-4`}>
-        {payload.map((entry, index: number) => {
+      <ul className={`flex ${mobile ? 'flex-col' : 'flex-wrap'} gap-2 justify-center mt-4`}>
+        {payload?.map((entry, index: number) => {
           const percentage = (entry.payload.value / total) * 100;
           return (
-            <li key={`item-${index}`} className="flex items-center gap-2">
+            <li key={`item-${entry.value}-${index}`} className="flex items-center gap-2">
               <span className="w-3 h-3 rounded-sm" style={{ backgroundColor: entry.color }} />
               <span style={chartTheme.legend.style}>
                 {entry.value}
@@ -180,9 +183,9 @@ export function PieChart({
           >
             {defaultConfig.data.map((entry, index) => (
               <Cell
-                key={`cell-${index}`}
+                key={`cell-${entry.name || entry.value || index}`}
                 fill={colors[index % colors.length]}
-                style={{ cursor: onDataPointClick ? "pointer" : "default" }}
+                style={{ cursor: onDataPointClick ? 'pointer' : 'default' }}
               />
             ))}
           </Pie>
