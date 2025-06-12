@@ -37,12 +37,16 @@ interface DashboardClientProps {
 }
 
 export default function DashboardClient({ initialData }: DashboardClientProps) {
-  const { clinic } = initialData;
+  const { clinic: _clinic } = initialData;
   const [refreshing, setRefreshing] = useState(false);
 
   // Generate mock data
-  const { revenueData, appointmentsData, patientsData, treatmentsData } =
-    generateDashboardMockData();
+  const {
+    revenueData,
+    appointmentsData,
+    patientsData,
+    treatmentsData: _treatmentsData,
+  } = generateDashboardMockData();
 
   // Calculate KPI data using custom hook
   const kpiData = useDashboardKPI({
@@ -191,12 +195,14 @@ export default function DashboardClient({ initialData }: DashboardClientProps) {
       </div>
 
       {/* Dashboard Grid */}
-      <DashboardGrid
-        layout={layout.activeLayout!}
-        onLayoutChange={layout.updateLayout}
-        onComponentRemove={layout.removeComponent}
-        editMode={layout.isEditing}
-      />
+      {layout.activeLayout && (
+        <DashboardGrid
+          layout={layout.activeLayout}
+          onLayoutChange={layout.updateLayout}
+          onComponentRemove={layout.removeComponent}
+          editMode={layout.isEditing}
+        />
+      )}
     </div>
   );
 }

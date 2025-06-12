@@ -4,7 +4,7 @@
  */
 
 import { withAuth } from '@/lib/api/middleware';
-import { ApiError, ApiResponse, getDateRangeParams } from '@/lib/api/utils';
+import { apiError, apiSuccess, getDateRangeParams } from '@/lib/api/utils';
 import * as metricQueries from '@/lib/database/queries/metrics';
 import { z } from 'zod';
 
@@ -29,7 +29,7 @@ export const GET = withAuth(async (request, { authContext }) => {
 
   // Validate required parameters
   if (!(dateRange.startDate && dateRange.endDate)) {
-    return ApiError.badRequest('Start date and end date are required');
+    return apiError('Start date and end date are required', 400);
   }
 
   // Parse query parameters
@@ -42,7 +42,7 @@ export const GET = withAuth(async (request, { authContext }) => {
       aggregationType: searchParams.get('aggregationType') || 'monthly',
     });
   } catch (_error) {
-    return ApiError.badRequest('Invalid query parameters');
+    return apiError('Invalid query parameters', 400);
   }
 
   try {
@@ -56,10 +56,10 @@ export const GET = withAuth(async (request, { authContext }) => {
       },
     });
 
-    return ApiResponse.success({ aggregations });
+    return apiSuccess({ aggregations });
   } catch (error) {
     if (error instanceof Error && error.message.includes('Access denied')) {
-      return ApiError.forbidden(error.message);
+      return apiError(error.message, 403);
     }
     throw error;
   }

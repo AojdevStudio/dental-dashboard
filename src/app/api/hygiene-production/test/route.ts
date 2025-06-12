@@ -1,4 +1,4 @@
-import { ApiResponse } from '@/lib/api/utils';
+import { apiError, apiSuccess } from '@/lib/api/utils';
 import { prisma } from '@/lib/database/client';
 import { getHygieneProduction } from '@/lib/database/queries/hygiene-production';
 import type { NextRequest } from 'next/server';
@@ -13,7 +13,7 @@ export async function GET(request: NextRequest) {
     const clinicId = searchParams.get('clinicId');
 
     if (!clinicId) {
-      return ApiResponse.error('clinicId parameter is required', 400);
+      return apiError('clinicId parameter is required', 400);
     }
 
     // Create a minimal auth context for testing
@@ -46,7 +46,7 @@ export async function GET(request: NextRequest) {
           })
         : [];
 
-    return ApiResponse.success({
+    return apiSuccess({
       clinic,
       providers,
       records: records.map((record) => ({
@@ -75,6 +75,6 @@ export async function GET(request: NextRequest) {
       },
     });
   } catch (error) {
-    return ApiResponse.error(error instanceof Error ? error.message : 'Internal server error', 500);
+    return apiError(error instanceof Error ? error.message : 'Internal server error', 500);
   }
 }

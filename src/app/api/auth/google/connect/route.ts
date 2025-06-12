@@ -11,7 +11,7 @@
  */
 
 import { withAuth } from '@/lib/api/middleware';
-import { type ApiResponse, apiError } from '@/lib/api/utils';
+import { apiError } from '@/lib/api/utils';
 import * as googleSheetsQueries from '@/lib/database/queries/google-sheets';
 import { generateAuthUrl } from '@/services/google/auth';
 import { NextResponse } from 'next/server';
@@ -36,13 +36,10 @@ import { NextResponse } from 'next/server';
  *   - 403: Forbidden if user doesn't have access
  *   - 500: Server error if environment is misconfigured or URL generation fails
  */
-export const GET = withAuth<null>(
-  async (
-    request: Request,
-    { authContext }
-  ): Promise<NextResponse<ApiResponse<null> | ApiResponse<never>>> => {
-    const { searchParams } = new URL(request.url);
-    const dataSourceId = searchParams.get('dataSourceId');
+export const GET = withAuth(
+  async (request, { authContext }) => {
+    const url = new URL(request.url);
+    const dataSourceId = url.searchParams.get('dataSourceId');
 
     if (!dataSourceId) {
       return apiError('dataSourceId is required', 400);
@@ -63,10 +60,7 @@ export const GET = withAuth<null>(
     try {
       // Generate auth URL with dataSourceId in state
       const authorizationUrl = generateAuthUrl(dataSourceId);
-      return NextResponse.json<ApiResponse<null>>(
-        { success: true, data: null },
-        { status: 302, headers: { Location: authorizationUrl } }
-      );
+      return NextResponse.redirect(authorizationUrl);
     } catch (_error) {
       return apiError('Failed to initiate Google authentication', 500);
     }

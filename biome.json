@@ -364,6 +364,9 @@
           },
           "style": {
             "noNonNullAssertion": "off"
+          },
+          "nursery": {
+            "noSecrets": "off"
           }
         }
       }
@@ -390,6 +393,16 @@
           },
           "suspicious": {
             "noEmptyInterface": "off"
+          }
+        }
+      }
+    },
+    {
+      "include": ["src/app/api/**/*"],
+      "linter": {
+        "rules": {
+          "nursery": {
+            "noSecrets": "off"
           }
         }
       }

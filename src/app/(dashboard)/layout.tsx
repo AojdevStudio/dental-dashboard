@@ -11,7 +11,7 @@ export default async function DashboardLayoutServer({
   const authContext = await getAuthContext();
 
   // Get user's accessible clinics
-  let clinics = [];
+  let clinics: Array<{ id: string; name: string; location: string }> = [];
   if (authContext) {
     if (authContext.isSystemAdmin) {
       // System admins can see all clinics

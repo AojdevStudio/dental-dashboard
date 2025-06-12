@@ -93,6 +93,7 @@ export default function AuthCallbackPage() {
               viewBox="0 0 24 24"
               stroke="currentColor"
             >
+              <title>Warning icon</title>
               <path
                 strokeLinecap="round"
                 strokeLinejoin="round"

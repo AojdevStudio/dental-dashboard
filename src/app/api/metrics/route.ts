@@ -5,7 +5,7 @@
 
 import { cachedJson } from '@/lib/api/cache-headers';
 import { withAuth } from '@/lib/api/middleware';
-import { ApiError, ApiResponse, getDateRangeParams, getPaginationParams } from '@/lib/api/utils';
+import { apiCreated, apiError, getDateRangeParams, getPaginationParams } from '@/lib/api/utils';
 import * as metricQueries from '@/lib/database/queries/metrics';
 import { z } from 'zod';
 
@@ -95,7 +95,7 @@ export const POST = withAuth(async (request, { authContext }) => {
     const rawBody = await request.json();
     body = createMetricSchema.parse(rawBody);
   } catch (_error) {
-    return ApiError.badRequest('Invalid request body');
+    return apiError('Invalid request body', 400);
   }
 
   // Convert date string to Date object
@@ -106,17 +106,17 @@ export const POST = withAuth(async (request, { authContext }) => {
 
   try {
     const metric = await metricQueries.createMetric(authContext, metricData);
-    return ApiResponse.created(metric);
+    return apiCreated(metric);
   } catch (error) {
     if (error instanceof Error) {
       if (error.message.includes('Access denied')) {
-        return ApiError.forbidden(error.message);
+        return apiError(error.message, 403);
       }
       if (error.message.includes('Insufficient permissions')) {
-        return ApiError.forbidden(error.message);
+        return apiError(error.message, 403);
       }
       if (error.message.includes('Invalid metric definition')) {
-        return ApiError.badRequest(error.message);
+        return apiError(error.message, 400);
       }
     }
     throw error;

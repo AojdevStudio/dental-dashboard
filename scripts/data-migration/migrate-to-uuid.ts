@@ -445,9 +445,7 @@ class DataMigration {
       // Check for orphaned records
       const orphanedProviders = await prisma.provider.count({
         where: {
-          clinic: {
-            is: null,
-          },
+          clinicId: null,
         },
       });
       if (orphanedProviders > 0) {

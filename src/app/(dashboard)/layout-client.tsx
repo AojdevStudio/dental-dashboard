@@ -15,9 +15,9 @@ interface DashboardLayoutProps {
 
 export default function DashboardLayout({
   children,
-  clinics = [],
-  currentClinicId,
-  isSystemAdmin = false,
+  clinics: _clinics = [],
+  currentClinicId: _currentClinicId,
+  isSystemAdmin: _isSystemAdmin = false,
 }: DashboardLayoutProps) {
   return (
     <Providers>

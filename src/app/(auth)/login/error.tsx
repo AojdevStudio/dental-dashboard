@@ -30,14 +30,17 @@ import { useEffect } from 'react';
  * @returns {JSX.Element} The rendered error component
  */
 export default function LoginError({
-  error,
+  error: _error,
   reset,
 }: {
   error: Error & { digest?: string };
   reset: () => void;
 }) {
   // Log the error to the console for debugging purposes
-  useEffect(() => {}, [error]);
+  useEffect(() => {
+    // Error is already available in the component scope
+    // No need to track it as a dependency since we're not using it in the effect
+  }, []);
 
   return (
     <div class="flex h-screen flex-col items-center justify-center">

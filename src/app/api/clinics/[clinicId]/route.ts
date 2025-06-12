@@ -46,8 +46,9 @@ export type GetClinicStatsResponse = Awaited<ReturnType<typeof clinicQueries.get
  */
 export const GET = withAuth<ClinicWithDetails>(
   async (request: Request, { authContext, params }) => {
+    const resolvedParams = await params;
     let clinicId: string;
-    const clinicIdParam = params?.clinicId;
+    const clinicIdParam = resolvedParams?.clinicId;
 
     if (Array.isArray(clinicIdParam)) {
       if (clinicIdParam.length === 0 || !clinicIdParam[0]) {
@@ -91,8 +92,9 @@ export const GET = withAuth<ClinicWithDetails>(
  * Update a clinic (clinic admin only)
  */
 export const PATCH = withAuth<Clinic>(async (request, { authContext, params }) => {
+  const resolvedParams = await params;
   let clinicId: string;
-  const clinicIdParam = params?.clinicId;
+  const clinicIdParam = resolvedParams?.clinicId;
 
   if (Array.isArray(clinicIdParam)) {
     if (clinicIdParam.length === 0 || !clinicIdParam[0]) {

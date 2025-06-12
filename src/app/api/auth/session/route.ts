@@ -77,7 +77,7 @@ export async function GET() {
   }
 }
 
-export async function POST(_request: Request) {
+export function POST(_request: Request) {
   // TODO: Implement session creation/update logic
   return Response.json({ message: 'Session POST placeholder' });
 }

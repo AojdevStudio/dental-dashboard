@@ -5,7 +5,7 @@ import type { ApiResponse } from './utils';
 export type ApiHandler<TSuccessPayload = unknown> = (
   request: Request,
   context: {
-    params?: Record<string, string | string[]>;
+    params: Promise<Record<string, string | string[]>>;
     authContext: AuthContext;
   }
 ) => Promise<
@@ -23,9 +23,9 @@ export function withAuth<TSuccessPayload = unknown>(
   }
 ): (
   request: Request,
-  context: { params?: Record<string, string | string[]> }
+  context: { params: Promise<Record<string, string | string[]>> }
 ) => Promise<NextResponse> {
-  return async (req: Request, context: { params?: Record<string, string | string[]> }) => {
+  return async (req: Request, context: { params: Promise<Record<string, string | string[]>> }) => {
     const _nextRequest = req as NextRequest;
     try {
       // Get auth context

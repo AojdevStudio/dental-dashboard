@@ -10,7 +10,8 @@ import {
 } from '@/lib/types/goals';
 
 export const GET = withAuth<GoalResponse>(async (_request: Request, { params, authContext }) => {
-  const goalId = params?.goalId as string;
+  const resolvedParams = await params;
+  const goalId = resolvedParams?.goalId as string;
   if (!goalId) {
     return apiError('Goal ID is required', 400);
   }
@@ -26,7 +27,8 @@ export const GET = withAuth<GoalResponse>(async (_request: Request, { params, au
 
 export const PUT = withAuth<GoalResponse>(
   async (request: Request, { params, authContext }) => {
-    const goalId = params?.goalId as string;
+    const resolvedParams = await params;
+    const goalId = resolvedParams?.goalId as string;
     if (!goalId) {
       return apiError('Goal ID is required', 400);
     }
@@ -62,7 +64,8 @@ export const PUT = withAuth<GoalResponse>(
 
 export const DELETE = withAuth<{ success: true }>(
   async (_request: Request, { params, authContext }) => {
-    const goalId = params?.goalId as string;
+    const resolvedParams = await params;
+    const goalId = resolvedParams?.goalId as string;
     if (!goalId) {
       return apiError('Goal ID is required', 400);
     }

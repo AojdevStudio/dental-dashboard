@@ -23,7 +23,8 @@ export type GetClinicStatisticsResponse = Awaited<
  */
 export const GET = withAuth<GetClinicStatisticsResponse>(
   async (request: Request, { authContext, params }) => {
-    const clinicIdParam = params?.clinicId;
+    const resolvedParams = await params;
+    const clinicIdParam = resolvedParams?.clinicId;
     let clinicId: string;
 
     if (Array.isArray(clinicIdParam)) {

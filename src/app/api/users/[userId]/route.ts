@@ -35,7 +35,8 @@ export const GET = withAuth<GetUserResponse>(
     _request: Request,
     { authContext, params }
   ): Promise<NextResponse<ApiSuccessPayload<GetUserResponse> | ApiErrorPayload>> => {
-    const rawId = params?.userId;
+    const resolvedParams = await params;
+    const rawId = resolvedParams?.userId;
     const userId = Array.isArray(rawId) ? rawId[0] : rawId;
     if (!userId) {
       return apiError('User ID required', 400);
@@ -68,7 +69,8 @@ export const PATCH = withAuth<UpdateUserResponse>(
     request: Request,
     { authContext, params }
   ): Promise<NextResponse<ApiSuccessPayload<UpdateUserResponse> | ApiErrorPayload>> => {
-    const rawId = params?.userId;
+    const resolvedParams = await params;
+    const rawId = resolvedParams?.userId;
     const userId = Array.isArray(rawId) ? rawId[0] : rawId;
     if (!userId) {
       return apiError('User ID required', 400);
@@ -118,7 +120,8 @@ export const DELETE = withAuth<{ success: boolean }>(
     _request: Request,
     { authContext, params }
   ): Promise<NextResponse<ApiSuccessPayload<{ success: boolean }> | ApiErrorPayload>> => {
-    const rawId = params?.userId;
+    const resolvedParams = await params;
+    const rawId = resolvedParams?.userId;
     const userId = Array.isArray(rawId) ? rawId[0] : rawId;
     if (!userId) {
       return apiError('User ID required', 400);

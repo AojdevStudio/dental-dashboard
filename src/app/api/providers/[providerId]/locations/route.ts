@@ -13,9 +13,12 @@ interface ProviderLocationUpdateData {
   endDate?: Date | null;
 }
 
-export async function GET(request: NextRequest, { params }: { params: { providerId: string } }) {
+export async function GET(
+  request: NextRequest,
+  { params }: { params: Promise<{ providerId: string }> }
+) {
   try {
-    const { providerId } = params;
+    const { providerId } = await params;
     const { searchParams } = new URL(request.url);
     const includeInactive = searchParams.get('includeInactive') === 'true';
 
@@ -95,9 +98,12 @@ export async function GET(request: NextRequest, { params }: { params: { provider
   }
 }
 
-export async function POST(request: NextRequest, { params }: { params: { providerId: string } }) {
+export async function POST(
+  request: NextRequest,
+  { params }: { params: Promise<{ providerId: string }> }
+) {
   try {
-    const { providerId } = params;
+    const { providerId } = await params;
     const body = await request.json();
     const { locationId, isPrimary = false, isActive = true, startDate, endDate } = body;
 
@@ -225,9 +231,12 @@ export async function POST(request: NextRequest, { params }: { params: { provide
   }
 }
 
-export async function PATCH(request: NextRequest, { params }: { params: { providerId: string } }) {
+export async function PATCH(
+  request: NextRequest,
+  { params }: { params: Promise<{ providerId: string }> }
+) {
   try {
-    const { providerId } = params;
+    const { providerId } = await params;
     const body = await request.json();
     const { relationshipId, isPrimary, isActive, startDate, endDate } = body;
 

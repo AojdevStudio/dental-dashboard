@@ -131,7 +131,7 @@ type ClinicWithCounts = Prisma.ClinicGetPayload<{
  *
  * @returns {JSX.Element} The rendered dashboard content
  */
-async function DashboardContent({
+function DashboardContent({
   authContext,
   clinic,
 }: {
