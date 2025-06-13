@@ -9,8 +9,7 @@ export abstract class BaseService {
    */
   protected handleError(error: unknown, context: string): never {
     const message = error instanceof Error ? error.message : 'Unknown error';
--    throw new Error(`${context}: ${message}`);
-+    throw new Error(`${context}: ${message}`, { cause: error });
+    throw new Error(`${context}: ${message}`, { cause: error });
   }
 
   /**
