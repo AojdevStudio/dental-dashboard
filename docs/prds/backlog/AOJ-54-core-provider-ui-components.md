@@ -1,84 +1,334 @@
-# PRD: Core Provider UI Components
+# PRD: Core Provider UI Components (AOJ-54)
 
-## 1. Summary
+## 1. Document Information
 
-This document outlines the requirements for creating a set of reusable UI components to display provider information on the "Providers" page. This feature is essential for allowing clinic administrators to view and manage their staff effectively. The components will be built using the existing `shadcn/ui` library to ensure design consistency and will include functionality for displaying provider details, key performance metrics, and quick actions. The implementation will cover loading, error, and empty states.
+-   **Priority**: High
+-   **Timeline**: 1-2 Days (Updated)
+-   **Status**: Partially Implemented - Ready for Component Development
+-   **Owner**: AOJ Sr
+-   **Last Updated**: January 2025
 
-## 2. Priority & Timeline Assessment
+## 2. Summary
+
+This document outlines the requirements for implementing the core provider UI components for the dental dashboard. The foundational infrastructure has been established, including API endpoints, data hooks, type definitions, and basic page structure. The remaining work focuses on building the actual UI components using the existing `shadcn/ui` library to display provider information with rich functionality.
+
+## 3. Current Implementation Status
+
+### ✅ Completed Infrastructure
+-   **API Layer**: `/api/providers` endpoint with full CRUD operations
+-   **Data Layer**: `useProviders` hook with TanStack Query integration
+-   **Type System**: Comprehensive TypeScript types in `src/types/providers.ts`
+-   **Page Structure**: Basic providers page with loading and error states
+-   **Component Files**: Empty component files created in `src/components/providers/`
+
+### ❌ Remaining Implementation
+-   **Provider Card Component**: Rich card display for individual providers
+-   **Provider Grid Component**: Responsive grid layout with state management
+-   **Provider Metrics Component**: Performance metrics display
+-   **Provider Actions Component**: Action buttons and dropdown menus
+-   **Provider Filters Component**: Advanced filtering and search functionality
+
+## 4. Priority & Timeline Assessment
 
 -   **Priority**: **High**
-    -   **Reasoning**: This is a core feature for the dental dashboard, directly impacting the user's ability to manage providers, which is a primary function of the application.
--   **Timeline**: **2-3 Days**
-    -   **Reasoning**: The complexity is medium, involving the creation of several interconnected components. The timeline aligns with fast-shipping standards for high-priority features.
+    -   **Reasoning**: Core dashboard functionality for provider management
+    -   **Dependencies**: Required for provider performance analytics (AOJ-53)
+-   **Updated Timeline**: **1-2 Days**
+    -   **Reasoning**: Infrastructure is complete, focus is on UI component implementation
 
-## 3. User Stories
+## 5. User Stories
 
--   **As a Clinic Administrator, I want to see a list of all providers in a clear and organized grid, so that I can quickly get an overview of my staff.**
--   **As a Clinic Administrator, I want to view key performance metrics for each provider at a glance, so that I can assess their performance.**
--   **As a Clinic Administrator, I want to be able to perform common actions for a provider (e.g., edit, view details), so that I can manage them efficiently.**
+-   **As a Clinic Administrator, I want to see a comprehensive list of all providers in a visually appealing grid, so that I can quickly assess my team.**
+-   **As a Clinic Administrator, I want to view key performance metrics and location assignments for each provider at a glance.**
+-   **As a Clinic Administrator, I want to filter and search providers by type, status, and location for efficient management.**
+-   **As a Clinic Administrator, I want quick access to provider actions like viewing details, editing information, and managing assignments.**
 
-## 4. Functional Expectations
+## 6. Technical Architecture
 
-### Component Breakdown:
+### Available Data Structure
+```typescript
+// From src/types/providers.ts
+interface ProviderWithLocations {
+  id: string;
+  name: string;
+  firstName?: string;
+  lastName?: string;
+  email?: string;
+  providerType: 'dentist' | 'hygienist' | 'specialist' | 'other';
+  status: string;
+  clinic: { id: string; name: string };
+  locations: LocationDetail[];
+  primaryLocation?: LocationSummary;
+  _count: {
+    locations: number;
+    hygieneProduction: number;
+    dentistProduction: number;
+  };
+}
+```
 
--   **`provider-card.tsx`**: A card component to display a single provider's information, including their photo (using `avatar.tsx`), name, role (using `badge.tsx`), and other key details.
--   **`provider-grid.tsx`**: A responsive grid layout that arranges multiple `provider-card` components.
--   **`provider-metrics.tsx`**: A component within the provider card to display KPIs using the existing `metric-card.tsx`.
--   **`provider-actions.tsx`**: A dropdown menu or set of buttons (using `dropdown-menu.tsx` or `button.tsx`) for actions like "View Profile" or "Edit".
+### Available Hooks
+-   `useProviders()` - Main data fetching with filters and pagination
+-   `useProvider(id)` - Single provider details
+-   `useProviderFilters()` - Filter options and statistics
 
-### State Handling:
+### Available UI Components
+-   **shadcn/ui**: Card, Avatar, Badge, Button, DropdownMenu, Skeleton
+-   **Custom**: MetricCard, LoadingSpinner, existing dashboard components
 
--   **Loading State**: The grid should display skeleton loaders (`skeleton.tsx`) while provider data is being fetched.
--   **Error State**: A clear error message and a "Retry" option should be displayed if data fetching fails.
--   **Empty State**: A helpful message should be shown when there are no providers to display.
+## 7. Component Specifications
 
-### Acceptance Criteria:
+### 7.1 Provider Card Component (`provider-card.tsx`)
+**Purpose**: Display individual provider information in a card format
 
--   All components must be fully typed using TypeScript. A `Provider` interface/type must be defined.
--   Components must be responsive and functional on modern desktop browsers.
--   The UI must be consistent with the existing design system (`shadcn/ui`).
--   Code must be well-documented with JSDoc3 comments.
+**Features**:
+-   Provider avatar with fallback initials
+-   Name, type, and status display
+-   Location assignments with primary location highlight
+-   Production count indicators
+-   Quick action buttons
+-   Responsive design for mobile and desktop
 
-## 5. Affected Files
+**Props Interface**:
+```typescript
+interface ProviderCardProps {
+  provider: ProviderWithLocations;
+  onEdit?: (provider: ProviderWithLocations) => void;
+  onViewDetails?: (provider: ProviderWithLocations) => void;
+  showMetrics?: boolean;
+  compact?: boolean;
+}
+```
 
-### New Files:
+### 7.2 Provider Grid Component (`provider-grid.tsx`)
+**Purpose**: Responsive grid layout with state management
 
--   `src/components/providers/provider-card.tsx`
--   `src/components/providers/provider-grid.tsx`
--   `src/components/providers/provider-metrics.tsx`
--   `src/components/providers/provider-actions.tsx`
--   `src/lib/types/provider.ts` (or similar, to define the Provider data structure)
+**Features**:
+-   Responsive grid (1-4 columns based on screen size)
+-   Loading state with skeleton cards
+-   Empty state with helpful messaging
+-   Error state with retry functionality
+-   Pagination controls
+-   Grid/list view toggle
 
-### Modified Files:
+**Props Interface**:
+```typescript
+interface ProviderGridProps {
+  providers: ProviderWithLocations[];
+  isLoading?: boolean;
+  isError?: boolean;
+  onRetry?: () => void;
+  pagination?: PaginationInfo;
+  viewMode?: 'grid' | 'list';
+  onViewModeChange?: (mode: 'grid' | 'list') => void;
+}
+```
 
--   `src/app/(dashboard)/settings/providers/page.tsx`: To integrate and render the new `provider-grid.tsx` component.
--   `src/lib/database/queries/providers.ts`: May require a new query to fetch the necessary data for the provider components.
+### 7.3 Provider Metrics Component (`provider-metrics.tsx`)
+**Purpose**: Display key performance indicators
 
-## 6. Implementation Strategy
+**Features**:
+-   Production count badges
+-   Location count indicator
+-   Status indicators
+-   Performance trend icons
+-   Compact metric display
 
-1.  **Define Data Structure**: Create a `Provider` interface in `src/lib/types/provider.ts` that includes all necessary fields (e.g., `id`, `name`, `role`, `avatarUrl`, `metrics`).
-2.  **Develop Bottom-Up**:
-    -   Start by building the smallest, most reusable component: `provider-card.tsx`. Use mock data to develop the UI.
-    -   Develop `provider-metrics.tsx` and `provider-actions.tsx` and integrate them into the card.
-3.  **Compose the Grid**: Build `provider-grid.tsx` to responsively display a list of `provider-card` components, still using mock data.
-4.  **Implement State Handling**: Add loading, empty, and error state handling to `provider-grid.tsx`.
-5.  **Integrate Data**: Connect the `provider-grid.tsx` to a data-fetching hook or function that retrieves real provider data.
-6.  **Final Integration**: Replace any placeholder content on `src/app/(dashboard)/settings/providers/page.tsx` with the completed `provider-grid.tsx` component.
+### 7.4 Provider Actions Component (`provider-actions.tsx`)
+**Purpose**: Action buttons and dropdown menus
 
-## 7. AI Guardrails Implementation Strategy
+**Features**:
+-   View details button
+-   Edit provider button
+-   Manage locations action
+-   View performance action
+-   Dropdown menu for additional actions
+-   Permission-based action visibility
 
-Given that this feature affects multiple files and involves creating new, typed components, the following guardrails should be applied during AI-assisted development:
+### 7.5 Provider Filters Component (`provider-filters.tsx`)
+**Purpose**: Advanced filtering and search
 
--   **File-level Constraints**: When working on a component, instruct the AI to only import from `react`, `clsx`, `lucide-react`, `@radix-ui`, and other approved `shadcn/ui` components. All data-related types must be imported from `src/lib/types`.
--   **Change Type Isolation**: Separate tasks into distinct sessions. For example, one session for creating the `Provider` type, another for building the `provider-card.tsx` UI with mock data, and a final one for data integration.
--   **Incremental Validation**: After creating each component, run the linter and type-checker (`pnpm lint`) to ensure no new issues are introduced.
--   **Safety Prompts**: Use prompts that reinforce the rules, such as: "Create the `provider-card.tsx` component. It should be a client component and use the `Provider` type from `src/lib/types`. Do not include any data-fetching logic."
+**Features**:
+-   Search by name/email
+-   Filter by provider type
+-   Filter by status (active/inactive)
+-   Filter by location
+-   Clear all filters
+-   Filter count indicators
 
-## 8. Risk Assessment & Mitigation
+## 8. Implementation Strategy
 
--   **Risk**: The `Provider` data model may be incomplete or change in the future.
-    -   **Mitigation**: Define the `Provider` type in a central `types` file. This makes it easy to update and ensures all components use the same structure.
--   **Risk**: UI components may become inconsistent with the overall design.
-    -   **Mitigation**: Strictly adhere to using `shadcn/ui` components and follow the existing design patterns in the application. Conduct a UI review before merging.
--   **Risk**: Performance issues if the list of providers grows very large.
-    -   **Mitigation**: For this initial implementation, performance is not a primary concern. However, design the `provider-grid.tsx` to accept a paginated or virtualized list in the future without major refactoring.
+### Phase 1: Core Components (Day 1 - 6 hours)
+
+#### 8.1 Provider Card Implementation
+**File**: `src/components/providers/provider-card.tsx`
+-   Build responsive card layout using shadcn/ui Card components
+-   Implement avatar with fallback initials
+-   Add provider type badges and status indicators
+-   Include location assignments display
+-   Add production count metrics
+-   Integrate action buttons
+
+#### 8.2 Provider Metrics Implementation
+**File**: `src/components/providers/provider-metrics.tsx`
+-   Create compact metrics display
+-   Show production counts with icons
+-   Display location assignments
+-   Add status indicators with appropriate colors
+
+#### 8.3 Provider Actions Implementation
+**File**: `src/components/providers/provider-actions.tsx`
+-   Build dropdown menu with actions
+-   Implement permission-based visibility
+-   Add navigation handlers
+-   Include confirmation dialogs for destructive actions
+
+### Phase 2: Grid and Filters (Day 1-2 - 4 hours)
+
+#### 8.4 Provider Grid Implementation
+**File**: `src/components/providers/provider-grid.tsx`
+-   Create responsive grid layout
+-   Implement loading states with skeletons
+-   Add empty and error states
+-   Include pagination controls
+-   Add view mode toggle (grid/list)
+
+#### 8.5 Provider Filters Implementation
+**File**: `src/components/providers/provider-filters.tsx`
+-   Build search input with debouncing
+-   Create filter dropdowns for type, status, location
+-   Add clear filters functionality
+-   Implement filter count indicators
+-   Integrate with useProviders hook
+
+### Phase 3: Integration and Polish (Day 2 - 2 hours)
+
+#### 8.6 Page Integration
+**Files**:
+-   `src/app/(dashboard)/providers/page.tsx`
+-   `src/app/(dashboard)/settings/providers/page.tsx`
+
+-   Replace basic provider display with rich components
+-   Integrate filters with grid
+-   Add proper error boundaries
+-   Implement responsive design
+-   Add loading and empty states
+
+## 9. File Status and Requirements
+
+### ✅ Existing Infrastructure
+-   `src/types/providers.ts` - Complete type definitions
+-   `src/hooks/use-providers.ts` - Data fetching and state management
+-   `src/app/api/providers/route.ts` - API endpoints
+-   `src/app/(dashboard)/providers/page.tsx` - Basic page structure
+-   `src/app/(dashboard)/providers/loading.tsx` - Loading component
+-   `src/app/(dashboard)/providers/error.tsx` - Error component
+
+### 🔄 Files to Implement (Currently Empty)
+-   `src/components/providers/provider-card.tsx` - **Priority 1**
+-   `src/components/providers/provider-grid.tsx` - **Priority 2**
+-   `src/components/providers/provider-metrics.tsx` - **Priority 3**
+-   `src/components/providers/provider-actions.tsx` - **Priority 4**
+-   `src/components/providers/provider-filters.tsx` - **Priority 5**
+
+### 📝 Files to Update
+-   `src/app/(dashboard)/providers/page.tsx` - Replace basic grid with rich components
+-   `src/app/(dashboard)/settings/providers/page.tsx` - Add provider management UI
+
+## 10. Design System Integration
+
+### shadcn/ui Components to Use
+-   **Card, CardHeader, CardContent, CardFooter** - Provider card structure
+-   **Avatar** - Provider profile images with fallback
+-   **Badge** - Provider type and status indicators
+-   **Button** - Action buttons and controls
+-   **DropdownMenu** - Action menus and filters
+-   **Input** - Search functionality
+-   **Select** - Filter dropdowns
+-   **Skeleton** - Loading states
+-   **Alert** - Error and empty states
+
+### Design Patterns
+-   **Responsive Grid**: 1 column (mobile) → 2 columns (tablet) → 3-4 columns (desktop)
+-   **Card Hover States**: Subtle elevation and border changes
+-   **Status Colors**: Green (active), Gray (inactive), Blue (pending)
+-   **Typography Hierarchy**: Provider name (font-semibold), type (text-sm), details (text-xs)
+
+## 11. Acceptance Criteria
+
+### Functional Requirements
+-   ✅ Provider cards display all relevant information clearly
+-   ✅ Grid layout is responsive across all device sizes
+-   ✅ Loading states use skeleton components
+-   ✅ Error states provide retry functionality
+-   ✅ Empty states include helpful messaging
+-   ✅ Filters work correctly with the useProviders hook
+-   ✅ Actions integrate with existing navigation patterns
+
+### Technical Requirements
+-   ✅ All components are fully typed with TypeScript
+-   ✅ Components follow established project patterns
+-   ✅ Code includes comprehensive JSDoc documentation
+-   ✅ Components are accessible (ARIA labels, keyboard navigation)
+-   ✅ Performance is optimized (memoization where appropriate)
+
+### Design Requirements
+-   ✅ Consistent with existing dashboard design system
+-   ✅ Uses only approved shadcn/ui components
+-   ✅ Responsive design works on all target devices
+-   ✅ Loading and error states match application patterns
+-   ✅ Color scheme follows established brand guidelines
+
+## 12. Risk Assessment & Mitigation
+
+### Technical Risks
+-   **Risk**: Component complexity could impact performance
+    -   **Mitigation**: Use React.memo for provider cards, implement virtual scrolling if needed
+-   **Risk**: Type safety issues with complex provider data
+    -   **Mitigation**: Leverage existing comprehensive types, add runtime validation
+-   **Risk**: Inconsistent UI patterns
+    -   **Mitigation**: Strict adherence to shadcn/ui components and existing patterns
+
+### UX Risks
+-   **Risk**: Information overload in provider cards
+    -   **Mitigation**: Progressive disclosure, compact/expanded view modes
+-   **Risk**: Poor mobile experience
+    -   **Mitigation**: Mobile-first responsive design, touch-friendly interactions
+-   **Risk**: Slow loading with many providers
+    -   **Mitigation**: Pagination, skeleton loading, optimistic updates
+
+## 13. Testing Strategy
+
+### Component Testing
+-   Unit tests for each component with various props
+-   Accessibility testing with screen readers
+-   Responsive design testing across breakpoints
+-   Performance testing with large datasets
+
+### Integration Testing
+-   Provider grid with real API data
+-   Filter functionality with useProviders hook
+-   Navigation and action button functionality
+-   Error boundary and loading state handling
+
+## 14. Future Enhancements
+
+### Phase 2 Features
+-   **Bulk Actions**: Select multiple providers for batch operations
+-   **Advanced Metrics**: Performance charts and trends
+-   **Export Functionality**: CSV/PDF export of provider lists
+-   **Drag & Drop**: Reorder providers or assign to locations
+
+### Performance Optimizations
+-   **Virtual Scrolling**: For large provider lists
+-   **Image Optimization**: Lazy loading for provider avatars
+-   **Caching**: Aggressive caching of provider data
+-   **Search Optimization**: Debounced search with server-side filtering
+
+---
+
+**Linear Issue**: [AOJ-54](https://linear.app/aojdevstudio/issue/AOJ-54)
+**Priority**: High
+**Labels**: `frontend`, `ui`, `providers`, `components`
+**Dependencies**: Requires completion for AOJ-53 (Provider Performance Metrics)
+**Estimated Effort**: 1-2 days (12-16 hours)
