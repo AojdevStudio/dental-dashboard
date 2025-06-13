@@ -24,9 +24,9 @@ export abstract class BaseService {
   /**
    * Validate required parameters
    */
-  protected validateRequired<T extends Record<string, unknown>>(
+  protected validateRequired<T extends Record<string, unknown>, K extends keyof T>(
     params: T,
-    requiredFields: string[]
+    requiredFields: K[]
   ): void {
     const missing = requiredFields.filter(
       (field) => params[field] === undefined || params[field] === null || params[field] === ''
