@@ -176,42 +176,99 @@ export const getStatusColor = (
   return palette.success;
 };
 
-export const chartTheme = {
+/**
+ * Get computed CSS custom property value
+ */
+const getCSSVariable = (variable: string): string => {
+  if (typeof window === 'undefined') {
+    return '#666'; // SSR fallback
+  }
+
+  const root = document.documentElement;
+  const value = getComputedStyle(root).getPropertyValue(variable).trim();
+  return value || '#666'; // fallback color
+};
+
+/**
+ * Get theme-aware chart configuration
+ */
+export const getChartTheme = () => ({
   axis: {
     style: {
       fontSize: 12,
       fontFamily: 'Inter, sans-serif',
-      fill: defaultColorPalette.neutral[5],
+      fill: `hsl(${getCSSVariable('--muted-foreground')})`,
     },
   },
   grid: {
-    stroke: defaultColorPalette.neutral[2],
+    stroke: `hsl(${getCSSVariable('--border')})`,
     strokeDasharray: '3 3',
   },
   tooltip: {
     container: {
-      backgroundColor: 'white',
-      border: `1px solid ${defaultColorPalette.neutral[2]}`,
+      backgroundColor: `hsl(${getCSSVariable('--popover')})`,
+      border: `1px solid hsl(${getCSSVariable('--border')})`,
       borderRadius: '6px',
       padding: '8px 12px',
-      boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)',
+      boxShadow: `0 4px 12px -4px hsl(${getCSSVariable('--ring')} / 0.2)`,
     },
     label: {
       fontSize: 12,
       fontWeight: 600,
-      color: defaultColorPalette.neutral[8],
+      color: `hsl(${getCSSVariable('--popover-foreground')})`,
     },
     value: {
       fontSize: 14,
       fontWeight: 400,
-      color: defaultColorPalette.neutral[6],
+      color: `hsl(${getCSSVariable('--muted-foreground')})`,
     },
   },
   legend: {
     style: {
       fontSize: 12,
       fontFamily: 'Inter, sans-serif',
-      fill: defaultColorPalette.neutral[6],
+      fill: `hsl(${getCSSVariable('--muted-foreground')})`,
+    },
+  },
+});
+
+// Updated chart theme with better dark mode support
+export const chartTheme = {
+  axis: {
+    style: {
+      fontSize: 12,
+      fontFamily: 'Inter, sans-serif',
+      fill: 'currentColor', // Use currentColor for better theme compatibility
+    },
+  },
+  grid: {
+    stroke: 'hsl(var(--border))',
+    strokeDasharray: '3 3',
+  },
+  tooltip: {
+    container: {
+      backgroundColor: 'hsl(var(--popover))',
+      border: '1px solid hsl(var(--border))',
+      borderRadius: '6px',
+      padding: '8px 12px',
+      boxShadow: '0 4px 12px -4px hsl(var(--ring) / 0.2)',
+    },
+    label: {
+      fontSize: 12,
+      fontWeight: 600,
+      color: 'hsl(var(--popover-foreground))',
+    },
+    value: {
+      fontSize: 14,
+      fontWeight: 400,
+      color: 'hsl(var(--muted-foreground))',
+    },
+  },
+  legend: {
+    style: {
+      fontSize: 12,
+      fontFamily: 'Inter, sans-serif',
+      fill: 'currentColor', // Use currentColor for better theme compatibility
     },
   },
 };

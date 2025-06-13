@@ -99,7 +99,11 @@ export function LineChart({
       error={error}
       className={className}
     >
-      <ResponsiveContainer width="100%" height={defaultConfig.height}>
+      <ResponsiveContainer
+        width="100%"
+        height={defaultConfig.height}
+        className="text-muted-foreground"
+      >
         <RechartsLineChart
           data={defaultConfig.data}
           margin={margin}

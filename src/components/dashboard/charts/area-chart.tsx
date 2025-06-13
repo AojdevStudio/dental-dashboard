@@ -103,7 +103,11 @@ export function AreaChart({
       error={error}
       className={className}
     >
-      <ResponsiveContainer width="100%" height={defaultConfig.height}>
+      <ResponsiveContainer
+        width="100%"
+        height={defaultConfig.height}
+        className="text-muted-foreground"
+      >
         <RechartsAreaChart
           data={defaultConfig.data}
           margin={margin}
