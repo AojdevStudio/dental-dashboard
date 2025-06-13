@@ -5,7 +5,6 @@ import { Progress } from '@/components/ui/progress';
 import { Skeleton } from '@/components/ui/skeleton';
 import type { KPICardProps } from '@/lib/types/kpi';
 import { cn } from '@/lib/utils';
-import { getTrendColor } from '@/lib/utils/color-schemes';
 import { motion } from 'framer-motion';
 import { Calendar, Info, Minus, Target, TrendingDown, TrendingUp } from 'lucide-react';
 
@@ -60,16 +59,11 @@ export function KPICard({
           ? TrendingDown
           : Minus;
 
-    const color = getTrendColor(
-      data.trend.direction,
-      data.trend.direction === 'up' ? 'positive' : 'negative'
-    );
-
     return (
       <div
         className={cn('flex items-center gap-1 text-sm', {
-          'text-green-600 dark:text-green-400': color === '#059669',
-          'text-red-600 dark:text-red-400': color === '#DC2626',
+          'text-green-600 dark:text-green-400': data.trend.direction === 'up',
+          'text-red-600 dark:text-red-400': data.trend.direction === 'down',
           'text-muted-foreground': data.trend.direction === 'neutral',
         })}
       >
