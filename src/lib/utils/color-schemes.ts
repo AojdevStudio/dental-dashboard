@@ -181,37 +181,37 @@ export const chartTheme = {
     style: {
       fontSize: 12,
       fontFamily: 'Inter, sans-serif',
-      fill: defaultColorPalette.neutral[5],
+      fill: 'hsl(var(--muted-foreground))',
     },
   },
   grid: {
-    stroke: defaultColorPalette.neutral[2],
+    stroke: 'hsl(var(--border))',
     strokeDasharray: '3 3',
   },
   tooltip: {
     container: {
-      backgroundColor: 'white',
-      border: `1px solid ${defaultColorPalette.neutral[2]}`,
+      backgroundColor: 'hsl(var(--popover))',
+      border: '1px solid hsl(var(--border))',
       borderRadius: '6px',
       padding: '8px 12px',
-      boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)',
+      boxShadow: '0 4px 12px -4px hsl(var(--ring) / 0.2)',
     },
     label: {
       fontSize: 12,
       fontWeight: 600,
-      color: defaultColorPalette.neutral[8],
+      color: 'hsl(var(--popover-foreground))',
     },
     value: {
       fontSize: 14,
       fontWeight: 400,
-      color: defaultColorPalette.neutral[6],
+      color: 'hsl(var(--muted-foreground))',
     },
   },
   legend: {
     style: {
       fontSize: 12,
       fontFamily: 'Inter, sans-serif',
-      fill: defaultColorPalette.neutral[6],
+      fill: 'hsl(var(--muted-foreground))',
     },
   },
 };

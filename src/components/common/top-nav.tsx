@@ -3,6 +3,7 @@ import { Button } from '@/components/ui/button';
 import { Calendar } from '@/components/ui/calendar';
 import { Input } from '@/components/ui/input';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { ThemeToggle } from '@/components/ui/theme-toggle';
 import { useAuth } from '@/hooks/use-auth';
 import type { TopNavProps } from '@/lib/types/layout';
 import { cn } from '@/lib/utils';
@@ -118,6 +119,8 @@ export function TopNav({
         <Button variant="ghost" size="icon" aria-label="Settings">
           <Settings className="h-5 w-5" />
         </Button>
+
+        <ThemeToggle />
 
         <div className="ml-2 border-l pl-2">
           {isAuthenticated ? (

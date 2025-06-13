@@ -68,9 +68,9 @@ export function KPICard({
     return (
       <div
         className={cn('flex items-center gap-1 text-sm', {
-          'text-green-600': color === '#059669',
-          'text-red-600': color === '#DC2626',
-          'text-gray-600': data.trend.direction === 'neutral',
+          'text-green-600 dark:text-green-400': color === '#059669',
+          'text-red-600 dark:text-red-400': color === '#DC2626',
+          'text-muted-foreground': data.trend.direction === 'neutral',
         })}
       >
         <Icon className="w-4 h-4" />
@@ -182,9 +182,12 @@ export function KPICard({
     'relative overflow-hidden transition-all duration-200 h-full',
     {
       'hover:shadow-md cursor-pointer': onClick,
-      'border-green-200 bg-green-50/30': colorScheme === 'success',
-      'border-amber-200 bg-amber-50/30': colorScheme === 'warning',
-      'border-red-200 bg-red-50/30': colorScheme === 'error',
+      'border-green-500/20 bg-green-500/5 dark:border-green-400/20 dark:bg-green-400/5':
+        colorScheme === 'success',
+      'border-amber-500/20 bg-amber-500/5 dark:border-amber-400/20 dark:bg-amber-400/5':
+        colorScheme === 'warning',
+      'border-red-500/20 bg-red-500/5 dark:border-red-400/20 dark:bg-red-400/5':
+        colorScheme === 'error',
     },
     className
   );
