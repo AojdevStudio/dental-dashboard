@@ -1,0 +1,4 @@
+<design_analysis>
+  <domain>{{DESIGN_DOMAIN}}</domain>
+  <prompt>Think deeper about my {{DESIGN_DOMAIN}} with pro using max thinking mode and brainstorm to come up with the best architecture for my project.</prompt>
+</design_analysis>

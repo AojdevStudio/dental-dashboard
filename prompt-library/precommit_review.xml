@@ -1,0 +1,4 @@
+<precommit_review>
+  <tool>gemini</tool>
+  <prompt>Now use gemini and perform a review and precommit and ensure original requirements are met, no duplication of code or logic, everything should work as expected.</prompt>
+</precommit_review>

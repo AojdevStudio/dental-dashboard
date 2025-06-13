@@ -1,0 +1,4 @@
+<debug_request>
+  <error>{{ERROR_DESCRIPTION}}</error>
+  <prompt>Get gemini to debug why my {{ERROR_DESCRIPTION}}</prompt>
+</debug_request>

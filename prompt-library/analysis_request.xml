@@ -1,0 +1,4 @@
+<analysis_request>
+  <target>{{TARGET}}</target>
+  <prompt>Get gemini to do an architecture analysis of {{TARGET}}</prompt>
+</analysis_request>

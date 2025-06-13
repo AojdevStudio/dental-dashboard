@@ -1,0 +1,4 @@
+<code_review>
+  <file>{{FILE_NAME}}</file>
+  <prompt>Perform a code review with gemini pro and review {{FILE_NAME}} for security issues and potential vulnerabilities. I need an actionable plan but break it down into smaller quick-wins that we can implement and test rapidly</prompt>
+</code_review>
