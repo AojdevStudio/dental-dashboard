@@ -626,3 +626,254 @@ export async function getProviderWithLocationDetails(
   const providers = await getProvidersWithLocations({ providerId });
   return providers[0] || null;
 }
+
+/**
+ * Calculate period start and end dates based on period type
+ */
+function calculatePeriodDates(
+  period: 'daily' | 'weekly' | 'monthly' | 'quarterly' | 'yearly',
+  startDate?: Date,
+  endDate?: Date
+): { periodStart: Date; periodEnd: Date } {
+  const now = new Date();
+
+  if (startDate && endDate) {
+    return { periodStart: startDate, periodEnd: endDate };
+  }
+
+  switch (period) {
+    case 'daily': {
+      const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+      return { periodStart: today, periodEnd: today };
+    }
+    case 'weekly': {
+      const startOfWeek = new Date(now);
+      startOfWeek.setDate(now.getDate() - now.getDay());
+      startOfWeek.setHours(0, 0, 0, 0);
+      const endOfWeek = new Date(startOfWeek);
+      endOfWeek.setDate(startOfWeek.getDate() + 6);
+      endOfWeek.setHours(23, 59, 59, 999);
+      return { periodStart: startOfWeek, periodEnd: endOfWeek };
+    }
+    case 'monthly': {
+      const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+      const endOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+      endOfMonth.setHours(23, 59, 59, 999);
+      return { periodStart: startOfMonth, periodEnd: endOfMonth };
+    }
+    case 'quarterly': {
+      const quarter = Math.floor(now.getMonth() / 3);
+      const startOfQuarter = new Date(now.getFullYear(), quarter * 3, 1);
+      const endOfQuarter = new Date(now.getFullYear(), quarter * 3 + 3, 0);
+      endOfQuarter.setHours(23, 59, 59, 999);
+      return { periodStart: startOfQuarter, periodEnd: endOfQuarter };
+    }
+    case 'yearly': {
+      const startOfYear = new Date(now.getFullYear(), 0, 1);
+      const endOfYear = new Date(now.getFullYear(), 11, 31);
+      endOfYear.setHours(23, 59, 59, 999);
+      return { periodStart: startOfYear, periodEnd: endOfYear };
+    }
+    default: {
+      // Default to current month
+      const startDefault = new Date(now.getFullYear(), now.getMonth(), 1);
+      const endDefault = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+      endDefault.setHours(23, 59, 59, 999);
+      return { periodStart: startDefault, periodEnd: endDefault };
+    }
+  }
+}
+
+/**
+ * Aggregate production data by location
+ */
+function aggregateProductionByLocation(productionData: ProviderPerformanceMetrics[]) {
+  return productionData.reduce(
+    (acc, data) => {
+      const existing = acc.find((item) => item.locationId === data.locationId);
+      if (existing) {
+        existing.total += data.totalProduction;
+        existing.average = (existing.average + data.avgDailyProduction) / 2;
+        if (data.productionGoal) {
+          existing.goal = (existing.goal || 0) + data.productionGoal;
+        }
+      } else {
+        acc.push({
+          locationId: data.locationId,
+          locationName: data.locationName,
+          total: data.totalProduction,
+          average: data.avgDailyProduction,
+          goal: data.productionGoal,
+          variance: data.productionGoal ? data.totalProduction - data.productionGoal : undefined,
+          variancePercentage: data.variancePercentage,
+        });
+      }
+      return acc;
+    },
+    [] as Array<{
+      locationId: string;
+      locationName: string;
+      total: number;
+      average: number;
+      goal?: number;
+      variance?: number;
+      variancePercentage?: number;
+    }>
+  );
+}
+
+/**
+ * Fetch provider goals for a given period
+ */
+async function fetchProviderGoals(
+  providerId: string,
+  clinicId: string,
+  periodStart: Date,
+  periodEnd: Date
+) {
+  const goals = await prisma.goal.findMany({
+    where: {
+      providerId,
+      clinicId,
+      startDate: {
+        gte: periodStart,
+      },
+      endDate: {
+        lte: periodEnd,
+      },
+    },
+    include: {
+      metricDefinition: {
+        select: {
+          name: true,
+          description: true,
+        },
+      },
+    },
+    orderBy: { createdAt: 'desc' },
+  });
+
+  return {
+    total: goals.length,
+    achieved: 0, // Would need metric value comparison
+    achievementRate: 0, // Would need actual vs target calculation
+    details: goals.map((goal) => ({
+      id: goal.id,
+      title: goal.metricDefinition.name,
+      targetValue: Number.parseFloat(goal.targetValue),
+      currentValue: 0, // Would need current metric value
+      achievementPercentage: 0, // Would need calculation
+      period: goal.timePeriod,
+      status: 'in_progress' as const, // Would need actual evaluation
+    })),
+  };
+}
+
+/**
+ * Get comprehensive provider performance metrics
+ */
+export async function getProviderPerformanceMetrics(params: {
+  providerId: string;
+  period?: 'daily' | 'weekly' | 'monthly' | 'quarterly' | 'yearly';
+  startDate?: Date;
+  endDate?: Date;
+  locationId?: string;
+  includeGoals?: boolean;
+  clinicId?: string;
+}) {
+  const {
+    providerId,
+    period = 'monthly',
+    startDate,
+    endDate,
+    locationId,
+    includeGoals = true,
+    clinicId,
+  } = params;
+
+  // Calculate period dates
+  const { periodStart, periodEnd } = calculatePeriodDates(period, startDate, endDate);
+
+  // Get provider details with location information
+  const provider = await getProviderWithLocationDetails(providerId);
+  if (!provider) {
+    return null;
+  }
+
+  // Verify clinic access if provided
+  if (clinicId && provider.clinic.id !== clinicId) {
+    return null;
+  }
+
+  // Build location filter conditions
+  const locationFilter = locationId ? { locationId } : {};
+
+  // Get production data based on provider type
+  let productionData: ProviderPerformanceMetrics[] = [];
+
+  if (provider.providerType === 'dentist' || provider.providerType === 'hygienist') {
+    try {
+      productionData = await getProviderPerformanceByLocation({
+        providerId,
+        startDate: periodStart,
+        endDate: periodEnd,
+        providerType: provider.providerType as 'dentist' | 'hygienist',
+        clinicId: provider.clinic.id,
+        ...locationFilter,
+      });
+    } catch {
+      productionData = [];
+    }
+  }
+
+  // Calculate total production metrics
+  const totalProduction = productionData.reduce((sum, data) => sum + data.totalProduction, 0);
+  const averageProduction = productionData.length > 0 ? totalProduction / productionData.length : 0;
+  const totalGoal = productionData.reduce((sum, data) => sum + (data.productionGoal || 0), 0);
+  const variance = totalGoal > 0 ? totalProduction - totalGoal : undefined;
+  const variancePercentage =
+    totalGoal > 0 ? ((totalProduction - totalGoal) / totalGoal) * 100 : undefined;
+
+  // Group by location for multi-location providers
+  const byLocation = aggregateProductionByLocation(productionData);
+
+  // Get goals if requested
+  let goalsData: Awaited<ReturnType<typeof fetchProviderGoals>> | undefined;
+  if (includeGoals) {
+    try {
+      goalsData = await fetchProviderGoals(providerId, provider.clinic.id, periodStart, periodEnd);
+    } catch {
+      goalsData = undefined;
+    }
+  }
+
+  return {
+    provider: {
+      id: provider.id,
+      name: provider.name,
+      providerType: provider.providerType,
+      primaryLocation: provider.primaryLocation
+        ? {
+            id: provider.primaryLocation.id,
+            name: provider.primaryLocation.name,
+            address: provider.primaryLocation.address || undefined,
+          }
+        : undefined,
+    },
+    period: {
+      startDate: periodStart,
+      endDate: periodEnd,
+      period,
+    },
+    production: {
+      total: totalProduction,
+      average: averageProduction,
+      goal: totalGoal > 0 ? totalGoal : undefined,
+      variance,
+      variancePercentage,
+      byLocation: byLocation.length > 0 ? byLocation : undefined,
+    },
+    goals: goalsData,
+    trends: undefined, // Would require additional historical data queries
+  };
+}

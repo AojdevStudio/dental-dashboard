@@ -85,5 +85,3 @@ scripts/apply-migrations-supabase.ts
 repomix-*.xml
 repomix.config.json
 
-# Prompt library - personal AI prompts
-prompt-library/
