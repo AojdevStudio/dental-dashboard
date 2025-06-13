@@ -693,16 +693,25 @@ function aggregateProductionByLocation(productionData: ProviderPerformanceMetric
       const existing = acc.find((item) => item.locationId === data.locationId);
       if (existing) {
         existing.total += data.totalProduction;
-        existing.average = (existing.average + data.avgDailyProduction) / 2;
+        existing.totalProductionDays += data.productionDays;
+        // Calculate weighted average: total production / total production days
+        existing.average =
+          existing.totalProductionDays > 0 ? existing.total / existing.totalProductionDays : 0;
         if (data.productionGoal) {
           existing.goal = (existing.goal || 0) + data.productionGoal;
+        }
+        // Recalculate variance based on updated totals
+        if (existing.goal && existing.goal > 0) {
+          existing.variance = existing.total - existing.goal;
+          existing.variancePercentage = (existing.variance / existing.goal) * 100;
         }
       } else {
         acc.push({
           locationId: data.locationId,
           locationName: data.locationName,
           total: data.totalProduction,
-          average: data.avgDailyProduction,
+          totalProductionDays: data.productionDays,
+          average: data.productionDays > 0 ? data.totalProduction / data.productionDays : 0,
           goal: data.productionGoal,
           variance: data.productionGoal ? data.totalProduction - data.productionGoal : undefined,
           variancePercentage: data.variancePercentage,
@@ -714,6 +723,7 @@ function aggregateProductionByLocation(productionData: ProviderPerformanceMetric
       locationId: string;
       locationName: string;
       total: number;
+      totalProductionDays: number;
       average: number;
       goal?: number;
       variance?: number;
@@ -828,7 +838,8 @@ export async function getProviderPerformanceMetrics(params: {
 
   // Calculate total production metrics
   const totalProduction = productionData.reduce((sum, data) => sum + data.totalProduction, 0);
-  const averageProduction = productionData.length > 0 ? totalProduction / productionData.length : 0;
+  const totalProductionDays = productionData.reduce((sum, data) => sum + data.productionDays, 0);
+  const averageProduction = totalProductionDays > 0 ? totalProduction / totalProductionDays : 0;
   const totalGoal = productionData.reduce((sum, data) => sum + (data.productionGoal || 0), 0);
   const variance = totalGoal > 0 ? totalProduction - totalGoal : undefined;
   const variancePercentage =
