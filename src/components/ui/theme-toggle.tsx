@@ -26,7 +26,7 @@ import { useTheme } from 'next-themes';
  * Features:
  * - Three-state toggle: light, dark, system
  * - Keyboard accessible dropdown interface
- * - Context-aware icons (Sun, Moon, Monitor)
+ * - Context-aware icons (Sun, Moon, Monitor) based on resolved theme
  * - Smooth transitions handled by next-themes
  * - System theme detection support
  *
@@ -35,14 +35,18 @@ import { useTheme } from 'next-themes';
  * <ThemeToggle />
  */
 export function ThemeToggle() {
-  const { setTheme, theme } = useTheme();
+  const { setTheme, theme, resolvedTheme } = useTheme();
 
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild={true}>
         <Button variant="ghost" size="icon" aria-label="Toggle theme" className="relative">
-          <Sun className="h-[1.2rem] w-[1.2rem] rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
-          <Moon className="absolute h-[1.2rem] w-[1.2rem] rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
+          <Sun
+            className={`h-[1.2rem] w-[1.2rem] transition-all ${resolvedTheme === 'dark' ? 'rotate-90 scale-0' : 'rotate-0 scale-100'}`}
+          />
+          <Moon
+            className={`absolute h-[1.2rem] w-[1.2rem] transition-all ${resolvedTheme === 'dark' ? 'rotate-0 scale-100' : '-rotate-90 scale-0'}`}
+          />
           <span className="sr-only">Toggle theme</span>
         </Button>
       </DropdownMenuTrigger>
