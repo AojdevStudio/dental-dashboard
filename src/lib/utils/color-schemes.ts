@@ -176,12 +176,69 @@ export const getStatusColor = (
   return palette.success;
 };
 
+/**
+ * Get computed CSS custom property value
+ */
+const getCSSVariable = (variable: string): string => {
+  if (typeof window === 'undefined') {
+    return '#666'; // SSR fallback
+  }
+
+  const root = document.documentElement;
+  const value = getComputedStyle(root).getPropertyValue(variable).trim();
+  return value || '#666'; // fallback color
+};
+
+/**
+ * Get theme-aware chart configuration
+ */
+export const getChartTheme = () => ({
+  axis: {
+    style: {
+      fontSize: 12,
+      fontFamily: 'Inter, sans-serif',
+      fill: `hsl(${getCSSVariable('--muted-foreground')})`,
+    },
+  },
+  grid: {
+    stroke: `hsl(${getCSSVariable('--border')})`,
+    strokeDasharray: '3 3',
+  },
+  tooltip: {
+    container: {
+      backgroundColor: `hsl(${getCSSVariable('--popover')})`,
+      border: `1px solid hsl(${getCSSVariable('--border')})`,
+      borderRadius: '6px',
+      padding: '8px 12px',
+      boxShadow: `0 4px 12px -4px hsl(${getCSSVariable('--ring')} / 0.2)`,
+    },
+    label: {
+      fontSize: 12,
+      fontWeight: 600,
+      color: `hsl(${getCSSVariable('--popover-foreground')})`,
+    },
+    value: {
+      fontSize: 14,
+      fontWeight: 400,
+      color: `hsl(${getCSSVariable('--muted-foreground')})`,
+    },
+  },
+  legend: {
+    style: {
+      fontSize: 12,
+      fontFamily: 'Inter, sans-serif',
+      fill: `hsl(${getCSSVariable('--muted-foreground')})`,
+    },
+  },
+});
+
+// Updated chart theme with better dark mode support
 export const chartTheme = {
   axis: {
     style: {
       fontSize: 12,
       fontFamily: 'Inter, sans-serif',
-      fill: 'hsl(var(--muted-foreground))',
+      fill: 'currentColor', // Use currentColor for better theme compatibility
     },
   },
   grid: {
@@ -211,7 +268,7 @@ export const chartTheme = {
     style: {
       fontSize: 12,
       fontFamily: 'Inter, sans-serif',
-      fill: 'hsl(var(--muted-foreground))',
+      fill: 'currentColor', // Use currentColor for better theme compatibility
     },
   },
 };

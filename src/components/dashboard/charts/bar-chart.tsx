@@ -102,7 +102,11 @@ export function BarChart({
   };
 
   const ChartComponent = horizontal ? (
-    <ResponsiveContainer width="100%" height={defaultConfig.height}>
+    <ResponsiveContainer
+      width="100%"
+      height={defaultConfig.height}
+      className="text-muted-foreground"
+    >
       <RechartsBarChart
         layout="vertical"
         data={defaultConfig.data}
@@ -163,7 +167,11 @@ export function BarChart({
       </RechartsBarChart>
     </ResponsiveContainer>
   ) : (
-    <ResponsiveContainer width="100%" height={defaultConfig.height}>
+    <ResponsiveContainer
+      width="100%"
+      height={defaultConfig.height}
+      className="text-muted-foreground"
+    >
       <RechartsBarChart
         data={defaultConfig.data}
         margin={margin}

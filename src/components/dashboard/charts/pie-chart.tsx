@@ -166,7 +166,11 @@ export function PieChart({
       error={error}
       className={className}
     >
-      <ResponsiveContainer width="100%" height={defaultConfig.height}>
+      <ResponsiveContainer
+        width="100%"
+        height={defaultConfig.height}
+        className="text-muted-foreground"
+      >
         <RechartsPieChart>
           <Pie
             data={defaultConfig.data}
