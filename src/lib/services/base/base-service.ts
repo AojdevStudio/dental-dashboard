@@ -9,7 +9,7 @@ export abstract class BaseService {
    */
   protected handleError(error: unknown, context: string): never {
     const message = error instanceof Error ? error.message : 'Unknown error';
-    throw new Error(`${context}: ${message}`);
+    throw new Error(`${context}: ${message}`, { cause: error });
   }
 
   /**
@@ -24,7 +24,10 @@ export abstract class BaseService {
   /**
    * Validate required parameters
    */
-  protected validateRequired<T extends Record<string, unknown>>(params: T, requiredFields: string[]): void {
+  protected validateRequired<T extends Record<string, unknown>, K extends keyof T>(
+    params: T,
+    requiredFields: K[]
+  ): void {
     const missing = requiredFields.filter(
       (field) => params[field] === undefined || params[field] === null || params[field] === ''
     );

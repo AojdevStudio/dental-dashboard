@@ -1,0 +1,18 @@
+{
+  "include": [
+    "docs/prds/backlog/providers-main-page.md",
+    "src/app/(dashboard)/providers/page.tsx",
+    "src/app/(dashboard)/providers/loading.tsx",
+    "src/app/(dashboard)/providers/error.tsx",
+    "src/components/providers/provider-card.tsx",
+    "src/components/providers/provider-grid.tsx",
+    "src/components/providers/provider-filters.tsx",
+    "src/components/providers/provider-metrics.tsx",
+    "src/components/providers/provider-actions.tsx",
+    "src/app/api/providers/route.ts",
+    "src/lib/database/queries/providers.ts",
+    "src/lib/types/providers.ts",
+    "src/hooks/use-providers.ts",
+    "src/components/common/sidebar.tsx"
+  ]
+} 

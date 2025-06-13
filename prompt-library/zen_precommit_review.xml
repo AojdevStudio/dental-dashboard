@@ -1,0 +1,4 @@
+<precommit_review>
+  <tool>zen</tool>
+  <prompt>Use zen and perform a thorough precommit ensuring there aren't any new regressions or bugs introduced.</prompt>
+</precommit_review>
