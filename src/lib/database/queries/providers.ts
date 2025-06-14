@@ -1,24 +1,11 @@
 import { prisma } from '@/lib/database/client';
+import logger from '@/lib/utils/logger';
+import type {
+  ProviderFilters,
+  ProviderPerformanceMetrics,
+  ProviderWithLocations,
+} from '@/types/providers';
 import { Prisma } from '@prisma/client';
-
-/**
- * Provider filter parameters for API requests
- */
-export interface ProviderFilters {
-  search?: string;
-  providerType?: string;
-  status?: string;
-  locationId?: string;
-  page?: number;
-  limit?: number;
-  clinicId?: string;
-  providerId?: string;
-  includeInactive?: boolean;
-  pagination?: {
-    offset: number;
-    limit: number;
-  };
-}
 
 /**
  * Describes the raw row structure from the dentist performance query.
@@ -177,20 +164,27 @@ type RawProviderData = Prisma.ProviderGetPayload<typeof providerQueryArgs>;
 /**
  * Build common query options for provider queries
  */
+/**
+ * Build Prisma query options with optional pagination
+ * @param whereClause - The where clause for filtering
+ * @param pagination - Optional pagination parameters with page and limit
+ * @returns Prisma query options with computed offset from page and limit
+ */
 function buildProviderQueryOptions(
   whereClause: Prisma.ProviderWhereInput,
-  pagination?: { offset: number; limit: number }
+  pagination?: { page: number; limit: number }
 ) {
   const baseOptions = {
     ...providerQueryArgs,
     where: whereClause,
   };
 
-  // Add pagination if provided
+  // Add pagination if provided - compute offset internally from page and limit
   if (pagination) {
+    const offset = (pagination.page - 1) * pagination.limit;
     return {
       ...baseOptions,
-      skip: pagination.offset,
+      skip: offset,
       take: pagination.limit,
     };
   }
@@ -236,54 +230,6 @@ function transformProviderData(providers: RawProviderData[]): ProviderWithLocati
   });
 }
 
-export interface ProviderWithLocations {
-  id: string;
-  name: string;
-  firstName: string | null;
-  lastName: string | null;
-  email: string | null;
-  providerType: string;
-  status: string;
-  clinic: {
-    id: string;
-    name: string;
-  };
-  locations: {
-    id: string;
-    locationId: string;
-    locationName: string;
-    locationAddress: string | null;
-    isPrimary: boolean;
-    isActive: boolean;
-    startDate: Date;
-    endDate: Date | null;
-  }[];
-  primaryLocation?: {
-    id: string;
-    name: string;
-    address: string | null;
-  };
-  _count: {
-    locations: number;
-    hygieneProduction: number;
-    dentistProduction: number;
-  };
-}
-
-export interface ProviderPerformanceMetrics {
-  providerId: string;
-  providerName: string;
-  locationId: string;
-  locationName: string;
-  periodStart: Date;
-  periodEnd: Date;
-  totalProduction: number;
-  avgDailyProduction: number;
-  productionDays: number;
-  productionGoal?: number;
-  variancePercentage?: number;
-}
-
 /**
  * Get all providers with their location relationships
  * @param params - Filter and pagination parameters
@@ -299,7 +245,8 @@ export async function getProvidersWithLocations(
     providerType,
     status,
     includeInactive = false,
-    pagination,
+    page,
+    limit,
   } = params || {};
 
   const whereClause = buildProviderWhereClause({
@@ -311,6 +258,8 @@ export async function getProvidersWithLocations(
     locationId,
   });
 
+  // Create pagination object if page and limit are provided
+  const pagination = page && limit ? { page, limit } : undefined;
   const queryOptions = buildProviderQueryOptions(whereClause, pagination);
   const providers = await prisma.provider.findMany(queryOptions);
 
@@ -583,18 +532,19 @@ export async function getProvidersWithLocationsPaginated(
     providerType,
     status,
     includeInactive = false,
-    pagination,
+    page,
+    limit,
   } = params || {};
 
   // Input validation for pagination parameters
-  if (pagination) {
-    if (pagination.offset < 0) {
-      throw new Error('Pagination offset cannot be negative');
+  if (page !== undefined || limit !== undefined) {
+    if (page !== undefined && page < 1) {
+      throw new Error('Page number must be greater than 0');
     }
-    if (pagination.limit <= 0) {
+    if (limit !== undefined && limit <= 0) {
       throw new Error('Pagination limit must be greater than 0');
     }
-    if (pagination.limit > 1000) {
+    if (limit !== undefined && limit > 1000) {
       throw new Error('Pagination limit cannot exceed 1000 to prevent performance issues');
     }
   }
@@ -607,6 +557,9 @@ export async function getProvidersWithLocationsPaginated(
     includeInactive,
     locationId,
   });
+
+  // Create pagination object if page and limit are provided
+  const pagination = page && limit ? { page, limit } : undefined;
 
   // Execute count and data queries in parallel for performance
   const [total, providers] = await Promise.all([
@@ -625,4 +578,303 @@ export async function getProviderWithLocationDetails(
 ): Promise<ProviderWithLocations | null> {
   const providers = await getProvidersWithLocations({ providerId });
   return providers[0] || null;
+}
+
+/**
+ * Calculate period start and end dates based on period type
+ */
+function calculatePeriodDates(
+  period: 'daily' | 'weekly' | 'monthly' | 'quarterly' | 'yearly',
+  startDate?: Date,
+  endDate?: Date
+): { periodStart: Date; periodEnd: Date } {
+  const now = new Date();
+
+  if (startDate && endDate) {
+    return { periodStart: startDate, periodEnd: endDate };
+  }
+
+  switch (period) {
+    case 'daily': {
+      const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+      const endOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+      endOfDay.setHours(23, 59, 59, 999);
+      return { periodStart: today, periodEnd: endOfDay };
+    }
+    case 'weekly': {
+      const startOfWeek = new Date(now);
+      startOfWeek.setDate(now.getDate() - now.getDay());
+      startOfWeek.setHours(0, 0, 0, 0);
+      const endOfWeek = new Date(startOfWeek);
+      endOfWeek.setDate(startOfWeek.getDate() + 6);
+      endOfWeek.setHours(23, 59, 59, 999);
+      return { periodStart: startOfWeek, periodEnd: endOfWeek };
+    }
+    case 'monthly': {
+      const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+      const endOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+      endOfMonth.setHours(23, 59, 59, 999);
+      return { periodStart: startOfMonth, periodEnd: endOfMonth };
+    }
+    case 'quarterly': {
+      const quarter = Math.floor(now.getMonth() / 3);
+      const startOfQuarter = new Date(now.getFullYear(), quarter * 3, 1);
+      const endOfQuarter = new Date(now.getFullYear(), quarter * 3 + 3, 0);
+      endOfQuarter.setHours(23, 59, 59, 999);
+      return { periodStart: startOfQuarter, periodEnd: endOfQuarter };
+    }
+    case 'yearly': {
+      const startOfYear = new Date(now.getFullYear(), 0, 1);
+      const endOfYear = new Date(now.getFullYear(), 11, 31);
+      endOfYear.setHours(23, 59, 59, 999);
+      return { periodStart: startOfYear, periodEnd: endOfYear };
+    }
+    default: {
+      // Default to current month
+      const startDefault = new Date(now.getFullYear(), now.getMonth(), 1);
+      const endDefault = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+      endDefault.setHours(23, 59, 59, 999);
+      return { periodStart: startDefault, periodEnd: endDefault };
+    }
+  }
+}
+
+/**
+ * Aggregate production data by location
+ */
+function aggregateProductionByLocation(productionData: ProviderPerformanceMetrics[]) {
+  // Use a Map to track production days separately from the accumulator objects
+  const productionDaysMap = new Map<string, number>();
+
+  return productionData.reduce(
+    (acc, data) => {
+      const existing = acc.find((item) => item.locationId === data.locationId);
+      const existingProductionDays = productionDaysMap.get(data.locationId) || 0;
+
+      if (existing) {
+        existing.total += data.totalProduction;
+        const newProductionDays = existingProductionDays + data.productionDays;
+        productionDaysMap.set(data.locationId, newProductionDays);
+
+        // Calculate weighted average: total production / total production days
+        existing.average = newProductionDays > 0 ? existing.total / newProductionDays : 0;
+        if (data.productionGoal) {
+          existing.goal = (existing.goal || 0) + data.productionGoal;
+        }
+        // Recalculate variance based on updated totals
+        if (existing.goal && existing.goal > 0) {
+          existing.variance = existing.total - existing.goal;
+          existing.variancePercentage = (existing.variance / existing.goal) * 100;
+        }
+      } else {
+        productionDaysMap.set(data.locationId, data.productionDays);
+        acc.push({
+          locationId: data.locationId,
+          locationName: data.locationName,
+          total: data.totalProduction,
+          average: data.productionDays > 0 ? data.totalProduction / data.productionDays : 0,
+          goal: data.productionGoal,
+          variance: data.productionGoal ? data.totalProduction - data.productionGoal : undefined,
+          variancePercentage: data.variancePercentage,
+        });
+      }
+      return acc;
+    },
+    [] as Array<{
+      locationId: string;
+      locationName: string;
+      total: number;
+      average: number;
+      goal?: number;
+      variance?: number;
+      variancePercentage?: number;
+    }>
+  );
+}
+
+/**
+ * Fetch provider goals for a given period
+ */
+async function fetchProviderGoals(
+  providerId: string,
+  clinicId: string,
+  periodStart: Date,
+  periodEnd: Date
+) {
+  const goals = await prisma.goal.findMany({
+    where: {
+      providerId,
+      clinicId,
+      startDate: {
+        gte: periodStart,
+      },
+      endDate: {
+        lte: periodEnd,
+      },
+    },
+    include: {
+      metricDefinition: {
+        select: {
+          name: true,
+          description: true,
+        },
+      },
+    },
+    orderBy: { createdAt: 'desc' },
+  });
+
+  return {
+    total: goals.length,
+    achieved: 0, // Would need metric value comparison
+    achievementRate: 0, // Would need actual vs target calculation
+    details: goals.map((goal) => ({
+      id: goal.id,
+      title: goal.metricDefinition.name,
+      targetValue: Number.parseFloat(goal.targetValue),
+      currentValue: 0, // Would need current metric value
+      achievementPercentage: 0, // Would need calculation
+      period: goal.timePeriod,
+      status: 'in_progress' as const, // Would need actual evaluation
+    })),
+  };
+}
+
+/**
+ * Get comprehensive provider performance metrics
+ */
+export async function getProviderPerformanceMetrics(params: {
+  providerId: string;
+  period?: 'daily' | 'weekly' | 'monthly' | 'quarterly' | 'yearly';
+  startDate?: Date;
+  endDate?: Date;
+  locationId?: string;
+  includeGoals?: boolean;
+  clinicId?: string;
+}) {
+  const {
+    providerId,
+    period = 'monthly',
+    startDate,
+    endDate,
+    locationId,
+    includeGoals = true,
+    clinicId,
+  } = params;
+
+  // Calculate period dates
+  const { periodStart, periodEnd } = calculatePeriodDates(period, startDate, endDate);
+
+  // Get provider details with location information
+  const provider = await getProviderWithLocationDetails(providerId);
+  if (!provider) {
+    return null;
+  }
+
+  // Verify clinic access if provided
+  if (clinicId && provider.clinic.id !== clinicId) {
+    return null;
+  }
+
+  // Build location filter conditions
+  const locationFilter = locationId ? { locationId } : {};
+
+  // Get production data based on provider type
+  let productionData: ProviderPerformanceMetrics[] = [];
+
+  if (provider.providerType === 'dentist' || provider.providerType === 'hygienist') {
+    try {
+      productionData = await getProviderPerformanceByLocation({
+        providerId,
+        startDate: periodStart,
+        endDate: periodEnd,
+        providerType: provider.providerType as 'dentist' | 'hygienist',
+        clinicId: provider.clinic.id,
+        ...locationFilter,
+      });
+    } catch (error) {
+      logger.error('Failed to fetch provider performance data', {
+        error: error instanceof Error ? error.message : String(error),
+        stack: error instanceof Error ? error.stack : undefined,
+        providerId,
+        providerType: provider.providerType,
+        clinicId: provider.clinic.id,
+        periodStart: periodStart.toISOString(),
+        periodEnd: periodEnd.toISOString(),
+        locationFilter,
+        operation: 'getProviderPerformanceByLocation',
+      });
+      productionData = [];
+    }
+  }
+
+  // Calculate total production metrics
+  const totalProduction = productionData.reduce((sum, data) => sum + data.totalProduction, 0);
+  const totalProductionDays = productionData.reduce((sum, data) => sum + data.productionDays, 0);
+  const averageProduction = totalProductionDays > 0 ? totalProduction / totalProductionDays : 0;
+  const totalGoal = productionData.reduce((sum, data) => sum + (data.productionGoal || 0), 0);
+  const variance = totalGoal > 0 ? totalProduction - totalGoal : undefined;
+  const variancePercentage =
+    totalGoal > 0 ? ((totalProduction - totalGoal) / totalGoal) * 100 : undefined;
+
+  // Group by location for multi-location providers
+  const byLocation = aggregateProductionByLocation(productionData);
+
+  // Get goals if requested
+  let goalsData: Awaited<ReturnType<typeof fetchProviderGoals>> | undefined;
+  if (includeGoals) {
+    try {
+      goalsData = await fetchProviderGoals(providerId, provider.clinic.id, periodStart, periodEnd);
+    } catch (error) {
+      logger.error('Failed to fetch provider goals data', {
+        error: error instanceof Error ? error.message : String(error),
+        stack: error instanceof Error ? error.stack : undefined,
+        providerId,
+        clinicId: provider.clinic.id,
+        periodStart: periodStart.toISOString(),
+        periodEnd: periodEnd.toISOString(),
+        operation: 'fetchProviderGoals',
+      });
+
+      // Re-throw with additional context for better error handling upstream
+      throw new Error(
+        `Failed to fetch provider goals for provider ${providerId}: ${
+          error instanceof Error ? error.message : String(error)
+        }`
+      );
+    }
+  }
+
+  return {
+    provider: {
+      id: provider.id,
+      name: provider.name,
+      providerType: provider.providerType,
+      clinic: {
+        id: provider.clinic.id,
+        name: provider.clinic.name,
+      },
+      primaryLocation: provider.primaryLocation
+        ? {
+            id: provider.primaryLocation.id,
+            name: provider.primaryLocation.name,
+            address: provider.primaryLocation.address || undefined,
+          }
+        : undefined,
+    },
+    period: {
+      startDate: periodStart,
+      endDate: periodEnd,
+      period,
+    },
+    production: {
+      total: totalProduction,
+      average: averageProduction,
+      goal: totalGoal > 0 ? totalGoal : undefined,
+      variance,
+      variancePercentage,
+      byLocation: byLocation.length > 0 ? byLocation : undefined,
+    },
+    goals: goalsData,
+    trends: undefined, // Would require additional historical data queries
+  };
 }

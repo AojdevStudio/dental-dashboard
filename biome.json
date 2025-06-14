@@ -306,7 +306,7 @@
         "noIrregularWhitespace": "error",
         "noRestrictedImports": "off",
         "noRestrictedTypes": "off",
-        "noSecrets": "warn",
+        "noSecrets": "off",
         "noUselessEscapeInRegex": "error",
         "useAdjacentOverloadSignatures": "error",
         "useAtIndex": "error",

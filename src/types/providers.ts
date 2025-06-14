@@ -5,15 +5,74 @@
  * including the enhanced ProviderWithLocations type that includes location relationships.
  */
 
-// Re-export for other modules
-export type {
-  ProviderFilters,
-  ProviderPerformanceMetrics,
-} from '@/lib/database/queries/providers';
+/**
+ * Provider filter parameters for API requests
+ */
+export interface ProviderFilters {
+  search?: string;
+  providerType?: string;
+  status?: string;
+  locationId?: string;
+  page?: number;
+  limit?: number;
+  clinicId?: string;
+  providerId?: string;
+  includeInactive?: boolean;
+}
 
-// Import ProviderWithLocations for both local usage and re-export
-import type { ProviderWithLocations } from '@/lib/database/queries/providers';
-export type { ProviderWithLocations };
+/**
+ * Provider with location relationships
+ */
+export interface ProviderWithLocations {
+  id: string;
+  name: string;
+  firstName: string | null;
+  lastName: string | null;
+  email: string | null;
+  providerType: string;
+  status: string;
+  clinic: {
+    id: string;
+    name: string;
+  };
+  locations: {
+    id: string;
+    locationId: string;
+    locationName: string;
+    locationAddress: string | null;
+    isPrimary: boolean;
+    isActive: boolean;
+    startDate: Date;
+    endDate: Date | null;
+  }[];
+  primaryLocation?: {
+    id: string;
+    name: string;
+    address: string | null;
+  };
+  _count: {
+    locations: number;
+    hygieneProduction: number;
+    dentistProduction: number;
+  };
+}
+
+/**
+ * Provider performance metrics
+ */
+export interface ProviderPerformanceMetrics {
+  providerId: string;
+  providerName: string;
+  locationId: string;
+  locationName: string;
+  periodStart: Date;
+  periodEnd: Date;
+  totalProduction: number;
+  avgDailyProduction: number;
+  productionDays: number;
+  productionGoal?: number;
+  variancePercentage?: number;
+}
 
 /**
  * API response wrapper for paginated providers
@@ -72,4 +131,97 @@ export interface CreateProviderRequest {
   provider_type?: 'dentist' | 'hygienist' | 'specialist' | 'other';
   position?: string;
   clinic_id: string;
+}
+
+/**
+ * Location summary for provider performance response
+ */
+export interface LocationSummary {
+  id: string;
+  name: string;
+  address?: string;
+}
+
+/**
+ * Production summary by location
+ */
+export interface LocationProductionSummary {
+  locationId: string;
+  locationName: string;
+  total: number;
+  average: number;
+  goal?: number;
+  variance?: number;
+  variancePercentage?: number;
+}
+
+/**
+ * Goal summary for provider performance
+ */
+export interface GoalSummary {
+  id: string;
+  title: string;
+  targetValue: number;
+  currentValue: number;
+  achievementPercentage: number;
+  period: string;
+  status: 'achieved' | 'in_progress' | 'missed';
+}
+
+/**
+ * Trend data point for performance metrics
+ */
+export interface TrendData {
+  period: string;
+  value: number;
+  date: string;
+}
+
+/**
+ * Provider performance metrics response payload
+ */
+export interface ProviderPerformanceResponse {
+  success: true;
+  data: {
+    provider: {
+      id: string;
+      name: string;
+      providerType: 'dentist' | 'hygienist' | 'specialist' | 'other';
+      primaryLocation?: LocationSummary;
+    };
+    period: {
+      startDate: string;
+      endDate: string;
+      period: string;
+    };
+    production: {
+      total: number;
+      average: number;
+      goal?: number;
+      variance?: number;
+      variancePercentage?: number;
+      byLocation?: LocationProductionSummary[];
+    };
+    goals?: {
+      total: number;
+      achieved: number;
+      achievementRate: number;
+      details: GoalSummary[];
+    };
+    trends?: {
+      productionTrend: TrendData[];
+      goalAchievementTrend: TrendData[];
+    };
+  };
+}
+
+/**
+ * Provider performance query parameters
+ */
+export interface ProviderPerformanceQueryParams {
+  period?: 'daily' | 'weekly' | 'monthly' | 'quarterly' | 'yearly';
+  startDate?: string;
+  endDate?: string;
+  locationId?: string;
+  includeGoals?: boolean;
 }
