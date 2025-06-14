@@ -64,6 +64,20 @@ export interface TooltipProps {
   formatter?: (value: number, name: string) => string;
 }
 
+export interface RechartsClickData {
+  activePayload?: Array<{
+    payload: Record<string, unknown>;
+    name?: string;
+    value?: number | string;
+    dataKey?: string;
+  }>;
+  activeLabel?: string;
+  activeCoordinate?: {
+    x: number;
+    y: number;
+  };
+}
+
 export interface LegendProps {
   value?: string;
   payload?: Array<{

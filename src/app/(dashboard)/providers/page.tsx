@@ -116,8 +116,10 @@ function ProvidersPageClient() {
   // Check if user can create providers
   const canCreateProvider =
     permissions.user &&
-    permissions.getAccessibleClinics().length > 0 &&
-    permissions.getAccessibleClinics().some((clinicId) => permissions.canCreateProvider(clinicId));
+    (permissions.isSystemAdmin() ||
+      permissions
+        .getAccessibleClinics()
+        .some((clinicId) => permissions.canCreateProvider(clinicId)));
 
   return (
     <div className="space-y-6">

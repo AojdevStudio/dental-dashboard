@@ -256,7 +256,7 @@ export function ProviderFilters({
   // Update URL when debounced search changes
   useEffect(() => {
     if (debouncedSearch !== getParam('search')) {
-      updateUrl({ search: debouncedSearch || null });
+      updateUrl({ search: debouncedSearch || null, page: null });
     }
   }, [debouncedSearch, updateUrl, getParam]);
 
@@ -276,7 +276,7 @@ export function ProviderFilters({
   const handleProviderTypeChange = useCallback(
     (value: string) => {
       setProviderType(value);
-      updateUrl({ providerType: value || null });
+      updateUrl({ providerType: value || null, page: null });
     },
     [updateUrl]
   );
@@ -284,7 +284,7 @@ export function ProviderFilters({
   const handleStatusChange = useCallback(
     (value: string) => {
       setStatus(value);
-      updateUrl({ status: value || null });
+      updateUrl({ status: value || null, page: null });
     },
     [updateUrl]
   );
@@ -292,7 +292,7 @@ export function ProviderFilters({
   const handleLocationChange = useCallback(
     (value: string) => {
       setLocationId(value);
-      updateUrl({ locationId: value || null });
+      updateUrl({ locationId: value || null, page: null });
     },
     [updateUrl]
   );
@@ -308,6 +308,7 @@ export function ProviderFilters({
       providerType: null,
       status: null,
       locationId: null,
+      page: null,
     });
   }, [updateUrl]);
 
@@ -317,22 +318,22 @@ export function ProviderFilters({
       switch (key) {
         case 'search': {
           setLocalSearch('');
-          updateUrl({ search: null });
+          updateUrl({ search: null, page: null });
           break;
         }
         case 'providerType': {
           setProviderType('');
-          updateUrl({ providerType: null });
+          updateUrl({ providerType: null, page: null });
           break;
         }
         case 'status': {
           setStatus('');
-          updateUrl({ status: null });
+          updateUrl({ status: null, page: null });
           break;
         }
         case 'locationId': {
           setLocationId('');
-          updateUrl({ locationId: null });
+          updateUrl({ locationId: null, page: null });
           break;
         }
         default: {

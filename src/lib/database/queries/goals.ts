@@ -50,7 +50,7 @@ export async function getGoals(
 
   // Validate specific clinic access if requested
   if (filter.clinicId) {
-    const hasAccess = await validateClinicAccess(authContext, filter.clinicId);
+    const hasAccess = validateClinicAccess(authContext, filter.clinicId);
     if (!hasAccess) {
       throw new Error('Access denied to this clinic');
     }
@@ -127,7 +127,7 @@ export async function getGoalById(
 
   // Validate clinic access
   if (goal.clinicId) {
-    const hasAccess = await validateClinicAccess(authContext, goal.clinicId);
+    const hasAccess = validateClinicAccess(authContext, goal.clinicId);
     if (!hasAccess) {
       throw new Error('Access denied to this goal');
     }
@@ -166,7 +166,7 @@ export async function getGoalById(
  */
 export async function createGoal(authContext: AuthContext, input: CreateGoalInput) {
   // Validate clinic access
-  const hasAccess = await validateClinicAccess(authContext, input.clinicId);
+  const hasAccess = validateClinicAccess(authContext, input.clinicId);
   if (!hasAccess) {
     throw new Error('Access denied to this clinic');
   }
@@ -228,7 +228,7 @@ export async function updateGoal(
 
   // Validate clinic access
   if (goal.clinicId) {
-    const hasAccess = await validateClinicAccess(authContext, goal.clinicId);
+    const hasAccess = validateClinicAccess(authContext, goal.clinicId);
     if (!hasAccess) {
       throw new Error('Access denied to this goal');
     }
@@ -266,7 +266,7 @@ export async function deleteGoal(authContext: AuthContext, goalId: string) {
 
   // Validate clinic access and admin role
   if (goal.clinicId) {
-    const hasAccess = await validateClinicAccess(authContext, goal.clinicId);
+    const hasAccess = validateClinicAccess(authContext, goal.clinicId);
     if (!hasAccess) {
       throw new Error('Access denied to this goal');
     }
@@ -301,7 +301,7 @@ export async function getGoalsByTemplate(
 
   // Check access to template
   if (template.clinicId) {
-    const hasAccess = await validateClinicAccess(authContext, template.clinicId);
+    const hasAccess = validateClinicAccess(authContext, template.clinicId);
     if (!hasAccess) {
       throw new Error('Access denied to this template');
     }
@@ -314,7 +314,7 @@ export async function getGoalsByTemplate(
   };
 
   if (clinicId) {
-    const hasClinicAccess = await validateClinicAccess(authContext, clinicId);
+    const hasClinicAccess = validateClinicAccess(authContext, clinicId);
     if (!hasClinicAccess) {
       throw new Error('Access denied to this clinic');
     }
@@ -359,7 +359,7 @@ export async function createGoalFromTemplate(
 
   // Check access to template
   if (template.clinicId && template.clinicId !== options.clinicId) {
-    const hasAccess = await validateClinicAccess(authContext, template.clinicId);
+    const hasAccess = validateClinicAccess(authContext, template.clinicId);
     if (!hasAccess) {
       throw new Error('Access denied to this template');
     }

@@ -1,6 +1,6 @@
 import { prisma } from '@/lib/database/client';
 import { LocationDetailQueryService } from '@/lib/services/financial/location-detail-query-service';
-import { FinancialUpdateStrategyFactory } from '@/lib/services/financial/update-strategies';
+import { createFinancialUpdateStrategy } from '@/lib/services/financial/update-strategies';
 import { type NextRequest, NextResponse } from 'next/server';
 
 export async function GET(
@@ -69,7 +69,7 @@ export async function PUT(
     };
 
     // Create and execute update strategy
-    const strategy = FinancialUpdateStrategyFactory.createStrategy(body);
+    const strategy = createFinancialUpdateStrategy(body);
     const result = await strategy.update(body, context);
 
     return NextResponse.json({

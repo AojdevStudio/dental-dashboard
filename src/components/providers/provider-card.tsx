@@ -129,7 +129,7 @@ function Avatar_({ size = 'default' }: { size?: 'sm' | 'default' | 'lg' }) {
 
   return (
     <Avatar className={sizeClasses[size]}>
-      <AvatarImage src={undefined} alt={provider.name} />
+      <AvatarImage alt={provider.name} />
       <AvatarFallback className="bg-blue-100 text-blue-700 font-medium">
         {getProviderInitials(provider)}
       </AvatarFallback>
@@ -169,10 +169,12 @@ function Title() {
 function Actions({
   onEdit,
   onViewDetails,
+  onManageLocations,
   showQuickActions = true,
 }: {
   onEdit?: (provider: ProviderWithLocations) => void;
   onViewDetails?: (provider: ProviderWithLocations) => void;
+  onManageLocations?: (provider: ProviderWithLocations) => void;
   showQuickActions?: boolean;
 }) {
   const provider = useProviderCardContext();
@@ -213,10 +215,12 @@ function Actions({
               Edit Provider
             </DropdownMenuItem>
           )}
-          <DropdownMenuItem>
-            <MapPin className="mr-2 h-4 w-4" />
-            Manage Locations
-          </DropdownMenuItem>
+          {onManageLocations && (
+            <DropdownMenuItem onClick={() => onManageLocations(provider)}>
+              <MapPin className="mr-2 h-4 w-4" />
+              Manage Locations
+            </DropdownMenuItem>
+          )}
         </DropdownMenuContent>
       </DropdownMenu>
     </div>
@@ -366,11 +370,13 @@ export function CompactProviderCard({
   provider,
   onEdit,
   onViewDetails,
+  onManageLocations,
   onClick,
 }: {
   provider: ProviderWithLocations;
   onEdit?: (provider: ProviderWithLocations) => void;
   onViewDetails?: (provider: ProviderWithLocations) => void;
+  onManageLocations?: (provider: ProviderWithLocations) => void;
   onClick?: () => void;
 }) {
   return (
@@ -380,6 +386,7 @@ export function CompactProviderCard({
         <ProviderCard.Actions
           onEdit={onEdit}
           onViewDetails={onViewDetails}
+          onManageLocations={onManageLocations}
           showQuickActions={false}
         />
       </ProviderCard.Header>
@@ -400,18 +407,24 @@ export function DetailedProviderCard({
   provider,
   onEdit,
   onViewDetails,
+  onManageLocations,
   onClick,
 }: {
   provider: ProviderWithLocations;
   onEdit?: (provider: ProviderWithLocations) => void;
   onViewDetails?: (provider: ProviderWithLocations) => void;
+  onManageLocations?: (provider: ProviderWithLocations) => void;
   onClick?: () => void;
 }) {
   return (
     <ProviderCard.Root provider={provider} onClick={onClick}>
       <ProviderCard.Header>
         <ProviderCard.Title />
-        <ProviderCard.Actions onEdit={onEdit} onViewDetails={onViewDetails} />
+        <ProviderCard.Actions
+          onEdit={onEdit}
+          onViewDetails={onViewDetails}
+          onManageLocations={onManageLocations}
+        />
       </ProviderCard.Header>
       <ProviderCard.Content>
         <div className="space-y-4">

@@ -82,7 +82,7 @@ export type UserRole =
 export interface UserClinicAccess {
   clinicId: string;
   role: UserRole;
-  permissions: string[];
+  permissions?: string[];
 }
 
 /**
@@ -134,7 +134,13 @@ export function getUserClinicAccess(user: User | null): UserClinicAccess[] {
       'clinicId' in access &&
       'role' in access &&
       typeof (access as Record<string, unknown>).clinicId === 'string' &&
-      typeof (access as Record<string, unknown>).role === 'string'
+      typeof (access as Record<string, unknown>).role === 'string' &&
+      // permissions is optional, so check if it exists and is valid, or allow undefined
+      (!('permissions' in access) ||
+        (Array.isArray((access as Record<string, unknown>).permissions) &&
+          ((access as Record<string, unknown>).permissions as unknown[]).every(
+            (permission) => typeof permission === 'string'
+          )))
   );
 }
 

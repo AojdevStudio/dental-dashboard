@@ -36,13 +36,28 @@ const safeFormatNumber = (value: string | number): string => {
   return formatNumber(numValue);
 };
 
+// Type definition for Recharts click event data
+interface RechartsClickData {
+  activePayload?: Array<{
+    payload: Record<string, unknown>;
+    name?: string;
+    value?: number | string;
+    dataKey?: string;
+  }>;
+  activeLabel?: string;
+  activeCoordinate?: {
+    x: number;
+    y: number;
+  };
+}
+
 // Helper to generate click handler
 function createClickHandler(onDataPointClick?: (data: Record<string, unknown>) => void) {
   if (!onDataPointClick) {
     return undefined;
   }
-  return (data: unknown) => {
-    if (data?.activePayload) {
+  return (data: RechartsClickData) => {
+    if (data?.activePayload && data.activePayload.length > 0) {
       onDataPointClick(data.activePayload[0].payload);
     }
   };
@@ -56,21 +71,26 @@ function renderBars(
   animationDuration: number
 ) {
   if (config.series && config.series.length > 0) {
-    return config.series.map((series, index) => (
-      <Bar
-        key={series.dataKey}
-        dataKey={series.dataKey}
-        name={series.name}
-        fill={series.color || colors[index]}
-        stackId={stacked && series.stackId ? series.stackId : undefined}
-        animationDuration={animationDuration}
-      />
-    ));
+    return config.series.map(
+      (
+        series: { dataKey: string; name: string; color?: string; stackId?: string },
+        index: number
+      ) => (
+        <Bar
+          key={series.dataKey}
+          dataKey={series.dataKey}
+          name={series.name}
+          fill={series.color || colors[index]}
+          stackId={stacked ? series.stackId || 'stack' : undefined}
+          animationDuration={animationDuration}
+        />
+      )
+    );
   }
 
   return (
     <Bar dataKey="value" fill={colors[0]} animationDuration={animationDuration}>
-      {config.data.map((entry, index) => (
+      {config.data.map((entry: { name?: string; value: number }, index: number) => (
         <Cell
           key={`cell-${entry.name || entry.value || index}`}
           fill={colors[index % colors.length]}

@@ -140,7 +140,7 @@ describe('Query Layer - Multi-Tenant Support', () => {
       };
 
       vi.mocked(prisma.user.findUnique).mockResolvedValue(mockUser as unknown);
-      vi.mocked(validateClinicAccess).mockResolvedValue(true);
+      vi.mocked(validateClinicAccess).mockReturnValue(true);
 
       await userQueries.getUserById(mockAuthContext, 'user456');
 
@@ -151,7 +151,7 @@ describe('Query Layer - Multi-Tenant Support', () => {
       const { prisma } = await import('../client');
       const { validateClinicAccess } = await import('../auth-context');
 
-      vi.mocked(validateClinicAccess).mockResolvedValue(true);
+      vi.mocked(validateClinicAccess).mockReturnValue(true);
       vi.mocked(prisma.userClinicRole.findFirst).mockResolvedValue(null);
 
       await expect(
@@ -220,7 +220,7 @@ describe('Query Layer - Multi-Tenant Support', () => {
       const { validateClinicAccess, getUserClinicRole } = await import('../auth-context');
       const { prisma } = await import('../client');
 
-      vi.mocked(validateClinicAccess).mockResolvedValue(true);
+      vi.mocked(validateClinicAccess).mockReturnValue(true);
       vi.mocked(getUserClinicRole).mockResolvedValue('viewer');
       vi.mocked(prisma.metricDefinition.findUnique).mockResolvedValue({
         id: 'def1',
@@ -242,7 +242,7 @@ describe('Query Layer - Multi-Tenant Support', () => {
       const { prisma } = await import('../client');
       const { validateClinicAccess } = await import('../auth-context');
 
-      vi.mocked(validateClinicAccess).mockResolvedValue(true);
+      vi.mocked(validateClinicAccess).mockReturnValue(true);
       vi.mocked(prisma.metricAggregation.findMany).mockResolvedValue([]);
       vi.mocked(prisma.metricValue.findMany).mockResolvedValue([
         {
@@ -285,7 +285,7 @@ describe('Query Layer - Multi-Tenant Support', () => {
         endDate: new Date('2024-12-31'),
       };
 
-      vi.mocked(validateClinicAccess).mockResolvedValue(true);
+      vi.mocked(validateClinicAccess).mockReturnValue(true);
       vi.mocked(prisma.goal.findMany).mockResolvedValue([mockGoal] as unknown);
       vi.mocked(prisma.goal.count).mockResolvedValue(1);
       vi.mocked(prisma.metricValue.findMany).mockResolvedValue([
@@ -313,7 +313,7 @@ describe('Query Layer - Multi-Tenant Support', () => {
       const { prisma } = await import('../client');
       const { validateClinicAccess, getUserClinicRole } = await import('../auth-context');
 
-      vi.mocked(validateClinicAccess).mockResolvedValue(true);
+      vi.mocked(validateClinicAccess).mockReturnValue(true);
       vi.mocked(getUserClinicRole).mockResolvedValue('clinic_admin');
       vi.mocked(prisma.metricDefinition.findUnique).mockResolvedValue({
         id: 'def1',
@@ -368,7 +368,7 @@ describe('Query Layer - Multi-Tenant Support', () => {
       };
 
       vi.mocked(prisma.dataSource.findUnique).mockResolvedValue(mockDataSource as unknown);
-      vi.mocked(validateClinicAccess).mockResolvedValue(true);
+      vi.mocked(validateClinicAccess).mockReturnValue(true);
       vi.mocked(isClinicAdmin).mockResolvedValue(true);
 
       const result = await googleSheetsQueries.getDataSourceById(mockAuthContext, 'ds1', {
@@ -385,7 +385,7 @@ describe('Query Layer - Multi-Tenant Support', () => {
       vi.mocked(prisma.dataSource.findUnique).mockResolvedValue({
         clinicId: 'clinic3', // Different clinic
       } as unknown);
-      vi.mocked(validateClinicAccess).mockResolvedValue(false);
+      vi.mocked(validateClinicAccess).mockReturnValue(false);
 
       await expect(
         googleSheetsQueries.createColumnMapping(mockAuthContext, {
@@ -400,7 +400,7 @@ describe('Query Layer - Multi-Tenant Support', () => {
   describe('Cross-Clinic Access Prevention', () => {
     it('should prevent access to resources from other clinics', async () => {
       const { validateClinicAccess } = await import('../auth-context');
-      vi.mocked(validateClinicAccess).mockResolvedValue(false);
+      vi.mocked(validateClinicAccess).mockReturnValue(false);
 
       // Test various queries that should fail
       await expect(clinicQueries.getClinicById(mockAuthContext, 'clinic3')).rejects.toThrow(

@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import type { ProviderWithLocations } from '@/types/providers';
 import { AlertTriangle, Grid3X3, List, RefreshCw, Users } from 'lucide-react';
+import type React from 'react';
 import { CompactProviderCard, DetailedProviderCard } from './provider-card';
 
 /**
@@ -248,36 +249,107 @@ function Pagination({
         </Button>
 
         <div className="flex items-center gap-1">
-          {Array.from({ length: Math.min(pagination.totalPages, 5) }, (_, i) => {
-            const page = i + 1;
-            const isCurrentPage = page === pagination.page;
+          {(() => {
+            const totalPages = pagination.totalPages;
+            const currentPage = pagination.page;
+            const maxVisible = 5;
 
-            return (
-              <Button
-                key={page}
-                variant={isCurrentPage ? 'default' : 'outline'}
-                size="sm"
-                onClick={() => onPageChange(page)}
-                className="w-8 h-8 p-0"
-              >
-                {page}
-              </Button>
-            );
-          })}
+            // If total pages <= maxVisible, show all pages
+            if (totalPages <= maxVisible) {
+              return Array.from({ length: totalPages }, (_, i) => {
+                const page = i + 1;
+                const isCurrentPage = page === currentPage;
 
-          {pagination.totalPages > 5 && (
-            <>
-              <span className="text-gray-500">...</span>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => onPageChange(pagination.totalPages)}
-                className="w-8 h-8 p-0"
-              >
-                {pagination.totalPages}
-              </Button>
-            </>
-          )}
+                return (
+                  <Button
+                    key={page}
+                    variant={isCurrentPage ? 'default' : 'outline'}
+                    size="sm"
+                    onClick={() => onPageChange(page)}
+                    className="w-8 h-8 p-0"
+                  >
+                    {page}
+                  </Button>
+                );
+              });
+            }
+
+            // Calculate sliding window
+            let startPage = Math.max(1, currentPage - Math.floor(maxVisible / 2));
+            let endPage = startPage + maxVisible - 1;
+
+            // Adjust if we're near the end
+            if (endPage > totalPages) {
+              endPage = totalPages;
+              startPage = Math.max(1, endPage - maxVisible + 1);
+            }
+
+            const pages: (React.ReactElement | React.ReactNode)[] = [];
+
+            // Show first page and ellipsis if needed
+            if (startPage > 1) {
+              pages.push(
+                <Button
+                  key={1}
+                  variant="outline"
+                  size="sm"
+                  onClick={() => onPageChange(1)}
+                  className="w-8 h-8 p-0"
+                >
+                  1
+                </Button>
+              );
+
+              if (startPage > 2) {
+                pages.push(
+                  <span key="start-ellipsis" className="text-gray-500">
+                    ...
+                  </span>
+                );
+              }
+            }
+
+            // Show page window
+            for (let page = startPage; page <= endPage; page++) {
+              const isCurrentPage = page === currentPage;
+              pages.push(
+                <Button
+                  key={page}
+                  variant={isCurrentPage ? 'default' : 'outline'}
+                  size="sm"
+                  onClick={() => onPageChange(page)}
+                  className="w-8 h-8 p-0"
+                >
+                  {page}
+                </Button>
+              );
+            }
+
+            // Show ellipsis and last page if needed
+            if (endPage < totalPages) {
+              if (endPage < totalPages - 1) {
+                pages.push(
+                  <span key="end-ellipsis" className="text-gray-500">
+                    ...
+                  </span>
+                );
+              }
+
+              pages.push(
+                <Button
+                  key={totalPages}
+                  variant="outline"
+                  size="sm"
+                  onClick={() => onPageChange(totalPages)}
+                  className="w-8 h-8 p-0"
+                >
+                  {totalPages}
+                </Button>
+              );
+            }
+
+            return pages;
+          })()}
         </div>
 
         <Button

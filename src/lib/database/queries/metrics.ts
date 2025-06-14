@@ -173,7 +173,7 @@ export async function getAggregatedMetrics(
  */
 export async function createMetric(authContext: AuthContext, input: CreateMetricInput) {
   // Validate clinic access
-  const hasAccess = await validateClinicAccess(authContext, input.clinicId);
+  const hasAccess = validateClinicAccess(authContext, input.clinicId);
   if (!hasAccess) {
     throw new Error('Access denied to this clinic');
   }
@@ -231,7 +231,7 @@ export async function updateMetric(
 
   // Validate clinic access
   if (metric.clinicId) {
-    const hasAccess = await validateClinicAccess(authContext, metric.clinicId);
+    const hasAccess = validateClinicAccess(authContext, metric.clinicId);
     if (!hasAccess) {
       throw new Error('Access denied to this metric');
     }
@@ -269,7 +269,7 @@ export async function deleteMetric(authContext: AuthContext, metricId: string) {
 
   // Validate clinic access and admin role
   if (metric.clinicId) {
-    const hasAccess = await validateClinicAccess(authContext, metric.clinicId);
+    const hasAccess = validateClinicAccess(authContext, metric.clinicId);
     if (!hasAccess) {
       throw new Error('Access denied to this metric');
     }
@@ -298,7 +298,7 @@ export async function getMetricStatistics(
   }
 ) {
   // Validate clinic access
-  const hasAccess = await validateClinicAccess(authContext, clinicId);
+  const hasAccess = validateClinicAccess(authContext, clinicId);
   if (!hasAccess) {
     throw new Error('Access denied to this clinic');
   }
