@@ -1,11 +1,11 @@
 import { prisma } from '@/lib/database/client';
-import { Prisma } from '@prisma/client';
+import logger from '@/lib/utils/logger';
 import type {
   ProviderFilters,
   ProviderPerformanceMetrics,
   ProviderWithLocations,
 } from '@/types/providers';
-import logger from '@/lib/utils/logger';
+import { Prisma } from '@prisma/client';
 
 /**
  * Describes the raw row structure from the dentist performance query.
@@ -164,20 +164,27 @@ type RawProviderData = Prisma.ProviderGetPayload<typeof providerQueryArgs>;
 /**
  * Build common query options for provider queries
  */
+/**
+ * Build Prisma query options with optional pagination
+ * @param whereClause - The where clause for filtering
+ * @param pagination - Optional pagination parameters with page and limit
+ * @returns Prisma query options with computed offset from page and limit
+ */
 function buildProviderQueryOptions(
   whereClause: Prisma.ProviderWhereInput,
-  pagination?: { offset: number; limit: number }
+  pagination?: { page: number; limit: number }
 ) {
   const baseOptions = {
     ...providerQueryArgs,
     where: whereClause,
   };
 
-  // Add pagination if provided
+  // Add pagination if provided - compute offset internally from page and limit
   if (pagination) {
+    const offset = (pagination.page - 1) * pagination.limit;
     return {
       ...baseOptions,
-      skip: pagination.offset,
+      skip: offset,
       take: pagination.limit,
     };
   }
@@ -238,7 +245,8 @@ export async function getProvidersWithLocations(
     providerType,
     status,
     includeInactive = false,
-    pagination,
+    page,
+    limit,
   } = params || {};
 
   const whereClause = buildProviderWhereClause({
@@ -250,6 +258,8 @@ export async function getProvidersWithLocations(
     locationId,
   });
 
+  // Create pagination object if page and limit are provided
+  const pagination = page && limit ? { page, limit } : undefined;
   const queryOptions = buildProviderQueryOptions(whereClause, pagination);
   const providers = await prisma.provider.findMany(queryOptions);
 
@@ -522,18 +532,19 @@ export async function getProvidersWithLocationsPaginated(
     providerType,
     status,
     includeInactive = false,
-    pagination,
+    page,
+    limit,
   } = params || {};
 
   // Input validation for pagination parameters
-  if (pagination) {
-    if (pagination.offset < 0) {
-      throw new Error('Pagination offset cannot be negative');
+  if (page !== undefined || limit !== undefined) {
+    if (page !== undefined && page < 1) {
+      throw new Error('Page number must be greater than 0');
     }
-    if (pagination.limit <= 0) {
+    if (limit !== undefined && limit <= 0) {
       throw new Error('Pagination limit must be greater than 0');
     }
-    if (pagination.limit > 1000) {
+    if (limit !== undefined && limit > 1000) {
       throw new Error('Pagination limit cannot exceed 1000 to prevent performance issues');
     }
   }
@@ -546,6 +557,9 @@ export async function getProvidersWithLocationsPaginated(
     includeInactive,
     locationId,
   });
+
+  // Create pagination object if page and limit are provided
+  const pagination = page && limit ? { page, limit } : undefined;
 
   // Execute count and data queries in parallel for performance
   const [total, providers] = await Promise.all([
@@ -629,15 +643,21 @@ function calculatePeriodDates(
  * Aggregate production data by location
  */
 function aggregateProductionByLocation(productionData: ProviderPerformanceMetrics[]) {
+  // Use a Map to track production days separately from the accumulator objects
+  const productionDaysMap = new Map<string, number>();
+
   return productionData.reduce(
     (acc, data) => {
       const existing = acc.find((item) => item.locationId === data.locationId);
+      const existingProductionDays = productionDaysMap.get(data.locationId) || 0;
+
       if (existing) {
         existing.total += data.totalProduction;
-        existing.totalProductionDays += data.productionDays;
+        const newProductionDays = existingProductionDays + data.productionDays;
+        productionDaysMap.set(data.locationId, newProductionDays);
+
         // Calculate weighted average: total production / total production days
-        existing.average =
-          existing.totalProductionDays > 0 ? existing.total / existing.totalProductionDays : 0;
+        existing.average = newProductionDays > 0 ? existing.total / newProductionDays : 0;
         if (data.productionGoal) {
           existing.goal = (existing.goal || 0) + data.productionGoal;
         }
@@ -647,11 +667,11 @@ function aggregateProductionByLocation(productionData: ProviderPerformanceMetric
           existing.variancePercentage = (existing.variance / existing.goal) * 100;
         }
       } else {
+        productionDaysMap.set(data.locationId, data.productionDays);
         acc.push({
           locationId: data.locationId,
           locationName: data.locationName,
           total: data.totalProduction,
-          totalProductionDays: data.productionDays,
           average: data.productionDays > 0 ? data.totalProduction / data.productionDays : 0,
           goal: data.productionGoal,
           variance: data.productionGoal ? data.totalProduction - data.productionGoal : undefined,
@@ -664,7 +684,6 @@ function aggregateProductionByLocation(productionData: ProviderPerformanceMetric
       locationId: string;
       locationName: string;
       total: number;
-      totalProductionDays: number;
       average: number;
       goal?: number;
       variance?: number;
