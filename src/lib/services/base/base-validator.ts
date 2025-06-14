@@ -1,6 +1,10 @@
 /**
  * Base validator class providing common validation functionality
  */
+
+// Move regex to module scope for performance
+const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
 export interface ValidationResult {
   isValid: boolean;
   errors: ValidationError[];
@@ -69,7 +73,7 @@ export abstract class BaseValidator<T> {
   /**
    * Validate required field
    */
-  protected validateRequired(field: string, value: any, customMessage?: string): void {
+  protected validateRequired(field: string, value: unknown, customMessage?: string): void {
     if (value === undefined || value === null || value === '') {
       this.addError(field, customMessage || `${field} is required`);
     }
@@ -79,8 +83,7 @@ export abstract class BaseValidator<T> {
    * Validate email format
    */
   protected validateEmail(field: string, email: string): void {
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (email && !emailRegex.test(email)) {
+    if (email && !EMAIL_REGEX.test(email)) {
       this.addError(field, 'Invalid email format');
     }
   }
@@ -88,7 +91,7 @@ export abstract class BaseValidator<T> {
   /**
    * Validate numeric field
    */
-  protected validateNumeric(field: string, value: any, min?: number, max?: number): void {
+  protected validateNumeric(field: string, value: unknown, min?: number, max?: number): void {
     const num = Number(value);
     if (Number.isNaN(num)) {
       this.addError(field, `${field} must be a valid number`);
@@ -107,8 +110,8 @@ export abstract class BaseValidator<T> {
   /**
    * Validate date field
    */
-  protected validateDate(field: string, dateValue: any): void {
-    const date = new Date(dateValue);
+  protected validateDate(field: string, dateValue: unknown): void {
+    const date = new Date(dateValue as string | number | Date);
     if (Number.isNaN(date.getTime())) {
       this.addError(field, `${field} must be a valid date`);
     }

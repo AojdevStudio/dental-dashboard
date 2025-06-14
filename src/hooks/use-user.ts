@@ -1,7 +1,7 @@
 'use client';
 
 import { createBrowserClient } from '@supabase/ssr';
-import type { User } from '@supabase/supabase-js';
+import type { Session, User } from '@supabase/supabase-js';
 import { useEffect, useState } from 'react';
 
 /**
@@ -12,10 +12,14 @@ export function useUser() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
 
-  const supabase = createBrowserClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-  );
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+
+  if (!(supabaseUrl && supabaseAnonKey)) {
+    throw new Error('Missing required Supabase environment variables');
+  }
+
+  const supabase = createBrowserClient(supabaseUrl, supabaseAnonKey);
 
   useEffect(() => {
     // Get initial user
@@ -43,7 +47,7 @@ export function useUser() {
     // Listen for auth changes
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange(async (event: string, session: any) => {
+    } = supabase.auth.onAuthStateChange((event: string, session: Session | null) => {
       setUser(session?.user || null);
       setIsLoading(false);
 

@@ -93,10 +93,7 @@ export async function getAuthContext(): Promise<AuthContext | null> {
 /**
  * Validate user has access to a specific clinic
  */
-export async function validateClinicAccess(
-  authContext: AuthContext,
-  clinicId: string
-): Promise<boolean> {
+export function validateClinicAccess(authContext: AuthContext, clinicId: string): boolean {
   return authContext.clinicIds.includes(clinicId);
 }
 

@@ -5,15 +5,16 @@
  * including the enhanced ProviderWithLocations type that includes location relationships.
  */
 
-// Import types for local usage
 import type {
-  ProviderFilters,
-  ProviderPerformanceMetrics,
-  ProviderWithLocations,
+  ProviderFilters as DatabaseProviderFilters,
+  ProviderPerformanceMetrics as DatabaseProviderPerformanceMetrics,
+  ProviderWithLocations as DatabaseProviderWithLocations,
 } from '@/lib/database/queries/providers';
 
 // Re-export types from database queries
-export type { ProviderFilters, ProviderPerformanceMetrics, ProviderWithLocations };
+export type ProviderFilters = DatabaseProviderFilters;
+export type ProviderPerformanceMetrics = DatabaseProviderPerformanceMetrics;
+export type ProviderWithLocations = DatabaseProviderWithLocations;
 
 /**
  * API response wrapper for paginated providers

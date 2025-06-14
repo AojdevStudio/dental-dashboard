@@ -1,3 +1,4 @@
+import type React from 'react';
 import type { CSSProperties } from 'react';
 
 export type ChartType = 'line' | 'bar' | 'pie' | 'doughnut' | 'area';

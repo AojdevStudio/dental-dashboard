@@ -16,9 +16,12 @@ export function formatNumber(value: number): string {
   return new Intl.NumberFormat('en-US').format(value);
 }
 
+// Move regex to module scope for performance
+const PHONE_NUMBER_REGEX = /^(\d{3})(\d{3})(\d{4})$/;
+
 export function formatPhoneNumber(phoneNumber: string): string {
   const cleaned = `${phoneNumber}`.replace(/\D/g, '');
-  const match = cleaned.match(/^(\d{3})(\d{3})(\d{4})$/);
+  const match = cleaned.match(PHONE_NUMBER_REGEX);
   if (match) {
     return `(${match[1]}) ${match[2]}-${match[3]}`;
   }
