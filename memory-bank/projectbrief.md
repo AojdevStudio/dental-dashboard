@@ -1,13 +1,13 @@
 # Project Brief: Dental Practice Analytics Dashboard
-*Version: 1.0*
+*Version: 1.1*
 *Created: 2025-05-17*
-*Last Updated: {{Current Date}}*
+*Last Updated: 2025-06-14*
 
 ## Project Overview
-The Dental Practice Analytics Dashboard (MVP) is a centralized web application designed to visualize and analyze key performance indicators (KPIs) from dental practices. It connects to existing Google Spreadsheets via API, transforms raw data into actionable insights, and presents them through intuitive, **fixed-layout** visualizations. The MVP system will serve as a **read-only dashboard**, addressing the critical need for cohesive data analysis and real-time performance visibility against established goals. This document provides a high-level overview; detailed specifications are in `.dev/` and `.ai/plans/` directories.
+The Dental Practice Analytics Dashboard (MVP) is a centralized web application designed to visualize and analyze key performance indicators (KPIs) from dental practices. It connects to existing Google Spreadsheets via API, transforms raw data into actionable insights, and presents them through intuitive, **fixed-layout** visualizations. The MVP system will serve as a **read-only dashboard**, addressing the critical need for cohesive data analysis and real-time performance visibility against established goals. This document provides a high-level overview; detailed specifications are in `docs/prds/doing/` and `docs/prds/doing/` directories.
 
 ## Core MVP Requirements
-The MVP will focus on the following core features, as detailed in `.dev/mvp.md`, `.dev/feature-spec.md`, and `.ai/plans/PLAN.MD`:
+The MVP will focus on the following core features, as detailed in `docs/prds/doing/mvp.md`, `docs/prds/doing/feature-spec.md`, and `docs/prds/doing/PLAN.MD`:
 
 1.  **Google Sheets Integration Core:** Secure OAuth connection to Google Sheets API with basic data extraction and standardized metric mapping for essential dental practice KPIs.
 2.  **Essential KPI Dashboard:** Fixed dashboard layouts displaying core dental practice metrics (financial, patient, appointment, provider, call tracking) with basic filtering and time period selection.
@@ -34,7 +34,7 @@ The MVP will focus on the following core features, as detailed in `.dev/mvp.md`,
 -   Read-only dashboard functionality.
 
 ### Out of Scope (MVP)
-The following are explicitly **out of scope** for this MVP, as per `.dev/prd-mvp.md`:
+The following are explicitly **out of scope** for this MVP, as per `docs/prds/doing/prd-mvp.md`:
 -   **Advanced Dashboard Customization:** User-configurable widgets, drag-and-drop layouts, saved views.
 -   **Advanced Filtering/Analysis:** Complex trend analysis beyond simple historical views, deep drill-downs.
 -   **Form-Based Data Entry:** All data comes from Google Sheets for MVP.
@@ -48,7 +48,7 @@ The following are explicitly **out of scope** for this MVP, as per `.dev/prd-mvp
 -   Advanced AI-driven predictive analytics.
 
 ## Timeline (MVP Development Phases)
-Based on `.dev/prd-mvp.md`, high-level MVP phases:
+Based on `docs/prds/doing/prd-mvp.md`, high-level MVP phases:
 
 *   **Phase MVP-1: Foundation & Core Setup** (Partially Completed: Project infra, DB schema, Auth, Initial Google Sheets API)
 *   **Phase MVP-2: Core Google Sheets Integration & Data Pipeline** (Refine connection, implement mapping, build transformation pipeline)

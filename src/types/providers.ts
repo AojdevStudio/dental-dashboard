@@ -18,10 +18,6 @@ export interface ProviderFilters {
   clinicId?: string;
   providerId?: string;
   includeInactive?: boolean;
-  pagination?: {
-    offset: number;
-    limit: number;
-  };
 }
 
 /**

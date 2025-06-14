@@ -52,8 +52,9 @@ This is a multi-tenant dental practice dashboard built with Next.js 15, TypeScri
 - **UI:** React 19, Shadcn UI, Radix UI, Tailwind CSS 4
 - **State Management:** Server Components, React Context, Zustand, TanStack Query
 - **Authentication:** Supabase Auth with SSR
-- **Testing:** Vitest with jsdom environment
+- **Testing:** Vitest with jsdom environment and separate integration test configuration
 - **Code Quality:** Biome for comprehensive linting, formatting, and import organization with Husky pre-commit hooks
+- **API Layer:** Standardized API utilities with error handling, pagination, and validation
 
 ### Project Structure
 ```
@@ -99,10 +100,12 @@ src/
 
 ### API Development
 - API routes are located in `src/app/api/`
-- Use the `withAuth` middleware for protected routes
+- Use the `withAuth` middleware for protected routes with role-based access control
 - Follow RESTful conventions for route naming
 - Use Zod for request/response validation
-- Implement proper error handling with `ApiError` and `ApiResponse`
+- Implement proper error handling with `ApiError` and `ApiResponse` utilities
+- Use standardized pagination with `apiPaginated` and `getPaginationParams`
+- Apply multi-tenant security with clinic-based data isolation
 
 ## Supabase Project Details
 - **Project ID:** yovbdmjwrrgardkgrenc
@@ -198,7 +201,10 @@ Automated quality control via `.husky/pre-commit`:
 2. Implement HTTP methods as named exports (GET, POST, etc.)
 3. Add authentication with `withAuth` middleware if needed
 4. Use Zod schemas for request validation
-5. Return responses using `ApiResponse` utility
+5. Return responses using `ApiResponse` utilities (`apiSuccess`, `apiError`, `apiPaginated`)
+6. Apply multi-tenant filtering with clinic-based access control
+7. Use `getPaginationParams` for paginated endpoints
+8. Implement proper error handling with `handleApiError`
 
 ### Adding a New Component
 1. Place in appropriate `src/components/` subdirectory
@@ -237,8 +243,36 @@ Required environment variables:
 - **Multi-tenancy:** All data operations must respect clinic-based isolation
 - **Migration Status:** Currently migrating from CUID to UUID identifiers
 - **Google Integration:** OAuth flow for Sheets API access is implemented
+- **API Standards:** Use standardized API utilities for consistent error handling and responses
+- **Performance:** Database-level pagination is implemented for efficient large dataset handling
+- **Provider Management:** Comprehensive provider-location relationship management is available
 
 ## Development Guidelines
 
 ### Code Writing Guidelines
 - Every time you write new code you must run a typecheck and biome check and fix any issues related to the code you wrote
+
+## New Features and API Endpoints
+
+### Provider Management API
+- **GET/POST /api/providers** - Paginated provider listing and creation with multi-tenant security
+- **GET/POST/PATCH /api/providers/[providerId]/locations** - Provider-location relationship management
+- **GET /api/providers/[providerId]/performance** - Comprehensive provider performance metrics
+
+### API Utilities and Standards
+- **Standardized Error Handling:** `ApiError` class and `handleApiError` function
+- **Response Utilities:** `apiSuccess`, `apiError`, `apiPaginated` for consistent responses
+- **Pagination Support:** `getPaginationParams` with database-level pagination
+- **Validation Helpers:** Date range and sort parameter validation
+- **UUID Validation:** Built-in UUID format validation
+
+### Service Layer Architecture
+- **Base Service Pattern:** Standardized service classes with validation
+- **Goal Creation Strategies:** Template-based and regular goal creation patterns
+- **Financial Services:** Location financial data management and import pipeline
+
+### Performance Enhancements
+- **Database-level Pagination:** Efficient handling of large datasets
+- **Parallel Query Execution:** Count and data queries executed in parallel
+- **Multi-location Aggregation:** Provider performance across multiple locations
+- **Comprehensive Metrics:** Production tracking, goal achievement, and variance analysis

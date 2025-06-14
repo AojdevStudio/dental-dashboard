@@ -29,7 +29,7 @@ const getProvidersHandler: ApiHandler = async (
     const queryParams = providersQuerySchema.parse(Object.fromEntries(searchParams.entries()));
 
     // Parse pagination parameters using utility
-    const { page, limit, offset } = getPaginationParams(searchParams);
+    const { page, limit } = getPaginationParams(searchParams);
 
     // Apply multi-tenant filtering - providers can only see providers from their clinic
     const filters = {
@@ -44,7 +44,8 @@ const getProvidersHandler: ApiHandler = async (
     // Fetch providers with database-level pagination
     const { providers: paginatedProviders, total } = await getProvidersWithLocationsPaginated({
       ...filters,
-      pagination: { offset, limit },
+      page,
+      limit,
     });
 
     return apiPaginated(paginatedProviders, total, page, limit) as NextResponse;

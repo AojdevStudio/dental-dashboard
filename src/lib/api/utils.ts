@@ -5,14 +5,17 @@ import { ZodError } from 'zod';
  * Custom error class for API errors
  */
 export class ApiError extends Error {
-  statusCode: number;
-  code?: string;
+  readonly statusCode: number;
+  readonly code?: string;
 
   constructor(message: string, statusCode = 500, code?: string) {
     super(message);
     this.name = 'ApiError';
     this.statusCode = statusCode;
     this.code = code;
+
+    // Ensure proper prototype chain for instanceof checks after transpilation
+    Object.setPrototypeOf(this, ApiError.prototype);
   }
 }
 
