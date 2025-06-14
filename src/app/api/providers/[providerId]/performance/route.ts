@@ -18,6 +18,9 @@ const performanceQuerySchema = z.object({
     .optional(),
 });
 
+// Provider ID validation schema - accepts UUID or ULID format
+const providerIdSchema = z.union([z.string().uuid(), z.string().ulid()]);
+
 const getProviderPerformanceHandler: ApiHandler = async (
   request: Request,
   {
@@ -29,9 +32,15 @@ const getProviderPerformanceHandler: ApiHandler = async (
     const resolvedParams = await params;
     const providerId = resolvedParams.providerId as string;
 
-    // Validate provider ID format
-    if (!providerId || typeof providerId !== 'string') {
+    // Validate provider ID format (UUID or ULID)
+    if (!providerId) {
       return apiError('Provider ID is required', 400);
+    }
+
+    try {
+      providerIdSchema.parse(providerId);
+    } catch (_error) {
+      return apiError('Provider ID must be a valid UUID or ULID format', 400);
     }
 
     const url = new URL(request.url);
@@ -49,17 +58,12 @@ const getProviderPerformanceHandler: ApiHandler = async (
       return apiError('Start date must be before end date', 400);
     }
 
-    // Apply multi-tenant filtering - providers can only see data from their clinic
-    const clinicId =
-      authContext.clinicIds && authContext.clinicIds.length > 0
-        ? authContext.clinicIds[0]
-        : undefined;
-
-    if (!clinicId) {
+    // Verify user has clinic access
+    if (!authContext.clinicIds || authContext.clinicIds.length === 0) {
       return apiError('No clinic access available', 403);
     }
 
-    // Fetch provider performance metrics
+    // Fetch provider performance metrics without clinic restriction
     const performanceData = await getProviderPerformanceMetrics({
       providerId,
       period: queryParams.period,
@@ -67,10 +71,17 @@ const getProviderPerformanceHandler: ApiHandler = async (
       endDate,
       locationId: queryParams.locationId,
       includeGoals: queryParams.includeGoals ?? true,
-      clinicId,
     });
 
     if (!performanceData) {
+      return apiError('Provider not found', 404);
+    }
+
+    // Verify provider belongs to one of the user's authorized clinics
+    const providerClinicId = performanceData.provider.clinic.id;
+    const hasAccess = authContext.clinicIds.includes(providerClinicId);
+
+    if (!hasAccess) {
       return apiError('Provider not found or access denied', 404);
     }
 

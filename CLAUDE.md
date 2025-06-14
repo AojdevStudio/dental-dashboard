@@ -237,3 +237,8 @@ Required environment variables:
 - **Multi-tenancy:** All data operations must respect clinic-based isolation
 - **Migration Status:** Currently migrating from CUID to UUID identifiers
 - **Google Integration:** OAuth flow for Sheets API access is implemented
+
+## Development Guidelines
+
+### Code Writing Guidelines
+- Every time you write new code you must run a typecheck and biome check and fix any issues related to the code you wrote

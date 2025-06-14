@@ -1,24 +1,11 @@
 import { prisma } from '@/lib/database/client';
 import { Prisma } from '@prisma/client';
-
-/**
- * Provider filter parameters for API requests
- */
-export interface ProviderFilters {
-  search?: string;
-  providerType?: string;
-  status?: string;
-  locationId?: string;
-  page?: number;
-  limit?: number;
-  clinicId?: string;
-  providerId?: string;
-  includeInactive?: boolean;
-  pagination?: {
-    offset: number;
-    limit: number;
-  };
-}
+import type {
+  ProviderFilters,
+  ProviderPerformanceMetrics,
+  ProviderWithLocations,
+} from '@/types/providers';
+import logger from '@/lib/utils/logger';
 
 /**
  * Describes the raw row structure from the dentist performance query.
@@ -234,54 +221,6 @@ function transformProviderData(providers: RawProviderData[]): ProviderWithLocati
       },
     };
   });
-}
-
-export interface ProviderWithLocations {
-  id: string;
-  name: string;
-  firstName: string | null;
-  lastName: string | null;
-  email: string | null;
-  providerType: string;
-  status: string;
-  clinic: {
-    id: string;
-    name: string;
-  };
-  locations: {
-    id: string;
-    locationId: string;
-    locationName: string;
-    locationAddress: string | null;
-    isPrimary: boolean;
-    isActive: boolean;
-    startDate: Date;
-    endDate: Date | null;
-  }[];
-  primaryLocation?: {
-    id: string;
-    name: string;
-    address: string | null;
-  };
-  _count: {
-    locations: number;
-    hygieneProduction: number;
-    dentistProduction: number;
-  };
-}
-
-export interface ProviderPerformanceMetrics {
-  providerId: string;
-  providerName: string;
-  locationId: string;
-  locationName: string;
-  periodStart: Date;
-  periodEnd: Date;
-  totalProduction: number;
-  avgDailyProduction: number;
-  productionDays: number;
-  productionGoal?: number;
-  variancePercentage?: number;
 }
 
 /**
@@ -644,7 +583,9 @@ function calculatePeriodDates(
   switch (period) {
     case 'daily': {
       const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-      return { periodStart: today, periodEnd: today };
+      const endOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+      endOfDay.setHours(23, 59, 59, 999);
+      return { periodStart: today, periodEnd: endOfDay };
     }
     case 'weekly': {
       const startOfWeek = new Date(now);
@@ -831,7 +772,18 @@ export async function getProviderPerformanceMetrics(params: {
         clinicId: provider.clinic.id,
         ...locationFilter,
       });
-    } catch {
+    } catch (error) {
+      logger.error('Failed to fetch provider performance data', {
+        error: error instanceof Error ? error.message : String(error),
+        stack: error instanceof Error ? error.stack : undefined,
+        providerId,
+        providerType: provider.providerType,
+        clinicId: provider.clinic.id,
+        periodStart: periodStart.toISOString(),
+        periodEnd: periodEnd.toISOString(),
+        locationFilter,
+        operation: 'getProviderPerformanceByLocation',
+      });
       productionData = [];
     }
   }
@@ -853,8 +805,23 @@ export async function getProviderPerformanceMetrics(params: {
   if (includeGoals) {
     try {
       goalsData = await fetchProviderGoals(providerId, provider.clinic.id, periodStart, periodEnd);
-    } catch {
-      goalsData = undefined;
+    } catch (error) {
+      logger.error('Failed to fetch provider goals data', {
+        error: error instanceof Error ? error.message : String(error),
+        stack: error instanceof Error ? error.stack : undefined,
+        providerId,
+        clinicId: provider.clinic.id,
+        periodStart: periodStart.toISOString(),
+        periodEnd: periodEnd.toISOString(),
+        operation: 'fetchProviderGoals',
+      });
+
+      // Re-throw with additional context for better error handling upstream
+      throw new Error(
+        `Failed to fetch provider goals for provider ${providerId}: ${
+          error instanceof Error ? error.message : String(error)
+        }`
+      );
     }
   }
 
@@ -863,6 +830,10 @@ export async function getProviderPerformanceMetrics(params: {
       id: provider.id,
       name: provider.name,
       providerType: provider.providerType,
+      clinic: {
+        id: provider.clinic.id,
+        name: provider.clinic.name,
+      },
       primaryLocation: provider.primaryLocation
         ? {
             id: provider.primaryLocation.id,

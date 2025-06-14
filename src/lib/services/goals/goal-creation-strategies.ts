@@ -203,12 +203,12 @@ export class RegularGoalCreationStrategy extends BaseService implements GoalCrea
  * Custom error class for goal creation
  */
 export class GoalCreationError extends Error {
-  constructor(
-    message: string,
-    public statusCode: number
-  ) {
+  statusCode: number;
+
+  constructor(message: string, statusCode: number) {
     super(message);
     this.name = 'GoalCreationError';
+    this.statusCode = statusCode;
   }
 }
 

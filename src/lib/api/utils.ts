@@ -5,13 +5,14 @@ import { ZodError } from 'zod';
  * Custom error class for API errors
  */
 export class ApiError extends Error {
-  constructor(
-    message: string,
-    public statusCode = 500,
-    public code?: string
-  ) {
+  statusCode: number;
+  code?: string;
+
+  constructor(message: string, statusCode = 500, code?: string) {
     super(message);
     this.name = 'ApiError';
+    this.statusCode = statusCode;
+    this.code = code;
   }
 }
 
@@ -155,11 +156,15 @@ export function handleApiError(error: unknown): NextResponse<ApiErrorPayload> {
 }
 
 /**
+ * UUID v4 validation regex
+ */
+const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+
+/**
  * Validate UUID format
  */
 export function isValidUuid(id: string): boolean {
-  const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
-  return uuidRegex.test(id);
+  return UUID_REGEX.test(id);
 }
 
 /**

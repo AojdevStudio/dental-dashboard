@@ -5,15 +5,78 @@
  * including the enhanced ProviderWithLocations type that includes location relationships.
  */
 
-// Import types for local usage
-import type {
-  ProviderFilters,
-  ProviderPerformanceMetrics,
-  ProviderWithLocations,
-} from '@/lib/database/queries/providers';
+/**
+ * Provider filter parameters for API requests
+ */
+export interface ProviderFilters {
+  search?: string;
+  providerType?: string;
+  status?: string;
+  locationId?: string;
+  page?: number;
+  limit?: number;
+  clinicId?: string;
+  providerId?: string;
+  includeInactive?: boolean;
+  pagination?: {
+    offset: number;
+    limit: number;
+  };
+}
 
-// Re-export types from database queries
-export type { ProviderFilters, ProviderPerformanceMetrics, ProviderWithLocations };
+/**
+ * Provider with location relationships
+ */
+export interface ProviderWithLocations {
+  id: string;
+  name: string;
+  firstName: string | null;
+  lastName: string | null;
+  email: string | null;
+  providerType: string;
+  status: string;
+  clinic: {
+    id: string;
+    name: string;
+  };
+  locations: {
+    id: string;
+    locationId: string;
+    locationName: string;
+    locationAddress: string | null;
+    isPrimary: boolean;
+    isActive: boolean;
+    startDate: Date;
+    endDate: Date | null;
+  }[];
+  primaryLocation?: {
+    id: string;
+    name: string;
+    address: string | null;
+  };
+  _count: {
+    locations: number;
+    hygieneProduction: number;
+    dentistProduction: number;
+  };
+}
+
+/**
+ * Provider performance metrics
+ */
+export interface ProviderPerformanceMetrics {
+  providerId: string;
+  providerName: string;
+  locationId: string;
+  locationName: string;
+  periodStart: Date;
+  periodEnd: Date;
+  totalProduction: number;
+  avgDailyProduction: number;
+  productionDays: number;
+  productionGoal?: number;
+  variancePercentage?: number;
+}
 
 /**
  * API response wrapper for paginated providers
