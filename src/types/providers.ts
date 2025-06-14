@@ -52,6 +52,7 @@ export interface PaginatedResponse<T> {
  * Query parameters for the providers API endpoint
  */
 export interface ProvidersQueryParams {
+  search?: string;
   clinicId?: string;
   locationId?: string;
   providerType?: 'dentist' | 'hygienist' | 'specialist' | 'other';

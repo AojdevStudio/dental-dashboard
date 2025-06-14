@@ -136,13 +136,49 @@ export function useProviders(options: UseProvidersOptions = {}): UseProvidersRet
     };
   });
 
-  // Query for fetching providers
+  // Query for fetching providers with data transformation
   const { data, isLoading, isError, error, refetch } = useQuery({
     queryKey: ['providers', filters],
     queryFn: () => fetchProviders(filters),
     enabled,
     refetchOnWindowFocus,
     staleTime: 5 * 60 * 1000, // 5 minutes
+    // Use select to transform and stabilize data for better React performance
+    select: useCallback((data: ApiResponse) => {
+      return {
+        ...data,
+        data: data.data.map((provider) => ({
+          // Transform to stable, flat structure for UI components
+          id: provider.id,
+          name: provider.name,
+          firstName: provider.firstName,
+          lastName: provider.lastName,
+          email: provider.email,
+          providerType: provider.providerType,
+          status: provider.status,
+          clinic: {
+            id: provider.clinic.id,
+            name: provider.clinic.name,
+          },
+          locations: provider.locations.map((location) => ({
+            id: location.id,
+            locationId: location.locationId,
+            locationName: location.locationName,
+            locationAddress: location.locationAddress,
+            isPrimary: location.isPrimary,
+            isActive: location.isActive,
+            startDate: location.startDate,
+            endDate: location.endDate,
+          })),
+          primaryLocation: provider.primaryLocation,
+          _count: {
+            locations: provider._count.locations,
+            hygieneProduction: provider._count.hygieneProduction,
+            dentistProduction: provider._count.dentistProduction,
+          },
+        })),
+      };
+    }, []), // Empty dependency array because transformation is pure
   });
 
   // Mutation for creating providers
@@ -243,7 +279,7 @@ export function useProviders(options: UseProvidersOptions = {}): UseProvidersRet
 export function useProvider(providerId: string, enabled = true) {
   return useQuery({
     queryKey: ['provider', providerId],
-    queryFn: async (): Promise<ProviderWithLocations> => {
+    queryFn: async (): Promise<ApiResponse> => {
       const response = await fetch(`/api/providers?providerId=${providerId}`, {
         credentials: 'include',
       });
@@ -257,10 +293,43 @@ export function useProvider(providerId: string, enabled = true) {
         throw new Error('Provider not found');
       }
 
-      return result.data[0];
+      return result;
     },
     enabled: enabled && !!providerId,
     staleTime: 5 * 60 * 1000,
+    // Transform single provider data for consistency
+    select: useCallback((data: ApiResponse): ProviderWithLocations => {
+      const provider = data.data[0];
+      return {
+        id: provider.id,
+        name: provider.name,
+        firstName: provider.firstName,
+        lastName: provider.lastName,
+        email: provider.email,
+        providerType: provider.providerType,
+        status: provider.status,
+        clinic: {
+          id: provider.clinic.id,
+          name: provider.clinic.name,
+        },
+        locations: provider.locations.map((location) => ({
+          id: location.id,
+          locationId: location.locationId,
+          locationName: location.locationName,
+          locationAddress: location.locationAddress,
+          isPrimary: location.isPrimary,
+          isActive: location.isActive,
+          startDate: location.startDate,
+          endDate: location.endDate,
+        })),
+        primaryLocation: provider.primaryLocation,
+        _count: {
+          locations: provider._count.locations,
+          hygieneProduction: provider._count.hygieneProduction,
+          dentistProduction: provider._count.dentistProduction,
+        },
+      };
+    }, []),
   });
 }
 
