@@ -40,9 +40,9 @@ export async function signInWithVerification(
     });
 
     // If not found by authId, try by email (for existing users before UUID migration)
-    if (!dbUser) {
+    if (!dbUser && authData.user.email) {
       dbUser = await prisma.user.findUnique({
-        where: { email: authData.user.email! },
+        where: { email: authData.user.email },
         include: {
           clinic: true,
         },

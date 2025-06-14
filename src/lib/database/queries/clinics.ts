@@ -442,7 +442,7 @@ export async function searchClinics(
     ],
   };
 
-  return prisma.clinic.findMany({
+  return await prisma.clinic.findMany({
     where,
     take: options?.limit || 10,
     orderBy: { name: 'asc' },

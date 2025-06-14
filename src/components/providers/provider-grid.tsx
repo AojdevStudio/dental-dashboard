@@ -120,8 +120,8 @@ function LoadingState({
 
   return (
     <div className={gridClasses}>
-      {Array.from({ length: count }).map((_, index) => (
-        <ProviderCardSkeleton key={index} viewMode={viewMode} />
+      {Array.from({ length: count }, (_, index) => index).map((skeletonId) => (
+        <ProviderCardSkeleton key={`skeleton-${skeletonId}`} viewMode={viewMode} />
       ))}
     </div>
   );
@@ -187,7 +187,9 @@ function ViewModeToggle({
   viewMode: 'grid' | 'list';
   onViewModeChange?: (mode: 'grid' | 'list') => void;
 }) {
-  if (!onViewModeChange) return null;
+  if (!onViewModeChange) {
+    return null;
+  }
 
   return (
     <div className="flex items-center border rounded-lg p-1">
@@ -223,7 +225,9 @@ function Pagination({
   pagination: PaginationInfo;
   onPageChange?: (page: number) => void;
 }) {
-  if (!onPageChange) return null;
+  if (!onPageChange) {
+    return null;
+  }
 
   return (
     <div className="flex items-center justify-between">
@@ -338,7 +342,7 @@ export function ProviderGrid({
   }
 
   // Handle empty state
-  if (!providers.length) {
+  if (providers.length === 0) {
     return (
       <div className={`space-y-4 ${className}`}>
         <div className="flex items-center justify-between">

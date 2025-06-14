@@ -8,6 +8,9 @@ import type { UpdateGoalQueryInput } from '../../types/goals';
 import { type AuthContext, getUserClinicRole, validateClinicAccess } from '../auth-context';
 import { prisma } from '../client';
 
+// Move regex to module scope for performance
+const FORMULA_MULTIPLIER_REGEX = /\* ([\d.]+)/;
+
 export interface CreateGoalInput {
   metricDefinitionId: string;
   timePeriod: string;
@@ -492,7 +495,7 @@ async function calculateTargetFromFormula(
       .reduce((acc, val) => acc + val, 0);
 
     // Apply formula multiplier
-    const multiplierMatch = formula.match(/\* ([\d.]+)/);
+    const multiplierMatch = formula.match(FORMULA_MULTIPLIER_REGEX);
     const multiplier = multiplierMatch ? Number.parseFloat(multiplierMatch[1]) : 1;
 
     return String(Math.round(previousSum * multiplier));

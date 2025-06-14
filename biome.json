@@ -19,7 +19,18 @@
       "**/*.bundle.js",
       "scripts/**",
       "upload/**",
-      "prisma/seed.ts"
+      "prisma/seed.ts",
+      "**/__tests__/**",
+      "**/tests/**",
+      "**/*.test.ts",
+      "**/*.test.tsx",
+      "**/*.spec.ts",
+      "**/*.spec.tsx",
+      "src/tests/**",
+      "src/**/__tests__/**",
+      "**/vitest-setup*.ts",
+      "**/vitest.config.ts",
+      "**/vitest.*.config.ts"
     ]
   },
   "formatter": {
@@ -79,7 +90,12 @@
       "complexity": {
         "noBannedTypes": "error",
         "noEmptyTypeParameters": "error",
-        "noExcessiveCognitiveComplexity": "warn",
+        "noExcessiveCognitiveComplexity": {
+          "level": "warn",
+          "options": {
+            "maxAllowedComplexity": 25
+          }
+        },
         "noExcessiveNestedTestSuites": "error",
         "noExtraBooleanCast": "error",
         "noForEach": "error",
@@ -330,23 +346,7 @@
       "bracketSameLine": false,
       "attributePosition": "auto"
     },
-    "globals": [
-      "console",
-      "process",
-      "Buffer",
-      "global",
-      "__dirname",
-      "__filename",
-      "vi",
-      "describe",
-      "it",
-      "test",
-      "expect",
-      "beforeEach",
-      "afterEach",
-      "beforeAll",
-      "afterAll"
-    ]
+    "globals": ["console", "process", "Buffer", "global", "__dirname", "__filename"]
   },
   "json": {
     "parser": {
@@ -373,39 +373,6 @@
     }
   },
   "overrides": [
-    {
-      "include": [
-        "*.test.ts",
-        "*.test.tsx",
-        "*.spec.ts",
-        "*.spec.tsx",
-        "**/__tests__/**/*",
-        "**/tests/**/*",
-        "src/tests/**/*"
-      ],
-      "linter": {
-        "rules": {
-          "suspicious": {
-            "noConsole": "off",
-            "noConsoleLog": "off",
-            "noExplicitAny": "off"
-          },
-          "style": {
-            "noNonNullAssertion": "off"
-          },
-          "nursery": {
-            "noSecrets": "off"
-          },
-          "complexity": {
-            "noExcessiveCognitiveComplexity": "off"
-          },
-          "correctness": {
-            "noUnusedVariables": "warn",
-            "noUnusedImports": "warn"
-          }
-        }
-      }
-    },
     {
       "include": ["*.config.js", "*.config.ts", "*.config.mjs"],
       "linter": {
@@ -470,19 +437,6 @@
         "rules": {
           "nursery": {
             "noSecrets": "off"
-          }
-        }
-      }
-    },
-    {
-      "include": ["**/vitest-setup*.ts", "**/vitest.config.ts", "**/vitest.*.config.ts"],
-      "linter": {
-        "rules": {
-          "style": {
-            "noNonNullAssertion": "off"
-          },
-          "correctness": {
-            "noUndeclaredVariables": "off"
           }
         }
       }

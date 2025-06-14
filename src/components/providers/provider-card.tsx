@@ -258,8 +258,8 @@ function Metrics({ compact = false }: { compact?: boolean }) {
   if (compact) {
     return (
       <div className="flex items-center gap-4 text-xs text-gray-600">
-        {metrics.map((metric, index) => (
-          <div key={index} className="flex items-center gap-1">
+        {metrics.map((metric) => (
+          <div key={metric.label} className="flex items-center gap-1">
             {metric.icon && <metric.icon className="h-3 w-3" />}
             <span className={metric.color}>{metric.value}</span>
             <span>{metric.label}</span>
@@ -271,8 +271,8 @@ function Metrics({ compact = false }: { compact?: boolean }) {
 
   return (
     <div className="grid grid-cols-3 gap-3">
-      {metrics.map((metric, index) => (
-        <div key={index} className="text-center">
+      {metrics.map((metric) => (
+        <div key={metric.label} className="text-center">
           <div className={`text-lg font-semibold ${metric.color}`}>{metric.value}</div>
           <div className="text-xs text-gray-500">{metric.label}</div>
         </div>
@@ -287,7 +287,7 @@ function Metrics({ compact = false }: { compact?: boolean }) {
 function Locations({ maxDisplay = 2 }: { maxDisplay?: number }) {
   const provider = useProviderCardContext();
 
-  if (!provider.locations.length) {
+  if (provider.locations.length === 0) {
     return <div className="text-sm text-gray-500 italic">No locations assigned</div>;
   }
 

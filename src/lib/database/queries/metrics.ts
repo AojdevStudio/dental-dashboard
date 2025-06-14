@@ -56,7 +56,7 @@ export async function getMetricDefinitions(
     where.isComposite = options.isComposite;
   }
 
-  return prisma.metricDefinition.findMany({
+  return await prisma.metricDefinition.findMany({
     where,
     orderBy: [{ category: 'asc' }, { name: 'asc' }],
   });

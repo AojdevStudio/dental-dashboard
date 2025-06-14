@@ -300,7 +300,7 @@ export async function getUserClinicRoles(authContext: AuthContext, userId?: stri
  * Update user's last login timestamp
  */
 export async function updateLastLogin(authId: string) {
-  return prisma.user.update({
+  return await prisma.user.update({
     where: { authId },
     data: { lastLogin: new Date() },
   });
@@ -333,7 +333,7 @@ export async function searchUsers(
     ],
   };
 
-  return prisma.user.findMany({
+  return await prisma.user.findMany({
     where,
     include: {
       clinic: true,

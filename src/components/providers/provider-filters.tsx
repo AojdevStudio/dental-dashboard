@@ -45,13 +45,13 @@ function useUrlFilters() {
     (updates: Record<string, string | null>) => {
       const params = new URLSearchParams(searchParams);
 
-      Object.entries(updates).forEach(([key, value]) => {
+      for (const [key, value] of Object.entries(updates)) {
         if (value === null || value === '' || value === undefined) {
           params.delete(key);
         } else {
           params.set(key, value);
         }
-      });
+      }
 
       // Use replace to avoid adding to browser history for filter changes
       router.replace(`${pathname}?${params.toString()}`, { scroll: false });
@@ -113,12 +113,15 @@ export interface ProviderFiltersProps {
  * Individual filter count badge
  */
 function FilterCount({ count, onClear }: { count: number; onClear: () => void }) {
-  if (count === 0) return null;
+  if (count === 0) {
+    return null;
+  }
 
   return (
     <Badge variant="secondary" className="ml-2">
       {count}
       <button
+        type="button"
         onClick={onClear}
         className="ml-1 hover:bg-gray-200 rounded-full p-0.5"
         aria-label="Clear filter"
@@ -149,7 +152,11 @@ function ActiveFilters({
   onClearAll: () => void;
   onClearFilter: (key: string) => void;
 }) {
-  const activeFilters = [];
+  const activeFilters: Array<{
+    key: string;
+    label: string;
+    value: string;
+  }> = [];
 
   if (search) {
     activeFilters.push({
@@ -186,7 +193,9 @@ function ActiveFilters({
     });
   }
 
-  if (activeFilters.length === 0) return null;
+  if (activeFilters.length === 0) {
+    return null;
+  }
 
   return (
     <div className="flex items-center gap-2 flex-wrap">
@@ -195,6 +204,7 @@ function ActiveFilters({
         <Badge key={filter.key} variant="outline" className="gap-1">
           {filter.label}
           <button
+            type="button"
             onClick={() => onClearFilter(filter.key)}
             className="hover:bg-gray-200 rounded-full p-0.5"
             aria-label={`Clear ${filter.key} filter`}
@@ -305,22 +315,30 @@ export function ProviderFilters({
   const handleClearFilter = useCallback(
     (key: string) => {
       switch (key) {
-        case 'search':
+        case 'search': {
           setLocalSearch('');
           updateUrl({ search: null });
           break;
-        case 'providerType':
+        }
+        case 'providerType': {
           setProviderType('');
           updateUrl({ providerType: null });
           break;
-        case 'status':
+        }
+        case 'status': {
           setStatus('');
           updateUrl({ status: null });
           break;
-        case 'locationId':
+        }
+        case 'locationId': {
           setLocationId('');
           updateUrl({ locationId: null });
           break;
+        }
+        default: {
+          // Handle unknown filter keys silently
+          break;
+        }
       }
     },
     [updateUrl]

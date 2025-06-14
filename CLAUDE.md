@@ -237,3 +237,30 @@ Required environment variables:
 - **Multi-tenancy:** All data operations must respect clinic-based isolation
 - **Migration Status:** Currently migrating from CUID to UUID identifiers
 - **Google Integration:** OAuth flow for Sheets API access is implemented
+
+## Code Performance and Best Practices
+
+- Avoid using the index of an array as key property in an element
+- Prefer for...of instead of forEach. forEach may lead to performance issues when working with large arrays. When combined with functions like filter or map, this causes multiple iterations over the same type
+
+## Work Guidelines
+
+- Run `pnpm biome:check` after every major code implementation
+
+## Import Best Practices
+- An import should not be exported. Use export from instead. 'export from' makes it clearer that the intention is to re-export a variable.
+
+## TypeScript Type Practices
+- Do not use the 'any' type whatsoever. Sometimes you can use the type 'unknown' instead of the type 'any'
+
+## Code Guidelines
+- Regex literals are required to be declared at the top level
+
+## JavaScript Variable Declaration Best Practices
+- All variables must be explicitly declared before use.
+- Avoid using undeclared or implicit global variables.
+- Prefer `const` or `let` over `var` in JavaScript.
+- Ensure all identifiers are defined within scope or imported.
+
+## Additional Coding Practices
+- Avoid classes that only contain static members

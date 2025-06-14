@@ -1,3 +1,5 @@
+import type React from 'react';
+
 export type TrendDirection = 'up' | 'down' | 'neutral';
 export type ComparisonPeriod = 'day' | 'week' | 'month' | 'quarter' | 'year' | 'custom';
 

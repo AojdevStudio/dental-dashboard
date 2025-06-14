@@ -59,6 +59,7 @@ export function usePermissions(): PermissionsContextValue {
   const context = useContext(PermissionsContext);
 
   if (!context) {
+    // biome-ignore lint/nursery/noSecrets: This is an error message, not a secret
     throw new Error('usePermissions must be used within a PermissionsProvider');
   }
 
@@ -88,7 +89,9 @@ export interface UserClinicAccess {
  * Extract user role from Supabase user metadata
  */
 export function getUserRole(user: User | null): UserRole {
-  if (!user) return 'viewer';
+  if (!user) {
+    return 'viewer';
+  }
 
   const role = user.app_metadata?.role || user.user_metadata?.role;
 
@@ -113,15 +116,25 @@ export function getUserRole(user: User | null): UserRole {
  * Extract user clinic access from Supabase user metadata
  */
 export function getUserClinicAccess(user: User | null): UserClinicAccess[] {
-  if (!user) return [];
+  if (!user) {
+    return [];
+  }
 
   const clinicAccess = user.app_metadata?.clinic_access || user.user_metadata?.clinic_access || [];
 
-  if (!Array.isArray(clinicAccess)) return [];
+  if (!Array.isArray(clinicAccess)) {
+    return [];
+  }
 
   return clinicAccess.filter(
-    (access: any) =>
-      access && typeof access.clinicId === 'string' && typeof access.role === 'string'
+    (access: unknown): access is UserClinicAccess =>
+      access !== null &&
+      access !== undefined &&
+      typeof access === 'object' &&
+      'clinicId' in access &&
+      'role' in access &&
+      typeof (access as Record<string, unknown>).clinicId === 'string' &&
+      typeof (access as Record<string, unknown>).role === 'string'
   );
 }
 
@@ -150,7 +163,9 @@ export function createPermissionsValue(user: User | null): PermissionsContextVal
 
   // Check if user is clinic admin for specific clinic
   const isClinicAdmin = (clinicId: string): boolean => {
-    if (isSystemAdmin()) return true;
+    if (isSystemAdmin()) {
+      return true;
+    }
 
     const access = clinicAccess.find((a) => a.clinicId === clinicId);
     return access?.role === 'clinic_admin';
@@ -158,16 +173,22 @@ export function createPermissionsValue(user: User | null): PermissionsContextVal
 
   // Check if user can access clinic
   const canAccessClinic = (clinicId: string): boolean => {
-    if (isSystemAdmin()) return true;
+    if (isSystemAdmin()) {
+      return true;
+    }
 
     return clinicAccess.some((access) => access.clinicId === clinicId);
   };
 
   // Check if user can edit providers
   const canEditProvider = (clinicId: string): boolean => {
-    if (!canAccessClinic(clinicId)) return false;
+    if (!canAccessClinic(clinicId)) {
+      return false;
+    }
 
-    if (isSystemAdmin() || isClinicAdmin(clinicId)) return true;
+    if (isSystemAdmin() || isClinicAdmin(clinicId)) {
+      return true;
+    }
 
     const access = clinicAccess.find((a) => a.clinicId === clinicId);
     return (
@@ -177,7 +198,9 @@ export function createPermissionsValue(user: User | null): PermissionsContextVal
 
   // Check if user can view provider details
   const canViewProviderDetails = (clinicId: string): boolean => {
-    if (!canAccessClinic(clinicId)) return false;
+    if (!canAccessClinic(clinicId)) {
+      return false;
+    }
 
     // All users with clinic access can view provider details
     return true;
@@ -185,9 +208,13 @@ export function createPermissionsValue(user: User | null): PermissionsContextVal
 
   // Check if user can manage provider locations
   const canManageProviderLocations = (clinicId: string): boolean => {
-    if (!canAccessClinic(clinicId)) return false;
+    if (!canAccessClinic(clinicId)) {
+      return false;
+    }
 
-    if (isSystemAdmin() || isClinicAdmin(clinicId)) return true;
+    if (isSystemAdmin() || isClinicAdmin(clinicId)) {
+      return true;
+    }
 
     const access = clinicAccess.find((a) => a.clinicId === clinicId);
     return (
@@ -197,9 +224,13 @@ export function createPermissionsValue(user: User | null): PermissionsContextVal
 
   // Check if user can create providers
   const canCreateProvider = (clinicId: string): boolean => {
-    if (!canAccessClinic(clinicId)) return false;
+    if (!canAccessClinic(clinicId)) {
+      return false;
+    }
 
-    if (isSystemAdmin() || isClinicAdmin(clinicId)) return true;
+    if (isSystemAdmin() || isClinicAdmin(clinicId)) {
+      return true;
+    }
 
     const access = clinicAccess.find((a) => a.clinicId === clinicId);
     return (
@@ -209,7 +240,9 @@ export function createPermissionsValue(user: User | null): PermissionsContextVal
 
   // Check if user can delete providers
   const canDeleteProvider = (clinicId: string): boolean => {
-    if (!canAccessClinic(clinicId)) return false;
+    if (!canAccessClinic(clinicId)) {
+      return false;
+    }
 
     // Only system admins and clinic admins can delete providers
     return isSystemAdmin() || isClinicAdmin(clinicId);
@@ -217,9 +250,13 @@ export function createPermissionsValue(user: User | null): PermissionsContextVal
 
   // Check if user can view provider metrics
   const canViewProviderMetrics = (clinicId: string): boolean => {
-    if (!canAccessClinic(clinicId)) return false;
+    if (!canAccessClinic(clinicId)) {
+      return false;
+    }
 
-    if (isSystemAdmin() || isClinicAdmin(clinicId)) return true;
+    if (isSystemAdmin() || isClinicAdmin(clinicId)) {
+      return true;
+    }
 
     const access = clinicAccess.find((a) => a.clinicId === clinicId);
     return access?.role !== 'viewer';

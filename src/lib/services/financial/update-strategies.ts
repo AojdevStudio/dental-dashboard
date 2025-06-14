@@ -211,30 +211,30 @@ export class DateUpsertStrategy extends BaseService implements FinancialUpdateSt
 /**
  * Factory for creating appropriate update strategy
  */
-export class FinancialUpdateStrategyFactory {
-  static createStrategy(data: UpdateRequestData): FinancialUpdateStrategy {
-    const recordService = new FinancialRecordService();
-    const calculator = new FinancialCalculatorService();
-    const validator = new FinancialDataValidator();
+export function createFinancialUpdateStrategy(data: UpdateRequestData): FinancialUpdateStrategy {
+  const recordService = new FinancialRecordService();
+  const calculator = new FinancialCalculatorService();
+  const validator = new FinancialDataValidator();
 
-    if (data.recordId) {
-      return new RecordIdUpdateStrategy(recordService, calculator, validator);
-    }
-
-    if (data.date) {
-      return new DateUpsertStrategy(recordService, calculator, validator);
-    }
-
-    throw new Error('Either recordId or date is required for update operation');
+  if (data.recordId) {
+    return new RecordIdUpdateStrategy(recordService, calculator, validator);
   }
 
-  static determineStrategyType(data: UpdateRequestData): 'recordId' | 'dateUpsert' | 'invalid' {
-    if (data.recordId) {
-      return 'recordId';
-    }
-    if (data.date) {
-      return 'dateUpsert';
-    }
-    return 'invalid';
+  if (data.date) {
+    return new DateUpsertStrategy(recordService, calculator, validator);
   }
+
+  throw new Error('Either recordId or date is required for update operation');
+}
+
+export function determineStrategyType(
+  data: UpdateRequestData
+): 'recordId' | 'dateUpsert' | 'invalid' {
+  if (data.recordId) {
+    return 'recordId';
+  }
+  if (data.date) {
+    return 'dateUpsert';
+  }
+  return 'invalid';
 }

@@ -203,33 +203,31 @@ export class RegularGoalCreationStrategy extends BaseService implements GoalCrea
  * Custom error class for goal creation
  */
 export class GoalCreationError extends Error {
-  constructor(
-    message: string,
-    public statusCode: number
-  ) {
+  statusCode: number;
+
+  constructor(message: string, statusCode: number) {
     super(message);
     this.name = 'GoalCreationError';
+    this.statusCode = statusCode;
   }
 }
 
 /**
  * Factory for creating appropriate goal creation strategy
  */
-export class GoalCreationStrategyFactory {
-  static createStrategy(data: unknown): GoalCreationStrategy {
-    // Check if data has templateId to determine strategy
-    if (typeof data === 'object' && data !== null && 'templateId' in data) {
-      return new TemplateGoalCreationStrategy();
-    }
-
-    return new RegularGoalCreationStrategy();
+export function createGoalCreationStrategy(data: unknown): GoalCreationStrategy {
+  // Check if data has templateId to determine strategy
+  if (typeof data === 'object' && data !== null && 'templateId' in data) {
+    return new TemplateGoalCreationStrategy();
   }
 
-  static determineStrategyType(data: unknown): 'template' | 'regular' {
-    if (typeof data === 'object' && data !== null && 'templateId' in data) {
-      return 'template';
-    }
+  return new RegularGoalCreationStrategy();
+}
 
-    return 'regular';
+export function determineGoalCreationStrategyType(data: unknown): 'template' | 'regular' {
+  if (typeof data === 'object' && data !== null && 'templateId' in data) {
+    return 'template';
   }
+
+  return 'regular';
 }

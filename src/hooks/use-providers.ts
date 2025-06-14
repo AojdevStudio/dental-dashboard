@@ -226,14 +226,16 @@ export function useProviders(options: UseProvidersOptions = {}): UseProvidersRet
   );
 
   const nextPage = useCallback(() => {
-    if (data?.pagination && filters.page! < data.pagination.totalPages) {
-      setPage(filters.page! + 1);
+    const currentPage = filters.page ?? 1;
+    if (data?.pagination && currentPage < data.pagination.totalPages) {
+      setPage(currentPage + 1);
     }
   }, [data?.pagination, filters.page, setPage]);
 
   const previousPage = useCallback(() => {
-    if (filters.page! > 1) {
-      setPage(filters.page! - 1);
+    const currentPage = filters.page ?? 1;
+    if (currentPage > 1) {
+      setPage(currentPage - 1);
     }
   }, [filters.page, setPage]);
 
