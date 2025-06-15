@@ -19,7 +19,10 @@ describe('ProviderFilters Pagination Reset Logic', () => {
         }
       }
 
-      mockReplace(`${mockPathname}?${params.toString()}`, { scroll: false });
+      // Only append ? and query string if parameters exist
+      const queryString = params.toString();
+      const url = queryString ? `${mockPathname}?${queryString}` : mockPathname;
+      mockReplace(url, { scroll: false });
       return params;
     };
 
@@ -85,7 +88,7 @@ describe('ProviderFilters Pagination Reset Logic', () => {
     updateUrl({ providerType: null, page: null });
 
     expect(mockReplace).toHaveBeenCalledWith(
-      '/providers?',
+      '/providers',
       { scroll: false }
     );
   });
@@ -103,7 +106,7 @@ describe('ProviderFilters Pagination Reset Logic', () => {
     });
 
     expect(mockReplace).toHaveBeenCalledWith(
-      '/providers?',
+      '/providers',
       { scroll: false }
     );
   });
@@ -127,7 +130,7 @@ describe('ProviderFilters Pagination Reset Logic', () => {
     updateUrl({ providerType: '', page: null });
 
     expect(mockReplace).toHaveBeenCalledWith(
-      '/providers?',
+      '/providers',
       { scroll: false }
     );
   });

@@ -29,13 +29,17 @@ function ProvidersPageClient() {
     const limit = Number.parseInt(searchParams.get('limit') || '12', 10);
     const viewMode = searchParams.get('viewMode') === 'list' ? 'list' : 'grid';
 
+    // Ensure safe defaults for NaN values
+    const safePage = Number.isNaN(page) ? 1 : page;
+    const safeLimit = Number.isNaN(limit) ? 12 : limit;
+
     return {
       search: search || undefined,
       providerType: (providerType as 'dentist' | 'hygienist' | 'specialist' | 'other') || undefined,
       status: (status as 'active' | 'inactive') || undefined,
       locationId: locationId || undefined,
-      page,
-      limit,
+      page: safePage,
+      limit: safeLimit,
       viewMode: viewMode as 'grid' | 'list',
     };
   }, [searchParams]);

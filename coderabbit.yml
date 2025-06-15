@@ -14,7 +14,7 @@ reviews:
   path_filters:
     # Include core application code
     - "src/**/*.ts"
-    - "src/**/*.tsx" 
+    - "src/**/*.tsx"
     - "src/**/*.js"
     - "src/**/*.jsx"
     - "prisma/schema.prisma"
@@ -29,19 +29,19 @@ reviews:
     - "vitest.integration.config.ts"
     - "components.json"
     - "biome.json"
-    
+
     # Include Google Apps Script files
     - "scripts/**/*.gs"
     - "scripts/**/*.ts"
     - "scripts/**/*.js"
-    
+
     # Include Supabase functions
     - "supabase/functions/**/*.ts"
     - "supabase/migrations/**/*.sql"
-    
+
     # Exclude everything else explicitly
     - "!**/*.md"
-    - "!**/*.mdc" 
+    - "!**/*.mdc"
     - "!**/*.xml"
     - "!**/*.yml"
     - "!**/*.yaml"
@@ -64,7 +64,7 @@ reviews:
     - "!**/*.zip"
     - "!**/*.tar"
     - "!**/*.gz"
-    
+
     # Exclude generated and build files
     - "!src/generated/**"
     - "!**/node_modules/**"
@@ -73,7 +73,7 @@ reviews:
     - "!.next/**"
     - "!coverage/**"
     - "!.turbo/**"
-    
+
     # Exclude test files (focus on production code)
     - "!**/*.test.ts"
     - "!**/*.test.tsx"
@@ -81,7 +81,7 @@ reviews:
     - "!**/*.spec.tsx"
     - "!**/__tests__/**"
     - "!**/tests/**"
-    
+
     # Exclude documentation and config directories
     - "!docs/**"
     - "!.github/**"
@@ -93,10 +93,10 @@ reviews:
     - "!upload/**"
     - "!migrations/**"
     - "!ai copy/**"
-    
+
     # Exclude migration SQL files (auto-generated)
     - "!prisma/migrations/**/*.sql"
-    
+
     # Exclude lock files and logs
     - "!pnpm-lock.yaml"
     - "!package-lock.json"
@@ -123,7 +123,7 @@ reviews:
 
         **React/Next.js Patterns:**
         - Verify proper Next.js App Router patterns (Server vs Client components)
-        - Check for correct 'use client' directive placement
+        - Check for correct 'use client' directive placemen
         - Ensure proper component composition and prop typing
         - Validate React hooks usage and dependency arrays
         - Review array index key usage - prefer stable keys in lists
@@ -159,7 +159,7 @@ reviews:
 
         **Accessibility (Biome A11Y Rules):**
         - Check for proper ARIA labels and roles
-        - Ensure keyboard navigation support
+        - Ensure keyboard navigation suppor
         - Validate semantic HTML usage
         - Review focus management and screen reader compatibility
 
@@ -178,19 +178,19 @@ reviews:
     - path: "src/hooks/**/*.ts"
       instructions: |
         Review custom hooks for React and TanStack Query patterns:
-        
+
         **Hook Design:**
         - Verify proper hook naming conventions (use prefix)
         - Check for correct dependency management in useEffect/useMemo
         - Ensure proper error handling and loading states
         - Validate return value consistency and typing
-        
+
         **TanStack Query Integration:**
         - Check for proper query key management and consistency
         - Verify correct query/mutation patterns and options
         - Ensure proper cache invalidation strategies
         - Validate optimistic updates and error recovery
-        
+
         **Performance:**
         - Review for unnecessary API calls or redundant queries
         - Check for proper debouncing in search/filter hooks
@@ -200,19 +200,19 @@ reviews:
     - path: "src/lib/**/*.ts"
       instructions: |
         Review utility libraries and services for architecture and performance:
-        
+
         **Service Architecture:**
         - Verify proper service layer patterns and separation of concerns
         - Check for consistent error handling across services
         - Ensure proper logging and monitoring integration
         - Validate service composition and dependency injection
-        
+
         **Database Integration:**
         - Review Prisma query patterns for performance and safety
         - Check for proper transaction handling
         - Ensure efficient data fetching with appropriate includes/selects
         - Validate proper type safety with Prisma generated types
-        
+
         **Validation & Security:**
         - Check for comprehensive input validation using Zod or similar
         - Ensure proper sanitization of user inputs
@@ -233,21 +233,21 @@ reviews:
     - path: "supabase/functions/**/*.ts"
       instructions: |
         Review Supabase Edge Functions for serverless best practices:
-        
+
         **Edge Function Patterns:**
         - Ensure proper error handling and response formatting
         - Check for security best practices (input validation, sanitization)
         - Verify proper async/await patterns and database connections
         - Review for performance optimizations and cold start considerations
-        
+
         **Supabase Integration:**
         - Validate proper Supabase client initialization
-        - Check for correct RLS policy enforcement
+        - Check for correct RLS policy enforcemen
         - Ensure proper CORS and authentication handling
         - Review real-time subscription patterns if applicable
-        
+
         **Security & Performance:**
-        - Validate JWT token handling and user context
+        - Validate JWT token handling and user contex
         - Check for proper rate limiting and abuse prevention
         - Ensure efficient database queries and connection pooling
         - Review logging and monitoring integration
@@ -259,7 +259,7 @@ reviews:
         - Verify API integration patterns and security
         - Ensure proper data validation and sanitization
         - Review for performance and rate limiting considerations
-        - Check for proper credential management
+        - Check for proper credential managemen
         - Validate automation workflow patterns
         - Ensure proper retry logic and fault tolerance
 
@@ -283,14 +283,14 @@ ignore:
     - "Test"
     - "Experiment"
     - "Temp"
-    
+
   # Ignore specific branches
   branches:
     - "dev/test"
     - "experimental/*"
     - "temp/*"
     - "personal/*"
-    
+
   # Ignore specific file patterns (additional safety net)
   files:
     - "**/*.md"
