@@ -52,7 +52,7 @@ export async function getDataSources(
   };
 
   if (options?.clinicId) {
-    const hasAccess = await validateClinicAccess(authContext, options.clinicId);
+    const hasAccess = validateClinicAccess(authContext, options.clinicId);
     if (!hasAccess) {
       throw new Error('Access denied to this clinic');
     }
@@ -123,7 +123,7 @@ export async function getDataSourceById(
   }
 
   // Validate clinic access
-  const hasAccess = await validateClinicAccess(authContext, dataSource.clinicId);
+  const hasAccess = validateClinicAccess(authContext, dataSource.clinicId);
   if (!hasAccess) {
     throw new Error('Access denied to this data source');
   }
@@ -145,7 +145,7 @@ export async function getDataSourceById(
  */
 export async function createDataSource(authContext: AuthContext, input: CreateDataSourceInput) {
   // Validate clinic access and admin role
-  const hasAccess = await validateClinicAccess(authContext, input.clinicId);
+  const hasAccess = validateClinicAccess(authContext, input.clinicId);
   if (!hasAccess) {
     throw new Error('Access denied to this clinic');
   }
@@ -191,7 +191,7 @@ export async function updateDataSource(
   }
 
   // Validate clinic access and admin role
-  const hasAccess = await validateClinicAccess(authContext, dataSource.clinicId);
+  const hasAccess = validateClinicAccess(authContext, dataSource.clinicId);
   if (!hasAccess) {
     throw new Error('Access denied to this data source');
   }
@@ -235,7 +235,7 @@ export async function deleteDataSource(authContext: AuthContext, dataSourceId: s
   }
 
   // Validate clinic access and admin role
-  const hasAccess = await validateClinicAccess(authContext, dataSource.clinicId);
+  const hasAccess = validateClinicAccess(authContext, dataSource.clinicId);
   if (!hasAccess) {
     throw new Error('Access denied to this data source');
   }
@@ -265,7 +265,7 @@ export async function getColumnMappings(authContext: AuthContext, dataSourceId: 
     throw new Error('Data source not found');
   }
 
-  const hasAccess = await validateClinicAccess(authContext, dataSource.clinicId);
+  const hasAccess = validateClinicAccess(authContext, dataSource.clinicId);
   if (!hasAccess) {
     throw new Error('Access denied to this data source');
   }
@@ -302,7 +302,7 @@ export async function createColumnMapping(
     throw new Error('Data source not found');
   }
 
-  const hasAccess = await validateClinicAccess(authContext, dataSource.clinicId);
+  const hasAccess = validateClinicAccess(authContext, dataSource.clinicId);
   if (!hasAccess) {
     throw new Error('Access denied to this data source');
   }
@@ -359,7 +359,7 @@ export async function updateColumnMapping(
     throw new Error('Column mapping not found');
   }
 
-  const hasAccess = await validateClinicAccess(authContext, mapping.dataSource.clinicId);
+  const hasAccess = validateClinicAccess(authContext, mapping.dataSource.clinicId);
   if (!hasAccess) {
     throw new Error('Access denied to this column mapping');
   }
@@ -402,7 +402,7 @@ export async function deleteColumnMapping(authContext: AuthContext, mappingId: s
     throw new Error('Column mapping not found');
   }
 
-  const hasAccess = await validateClinicAccess(authContext, mapping.dataSource.clinicId);
+  const hasAccess = validateClinicAccess(authContext, mapping.dataSource.clinicId);
   if (!hasAccess) {
     throw new Error('Access denied to this column mapping');
   }
@@ -439,7 +439,7 @@ export async function getDataSourceSyncHistory(
     throw new Error('Data source not found');
   }
 
-  const hasAccess = await validateClinicAccess(authContext, dataSource.clinicId);
+  const hasAccess = validateClinicAccess(authContext, dataSource.clinicId);
   if (!hasAccess) {
     throw new Error('Access denied to this data source');
   }

@@ -182,7 +182,7 @@ export class ImportRecordValidator extends BaseValidator<ImportRecord[]> {
     this.validateImportNumericField(record.unearned, `${prefix}.unearned`, true);
   }
 
-  private validateImportNumericField(value: any, fieldName: string, allowNull = false): void {
+  private validateImportNumericField(value: unknown, fieldName: string, allowNull = false): void {
     if (value === undefined || value === null || value === '') {
       if (!allowNull) {
         // For optional fields, default to 0

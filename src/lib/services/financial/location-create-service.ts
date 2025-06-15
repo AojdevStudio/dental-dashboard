@@ -102,7 +102,7 @@ export class LocationFinancialCreateService {
     data: CreateLocationFinancialData,
     metrics: ReturnType<typeof this.calculateFinancialMetrics>
   ) {
-    return prisma.locationFinancial.create({
+    return await prisma.locationFinancial.create({
       data: {
         clinicId: data.clinicId,
         locationId: data.locationId,

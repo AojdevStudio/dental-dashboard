@@ -65,7 +65,10 @@ export class LocationDetailQueryService {
     return dateFilter;
   }
 
-  private async getSummaryData(where: any, location: any) {
+  private async getSummaryData(
+    where: { locationId: string; date?: DateFilter },
+    location: { id: string; name: string }
+  ) {
     const [recentRecords, totals, dateRange] = await Promise.all([
       this.getRecentRecords(where),
       this.getAggregates(where),
@@ -99,7 +102,10 @@ export class LocationDetailQueryService {
     };
   }
 
-  private async getDetailedData(where: any, location: any) {
+  private async getDetailedData(
+    where: { locationId: string; date?: DateFilter },
+    location: { id: string; name: string }
+  ) {
     const financialData = await prisma.locationFinancial.findMany({
       where,
       include: {
@@ -120,8 +126,8 @@ export class LocationDetailQueryService {
     };
   }
 
-  private async getRecentRecords(where: any) {
-    return prisma.locationFinancial.findMany({
+  private async getRecentRecords(where: { locationId: string; date?: DateFilter }) {
+    return await prisma.locationFinancial.findMany({
       where,
       orderBy: { date: 'desc' },
       take: 10,
@@ -134,8 +140,8 @@ export class LocationDetailQueryService {
     });
   }
 
-  private async getAggregates(where: any) {
-    return prisma.locationFinancial.aggregate({
+  private async getAggregates(where: { locationId: string; date?: DateFilter }) {
+    return await prisma.locationFinancial.aggregate({
       where,
       _sum: {
         production: true,
@@ -159,7 +165,7 @@ export class LocationDetailQueryService {
 
   private async getDateRange(locationId: string, dateFilter?: DateFilter) {
     const conditions: string[] = ['location_id = $1'];
-    const params: any[] = [locationId];
+    const params: (string | Date)[] = [locationId];
 
     if (dateFilter?.gte) {
       conditions.push(`date >= $${params.length + 1}`);

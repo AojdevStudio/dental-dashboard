@@ -18,3 +18,4 @@ task-magic/plans.mdc: 1
 ## Cursor Analytics Tracking
 task-magic/_index.md: 1
 rule-analytics.md: 1
+prompt-library/Product-manager.xml: 1

@@ -214,7 +214,7 @@ export class LocationFinancialQueryService {
   }
 
   private async enrichAggregatedData(aggregatedData: AggregatedFinancialItem[]) {
-    return Promise.all(
+    return await Promise.all(
       aggregatedData.map(async (item) => {
         const [clinic, location] = await Promise.all([
           prisma.clinic.findUnique({

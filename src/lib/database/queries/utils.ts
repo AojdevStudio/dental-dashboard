@@ -21,6 +21,11 @@ export function getClinicFilter(
       return requestedClinicId;
     }
 
+    // Check for wildcard access (service accounts)
+    if (authContext.clinicIds.includes('*')) {
+      return requestedClinicId;
+    }
+
     // Regular users must have access to the requested clinic
     if (authContext.clinicIds.includes(requestedClinicId)) {
       return requestedClinicId;

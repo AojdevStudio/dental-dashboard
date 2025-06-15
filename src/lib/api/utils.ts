@@ -1,6 +1,8 @@
 import { NextResponse } from 'next/server';
 import { ZodError } from 'zod';
 
+// Move regex to module scope for performance
+
 /**
  * Custom error class for API errors
  */

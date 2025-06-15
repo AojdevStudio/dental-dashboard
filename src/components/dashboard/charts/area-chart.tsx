@@ -186,7 +186,7 @@ export function AreaChart({
               strokeWidth={2}
               fill={gradient ? `url(#gradient-${series.dataKey})` : series.color || colors[index]}
               fillOpacity={gradient ? 1 : 0.6}
-              stackId={stacked && series.stackId ? series.stackId : undefined}
+              stackId={stacked ? series.stackId || 'stack' : undefined}
               animationDuration={defaultConfig.animationDuration}
             />
           )) || (

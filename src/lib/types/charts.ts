@@ -1,3 +1,4 @@
+import type React from 'react';
 import type { CSSProperties } from 'react';
 
 export type ChartType = 'line' | 'bar' | 'pie' | 'doughnut' | 'area';
@@ -61,6 +62,20 @@ export interface TooltipProps {
   }>;
   label?: string;
   formatter?: (value: number, name: string) => string;
+}
+
+export interface RechartsClickData {
+  activePayload?: Array<{
+    payload: Record<string, unknown>;
+    name?: string;
+    value?: number | string;
+    dataKey?: string;
+  }>;
+  activeLabel?: string;
+  activeCoordinate?: {
+    x: number;
+    y: number;
+  };
 }
 
 export interface LegendProps {

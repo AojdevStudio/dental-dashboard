@@ -93,10 +93,13 @@ export async function getAuthContext(): Promise<AuthContext | null> {
 /**
  * Validate user has access to a specific clinic
  */
-export async function validateClinicAccess(
-  authContext: AuthContext,
-  clinicId: string
-): Promise<boolean> {
+export function validateClinicAccess(authContext: AuthContext, clinicId: string): boolean {
+  // Check for wildcard access (service accounts)
+  if (authContext.clinicIds.includes('*')) {
+    return true;
+  }
+
+  // Check for specific clinic access
   return authContext.clinicIds.includes(clinicId);
 }
 
@@ -126,6 +129,10 @@ export async function getUserClinicRole(
  * Check if user is a clinic admin
  */
 export async function isClinicAdmin(authContext: AuthContext, clinicId: string): Promise<boolean> {
+  // First, check for basic access
+  if (!validateClinicAccess(authContext, clinicId)) {
+    return false;
+  }
   const role = await getUserClinicRole(authContext, clinicId);
   return role === 'clinic_admin';
 }

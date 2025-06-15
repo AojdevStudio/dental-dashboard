@@ -114,7 +114,7 @@ const customFormat = format.combine(
  *
  * @type {winston.transport[]}
  */
-const transports = [];
+const transports: winston.transport[] = [];
 
 // Always add console transport
 transports.push(new winston.transports.Console());

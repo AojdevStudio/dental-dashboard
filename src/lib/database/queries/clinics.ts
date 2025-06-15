@@ -76,7 +76,7 @@ export async function getClinicById(
   }
 ) {
   // Validate access
-  const hasAccess = await validateClinicAccess(authContext, clinicId);
+  const hasAccess = validateClinicAccess(authContext, clinicId);
   if (!hasAccess) {
     throw new Error('Access denied to this clinic');
   }
@@ -128,7 +128,7 @@ export async function getClinicDashboardData(
   dateRange?: { start: Date; end: Date }
 ) {
   // Validate access
-  const hasAccess = await validateClinicAccess(authContext, clinicId);
+  const hasAccess = validateClinicAccess(authContext, clinicId);
   if (!hasAccess) {
     throw new Error('Access denied to this clinic');
   }
@@ -272,7 +272,7 @@ export async function getClinicStatistics(
   }
 ) {
   // Validate access
-  const hasAccess = await validateClinicAccess(authContext, clinicId);
+  const hasAccess = validateClinicAccess(authContext, clinicId);
   if (!hasAccess) {
     throw new Error('Access denied to this clinic');
   }
@@ -361,7 +361,7 @@ export async function getClinicProviders(
   }
 ) {
   // Validate access
-  const hasAccess = await validateClinicAccess(authContext, clinicId);
+  const hasAccess = validateClinicAccess(authContext, clinicId);
   if (!hasAccess) {
     throw new Error('Access denied to this clinic');
   }
@@ -442,7 +442,7 @@ export async function searchClinics(
     ],
   };
 
-  return prisma.clinic.findMany({
+  return await prisma.clinic.findMany({
     where,
     take: options?.limit || 10,
     orderBy: { name: 'asc' },

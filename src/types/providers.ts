@@ -5,74 +5,16 @@
  * including the enhanced ProviderWithLocations type that includes location relationships.
  */
 
-/**
- * Provider filter parameters for API requests
- */
-export interface ProviderFilters {
-  search?: string;
-  providerType?: string;
-  status?: string;
-  locationId?: string;
-  page?: number;
-  limit?: number;
-  clinicId?: string;
-  providerId?: string;
-  includeInactive?: boolean;
-}
+import type {
+  ProviderFilters as DatabaseProviderFilters,
+  ProviderPerformanceMetrics as DatabaseProviderPerformanceMetrics,
+  ProviderWithLocations as DatabaseProviderWithLocations,
+} from '@/lib/database/queries/providers';
 
-/**
- * Provider with location relationships
- */
-export interface ProviderWithLocations {
-  id: string;
-  name: string;
-  firstName: string | null;
-  lastName: string | null;
-  email: string | null;
-  providerType: string;
-  status: string;
-  clinic: {
-    id: string;
-    name: string;
-  };
-  locations: {
-    id: string;
-    locationId: string;
-    locationName: string;
-    locationAddress: string | null;
-    isPrimary: boolean;
-    isActive: boolean;
-    startDate: Date;
-    endDate: Date | null;
-  }[];
-  primaryLocation?: {
-    id: string;
-    name: string;
-    address: string | null;
-  };
-  _count: {
-    locations: number;
-    hygieneProduction: number;
-    dentistProduction: number;
-  };
-}
-
-/**
- * Provider performance metrics
- */
-export interface ProviderPerformanceMetrics {
-  providerId: string;
-  providerName: string;
-  locationId: string;
-  locationName: string;
-  periodStart: Date;
-  periodEnd: Date;
-  totalProduction: number;
-  avgDailyProduction: number;
-  productionDays: number;
-  productionGoal?: number;
-  variancePercentage?: number;
-}
+// Re-export types from database queries
+export type ProviderFilters = DatabaseProviderFilters;
+export type ProviderPerformanceMetrics = DatabaseProviderPerformanceMetrics;
+export type ProviderWithLocations = DatabaseProviderWithLocations;
 
 /**
  * API response wrapper for paginated providers
@@ -111,6 +53,7 @@ export interface PaginatedResponse<T> {
  * Query parameters for the providers API endpoint
  */
 export interface ProvidersQueryParams {
+  search?: string;
   clinicId?: string;
   locationId?: string;
   providerType?: 'dentist' | 'hygienist' | 'specialist' | 'other';

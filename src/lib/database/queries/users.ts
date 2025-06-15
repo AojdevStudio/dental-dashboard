@@ -43,7 +43,7 @@ export async function getUserById(authContext: AuthContext, userId: string) {
   if (!user.clinicId) {
     throw new Error('User has no clinic association');
   }
-  const hasAccess = await validateClinicAccess(authContext, user.clinicId);
+  const hasAccess = validateClinicAccess(authContext, user.clinicId);
   if (!hasAccess) {
     throw new Error('Access denied to this user');
   }
@@ -94,7 +94,7 @@ export async function getUsers(
  */
 export async function getUsersByClinic(authContext: AuthContext, clinicId: string) {
   // Validate access
-  const hasAccess = await validateClinicAccess(authContext, clinicId);
+  const hasAccess = validateClinicAccess(authContext, clinicId);
   if (!hasAccess) {
     throw new Error('Access denied to this clinic');
   }
@@ -137,7 +137,7 @@ export async function getUsersByClinic(authContext: AuthContext, clinicId: strin
  */
 export async function createUser(authContext: AuthContext, input: CreateUserInput) {
   // Validate clinic access
-  const hasAccess = await validateClinicAccess(authContext, input.clinicId);
+  const hasAccess = validateClinicAccess(authContext, input.clinicId);
   if (!hasAccess) {
     throw new Error('Access denied to this clinic');
   }
@@ -278,7 +278,7 @@ export async function getUserClinicRoles(authContext: AuthContext, userId?: stri
       where: { id: targetUserId },
     });
 
-    if (!(targetUser?.clinicId && authContext.clinicIds.includes(targetUser.clinicId))) {
+    if (!(targetUser?.clinicId && validateClinicAccess(authContext, targetUser.clinicId))) {
       throw new Error('Access denied');
     }
   }
@@ -298,12 +298,15 @@ export async function getUserClinicRoles(authContext: AuthContext, userId?: stri
 
 /**
  * Update user's last login timestamp
+ * Uses updateMany to gracefully handle cases where the user doesn't exist
  */
-export async function updateLastLogin(authId: string) {
-  return prisma.user.update({
+export async function updateLastLogin(authId: string): Promise<{ updated: boolean }> {
+  const result = await prisma.user.updateMany({
     where: { authId },
     data: { lastLogin: new Date() },
   });
+
+  return { updated: result.count > 0 };
 }
 
 /**
@@ -333,7 +336,7 @@ export async function searchUsers(
     ],
   };
 
-  return prisma.user.findMany({
+  return await prisma.user.findMany({
     where,
     include: {
       clinic: true,

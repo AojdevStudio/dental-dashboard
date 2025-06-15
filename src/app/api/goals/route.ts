@@ -9,7 +9,7 @@ import { apiError, apiPaginated, apiSuccess, getPaginationParams } from '../../.
 import * as goalQueries from '../../../lib/database/queries/goals';
 import {
   GoalCreationError,
-  GoalCreationStrategyFactory,
+  createGoalCreationStrategy,
 } from '../../../lib/services/goals/goal-creation-strategies';
 
 export type GetGoalsResponse = Awaited<ReturnType<typeof goalQueries.getGoals>>;
@@ -57,13 +57,13 @@ export const POST = withAuth(async (request, { authContext }) => {
     const rawBody = await request.json();
 
     // Create and execute appropriate strategy
-    const strategy = GoalCreationStrategyFactory.createStrategy(rawBody);
+    const strategy = createGoalCreationStrategy(rawBody);
 
     // Validate the request data
     const validationResult = strategy.validate(rawBody);
     if (!validationResult.isValid) {
       return apiError(
-        `Validation failed: ${validationResult.errors.map((e) => e.message).join(', ')}`,
+        `Validation failed: ${validationResult.errors.map((e: { message: string }) => e.message).join(', ')}`,
         400
       );
     }
