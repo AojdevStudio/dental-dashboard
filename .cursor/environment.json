@@ -1,3 +1,23 @@
 {
-  "agentCanUpdateSnapshot": true
+  "agentCanUpdateSnapshot": true,
+  "install": "pnpm install",
+  "start": "pnpm run prisma:generate",
+  "terminals": [
+    {
+      "name": "Development Server",
+      "command": "pnpm run dev"
+    },
+    {
+      "name": "TypeScript Check",
+      "command": "pnpm run typecheck"
+    },
+    {
+      "name": "Biome Check",
+      "command": "pnpm run biome:check"
+    },
+    {
+      "name": "Prisma Studio",
+      "command": "pnpm run prisma:studio"
+    }
+  ]
 }

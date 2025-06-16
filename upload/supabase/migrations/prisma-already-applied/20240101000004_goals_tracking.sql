@@ -1,0 +1,1 @@
+-- Placeholder for 20240101000004_goals_tracking.sql

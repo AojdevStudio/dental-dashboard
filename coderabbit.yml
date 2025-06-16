@@ -1,0 +1,303 @@
+# CodeRabbit Configuration - Focused Code Review
+# Only reviews core development files and directories
+
+# Core settings
+language: "en-US"
+release_notes: false
+ignore_draft_pr: true
+enable_beta_features: true
+disable_poem: true
+
+# Reviews configuration
+reviews:
+  # Only include essential code files
+  path_filters:
+    # Include core application code
+    - "src/**/*.ts"
+    - "src/**/*.tsx"
+    - "src/**/*.js"
+    - "src/**/*.jsx"
+    - "prisma/schema.prisma"
+    - "prisma/seed.ts"
+    - "package.json"
+    - "tsconfig.json"
+    - "next.config.ts"
+    - "middleware.ts"
+    - "tailwind.config.js"
+    - "postcss.config.mjs"
+    - "vitest.config.ts"
+    - "vitest.integration.config.ts"
+    - "components.json"
+    - "biome.json"
+
+    # Include Google Apps Script files
+    - "scripts/**/*.gs"
+    - "scripts/**/*.ts"
+    - "scripts/**/*.js"
+
+    # Include Supabase functions
+    - "supabase/functions/**/*.ts"
+    - "supabase/migrations/**/*.sql"
+
+    # Exclude everything else explicitly
+    - "!**/*.md"
+    - "!**/*.mdc"
+    - "!**/*.xml"
+    - "!**/*.yml"
+    - "!**/*.yaml"
+    - "!**/*.json" # Exclude most JSON except specific ones above
+    - "!**/*.css"
+    - "!**/*.scss"
+    - "!**/*.sass"
+    - "!**/*.html"
+    - "!**/*.svg"
+    - "!**/*.png"
+    - "!**/*.jpg"
+    - "!**/*.jpeg"
+    - "!**/*.gif"
+    - "!**/*.ico"
+    - "!**/*.woff"
+    - "!**/*.woff2"
+    - "!**/*.ttf"
+    - "!**/*.eot"
+    - "!**/*.pdf"
+    - "!**/*.zip"
+    - "!**/*.tar"
+    - "!**/*.gz"
+
+    # Exclude generated and build files
+    - "!src/generated/**"
+    - "!**/node_modules/**"
+    - "!dist/**"
+    - "!build/**"
+    - "!.next/**"
+    - "!coverage/**"
+    - "!.turbo/**"
+
+    # Exclude test files (focus on production code)
+    - "!**/*.test.ts"
+    - "!**/*.test.tsx"
+    - "!**/*.spec.ts"
+    - "!**/*.spec.tsx"
+    - "!**/__tests__/**"
+    - "!**/tests/**"
+
+    # Exclude documentation and config directories
+    - "!docs/**"
+    - "!.github/**"
+    - "!.vscode/**"
+    - "!.cursor/**"
+    - "!memory-bank/**"
+    - "!prompt-library/**"
+    - "!templates/**"
+    - "!upload/**"
+    - "!migrations/**"
+    - "!ai copy/**"
+
+    # Exclude migration SQL files (auto-generated)
+    - "!prisma/migrations/**/*.sql"
+
+    # Exclude lock files and logs
+    - "!pnpm-lock.yaml"
+    - "!package-lock.json"
+    - "!yarn.lock"
+    - "!**/*.log"
+
+  # File-specific review instructions
+  path_instructions:
+    - path: "src/**/*.{ts,tsx}"
+      instructions: |
+        Focus on TypeScript/React code quality aligned with Biome configuration:
+
+        **Complexity & Code Quality:**
+        - Cognitive complexity should stay under 25 (current Biome threshold)
+        - Flag functions with complexity 20+ for refactoring consideration
+        - Suggest breaking down complex functions into smaller, focused utilities
+        - Ensure proper JSDoc comments for functions with complexity > 15
+
+        **Type Safety (Biome Rules):**
+        - Avoid 'any' types - use 'unknown' or proper type definitions
+        - Prefer explicit type annotations for better maintainability
+        - Check for proper null/undefined handling instead of non-null assertions
+        - Validate type evolution issues (variables changing types)
+
+        **React/Next.js Patterns:**
+        - Verify proper Next.js App Router patterns (Server vs Client components)
+        - Check for correct 'use client' directive placemen
+        - Ensure proper component composition and prop typing
+        - Validate React hooks usage and dependency arrays
+        - Review array index key usage - prefer stable keys in lists
+        - Check for proper state management patterns
+
+        **Performance (Biome Performance Rules):**
+        - Review regex literal placement - move to module scope when reused
+        - Check for accumulating spreads in loops
+        - Validate top-level regex usage for better performance
+        - Ensure proper memoization where needed (React.memo, useMemo, useCallback)
+
+        **Code Style (Biome Style Rules):**
+        - Prefer explicit length checks (.length === 0 vs !.length)
+        - Avoid parameter properties in constructors - use explicit assignments
+        - Check for proper import/export patterns
+        - Ensure consistent naming conventions
+
+        **Security:**
+        - Validate environment variable patterns and secret detection
+        - Check for proper input validation and sanitization
+        - Review authentication and authorization patterns
+        - Ensure secure database query patterns
+
+    - path: "src/components/**/*.{ts,tsx}"
+      instructions: |
+        Review UI components for Shadcn/UI and React best practices:
+
+        **Component Architecture:**
+        - Verify Shadcn/UI component usage and customization patterns
+        - Check for proper component composition using compound patterns
+        - Ensure consistent styling with Tailwind CSS utilities
+        - Validate component prop interfaces and TypeScript definitions
+
+        **Accessibility (Biome A11Y Rules):**
+        - Check for proper ARIA labels and roles
+        - Ensure keyboard navigation suppor
+        - Validate semantic HTML usage
+        - Review focus management and screen reader compatibility
+
+        **Performance:**
+        - Check for unnecessary re-renders and optimization opportunities
+        - Validate proper React.memo usage for expensive components
+        - Review context usage and potential optimization
+        - Ensure efficient event handler patterns
+
+        **React Patterns:**
+        - Verify proper hook usage and custom hook patterns
+        - Check for correct error boundary implementation
+        - Validate loading and error state handling
+        - Ensure proper form handling with react-hook-form patterns
+
+    - path: "src/hooks/**/*.ts"
+      instructions: |
+        Review custom hooks for React and TanStack Query patterns:
+
+        **Hook Design:**
+        - Verify proper hook naming conventions (use prefix)
+        - Check for correct dependency management in useEffect/useMemo
+        - Ensure proper error handling and loading states
+        - Validate return value consistency and typing
+
+        **TanStack Query Integration:**
+        - Check for proper query key management and consistency
+        - Verify correct query/mutation patterns and options
+        - Ensure proper cache invalidation strategies
+        - Validate optimistic updates and error recovery
+
+        **Performance:**
+        - Review for unnecessary API calls or redundant queries
+        - Check for proper debouncing in search/filter hooks
+        - Validate memoization of computed values
+        - Ensure efficient subscription patterns
+
+    - path: "src/lib/**/*.ts"
+      instructions: |
+        Review utility libraries and services for architecture and performance:
+
+        **Service Architecture:**
+        - Verify proper service layer patterns and separation of concerns
+        - Check for consistent error handling across services
+        - Ensure proper logging and monitoring integration
+        - Validate service composition and dependency injection
+
+        **Database Integration:**
+        - Review Prisma query patterns for performance and safety
+        - Check for proper transaction handling
+        - Ensure efficient data fetching with appropriate includes/selects
+        - Validate proper type safety with Prisma generated types
+
+        **Validation & Security:**
+        - Check for comprehensive input validation using Zod or similar
+        - Ensure proper sanitization of user inputs
+        - Validate API security patterns and rate limiting
+        - Review authentication and authorization logic
+
+    - path: "prisma/**"
+      instructions: |
+        Review database schema and Prisma code:
+        - Verify schema relationships and constraints are properly defined
+        - Check for proper indexing and performance considerations
+        - Ensure proper data types and field constraints
+        - Review seed files for data integrity and security
+        - Check for proper error handling in database operations
+        - Validate migration patterns and backwards compatibility
+        - Ensure RLS (Row Level Security) patterns for multi-tenant data
+
+    - path: "supabase/functions/**/*.ts"
+      instructions: |
+        Review Supabase Edge Functions for serverless best practices:
+
+        **Edge Function Patterns:**
+        - Ensure proper error handling and response formatting
+        - Check for security best practices (input validation, sanitization)
+        - Verify proper async/await patterns and database connections
+        - Review for performance optimizations and cold start considerations
+
+        **Supabase Integration:**
+        - Validate proper Supabase client initialization
+        - Check for correct RLS policy enforcemen
+        - Ensure proper CORS and authentication handling
+        - Review real-time subscription patterns if applicable
+
+        **Security & Performance:**
+        - Validate JWT token handling and user contex
+        - Check for proper rate limiting and abuse prevention
+        - Ensure efficient database queries and connection pooling
+        - Review logging and monitoring integration
+
+    - path: "scripts/**/*.{gs,ts,js}"
+      instructions: |
+        Review Google Apps Script and automation code:
+        - Check for proper error handling and logging
+        - Verify API integration patterns and security
+        - Ensure proper data validation and sanitization
+        - Review for performance and rate limiting considerations
+        - Check for proper credential managemen
+        - Validate automation workflow patterns
+        - Ensure proper retry logic and fault tolerance
+
+    - path: "{package.json,tsconfig.json,*.config.*}"
+      instructions: |
+        Review configuration files for security and performance:
+        - Check for security vulnerabilities in dependencies
+        - Ensure proper version pinning where appropriate
+        - Verify build and script configurations
+        - Review for performance optimizations
+        - Validate TypeScript configuration strictness
+        - Check for proper environment-specific configurations
+        - Ensure development vs production optimization settings
+
+# Ignore patterns
+ignore:
+  # Ignore PR titles
+  title_keywords:
+    - "WIP"
+    - "Draft"
+    - "Test"
+    - "Experiment"
+    - "Temp"
+
+  # Ignore specific branches
+  branches:
+    - "dev/test"
+    - "experimental/*"
+    - "temp/*"
+    - "personal/*"
+
+  # Ignore specific file patterns (additional safety net)
+  files:
+    - "**/*.md"
+    - "**/*.xml"
+    - "**/*.yml"
+    - "**/*.yaml"
+    - "**/README*"
+    - "**/CHANGELOG*"
+    - "**/.env*"
+    - "**/LICENSE*"

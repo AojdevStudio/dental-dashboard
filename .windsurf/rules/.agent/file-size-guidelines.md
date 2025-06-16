@@ -1,0 +1,65 @@
+---
+trigger: always_on
+description: 
+globs: 
+---
+## Guiding Principles for File Size and Modularity
+
+Maintaining appropriately sized and well-structured files is crucial for a healthy codebase. This is not just about arbitrary line counts, but about fostering clarity, maintainability, and effective collaboration, especially with AI development partners.
+
+- **1. Single Responsibility Principle (SRP) Adherence:**
+    - Each file (module, class, function) should have one primary reason to change.
+    - If a file manages multiple distinct responsibilities, it's a candidate for refactoring, regardless of its line count.
+    - Our rule "[Every File Has One Purpose](mdc:.cursor/rules/.structure/project-structure.mdc)" (assuming one exists, or cross-reference a relevant rule if available) reinforces this.
+
+- **2. Readability and Comprehensibility:**
+    - Code should be easy to read, understand, and maintain. Shorter, focused files significantly contribute to this.
+    - The goal is to allow a developer (or AI) to grasp the file's purpose and functionality without excessive cognitive load.
+
+- **3. Enhanced Testability:**
+    - Smaller, cohesive files and the components/functions within them are inherently easier to unit test thoroughly.
+
+- **4. Reduced Cognitive Load:**
+    - Shorter files limit the amount of information needed to be processed simultaneously to understand the code.
+
+- **5. Ease of Navigation and Refactoring:**
+    - A modular codebase with well-defined, reasonably sized files simplifies finding specific logic and performing refactoring tasks with confidence.
+
+- **6. Optimized AI Collaboration:**
+    - **Clearer Context:** AI models operate more effectively with focused, concise contexts. Smaller files provide this, leading to more accurate analysis and code generation.
+    - **Precise Modifications:** AI can make more targeted and safer changes in smaller files, reducing the risk of unintended side effects.
+    - **Efficient Processing:** Smaller files mean less data for the AI to process (fewer tokens), potentially leading to faster and more relevant responses.
+
+## Suggested File Size Ranges (Guidelines, Not Strict Limits)
+
+The ideal line count is contextual. Focus on cohesion and clarity above all.
+
+- **Utility Functions, Simple Components, Type Definitions:**
+    - Often very short and focused.
+    - **Guideline:** Aim for under 50-100 lines.
+    - *Example:* A file defining a few related utility functions or a single, simple UI component.
+
+- **Complex Components, Services, Modules with Clear SRP:**
+    - These files implement a well-defined piece of functionality.
+    - **Guideline:** Aim for 100-300 lines. May occasionally extend to 400-500 lines if the logic is inherently complex but remains highly cohesive.
+    - *Example:* A service managing user authentication, a complex data processing module, or a feature-rich UI component.
+
+- **Strict Maximum File Length:**
+    - **Rule:** Files **MUST NOT** exceed 500 lines of code. There are no exceptions to this rule.
+    - Any file approaching or exceeding this limit must be refactored into smaller, cohesive modules **before** further development on that file continues.
+    - This hard limit is essential for maintaining codebase health, ensuring AI effectiveness, and adhering to the Single Responsibility Principle.
+
+## Rationale: Why This Matters for AI and Codebase Health
+
+-   **AI Effectiveness:** AI systems (like Cursor) thrive on good architecture. They cannot effectively salvage or make sense of a disorganized, monolithic codebase. Clear, modular code is foundational.
+-   **Improved AI Targeting:** A well-structured, modular codebase allows AI agents to reliably identify and work within the correct files for a given task. This drastically improves the quality, consistency, and safety of AI-generated code.
+-   **Sustained Maintainability:** Adhering to these guidelines makes the codebase easier for human developers to understand, debug, and extend over time.
+-   **Consistency:** Provides a shared understanding and expectation for codebase structure.
+
+Strive for a balance that maximizes clarity and cohesion without creating unnecessary fragmentation. The "Every File Has One Purpose" and "No Bloat, No Repeats" principles should guide this balance.
+
+## Potential Downsides of Overly Granular Files
+
+While small files are generally good, excessive fragmentation can also be problematic:
+-   **Navigation Overhead:** Too many tiny files can make it harder to see the bigger picture or require excessive file hopping.
+-   **Boilerplate Ratio:** Very small files might have a disproportionate amount of boilerplate (imports, class/function definitions) compared to actual logic.

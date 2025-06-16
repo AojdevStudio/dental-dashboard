@@ -1,0 +1,193 @@
+---
+description: 
+globs: src/lib/supabase/server.ts,src/lib/supabase/client.ts,middleware.ts
+alwaysApply: false
+---
+# Next.js 15 + Supabase SSR Cookie Error Fix
+
+## Problem Description
+
+When upgrading to Next.js 15, Supabase SSR authentication fails with recurring errors:
+
+```
+Error: Route "/login" used `cookies().getAll()`. `cookies()` should be awaited before using its value.
+Error: Route "/login" used `cookies().set(...)`. `cookies()` should be awaited before using its value.
+```
+
+## Root Cause Analysis
+
+### Next.js 15 Breaking Change
+- **cookies()** function now returns a **Promise** and must be awaited
+- **headers()** function also requires awaiting
+- This affects all server-side cookie operations in Server Components, API Routes, and Server Actions
+
+### Error Pattern Recognition
+The error occurs because:
+1. Supabase server client tries to access cookies synchronously
+2. Next.js 15 requires async access to cookies
+3. The `createServerClient` cookie handlers use outdated synchronous patterns
+
+## ✅ Systematic Fix Approach
+
+### Step 1: Update Supabase Server Client
+
+**File:** [src/lib/supabase/server.ts](mdc:src/lib/supabase/server.ts)
+
+**Before (Broken in Next.js 15):**
+```typescript
+export function createClient() {
+  const cookieStore = cookies(); // ❌ Not awaited
+  
+  return createServerClient(url, key, {
+    cookies: {
+      getAll() {
+        return cookieStore.getAll(); // ❌ Fails in Next.js 15
+      },
+      setAll(cookiesToSet) {
+        cookieStore.set(name, value, options); // ❌ Fails in Next.js 15
+      }
+    }
+  });
+}
+```
+
+**After (Fixed for Next.js 15):**
+```typescript
+export async function createClient() {
+  const cookieStore = await cookies(); // ✅ Properly awaited
+  
+  return createServerClient(url, key, {
+    cookies: {
+      getAll() {
+        return cookieStore.getAll(); // ✅ Works with awaited cookies
+      },
+      setAll(cookiesToSet) {
+        try {
+          for (const { name, value, options } of cookiesToSet) {
+            cookieStore.set(name, value, options); // ✅ Works with awaited cookies
+          }
+        } catch {
+          // Handle Server Component context gracefully
+        }
+      }
+    }
+  });
+}
+```
+
+### Step 2: Update Function Signature and Documentation
+
+**Key Changes:**
+- Make `createClient()` **async**
+- Update return type to `Promise<ReturnType<typeof createServerClient>>`
+- Remove TypeScript error suppressions (no longer needed)
+- Update JSDoc comments to reflect async nature
+
+### Step 3: Verify Usage Patterns
+
+**Server Actions (Already Correct):**
+```typescript
+export async function signIn(formData: FormData) {
+  const supabase = await createClient(); // ✅ Already awaiting
+  // ... rest of implementation
+}
+```
+
+**Server Components:**
+```typescript
+export default async function Page() {
+  const supabase = await createClient(); // ✅ Must await
+  const { data } = await supabase.from('table').select();
+  return <div>{/* render data */}</div>;
+}
+```
+
+## 🚫 What NOT to Change
+
+### Middleware (Keep As-Is)
+**File:** [middleware.ts](mdc:middleware.ts)
+
+The middleware should continue using `createServerClient` directly:
+```typescript
+// ✅ Correct - Don't change this
+const supabase = createServerClient(url, key, {
+  cookies: {
+    getAll() {
+      return request.cookies.getAll();
+    },
+    setAll(cookiesToSet) {
+      // Handle response cookies
+    }
+  }
+});
+```
+
+### Browser Client (Keep As-Is)
+**File:** [src/lib/supabase/client.ts](mdc:src/lib/supabase/client.ts)
+
+Browser client remains synchronous:
+```typescript
+// ✅ Correct - Don't change this
+export function createClient() {
+  return createBrowserClient(url, key);
+}
+```
+
+## 🔍 Error Loop Analysis Method
+
+### 1. Pattern Recognition
+- Document exact error messages
+- Count occurrence frequency
+- Identify trigger conditions
+- Note environmental constants
+
+### 2. Root Cause Investigation
+- Check Next.js version and breaking changes
+- Review Supabase SSR documentation
+- Search for similar issues in community
+- Analyze call stack and timing
+
+### 3. Systematic Testing
+- Apply fix incrementally
+- Test in development environment
+- Verify no new errors introduced
+- Confirm authentication flow works
+
+### 4. Validation Strategy
+- Review all cookie usage patterns
+- Check server vs client implementations
+- Ensure middleware compatibility
+- Test edge cases and error boundaries
+
+## 📋 Verification Checklist
+
+After applying the fix:
+
+- [ ] Development server starts without cookie errors
+- [ ] Login/logout functionality works
+- [ ] No error loops in console
+- [ ] Server Actions handle auth correctly
+- [ ] Middleware continues to work
+- [ ] Browser client unaffected
+
+## 🎯 Prevention Guidelines
+
+### For Future Next.js Upgrades
+1. **Always check breaking changes** in Next.js release notes
+2. **Test async request APIs** (cookies, headers, params)
+3. **Update Supabase patterns** according to latest SSR docs
+4. **Use systematic error analysis** when facing loops
+
+### Code Patterns to Follow
+- **Always await** `cookies()` and `headers()` in Next.js 15+
+- **Make server utilities async** when they use request APIs
+- **Keep middleware patterns separate** from server component patterns
+- **Document async requirements** in function signatures
+
+## 📚 Related Resources
+
+- [Next.js 15 Async Request APIs](mdc:https:/nextjs.org/docs/messages/sync-dynamic-apis)
+- [Supabase SSR Documentation](mdc:https:/supabase.com/docs/guides/auth/server-side/nextjs)
+- [Next.js 15 Migration Guide](mdc:https:/nextjs.org/docs/app/building-your-application/upgrading/version-15)
+
+This systematic approach ensures reliable authentication while maintaining compatibility with Next.js 15's async-first architecture.

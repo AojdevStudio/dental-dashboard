@@ -59,3 +59,29 @@ logs
 
 # Storybook
 storybook-static/
+
+# Added by Claude Task Master
+dev-debug.log
+# Dependency directories
+node_modules/
+# Environment variables
+# Editor directories and files
+.idea
+.vscode
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+# OS specific
+
+# Ignore generated Prisma client files
+src/generated/prisma/
+
+# Ignore specific script with potentially sensitive information
+scripts/apply-migrations-supabase.ts
+
+# Repomix outputs
+repomix-*.xml
+repomix.config.json
+
