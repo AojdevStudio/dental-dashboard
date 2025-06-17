@@ -2,7 +2,7 @@
 
 import { createClient } from '@/lib/supabase/client';
 import type { AuthChangeEvent, Session, User } from '@supabase/supabase-js';
-import { usePathname, useRouter } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 import type React from 'react';
 import { createContext, useCallback, useContext, useEffect, useState } from 'react';
 
@@ -56,7 +56,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   // Initialize Supabase client using the SSR-compatible browser client
   const supabase = createClient();
   const router = useRouter();
-  const _pathname = usePathname();
 
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);

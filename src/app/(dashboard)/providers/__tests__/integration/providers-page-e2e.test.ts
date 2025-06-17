@@ -26,12 +26,57 @@ vi.mock('next/navigation', () => ({
 }));
 
 // Mock Supabase client for authentication
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
-const supabaseServiceKey = process.env.SUPABASE_SERVICE_KEY!;
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+const supabaseServiceKey = process.env.SUPABASE_SERVICE_KEY;
+
+// Validate required environment variables
+if (!supabaseUrl) {
+  throw new Error('NEXT_PUBLIC_SUPABASE_URL environment variable is required for E2E tests');
+}
+if (!supabaseAnonKey) {
+  throw new Error('NEXT_PUBLIC_SUPABASE_ANON_KEY environment variable is required for E2E tests');
+}
+if (!supabaseServiceKey) {
+  throw new Error('SUPABASE_SERVICE_KEY environment variable is required for E2E tests');
+};
 
 const anonClient = createClient(supabaseUrl, supabaseAnonKey);
 const serviceClient = createClient(supabaseUrl, supabaseServiceKey);
+
+/**
+ * Wait for database triggers to complete with retry mechanism
+ */
+async function waitForDatabaseTriggers(testData: any, maxRetries = 10, retryDelay = 200): Promise<void> {
+  let retries = 0;
+  
+  while (retries < maxRetries) {
+    try {
+      // Check if all expected data is properly created and accessible
+      const userCount = await prisma.user.count({
+        where: { authId: { in: testData.authIds } },
+      });
+      
+      const clinicCount = await prisma.clinic.count({
+        where: { id: { in: testData.clinics.map((c: any) => c.id) } },
+      });
+      
+      // Verify that all expected data is present
+      if (userCount === testData.authIds.length && clinicCount === testData.clinics.length) {
+        return; // All triggers completed successfully
+      }
+    } catch (error) {
+      // Continue retrying on database errors
+    }
+    
+    retries++;
+    if (retries < maxRetries) {
+      await new Promise(resolve => setTimeout(resolve, retryDelay));
+    }
+  }
+  
+  throw new Error(`Database triggers did not complete within ${maxRetries * retryDelay}ms timeout`);
+}
 
 /**
  * End-to-End Workflow Tests for Providers Page
@@ -133,8 +178,8 @@ describe('Providers Page E2E Multi-Tenant Workflow', () => {
       });
     }
 
-    // Wait for database triggers to complete
-    await new Promise((resolve) => setTimeout(resolve, 2000));
+    // Wait for database triggers to complete with retry mechanism
+    await waitForDatabaseTriggers(testData);
   }, 30000);
 
   afterAll(async () => {
@@ -159,6 +204,7 @@ describe('Providers Page E2E Multi-Tenant Workflow', () => {
       });
     } catch (error) {
       console.error('E2E cleanup error:', error);
+      throw error;
     }
   }, 30000);
 
