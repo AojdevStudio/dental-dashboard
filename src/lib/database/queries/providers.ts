@@ -648,7 +648,17 @@ function aggregateProductionByLocation(productionData: ProviderPerformanceMetric
 
   return productionData.reduce(
     (acc, data) => {
-      const existing = acc.find((item) => item.locationId === data.locationId);
+      const existing = acc.find(
+        (item: {
+          locationId: string;
+          locationName: string;
+          total: number;
+          average: number;
+          goal?: number;
+          variance?: number;
+          variancePercentage?: number;
+        }) => item.locationId === data.locationId
+      );
       const existingProductionDays = productionDaysMap.get(data.locationId) || 0;
 
       if (existing) {

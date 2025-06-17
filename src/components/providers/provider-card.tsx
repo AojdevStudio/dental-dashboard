@@ -39,7 +39,7 @@ function getProviderInitials(provider: ProviderWithLocations): string {
   }
   return provider.name
     .split(' ')
-    .map((word) => word[0])
+    .map((word: string) => word[0])
     .slice(0, 2)
     .join('')
     .toUpperCase();
@@ -305,7 +305,7 @@ function Locations({ maxDisplay = 2 }: { maxDisplay?: number }) {
         Locations
       </div>
       <div className="space-y-1">
-        {displayLocations.map((location) => (
+        {displayLocations.map((location: (typeof provider.locations)[0]) => (
           <div key={location.id} className="flex items-center justify-between text-sm">
             <span className="text-gray-900">{location.locationName}</span>
             {location.isPrimary && (

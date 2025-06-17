@@ -160,7 +160,7 @@ export function useProviders(options: UseProvidersOptions = {}): UseProvidersRet
             id: provider.clinic.id,
             name: provider.clinic.name,
           },
-          locations: provider.locations.map((location) => ({
+          locations: provider.locations.map((location: ProviderWithLocations['locations'][0]) => ({
             id: location.id,
             locationId: location.locationId,
             locationName: location.locationName,
@@ -314,7 +314,7 @@ export function useProvider(providerId: string, enabled = true) {
           id: provider.clinic.id,
           name: provider.clinic.name,
         },
-        locations: provider.locations.map((location) => ({
+        locations: provider.locations.map((location: ProviderWithLocations['locations'][0]) => ({
           id: location.id,
           locationId: location.locationId,
           locationName: location.locationName,
@@ -364,7 +364,10 @@ export function useProviderFilters(clinicId?: string) {
       const locations = [
         ...new Set(
           providers.flatMap((p) =>
-            p.locations.map((l) => ({ id: l.locationId, name: l.locationName }))
+            p.locations.map((l: ProviderWithLocations['locations'][0]) => ({
+              id: l.locationId,
+              name: l.locationName,
+            }))
           )
         ),
       ];

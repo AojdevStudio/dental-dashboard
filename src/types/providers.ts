@@ -5,16 +5,81 @@
  * including the enhanced ProviderWithLocations type that includes location relationships.
  */
 
-import type {
-  ProviderFilters as DatabaseProviderFilters,
-  ProviderPerformanceMetrics as DatabaseProviderPerformanceMetrics,
-  ProviderWithLocations as DatabaseProviderWithLocations,
-} from '@/lib/database/queries/providers';
+// Note: These types are defined locally in this file since they're not exported from the database queries
+// The database queries file imports these types from here, not the other way around
 
-// Re-export types from database queries
-export type ProviderFilters = DatabaseProviderFilters;
-export type ProviderPerformanceMetrics = DatabaseProviderPerformanceMetrics;
-export type ProviderWithLocations = DatabaseProviderWithLocations;
+/**
+ * Provider filters for database queries
+ */
+export interface ProviderFilters {
+  clinicId?: string;
+  locationId?: string;
+  providerId?: string;
+  providerType?: string;
+  status?: string;
+  includeInactive?: boolean;
+  page?: number;
+  limit?: number;
+}
+
+/**
+ * Provider performance metrics data structure
+ */
+export interface ProviderPerformanceMetrics {
+  providerId: string;
+  providerName: string;
+  locationId: string;
+  locationName: string;
+  periodStart: Date;
+  periodEnd: Date;
+  totalProduction: number;
+  avgDailyProduction: number;
+  productionDays: number;
+  productionGoal?: number;
+  variancePercentage?: number;
+}
+
+/**
+ * Location detail for provider
+ */
+export interface LocationDetail {
+  id: string;
+  locationId: string;
+  locationName: string;
+  locationAddress: string | null;
+  isPrimary: boolean;
+  isActive: boolean;
+  startDate: Date;
+  endDate: Date | null;
+}
+
+/**
+ * Provider with location relationships
+ */
+export interface ProviderWithLocations {
+  id: string;
+  name: string;
+  firstName: string | null;
+  lastName: string | null;
+  email: string | null;
+  providerType: string;
+  status: string;
+  clinic: {
+    id: string;
+    name: string;
+  };
+  locations: LocationDetail[];
+  primaryLocation?: {
+    id: string;
+    name: string;
+    address: string | null;
+  };
+  _count: {
+    locations: number;
+    hygieneProduction: number;
+    dentistProduction: number;
+  };
+}
 
 /**
  * API response wrapper for paginated providers
