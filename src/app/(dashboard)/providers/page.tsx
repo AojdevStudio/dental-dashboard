@@ -26,6 +26,20 @@ function safeParseInt(value: string | undefined, defaultValue: number): number {
 }
 
 /**
+ * Type-safe search parameter extraction helper
+ */
+function getSearchParam(
+  params: Record<string, string | string[] | undefined>,
+  key: string
+): string | undefined {
+  const value = params[key];
+  if (value === undefined) {
+    return undefined;
+  }
+  return Array.isArray(value) ? value[0] : value;
+}
+
+/**
  * Providers Page - Server Component Implementation
  *
  * Server-side rendered page that displays all providers with proper API data
@@ -77,42 +91,18 @@ export default async function ProvidersPage({
   // 2. Parse and Validate Search Parameters
   const page = Math.max(
     1,
-    Math.min(
-      MAX_PAGE,
-      safeParseInt(
-        Array.isArray(resolvedSearchParams.page)
-          ? resolvedSearchParams.page[0]
-          : resolvedSearchParams.page,
-        1
-      )
-    )
+    Math.min(MAX_PAGE, safeParseInt(getSearchParam(resolvedSearchParams, 'page'), 1))
   );
   const limit = Math.max(
     1,
-    Math.min(
-      1000,
-      safeParseInt(
-        Array.isArray(resolvedSearchParams.limit)
-          ? resolvedSearchParams.limit[0]
-          : resolvedSearchParams.limit,
-        12
-      )
-    )
+    Math.min(1000, safeParseInt(getSearchParam(resolvedSearchParams, 'limit'), 12))
   );
 
-  // Extract string parameters with array handling
-  const search = Array.isArray(resolvedSearchParams.search)
-    ? resolvedSearchParams.search[0]
-    : resolvedSearchParams.search;
-  const providerType = Array.isArray(resolvedSearchParams.providerType)
-    ? resolvedSearchParams.providerType[0]
-    : resolvedSearchParams.providerType;
-  const locationId = Array.isArray(resolvedSearchParams.locationId)
-    ? resolvedSearchParams.locationId[0]
-    : resolvedSearchParams.locationId;
-  const status = Array.isArray(resolvedSearchParams.status)
-    ? resolvedSearchParams.status[0]
-    : resolvedSearchParams.status;
+  // Extract string parameters with type-safe handling
+  const search = getSearchParam(resolvedSearchParams, 'search');
+  const providerType = getSearchParam(resolvedSearchParams, 'providerType');
+  const locationId = getSearchParam(resolvedSearchParams, 'locationId');
+  const status = getSearchParam(resolvedSearchParams, 'status');
 
   // Validate enum-like parameters
   const allowedStatuses = ['active', 'inactive'];
@@ -139,7 +129,8 @@ export default async function ProvidersPage({
       }),
       getProviderLocationSummary(isSystemAdmin ? undefined : clinicId),
     ]);
-  } catch (_error) {
+  } catch (error) {
+    console.error('Error fetching providers data:', error);
     // Fallback to empty data to prevent complete page failure
     providersResult = {
       providers: [],
@@ -174,8 +165,8 @@ export default async function ProvidersPage({
             page,
             limit,
             total: providersResult.total,
-            totalPages: Math.ceil(providersResult.total / limit),
-            hasNextPage: page < Math.ceil(providersResult.total / limit),
+            totalPages: Math.ceil(providersResult.total / Math.max(1, limit)),
+            hasNextPage: page < Math.ceil(providersResult.total / Math.max(1, limit)),
             hasPreviousPage: page > 1,
           }}
           emptyMessage="No providers found"

@@ -5,6 +5,7 @@
  * centralized AuthProvider pattern for better performance
  * and consistency.
  */
+// biome-ignore lint/performance/noBarrelFile: Backwards compatibility hook
 export { useAuth } from '@/contexts/auth-context';
 export type { AuthState } from '@/contexts/auth-context';
 

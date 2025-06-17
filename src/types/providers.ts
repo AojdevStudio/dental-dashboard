@@ -9,6 +9,19 @@
 // The database queries file imports these types from here, not the other way around
 
 /**
+ * Provider type constants - centralized to prevent inconsistencies
+ * These should be used instead of hardcoded string arrays throughout the application
+ */
+export const PROVIDER_TYPES = ['dentist', 'hygienist', 'specialist', 'other'] as const;
+export const PROVIDER_STATUSES = ['active', 'inactive'] as const;
+
+/**
+ * Type-safe provider type and status types derived from the constants
+ */
+export type ProviderTypeValue = (typeof PROVIDER_TYPES)[number];
+export type ProviderStatusValue = (typeof PROVIDER_STATUSES)[number];
+
+/**
  * Branded type for ISO date strings to ensure type safety
  */
 export type ISODateString = string & { readonly __brand: 'ISODateString' };

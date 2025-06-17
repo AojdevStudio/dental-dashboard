@@ -5,7 +5,12 @@ import { ProviderGrid } from '@/components/providers/provider-grid';
 import { Button } from '@/components/ui/button';
 import { usePermissions } from '@/hooks/use-permissions';
 import { useProviders } from '@/hooks/use-providers';
-import type { ProviderWithLocations } from '@/types/providers';
+import type {
+  ProviderStatusValue,
+  ProviderTypeValue,
+  ProviderWithLocations,
+} from '@/types/providers';
+import { PROVIDER_STATUSES, PROVIDER_TYPES } from '@/types/providers';
 import { Plus } from 'lucide-react';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { useCallback } from 'react';
@@ -22,17 +27,16 @@ export default function ProvidersPage() {
     const providerTypeParam = searchParams.get('providerType');
     const statusParam = searchParams.get('status');
     return {
-      page: Number.isNaN(page) ? 1 : page,
-      limit: Number.isNaN(limit) ? 12 : limit,
+      page: Number.isNaN(page) ? 1 : Math.max(1, page),
+      limit: Number.isNaN(limit) ? 12 : Math.min(Math.max(1, limit), 50), // cap to a sensible upper bound
       search: searchParams.get('search') || undefined,
       providerType:
-        providerTypeParam &&
-        ['dentist', 'hygienist', 'specialist', 'other'].includes(providerTypeParam)
-          ? (providerTypeParam as 'dentist' | 'hygienist' | 'specialist' | 'other')
+        providerTypeParam && PROVIDER_TYPES.includes(providerTypeParam as ProviderTypeValue)
+          ? (providerTypeParam as ProviderTypeValue)
           : undefined,
       status:
-        statusParam && ['active', 'inactive'].includes(statusParam)
-          ? (statusParam as 'active' | 'inactive')
+        statusParam && PROVIDER_STATUSES.includes(statusParam as ProviderStatusValue)
+          ? (statusParam as ProviderStatusValue)
           : undefined,
       locationId: searchParams.get('locationId') || undefined,
       viewMode: (searchParams.get('viewMode') as 'grid' | 'list') || 'grid',
@@ -130,7 +134,6 @@ export default function ProvidersPage() {
             onViewModeChange={handleViewModeChange}
             onPageChange={handlePageChange}
             onProviderEdit={handleProviderEdit}
-            onProviderView={handleProviderClick}
             onProviderClick={handleProviderClick}
             emptyMessage="No providers found"
             emptyDescription="Try adjusting your search criteria or add a new provider to get started."

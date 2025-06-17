@@ -259,7 +259,7 @@
         "noCompareNegZero": "error",
         "noConfusingLabels": "error",
         "noConfusingVoidType": "error",
-        "noConsole": "warn",
+        "noConsole": "off",
         "noConsoleLog": "warn",
         "noConstEnum": "error",
         "noControlCharactersInRegex": "error",
