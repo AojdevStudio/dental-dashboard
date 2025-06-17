@@ -1,0 +1,137 @@
+{
+  "prd_id": "AOJ-55",
+  "title": "Providers Main Page Implementation",
+  "priority": "High",
+  "complexity": "Medium-High",
+  "due_date": "June 17, 2025",
+  "dependencies": {
+    "completed": ["AOJ-52", "AOJ-54"],
+    "description": "Enhanced Providers API and Core Provider UI Components"
+  },
+  "executive_summary": "Create main providers page at /dashboard/providers by integrating enhanced providers API with core provider UI components using AI Guardrails Strategy due to navigation system integration complexity.",
+  "key_features": [
+    {
+      "id": "server_side_rendering",
+      "title": "Server-Side Data Fetching",
+      "description": "Implement proper SSR using enhanced providers API with loading states and error boundaries",
+      "requirements": [
+        "Data fetching using enhanced providers API",
+        "Loading states during server-side rendering", 
+        "Error boundaries for API failures",
+        "Performance optimization with caching"
+      ]
+    },
+    {
+      "id": "component_integration", 
+      "title": "Provider Components Integration",
+      "description": "Integrate provider cards, grid, filter components with proper data flow",
+      "requirements": [
+        "Provider cards, grid, and filter components integration",
+        "Server to client component data flow",
+        "Responsive design and accessibility",
+        "Dashboard styling patterns consistency"
+      ]
+    },
+    {
+      "id": "navigation_integration",
+      "title": "Navigation System Updates", 
+      "description": "Update sidebar to include providers page with active state highlighting",
+      "requirements": [
+        "Sidebar providers page link addition",
+        "Active state highlighting functionality",
+        "Existing navigation behavior preservation",
+        "Cross-dashboard navigation flow testing"
+      ]
+    }
+  ],
+  "files_to_create": [
+    {
+      "path": "src/app/(dashboard)/providers/page.tsx",
+      "risk": "Low-Medium",
+      "description": "Main providers page with server-side rendering and component integration"
+    },
+    {
+      "path": "src/app/(dashboard)/providers/loading.tsx", 
+      "risk": "Low",
+      "description": "Loading skeleton component following Next.js App Router patterns"
+    },
+    {
+      "path": "src/app/(dashboard)/providers/error.tsx",
+      "risk": "Low", 
+      "description": "Error boundary component with standard error handling"
+    }
+  ],
+  "files_to_modify": [
+    {
+      "path": "src/components/common/sidebar.tsx",
+      "risk": "Medium-High",
+      "description": "Navigation system changes with potential dashboard-wide impact"
+    }
+  ],
+  "non_functional_requirements": {
+    "performance": {
+      "page_load_time": "<2 seconds",
+      "optimization": "SSR with appropriate caching",
+      "concurrent_users": "Optimized for clinic management scale"
+    },
+    "security": {
+      "data_access": "Role-based access control",
+      "api_security": "Validated API calls and responses", 
+      "error_handling": "Secure error messages without sensitive data"
+    },
+    "scalability": {
+      "provider_count": "Handle growth in provider numbers efficiently",
+      "data_volume": "Optimize for increasing metrics and performance data"
+    }
+  },
+  "acceptance_criteria": [
+    "Main page displays all providers with proper API data",
+    "Server-side rendering works correctly",
+    "Loading and error states function properly", 
+    "Navigation updates integrate seamlessly",
+    "Page follows existing dashboard layout patterns",
+    "Performance optimized for provider list display",
+    "No breaking changes to existing functionality"
+  ],
+  "success_metrics": {
+    "functionality": "All 5 current providers display with correct data",
+    "performance": "Page load time <2 seconds, SSR functional",
+    "reliability": "Loading and error states work correctly",
+    "navigation": "Seamless integration with existing dashboard",
+    "code_quality": "No TypeScript errors, follows project conventions"
+  },
+  "ai_guardrails": {
+    "file_constraints": {
+      "max_files_per_session": 2,
+      "max_lines_per_change": 20,
+      "processing_order": ["loading.tsx", "error.tsx", "page.tsx", "sidebar.tsx"]
+    },
+    "change_isolation": {
+      "phase_1": "Foundation files without integration logic",
+      "phase_2": "Component integration one at a time",
+      "phase_3": "Navigation integration with existing preservation"
+    },
+    "validation_requirements": [
+      "TypeScript compilation after each file",
+      "Basic routing test after Phase 1", 
+      "Component rendering test after Phase 2",
+      "Full navigation test after Phase 3"
+    ]
+  },
+  "edge_cases": [
+    "Empty provider list state",
+    "API failure scenarios",
+    "Network timeout during SSR",
+    "Invalid provider data format",
+    "Navigation state conflicts",
+    "Concurrent user access patterns",
+    "Mobile responsive behavior",
+    "Accessibility compliance"
+  ],
+  "testing_requirements": {
+    "coverage_target": "80% overall, 90% critical business logic",
+    "test_types": ["unit", "component", "integration", "api_route"],
+    "framework": "Vitest with colocated test files",
+    "mocking_strategy": ["Prisma", "Supabase", "server-only", "Next.js Request/Response"]
+  }
+}

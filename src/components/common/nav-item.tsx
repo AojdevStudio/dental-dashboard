@@ -1,12 +1,12 @@
 'use client';
 
+import React from 'react';
 import { Badge } from '@/components/ui/badge';
 import type { NavItem } from '@/lib/types/navigation';
 import { cn } from '@/lib/utils';
 import { ChevronDown } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import type React from 'react';
 
 interface NavItemComponentProps {
   item: NavItem;
@@ -26,7 +26,7 @@ export function NavItemComponent({
   onItemClick,
 }: NavItemComponentProps) {
   const pathname = usePathname();
-  const isActive = pathname === item.href;
+  const isActive = pathname === item.href || pathname?.startsWith(`${item.href}/`);
   const hasChildren = item.children && item.children.length > 0;
 
   const handleClick = (e: React.MouseEvent) => {

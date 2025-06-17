@@ -1,14 +1,21 @@
+/**
+ * Providers Loading Skeleton Component
+ * Next.js 15 App Router loading.tsx for providers page
+ */
 export default function Loading() {
   return (
-    <div className="p-6">
-      <div className="animate-pulse">
-        <div className="h-8 bg-gray-200 rounded w-1/4 mb-4" />
-        <div className="space-y-3">
-          <div className="h-4 bg-gray-200 rounded" />
-          <div className="h-4 bg-gray-200 rounded w-5/6" />
-          <div className="h-4 bg-gray-200 rounded w-4/6" />
+    <output
+      aria-live="polite"
+      aria-busy="true"
+      aria-label="Loading providers"
+      className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 p-6"
+    >
+      {Array.from({ length: 8 }).map((_, index) => (
+        <div key={`skeleton-${index}`} data-testid="provider-skeleton-card" className="p-4 border rounded-lg">
+          <div data-testid="skeleton-heading" className="h-4 bg-gray-200 rounded mb-2" />
+          <div data-testid="skeleton-subtitle" className="h-3 bg-gray-200 rounded w-3/4" />
         </div>
-      </div>
-    </div>
+      ))}
+    </output>
   );
 }
