@@ -30,7 +30,10 @@
       "src/**/__tests__/**",
       "**/vitest-setup*.ts",
       "**/vitest.config.ts",
-      "**/vitest.*.config.ts"
+      "**/vitest.*.config.ts",
+      ".claude/**",
+      "**/.claude/**",
+      "**/settings.local.json"
     ]
   },
   "formatter": {

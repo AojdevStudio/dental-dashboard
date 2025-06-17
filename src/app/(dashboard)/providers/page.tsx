@@ -1,10 +1,12 @@
 import { ProviderFilters } from '@/components/providers/provider-filters';
 import { ProviderGrid } from '@/components/providers/provider-grid';
+import { prisma } from '@/lib/database/prisma';
 import {
   getProviderLocationSummary,
   getProvidersWithLocationsPaginated,
 } from '@/lib/database/queries/providers';
 import { createClient } from '@/lib/supabase/server';
+import type { ProviderWithLocations } from '@/types/providers';
 import { redirect } from 'next/navigation';
 
 /**
@@ -42,10 +44,28 @@ export default async function ProvidersPage({
     redirect('/login');
   }
 
-  // Extract clinicId from user session for multi-tenant security
-  const clinicId = user.user_metadata?.clinicId || user.app_metadata?.clinicId;
+  // Get user details from database to check role and clinic association
+  const dbUser = await prisma.user.findUnique({
+    where: { authId: user.id },
+    select: {
+      id: true,
+      email: true,
+      name: true,
+      role: true,
+      clinicId: true,
+    },
+  });
 
-  if (!clinicId) {
+  if (!dbUser) {
+    redirect('/login?error=user_not_found');
+  }
+
+  // Check if user is system admin
+  const isSystemAdmin = dbUser.role === 'system_admin';
+  const clinicId = dbUser.clinicId || undefined;
+
+  // Only require clinic association for non-system admins
+  if (!(clinicId || isSystemAdmin)) {
     redirect('/login?error=no_clinic_associated');
   }
 
@@ -95,18 +115,30 @@ export default async function ProvidersPage({
     providerType && allowedProviderTypes.includes(providerType) ? providerType : undefined;
 
   // 3. Concurrent Data Fetching for Performance
-  const [providersResult, locations] = await Promise.all([
-    getProvidersWithLocationsPaginated({
-      clinicId,
-      page,
-      limit,
-      search,
-      providerType: validProviderType,
-      locationId,
-      status: validStatus,
-    }),
-    getProviderLocationSummary(clinicId),
-  ]);
+  let providersResult: { providers: ProviderWithLocations[]; total: number };
+  let locations: Awaited<ReturnType<typeof getProviderLocationSummary>>;
+
+  try {
+    [providersResult, locations] = await Promise.all([
+      getProvidersWithLocationsPaginated({
+        clinicId: isSystemAdmin ? undefined : clinicId,
+        page,
+        limit,
+        search,
+        providerType: validProviderType,
+        locationId,
+        status: validStatus,
+      }),
+      getProviderLocationSummary(isSystemAdmin ? undefined : clinicId),
+    ]);
+  } catch (_error) {
+    // Fallback to empty data to prevent complete page failure
+    providersResult = {
+      providers: [],
+      total: 0,
+    };
+    locations = [];
+  }
 
   // 4. Render Components with Fetched Data
   return (
