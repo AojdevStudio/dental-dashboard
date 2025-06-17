@@ -10,6 +10,11 @@ import type { ProviderWithLocations } from '@/types/providers';
 import { redirect } from 'next/navigation';
 
 /**
+ * Maximum allowed page number to prevent performance issues
+ */
+const MAX_PAGE = 1000;
+
+/**
  * Safely parse integer from string with fallback to default value
  */
 function safeParseInt(value: string | undefined, defaultValue: number): number {
@@ -72,11 +77,14 @@ export default async function ProvidersPage({
   // 2. Parse and Validate Search Parameters
   const page = Math.max(
     1,
-    safeParseInt(
-      Array.isArray(resolvedSearchParams.page)
-        ? resolvedSearchParams.page[0]
-        : resolvedSearchParams.page,
-      1
+    Math.min(
+      MAX_PAGE,
+      safeParseInt(
+        Array.isArray(resolvedSearchParams.page)
+          ? resolvedSearchParams.page[0]
+          : resolvedSearchParams.page,
+        1
+      )
     )
   );
   const limit = Math.max(
