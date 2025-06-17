@@ -51,7 +51,7 @@ const navigation: NavSection[] = [
       {
         id: 'providers',
         title: 'Providers',
-        href: '/dashboard/providers',
+        href: '/providers',
         icon: Users,
       },
       {

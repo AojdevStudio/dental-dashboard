@@ -1,12 +1,12 @@
 'use client';
 
-import React from 'react';
 import { Badge } from '@/components/ui/badge';
 import type { NavItem } from '@/lib/types/navigation';
 import { cn } from '@/lib/utils';
 import { ChevronDown } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import type React from 'react';
 
 interface NavItemComponentProps {
   item: NavItem;
