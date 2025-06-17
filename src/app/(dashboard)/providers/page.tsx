@@ -90,7 +90,7 @@ export default async function ProvidersPage({
   const allowedStatuses = ['active', 'inactive'];
   const validStatus = status && allowedStatuses.includes(status) ? status : undefined;
 
-  const allowedProviderTypes = ['dentist', 'hygienist'];
+  const allowedProviderTypes = ['dentist', 'hygienist', 'specialist', 'other'];
   const validProviderType =
     providerType && allowedProviderTypes.includes(providerType) ? providerType : undefined;
 
