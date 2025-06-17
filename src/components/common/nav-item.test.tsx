@@ -60,7 +60,7 @@ describe('NavItemComponent', () => {
       
       const link = screen.getByRole('link');
       expect(link).not.toHaveAttribute('aria-current');
-      expect(link).not.toHaveClass('bg-accent text-accent-foreground');
+      expect(link).not.toHaveClass('bg-accent', 'text-accent-foreground');
     });
 
     it('should handle root path "/" correctly - active only for exact match', () => {
