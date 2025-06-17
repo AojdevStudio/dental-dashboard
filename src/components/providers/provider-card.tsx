@@ -148,7 +148,7 @@ function Title() {
       <div className="flex items-center gap-2">
         <Avatar_ />
         <div className="min-w-0 flex-1">
-          <p className="font-semibold text-gray-900 truncate">{provider.name}</p>
+          <p className="font-semibold text-gray-900 dark:text-gray-100 truncate">{provider.name}</p>
           <div className="flex items-center gap-2 mt-1">
             <Badge variant={getProviderTypeVariant(provider.providerType)} className="text-xs">
               {provider.providerType}
@@ -307,7 +307,7 @@ function Locations({ maxDisplay = 2 }: { maxDisplay?: number }) {
       <div className="space-y-1">
         {displayLocations.map((location: (typeof provider.locations)[0]) => (
           <div key={location.id} className="flex items-center justify-between text-sm">
-            <span className="text-gray-900">{location.locationName}</span>
+            <span className="text-gray-900 dark:text-gray-100">{location.locationName}</span>
             {location.isPrimary && (
               <Badge variant="outline" className="text-xs">
                 Primary

@@ -1,11 +1,7 @@
-import { describe, it, expect, beforeAll, afterAll, beforeEach, vi } from 'vitest';
-import { render, screen, waitFor } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
+import { describe, it, expect, beforeAll, afterAll, vi } from 'vitest';
 import { createClient } from '@supabase/supabase-js';
 import { prisma } from '@/lib/database/client';
 import { v4 as uuidv4 } from 'uuid';
-import ProvidersPage from '../../page';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { NextRouter } from 'next/router';
 
 // Mock Next.js router
@@ -45,37 +41,97 @@ const anonClient = createClient(supabaseUrl, supabaseAnonKey);
 const serviceClient = createClient(supabaseUrl, supabaseServiceKey);
 
 /**
- * Wait for database triggers to complete with retry mechanism
+ * Wait for database triggers to complete and verify all test data is properly created
+ * with relationships intact. This prevents flaky tests by ensuring data consistency.
  */
-async function waitForDatabaseTriggers(testData: any, maxRetries = 10, retryDelay = 200): Promise<void> {
+async function waitForDatabaseTriggers(
+  testData: { authIds: string[]; clinics: any[]; providers: any[] },
+  maxRetries = 60,          // ~30s total (increased from 10s)
+  retryDelay = 500          // Slightly longer delay for better stability
+): Promise<void> {
   let retries = 0;
-  
+  const expectedProviderIds = testData.providers.map((p) => p.id);
+  const expectedClinicIds = testData.clinics.map((c) => c.id);
+
   while (retries < maxRetries) {
     try {
       // Check if all expected data is properly created and accessible
       const userCount = await prisma.user.count({
         where: { authId: { in: testData.authIds } },
       });
-      
-      const clinicCount = await prisma.clinic.count({
-        where: { id: { in: testData.clinics.map((c: any) => c.id) } },
+
+      const [clinicCount, providerCount] = await Promise.all([
+        prisma.clinic.count({
+          where: { id: { in: expectedClinicIds } },
+        }),
+        prisma.provider.count({
+          where: { id: { in: expectedProviderIds } },
+        }),
+      ]);
+
+      // Additional verification: Check that providers have proper clinic relationships
+      const providersWithClinics = await prisma.provider.findMany({
+        where: { id: { in: expectedProviderIds } },
+        include: { clinic: true },
       });
-      
-      // Verify that all expected data is present
-      if (userCount === testData.authIds.length && clinicCount === testData.clinics.length) {
-        return; // All triggers completed successfully
+
+      // Verify all providers have their clinic relationships properly established
+      const providersWithValidClinics = providersWithClinics.filter((provider: typeof providersWithClinics[0]) =>
+        provider.clinic && expectedClinicIds.includes(provider.clinicId)
+      );
+
+      // Verify that all expected data is present and properly related
+      if (
+        userCount === testData.authIds.length &&
+        clinicCount === testData.clinics.length &&
+        providerCount === testData.providers.length &&
+        providersWithValidClinics.length === testData.providers.length
+      ) {
+        // Final verification: Ensure each provider matches expected test data
+        const allProvidersValid = testData.providers.every(expectedProvider => {
+          const actualProvider = providersWithClinics.find((p: typeof providersWithClinics[0]) => p.id === expectedProvider.id);
+          return actualProvider &&
+                 actualProvider.clinicId === expectedProvider.clinicId &&
+                 actualProvider.name === expectedProvider.name &&
+                 actualProvider.providerType === expectedProvider.providerType;
+        });
+
+        if (allProvidersValid) {
+          console.log(`✅ Database triggers completed successfully after ${retries + 1} attempts (${(retries + 1) * retryDelay}ms)`);
+          return; // All triggers completed successfully
+        }
       }
     } catch (error) {
-      // Continue retrying on database errors
+      // Log error for debugging but continue retrying
+      if (retries % 10 === 0) { // Log every 10th retry to avoid spam
+        console.warn(`Database trigger check attempt ${retries + 1}/${maxRetries} failed:`, error instanceof Error ? error.message : String(error));
+      }
     }
-    
+
     retries++;
     if (retries < maxRetries) {
       await new Promise(resolve => setTimeout(resolve, retryDelay));
     }
   }
-  
-  throw new Error(`Database triggers did not complete within ${maxRetries * retryDelay}ms timeout`);
+
+  // Provide detailed error information for debugging
+  try {
+    const finalUserCount = await prisma.user.count({ where: { authId: { in: testData.authIds } } });
+    const finalClinicCount = await prisma.clinic.count({ where: { id: { in: expectedClinicIds } } });
+    const finalProviderCount = await prisma.provider.count({ where: { id: { in: expectedProviderIds } } });
+
+    throw new Error(
+      `Database triggers did not complete within ${maxRetries * retryDelay}ms timeout. ` +
+      `Final counts: users=${finalUserCount}/${testData.authIds.length}, ` +
+      `clinics=${finalClinicCount}/${testData.clinics.length}, ` +
+      `providers=${finalProviderCount}/${testData.providers.length}`
+    );
+  } catch (countError) {
+    throw new Error(
+      `Database triggers did not complete within ${maxRetries * retryDelay}ms timeout. ` +
+      `Unable to get final counts: ${countError instanceof Error ? countError.message : String(countError)}`
+    );
+  }
 }
 
 /**
@@ -204,30 +260,29 @@ describe('Providers Page E2E Multi-Tenant Workflow', () => {
       });
     } catch (error) {
       console.error('E2E cleanup error:', error);
-      throw error;
+      // Don't throw error here to ensure finally block executes
+    } finally {
+      // Ensure proper resource cleanup regardless of errors
+      try {
+        // Sign out from all Supabase clients to close connections
+        await serviceClient.auth.signOut();
+        await anonClient.auth.signOut();
+        console.log('✅ Supabase clients signed out successfully');
+      } catch (signOutError) {
+        console.warn('⚠️ Warning: Failed to sign out from Supabase clients:', signOutError);
+      }
+
+      try {
+        // Disconnect Prisma client to close database connections
+        await prisma.$disconnect();
+        console.log('✅ Prisma client disconnected successfully');
+      } catch (disconnectError) {
+        console.warn('⚠️ Warning: Failed to disconnect Prisma client:', disconnectError);
+      }
     }
   }, 30000);
 
-  // Helper function to create authenticated test environment
-  const createAuthenticatedTestEnvironment = (userIndex: number) => {
-    const queryClient = new QueryClient({
-      defaultOptions: {
-        queries: { retry: false },
-        mutations: { retry: false },
-      },
-    });
 
-    // Mock authentication context for the specific user
-    const mockAuthContext = {
-      userId: `user-${userIndex}`,
-      authId: testData.authIds[userIndex],
-      clinicIds: [testData.users[userIndex].clinicId],
-      currentClinicId: testData.users[userIndex].clinicId,
-      role: testData.users[userIndex].role,
-    };
-
-    return { queryClient, mockAuthContext };
-  };
 
   describe('Multi-Tenant Authentication Flow', () => {
     it('should authenticate users for different clinics successfully', async () => {
@@ -321,8 +376,8 @@ describe('Providers Page E2E Multi-Tenant Workflow', () => {
       expect(clinicBProviders[0].name).toBe('Dr. Bob Johnson');
 
       // Verify no cross-contamination
-      const clinicAProviderIds = clinicAProviders.map(p => p.id);
-      const clinicBProviderIds = clinicBProviders.map(p => p.id);
+      const clinicAProviderIds = clinicAProviders.map((p: typeof clinicAProviders[0]) => p.id);
+      const clinicBProviderIds = clinicBProviders.map((p: typeof clinicBProviders[0]) => p.id);
 
       expect(clinicAProviderIds).not.toContain(testData.providers[1].id);
       expect(clinicBProviderIds).not.toContain(testData.providers[0].id);

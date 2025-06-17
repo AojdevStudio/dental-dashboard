@@ -55,11 +55,13 @@ const mockPermissions = {
   },
   isSystemAdmin: () => true,
   getAccessibleClinics: () => ['clinic-123'],
-  canCreateProvider: () => true,
+  canCreateProvider: (clinicId: string) => clinicId === 'clinic-123', // Fixed: now accepts clinicId parameter
 };
 
+const usePermissions = vi.fn(() => mockPermissions);
+
 vi.mock('@/hooks/use-permissions', () => ({
-  usePermissions: () => mockPermissions,
+  usePermissions,
 }));
 
 // Mock UI components with test-friendly implementations
@@ -399,9 +401,15 @@ describe('Providers Page Integration Tests', () => {
     });
 
     it('should hide add provider button when user lacks create permissions', async () => {
-      // Mock user without create permissions
-      vi.mocked(mockPermissions.canCreateProvider).mockReturnValue(false);
-      vi.mocked(mockPermissions.isSystemAdmin).mockReturnValue(false);
+      // Create a new mock permissions object for this test
+      const restrictedPermissions = {
+        ...mockPermissions,
+        canCreateProvider: (clinicId: string) => false, // User cannot create providers in any clinic
+        isSystemAdmin: () => false,
+      };
+
+      // Mock the hook to return restricted permissions
+      vi.mocked(usePermissions).mockReturnValue(restrictedPermissions);
 
       render(
         <TestWrapper>

@@ -108,7 +108,7 @@ export default function ProvidersPage() {
           <ProviderFilters
             locations={[]}
             showLocationFilter={true}
-            className="bg-white p-6 rounded-lg border"
+            className="bg-white dark:bg-gray-800 p-6 rounded-lg border border-gray-200 dark:border-gray-700"
           />
 
           <ProviderGrid
@@ -143,7 +143,10 @@ export default function ProvidersPage() {
 
 function AddProviderButton({ onAdd }: { onAdd: () => void }) {
   const permissions = usePermissions();
-  const canCreate = permissions.canCreateProvider('clinic-123'); // Default clinic ID for now
+  const accessibleClinics = permissions.getAccessibleClinics();
+
+  // Check if user can create providers in any of their accessible clinics
+  const canCreate = accessibleClinics.some((clinicId) => permissions.canCreateProvider(clinicId));
 
   if (!canCreate) {
     return null;
