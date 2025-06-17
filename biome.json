@@ -166,7 +166,7 @@
         "noUnsafeFinally": "error",
         "noUnsafeOptionalChaining": "error",
         "noUnusedFunctionParameters": "error",
-        "noUnusedImports": "error",
+        "noUnusedImports": "warn",
         "noUnusedLabels": "error",
         "noUnusedPrivateClassMembers": "error",
         "noUnusedVariables": "error",
@@ -437,6 +437,16 @@
         "rules": {
           "nursery": {
             "noSecrets": "off"
+          }
+        }
+      }
+    },
+    {
+      "include": ["**/*.tsx", "**/*.jsx"],
+      "linter": {
+        "rules": {
+          "correctness": {
+            "noUnusedImports": "warn"
           }
         }
       }

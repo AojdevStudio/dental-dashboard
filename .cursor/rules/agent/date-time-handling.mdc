@@ -1,0 +1,101 @@
+---
+description: 
+globs: *.md
+alwaysApply: false
+---
+# Date and Time Handling Guidelines
+
+## Core Requirement
+
+**ALWAYS run `date` command before writing any dates or times in documents, PRDs, or code.**
+
+## When to Use This Rule
+
+This rule applies when:
+- Writing Product Requirements Documents (PRDs)
+- Creating technical documentation with dates
+- Setting due dates or timelines
+- Adding timestamps to any files
+- Referencing current dates in code or documentation
+- Creating migration files or versioned content
+
+## Mandatory Process
+
+### Step 1: Get Current Date
+```bash
+date
+```
+
+### Step 2: Use Actual Date Information
+- **Never assume or guess dates**
+- **Always use the output from the `date` command**
+- **Format dates consistently across documents**
+
+### Step 3: Calculate Due Dates Accurately
+Based on the actual current date from the `date` command:
+- Critical priority: +1 day
+- High priority: +2-3 days  
+- Medium priority: +1 week
+- Low priority: +2-3 weeks
+
+## Common Date Formats
+
+### For PRDs and Documentation
+- **Created Date**: Use format "June 17, 2025" (Month Day, Year)
+- **Due Date**: Use format "June 22, 2025" with calculation explanation
+- **Timestamps**: Use ISO format when needed: "2025-06-17T16:40:53"
+
+### For Code and Technical Files
+- **Migration files**: Use format "20250617164053" (YYYYMMDDHHMMSS)
+- **Version tags**: Use format "v2025.06.17" or semantic versioning
+- **Log timestamps**: Use ISO 8601 format
+
+## Examples
+
+### ✅ Correct Process
+```bash
+# First, get current date
+$ date
+Tue Jun 17 16:40:53 CDT 2025
+
+# Then use actual date in PRD
+- **Created:** June 17, 2025
+- **Due Date:** June 22, 2025 (5 days from start)
+```
+
+### ❌ Incorrect Process
+```markdown
+# Don't do this - using assumed/wrong dates
+- **Created:** January 17, 2025  # Wrong month!
+- **Due Date:** January 22, 2025  # Calculated from wrong date!
+```
+
+## Integration with PRD Templates
+
+When using PRD templates like [senior-technical-pm.xml](mdc:prompt-library/senior-technical-pm.xml):
+
+1. **Always run `date` first**
+2. **Replace template date placeholders with actual dates**
+3. **Calculate due dates from the real current date**
+4. **Double-check all date references for accuracy**
+
+## Quality Assurance
+
+Before submitting any document with dates:
+- [ ] Ran `date` command to get current date
+- [ ] All dates reflect actual current date
+- [ ] Due dates calculated correctly from current date
+- [ ] Date formats are consistent throughout document
+- [ ] No placeholder or template dates remain
+
+## Common Mistakes to Avoid
+
+1. **Using template dates without updating them**
+2. **Assuming the current date without checking**
+3. **Inconsistent date formats within the same document**
+4. **Calculating due dates from wrong starting date**
+5. **Using different time zones without clarification**
+
+---
+
+**Remember: When in doubt about dates, run `date` again!**

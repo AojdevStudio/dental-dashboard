@@ -25,6 +25,7 @@ export interface ProviderFilters {
   includeInactive?: boolean;
   page?: number;
   limit?: number;
+  search?: string;
 }
 
 /**
