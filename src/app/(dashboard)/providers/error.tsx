@@ -1,10 +1,27 @@
 'use client';
+import { Button } from '@/components/ui/button';
 
-export default function ProvidersError() {
+/**
+ * Providers Error Boundary Component
+ * Next.js 15 App Router error.tsx for providers page
+ * Client component with retry functionality
+ */
+export default function ProvidersError({
+  error: _error,
+  reset,
+}: {
+  error: Error & { digest?: string };
+  reset: () => void;
+}) {
   return (
-    <div className="p-6">
-      <h1 className="text-2xl font-bold text-red-600">Error loading providers</h1>
-      <p className="text-gray-600 mt-2">Something went wrong while fetching provider data.</p>
+    <div role="alert" className="flex flex-col items-center justify-center min-h-[400px] space-y-4">
+      <h2 className="text-xl font-semibold">Something went wrong</h2>
+      <p className="text-muted-foreground text-center">
+        An unexpected error occurred while loading the providers page.
+      </p>
+      <Button type="button" onClick={reset} className="inline-flex">
+        Try again
+      </Button>
     </div>
   );
 }

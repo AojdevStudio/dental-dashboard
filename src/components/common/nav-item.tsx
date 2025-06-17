@@ -6,7 +6,8 @@ import { cn } from '@/lib/utils';
 import { ChevronDown } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import type React from 'react';
+// biome-ignore lint/style/useImportType: React is needed for JSX runtime in tests
+import React from 'react';
 
 interface NavItemComponentProps {
   item: NavItem;
@@ -26,7 +27,10 @@ export function NavItemComponent({
   onItemClick,
 }: NavItemComponentProps) {
   const pathname = usePathname();
-  const isActive = pathname === item.href;
+  const isActive =
+    item.href === '/'
+      ? pathname === '/'
+      : pathname === item.href || pathname?.startsWith(`${item.href}/`);
   const hasChildren = item.children && item.children.length > 0;
 
   const handleClick = (e: React.MouseEvent) => {

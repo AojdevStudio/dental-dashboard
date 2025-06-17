@@ -389,7 +389,6 @@ const DropdownMenuShortcut = ({ className, ...props }: React.HTMLAttributes<HTML
     />
   );
 };
-// biome-ignore lint/nursery/noSecrets: This is a React component displayName, not a secret
 DropdownMenuShortcut.displayName = 'DropdownMenuShortcut';
 
 export {
