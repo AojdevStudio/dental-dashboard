@@ -9,6 +9,7 @@
  * Expected Implementation: Skeleton UI matching provider card layout
  */
 
+import '@testing-library/jest-dom';
 import React from 'react';
 import { render, screen, within } from '@testing-library/react';
 import { describe, expect, it } from 'vitest';

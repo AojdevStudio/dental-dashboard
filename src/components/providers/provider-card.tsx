@@ -39,7 +39,8 @@ function getProviderInitials(provider: ProviderWithLocations): string {
   }
   return provider.name
     .split(' ')
-    .map((word: string) => word[0])
+    .filter((w) => w.length) // guard against empty tokens
+    .map((word) => word[0])
     .slice(0, 2)
     .join('')
     .toUpperCase();

@@ -4,7 +4,7 @@ import { createClient } from '@/lib/supabase/client';
 import type { AuthChangeEvent, Session, User } from '@supabase/supabase-js';
 import { useRouter } from 'next/navigation';
 import type React from 'react';
-import { createContext, useCallback, useContext, useEffect, useState } from 'react';
+import { createContext, useCallback, useContext, useEffect, useRef, useState } from 'react';
 
 /**
  * Database user information from the session API
@@ -54,7 +54,7 @@ const AuthContext = createContext<AuthState | undefined>(undefined);
  */
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   // Initialize Supabase client using the SSR-compatible browser client
-  const supabase = createClient();
+  const supabase = useRef(createClient()).current;
   const router = useRouter();
 
   const [user, setUser] = useState<User | null>(null);
@@ -91,6 +91,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   }, []);
 
+  // biome-ignore lint/correctness/useExhaustiveDependencies: supabase client is memoized with useRef and won't change
   useEffect(() => {
     // First, get the initial session explicitly
     const getInitialSession = async () => {
@@ -136,7 +137,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     return () => {
       subscription.unsubscribe();
     };
-  }, [supabase.auth, fetchDbUser]);
+  }, [fetchDbUser]);
 
   /**
    * Signs out the current user and redirects to login page

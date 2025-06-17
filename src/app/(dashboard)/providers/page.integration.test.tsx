@@ -15,7 +15,7 @@
 
 import { render, screen, waitFor, fireEvent } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { vi } from 'vitest';
+import { vi, afterAll } from 'vitest';
 import React from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import type { ProviderWithLocations } from '@/types/providers';
@@ -44,6 +44,7 @@ vi.mock('next/navigation', () => ({
 
 // Mock fetch for API calls
 const mockFetch = vi.fn();
+const originalFetch = global.fetch;
 global.fetch = mockFetch;
 
 // Mock permissions hook
@@ -359,6 +360,11 @@ describe('Providers Page Integration Tests', () => {
       }
       return Promise.reject(new Error('Unhandled fetch call'));
     });
+  });
+
+  afterAll(() => {
+    // Restore original fetch to prevent side effects on other test suites
+    global.fetch = originalFetch;
   });
 
   describe('Initial Page Load and Component Integration', () => {

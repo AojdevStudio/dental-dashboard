@@ -9,6 +9,11 @@
 // The database queries file imports these types from here, not the other way around
 
 /**
+ * Branded type for ISO date strings to ensure type safety
+ */
+export type ISODateString = string & { readonly __brand: 'ISODateString' };
+
+/**
  * Provider filters for database queries
  */
 export interface ProviderFilters {
@@ -30,8 +35,8 @@ export interface ProviderPerformanceMetrics {
   providerName: string;
   locationId: string;
   locationName: string;
-  periodStart: Date;
-  periodEnd: Date;
+  periodStart: ISODateString;
+  periodEnd: ISODateString;
   totalProduction: number;
   avgDailyProduction: number;
   productionDays: number;
@@ -49,8 +54,8 @@ export interface LocationDetail {
   locationAddress: string | null;
   isPrimary: boolean;
   isActive: boolean;
-  startDate: Date;
-  endDate: Date | null;
+  startDate: ISODateString;
+  endDate: ISODateString | null;
 }
 
 /**

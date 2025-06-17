@@ -304,11 +304,17 @@ describe('ProvidersPage Server Component Integration Tests', () => {
       await ProvidersPage({ searchParams: {} });
 
       // Assert - Should use the session's clinicId
-      expect(mockGetProvidersWithLocationsPaginated).toHaveBeenCalledWith(
-        expect.objectContaining({
-          clinicId: 'clinic-456',
-        })
-      );
+expect(mockGetProvidersWithLocationsPaginated).toHaveBeenCalledWith(
+  expect.objectContaining({
+    page: 2,
+    limit: 24,
+    search: 'dentist',
+    providerType: 'dentist',
+    status: 'active',
+    locationId: 'loc-1',
+    clinicId: 'clinic-123',
+  }),
+);
     });
 
     it('should handle unauthorized access gracefully', async () => {

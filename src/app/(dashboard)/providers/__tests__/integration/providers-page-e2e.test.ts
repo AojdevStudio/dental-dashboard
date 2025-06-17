@@ -21,24 +21,14 @@ vi.mock('next/navigation', () => ({
   usePathname: () => '/dashboard/providers',
 }));
 
-// Mock Supabase client for authentication
+// Environment variables (will be validated in beforeAll)
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_KEY;
 
-// Validate required environment variables
-if (!supabaseUrl) {
-  throw new Error('NEXT_PUBLIC_SUPABASE_URL environment variable is required for E2E tests');
-}
-if (!supabaseAnonKey) {
-  throw new Error('NEXT_PUBLIC_SUPABASE_ANON_KEY environment variable is required for E2E tests');
-}
-if (!supabaseServiceKey) {
-  throw new Error('SUPABASE_SERVICE_KEY environment variable is required for E2E tests');
-};
-
-const anonClient = createClient(supabaseUrl, supabaseAnonKey);
-const serviceClient = createClient(supabaseUrl, supabaseServiceKey);
+// Supabase clients (will be initialized in beforeAll after validation)
+let anonClient: ReturnType<typeof createClient>;
+let serviceClient: ReturnType<typeof createClient>;
 
 /**
  * Wait for database triggers to complete and verify all test data is properly created
@@ -184,6 +174,24 @@ describe('Providers Page E2E Multi-Tenant Workflow', () => {
   };
 
   beforeAll(async () => {
+    // Validate required environment variables and skip if missing
+    if (!supabaseUrl) {
+      vi.skip();
+      return;
+    }
+    if (!supabaseAnonKey) {
+      vi.skip();
+      return;
+    }
+    if (!supabaseServiceKey) {
+      vi.skip();
+      return;
+    }
+
+    // Initialize Supabase clients after validation
+    anonClient = createClient(supabaseUrl, supabaseAnonKey);
+    serviceClient = createClient(supabaseUrl, supabaseServiceKey);
+
     // Set up clinic relationships
     testData.users[0].clinicId = testData.clinics[0].id;
     testData.users[1].clinicId = testData.clinics[1].id;

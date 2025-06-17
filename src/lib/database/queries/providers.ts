@@ -1,6 +1,7 @@
 import { prisma } from '@/lib/database/client';
 import logger from '@/lib/utils/logger';
 import type {
+  ISODateString,
   ProviderFilters,
   ProviderPerformanceMetrics,
   ProviderWithLocations,
@@ -204,8 +205,8 @@ function transformProviderData(providers: RawProviderData[]): ProviderWithLocati
       locationAddress: pl.location.address,
       isPrimary: pl.isPrimary,
       isActive: pl.isActive,
-      startDate: pl.startDate,
-      endDate: pl.endDate,
+      startDate: pl.startDate.toISOString() as ISODateString,
+      endDate: pl.endDate ? (pl.endDate.toISOString() as ISODateString) : null,
     }));
 
     const primaryLocation = provider.providerLocations.find((pl) => pl.isPrimary)?.location;
@@ -395,8 +396,8 @@ export async function getProviderPerformanceByLocation(params: {
     providerName: row.provider_name,
     locationId: row.location_id,
     locationName: row.location_name,
-    periodStart: new Date(row.period_start),
-    periodEnd: new Date(row.period_end),
+    periodStart: new Date(row.period_start).toISOString() as ISODateString,
+    periodEnd: new Date(row.period_end).toISOString() as ISODateString,
     totalProduction: Number.parseFloat(row.total_production || '0'),
     avgDailyProduction: Number.parseFloat(row.avg_daily_production || '0'),
     productionDays: Number.parseInt(String(row.production_days || '0')),
@@ -640,66 +641,65 @@ function calculatePeriodDates(
 }
 
 /**
+ * Type for aggregated production data by location
+ */
+type LocationProductionData = {
+  locationId: string;
+  locationName: string;
+  total: number;
+  average: number;
+  goal?: number;
+  variance?: number;
+  variancePercentage?: number;
+};
+
+/**
  * Aggregate production data by location
  */
-function aggregateProductionByLocation(productionData: ProviderPerformanceMetrics[]) {
-  // Use a Map to track production days separately from the accumulator objects
+function aggregateProductionByLocation(
+  productionData: ProviderPerformanceMetrics[]
+): LocationProductionData[] {
+  // Use a Map to efficiently aggregate data by locationId - O(n) complexity
+  const locationMap = new Map<string, LocationProductionData>();
   const productionDaysMap = new Map<string, number>();
 
-  return productionData.reduce(
-    (acc, data) => {
-      const existing = acc.find(
-        (item: {
-          locationId: string;
-          locationName: string;
-          total: number;
-          average: number;
-          goal?: number;
-          variance?: number;
-          variancePercentage?: number;
-        }) => item.locationId === data.locationId
-      );
-      const existingProductionDays = productionDaysMap.get(data.locationId) || 0;
+  for (const data of productionData) {
+    const existing = locationMap.get(data.locationId);
+    const existingProductionDays = productionDaysMap.get(data.locationId) || 0;
 
-      if (existing) {
-        existing.total += data.totalProduction;
-        const newProductionDays = existingProductionDays + data.productionDays;
-        productionDaysMap.set(data.locationId, newProductionDays);
+    if (existing) {
+      // Update existing location data
+      existing.total += data.totalProduction;
+      const newProductionDays = existingProductionDays + data.productionDays;
+      productionDaysMap.set(data.locationId, newProductionDays);
 
-        // Calculate weighted average: total production / total production days
-        existing.average = newProductionDays > 0 ? existing.total / newProductionDays : 0;
-        if (data.productionGoal) {
-          existing.goal = (existing.goal || 0) + data.productionGoal;
-        }
-        // Recalculate variance based on updated totals
-        if (existing.goal && existing.goal > 0) {
-          existing.variance = existing.total - existing.goal;
-          existing.variancePercentage = (existing.variance / existing.goal) * 100;
-        }
-      } else {
-        productionDaysMap.set(data.locationId, data.productionDays);
-        acc.push({
-          locationId: data.locationId,
-          locationName: data.locationName,
-          total: data.totalProduction,
-          average: data.productionDays > 0 ? data.totalProduction / data.productionDays : 0,
-          goal: data.productionGoal,
-          variance: data.productionGoal ? data.totalProduction - data.productionGoal : undefined,
-          variancePercentage: data.variancePercentage,
-        });
+      // Calculate weighted average: total production / total production days
+      existing.average = newProductionDays > 0 ? existing.total / newProductionDays : 0;
+      if (data.productionGoal) {
+        existing.goal = (existing.goal || 0) + data.productionGoal;
       }
-      return acc;
-    },
-    [] as Array<{
-      locationId: string;
-      locationName: string;
-      total: number;
-      average: number;
-      goal?: number;
-      variance?: number;
-      variancePercentage?: number;
-    }>
-  );
+      // Recalculate variance based on updated totals
+      if (existing.goal && existing.goal > 0) {
+        existing.variance = existing.total - existing.goal;
+        existing.variancePercentage = (existing.variance / existing.goal) * 100;
+      }
+    } else {
+      // Create new location entry
+      productionDaysMap.set(data.locationId, data.productionDays);
+      locationMap.set(data.locationId, {
+        locationId: data.locationId,
+        locationName: data.locationName,
+        total: data.totalProduction,
+        average: data.productionDays > 0 ? data.totalProduction / data.productionDays : 0,
+        goal: data.productionGoal,
+        variance: data.productionGoal ? data.totalProduction - data.productionGoal : undefined,
+        variancePercentage: data.variancePercentage,
+      });
+    }
+  }
+
+  // Convert Map values to array
+  return Array.from(locationMap.values());
 }
 
 /**

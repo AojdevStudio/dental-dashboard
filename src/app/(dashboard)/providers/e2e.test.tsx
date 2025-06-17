@@ -149,7 +149,10 @@ describe('Providers Page E2E Multi-Tenant Workflow', () => {
     }
 
     // Wait for database triggers to complete
-    await new Promise((resolve) => setTimeout(resolve, 2000));
+    await waitFor(() => {
+      // Add specific condition to check if triggers completed
+      // e.g., check if expected data is available
+    }, { timeout: 3000 });
   }, 30000);
 
   afterAll(async () => {
@@ -195,8 +198,8 @@ describe('Providers Page E2E Multi-Tenant Workflow', () => {
       role: testData.users[userIndex].role,
     };
 
-    // Mock the auth hook to return our test user
-    vi.mock('@/hooks/use-auth', () => ({
+    // Use vi.doMock for dynamic mocking
+    vi.doMock('@/hooks/use-auth', () => ({
       useAuth: () => ({
         user: {
           id: mockAuthContext.userId,

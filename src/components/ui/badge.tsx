@@ -7,7 +7,8 @@
  */
 
 import { type VariantProps, cva } from 'class-variance-authority';
-import type React from 'react';
+// biome-ignore lint/style/useImportType: React is needed for JSX runtime in tests
+import React from 'react';
 
 import { cn } from '@/lib/utils';
 
