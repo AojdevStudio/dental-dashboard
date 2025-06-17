@@ -49,7 +49,7 @@ export function UserNav() {
       <DropdownMenuTrigger asChild={true}>
         <Button variant="ghost" className="flex items-center gap-2 px-3 py-2">
           <UserIcon className="h-5 w-5 text-blue-600" />
-          <span className="font-medium text-gray-900 text-sm max-w-[120px] truncate">
+          <span className="font-medium text-gray-900 dark:text-gray-100 text-sm max-w-[120px] truncate">
             {user.email}
           </span>
         </Button>

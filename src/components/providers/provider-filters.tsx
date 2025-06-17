@@ -73,7 +73,7 @@ function useUrlFilters() {
  * Provider type options
  */
 const PROVIDER_TYPES = [
-  { value: '', label: 'All Types' },
+  { value: 'all', label: 'All Types' },
   { value: 'dentist', label: 'Dentist' },
   { value: 'hygienist', label: 'Hygienist' },
   { value: 'specialist', label: 'Specialist' },
@@ -84,7 +84,7 @@ const PROVIDER_TYPES = [
  * Provider status options
  */
 const PROVIDER_STATUSES = [
-  { value: '', label: 'All Statuses' },
+  { value: 'all', label: 'All Statuses' },
   { value: 'active', label: 'Active' },
   { value: 'inactive', label: 'Inactive' },
   { value: 'pending', label: 'Pending' },
@@ -166,7 +166,7 @@ function ActiveFilters({
     });
   }
 
-  if (providerType) {
+  if (providerType && providerType !== 'all') {
     const typeLabel = PROVIDER_TYPES.find((t) => t.value === providerType)?.label;
     activeFilters.push({
       key: 'providerType',
@@ -175,7 +175,7 @@ function ActiveFilters({
     });
   }
 
-  if (status) {
+  if (status && status !== 'all') {
     const statusLabel = PROVIDER_STATUSES.find((s) => s.value === status)?.label;
     activeFilters.push({
       key: 'status',
@@ -184,7 +184,7 @@ function ActiveFilters({
     });
   }
 
-  if (locationId && locations) {
+  if (locationId && locationId !== 'all' && locations) {
     const locationLabel = locations.find((l) => l.id === locationId)?.name;
     activeFilters.push({
       key: 'locationId',
@@ -238,9 +238,9 @@ export function ProviderFilters({
 
   // Local state for immediate UI updates
   const [localSearch, setLocalSearch] = useState(() => getParam('search'));
-  const [providerType, setProviderType] = useState(() => getParam('providerType'));
-  const [status, setStatus] = useState(() => getParam('status'));
-  const [locationId, setLocationId] = useState(() => getParam('locationId'));
+  const [providerType, setProviderType] = useState(() => getParam('providerType') || 'all');
+  const [status, setStatus] = useState(() => getParam('status') || 'all');
+  const [locationId, setLocationId] = useState(() => getParam('locationId') || 'all');
 
   // Debounced search value
   const debouncedSearch = useDebounce(localSearch, 300);
@@ -248,9 +248,9 @@ export function ProviderFilters({
   // Sync URL params with local state on mount and URL changes
   useEffect(() => {
     setLocalSearch(getParam('search'));
-    setProviderType(getParam('providerType'));
-    setStatus(getParam('status'));
-    setLocationId(getParam('locationId'));
+    setProviderType(getParam('providerType') || 'all');
+    setStatus(getParam('status') || 'all');
+    setLocationId(getParam('locationId') || 'all');
   }, [getParam]);
 
   // Update URL when debounced search changes
@@ -265,9 +265,9 @@ export function ProviderFilters({
     if (onFiltersChange) {
       onFiltersChange({
         search: debouncedSearch,
-        providerType,
-        status,
-        locationId,
+        providerType: providerType === 'all' ? '' : providerType,
+        status: status === 'all' ? '' : status,
+        locationId: locationId === 'all' ? '' : locationId,
       });
     }
   }, [debouncedSearch, providerType, status, locationId, onFiltersChange]);
@@ -276,7 +276,8 @@ export function ProviderFilters({
   const handleProviderTypeChange = useCallback(
     (value: string) => {
       setProviderType(value);
-      updateUrl({ providerType: value || null, page: null });
+      // Convert 'all' to null for URL params (means no filter)
+      updateUrl({ providerType: value === 'all' ? null : value, page: null });
     },
     [updateUrl]
   );
@@ -284,7 +285,8 @@ export function ProviderFilters({
   const handleStatusChange = useCallback(
     (value: string) => {
       setStatus(value);
-      updateUrl({ status: value || null, page: null });
+      // Convert 'all' to null for URL params (means no filter)
+      updateUrl({ status: value === 'all' ? null : value, page: null });
     },
     [updateUrl]
   );
@@ -292,7 +294,8 @@ export function ProviderFilters({
   const handleLocationChange = useCallback(
     (value: string) => {
       setLocationId(value);
-      updateUrl({ locationId: value || null, page: null });
+      // Convert 'all' to null for URL params (means no filter)
+      updateUrl({ locationId: value === 'all' ? null : value, page: null });
     },
     [updateUrl]
   );
@@ -300,9 +303,9 @@ export function ProviderFilters({
   // Clear all filters
   const handleClearAll = useCallback(() => {
     setLocalSearch('');
-    setProviderType('');
-    setStatus('');
-    setLocationId('');
+    setProviderType('all');
+    setStatus('all');
+    setLocationId('all');
     updateUrl({
       search: null,
       providerType: null,
@@ -322,17 +325,17 @@ export function ProviderFilters({
           break;
         }
         case 'providerType': {
-          setProviderType('');
+          setProviderType('all');
           updateUrl({ providerType: null, page: null });
           break;
         }
         case 'status': {
-          setStatus('');
+          setStatus('all');
           updateUrl({ status: null, page: null });
           break;
         }
         case 'locationId': {
-          setLocationId('');
+          setLocationId('all');
           updateUrl({ locationId: null, page: null });
           break;
         }
@@ -345,8 +348,13 @@ export function ProviderFilters({
     [updateUrl]
   );
 
-  // Count active filters
-  const activeFilterCount = [localSearch, providerType, status, locationId].filter(Boolean).length;
+  // Count active filters (exclude 'all' values which mean no filter)
+  const activeFilterCount = [
+    localSearch,
+    providerType !== 'all' ? providerType : '',
+    status !== 'all' ? status : '',
+    locationId !== 'all' ? locationId : '',
+  ].filter(Boolean).length;
 
   return (
     <div className={`space-y-4 ${className}`}>
@@ -398,7 +406,7 @@ export function ProviderFilters({
               <SelectValue placeholder="Location" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="">All Locations</SelectItem>
+              <SelectItem value="all">All Locations</SelectItem>
               {locations.map((location) => (
                 <SelectItem key={location.id} value={location.id}>
                   {location.name}
