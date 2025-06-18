@@ -170,9 +170,11 @@ export class FinancialImportPipeline extends BaseService {
 
         if (result.errors.length > 0) {
           errors.push(...result.errors);
-        } else {
-          validRecords.push(result.data!);
+        } else if (result.data) {
+          validRecords.push(result.data);
           warnings.push(...result.warnings);
+        } else {
+          errors.push(`Record ${recordIndex}: Validation succeeded but data is missing`);
         }
       } catch (error) {
         errors.push(

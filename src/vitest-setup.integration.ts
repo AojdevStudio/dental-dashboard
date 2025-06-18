@@ -6,34 +6,19 @@
 
 import dotenv from 'dotenv';
 import { afterAll, beforeAll } from 'vitest';
+import { validateTestEnvironment } from '@/lib/config/environment';
 
 // Load test environment variables
 dotenv.config({ path: '.env.test' });
 
-// Verify required environment variables
-const requiredEnvVars = [
-  'DATABASE_URL',
-  'NEXT_PUBLIC_SUPABASE_URL',
-  'NEXT_PUBLIC_SUPABASE_ANON_KEY',
-  'SUPABASE_SERVICE_KEY',
-];
-
 beforeAll(() => {
-  // Check environment setup
-  const missingVars = requiredEnvVars.filter((v) => !process.env[v]);
-
-  if (missingVars.length > 0) {
+  try {
+    // Use validated environment configuration instead of manual checks
+    validateTestEnvironment();
+  } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : 'Unknown environment validation error';
     throw new Error(
-      `Missing required environment variables for integration tests: ${missingVars.join(', ')}\nPlease create a .env.test file with test database credentials.`
-    );
-  }
-
-  // Verify we're using a test database
-  const dbUrl = process.env.DATABASE_URL!;
-  if (!(dbUrl.includes('test') || dbUrl.includes('localhost'))) {
-    throw new Error(
-      'Integration tests must use a test database. ' +
-        'Please ensure DATABASE_URL points to a test database.'
+      `Integration test environment validation failed: ${errorMessage}\nPlease create a .env.test file with test database credentials.`
     );
   }
 });

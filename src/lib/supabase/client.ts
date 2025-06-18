@@ -4,6 +4,7 @@
  * configured for use in client-side (browser) environments.
  */
 
+import { validateClientEnvironment } from '@/lib/config/environment';
 import { createBrowserClient } from '@supabase/ssr';
 
 /**
@@ -11,19 +12,15 @@ import { createBrowserClient } from '@supabase/ssr';
  *
  * This function initializes and returns a Supabase client using the
  * `createBrowserClient` function from `@supabase/ssr`.
- * It relies on environment variables `NEXT_PUBLIC_SUPABASE_URL` and
- * `NEXT_PUBLIC_SUPABASE_ANON_KEY` for configuration.
+ * It uses validated environment variables from our environment configuration.
  *
  * @returns {ReturnType<typeof createBrowserClient>} A Supabase client instance.
- * @throws {Error} If `NEXT_PUBLIC_SUPABASE_URL` or `NEXT_PUBLIC_SUPABASE_ANON_KEY` are not set. (Implicitly, due to non-null assertion)
+ * @throws {Error} If required environment variables are not properly configured.
  */
 export function createClient() {
-  // The non-null assertion operator (!) is used here because the presence of these
-  // environment variables should be guaranteed by the application's setup and Next.js environment loading.
-  // If they are missing, an error will be thrown at runtime, which is the desired behavior
-  // to indicate a critical configuration issue.
-  return createBrowserClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-  );
+  // Use validated environment configuration instead of non-null assertions
+  // This provides clear error messages if configuration is missing
+  const { NEXT_PUBLIC_SUPABASE_URL, NEXT_PUBLIC_SUPABASE_ANON_KEY } = validateClientEnvironment();
+
+  return createBrowserClient(NEXT_PUBLIC_SUPABASE_URL, NEXT_PUBLIC_SUPABASE_ANON_KEY);
 }

@@ -33,6 +33,9 @@
     "prettier:yaml": "prettier --write \"**/*.{yml,yaml}\"",
     "pre-commit": "biome check --write . && pnpm test",
     "code-quality": "biome check . && pnpm test && pnpm build",
+    "null-safety:check": "biome check --reporter=json 2>/dev/null | jq '.diagnostics[] | select(.rule.name == \"noNonNullAssertion\")' || echo 'No non-null assertions found'",
+    "null-safety:report": "node scripts/null-safety-report.js",
+    "security:scan": "node scripts/security-scan.js",
     "prepare": "husky"
   },
   "dependencies": {

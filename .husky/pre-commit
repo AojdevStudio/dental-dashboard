@@ -1,12 +1,54 @@
+#!/bin/bash
+# Pre-commit hook for null safety compliance and code quality
+
+echo "🔍 Running pre-commit null safety validation..."
+
 # Run Biome check and auto-fix issues (only fail on errors, not warnings)
+echo "🧹 Running Biome linting and auto-fix..."
 pnpm biome check --write .
 
+# Check specifically for non-null assertions
+echo "🚫 Validating null safety compliance..."
+if pnpm biome check --reporter=json 2>/dev/null | jq -e '.diagnostics[] | select(.rule.name == "noNonNullAssertion")' > /dev/null 2>&1; then
+  echo "❌ COMMIT BLOCKED: Non-null assertions detected!"
+  echo "The following violations must be fixed before committing:"
+  pnpm biome check --reporter=json 2>/dev/null | jq -r '.diagnostics[] | select(.rule.name == "noNonNullAssertion") | "\(.location.path):\(.location.span.start.line) - \(.message)"' 2>/dev/null || echo "Run 'pnpm biome:check' to see details"
+  echo ""
+  echo "💡 Use these safe alternatives:"
+  echo "  - Replace 'value!' with proper null checks"
+  echo "  - Use type guards from src/lib/utils/type-guards.ts"
+  echo "  - Use environment validation from src/lib/config/environment.ts"
+  echo "  - See docs/null-safety-patterns.md for guidance"
+  exit 1
+else
+  echo "✅ Null safety compliance verified!"
+fi
+
+# Secret detection removed due to false positives
+# Use external security scanning tools for secret detection
+
 # Format YAML files with Prettier to prevent trailing whitespace
+echo "📝 Formatting YAML files..."
 pnpm prettier:yaml
 
 # Run tests to ensure nothing is broken
-# TODO: Re-enable once test suite is fixed
-# pnpm test --run
+echo "🧪 Running tests..."
+if [ "${SKIP_TESTS}" = "true" ]; then
+  echo "⚠️ Tests skipped due to SKIP_TESTS=true environment variable"
+elif pnpm test --help >/dev/null 2>&1; then
+  pnpm test --run || {
+    echo "❌ COMMIT BLOCKED: Tests are failing!"
+    echo "Please fix failing tests before committing."
+    echo "💡 To skip tests for infrastructure commits, use: SKIP_TESTS=true git commit ..."
+    exit 1
+  }
+  echo "✅ All tests passing"
+else
+  echo "⚠️ Test command not available, skipping test validation"
+fi
 
 # Add any fixed files back to the commit
+echo "📦 Adding fixed files to commit..."
 git add .
+
+echo "✅ Pre-commit validation completed successfully!"

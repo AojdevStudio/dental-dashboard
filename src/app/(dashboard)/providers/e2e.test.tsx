@@ -26,8 +26,11 @@ vi.mock('next/navigation', () => ({
 }));
 
 // Mock Supabase client for authentication
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
+import { validateTestEnvironment } from '@/lib/config/environment';
+
+const testEnv = validateTestEnvironment();
+const supabaseUrl = testEnv.NEXT_PUBLIC_SUPABASE_URL;
+const supabaseAnonKey = testEnv.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 // Use test-specific service key to avoid exposing production credentials
 const supabaseTestServiceKey = process.env.SUPABASE_TEST_SERVICE_KEY || 'test-service-key-mock';
 

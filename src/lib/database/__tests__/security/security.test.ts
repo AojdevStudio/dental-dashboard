@@ -19,8 +19,16 @@ import { v4 as uuidv4 } from 'uuid';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 
 // Test database connection
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-const supabaseServiceKey = process.env.SUPABASE_SERVICE_KEY!;
+import { validateTestEnvironment } from '@/lib/config/environment';
+
+const testEnv = validateTestEnvironment();
+const supabaseUrl = testEnv.NEXT_PUBLIC_SUPABASE_URL;
+const supabaseServiceKey = process.env.SUPABASE_SERVICE_KEY;
+
+if (!supabaseServiceKey) {
+  throw new Error('SUPABASE_SERVICE_KEY is required for security tests');
+}
+
 const serviceClient = createClient(supabaseUrl, supabaseServiceKey);
 
 // Test data for security tests
