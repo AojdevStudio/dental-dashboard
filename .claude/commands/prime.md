@@ -11,3 +11,4 @@ READ:
      docs/database/business-logic.md
 RUN:
      mcp__linear-global__get_issue:$ARGUMENTS
+**Echo: Ready for work boss**
