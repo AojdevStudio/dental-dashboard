@@ -1,0 +1,41 @@
+Track Status,,,,,,Resubmitted- No claim on file - used when claim is submitted and is not received by the insurance.,,,,,,
+Paid & Cleared - used when the claim was processed and the paid date is less than 60 days.,,,,,,Claim Denied- TFL - used when confirmed that TFL is valid.,,,,,,
+Paid Not Cleared- Requested Re-issue of Payment - used when the claim was processed and the paid date is over 60 days.,,,,,,"Claim Denied - Additional info. Submitted - used when the claim is soft denied for additional information
+e.g x-ray, PCH, narrative and PEOB. ",,,,,,
+Paid for reprocessing - this is used when a payment is i received however the claim needs to be reprocess.,,,,,,Needs Ofc Attention -Added to asana - used when the information needed requires ofc help.,,,,,,
+Claim Received/ Processing - used when the claim is confirmed on file and is currently in process,,,,,,Appeal 1 Submitted - used when the claim is re-submitted for first reconsideration request,,,,,,
+ORTHO - used for ortho claims regardless of the status * of the claim during claim traçe,,,,,,Appeal 2 Submitted - used when request for 1st reconsideration is denied and formal appeal is needed to be submitted to grievance department.,,,,,,
+,,,,,,,,,,,,
+DateService,Carrier,Phone,Type,Column 1,PatName,DateSent,TrackStat,DateStat,Amount,Notes,Amount Pending,Column 2
+3/14/2025,Aetna,(800)451-7715,Pri,,"Abbasi, Inaaya",3/17/2025,Claim Recieved/Processing,1/1/2001,$181.00,CLAIM WAS SENT LATE DUE TO THAT ADDRESS WAS NOT ENTER IN OD AT THE TIME OF THE APPT. ,,
+12/11/2024,BCBS (FEP Blue Dental),(855)504-2583,Sec,,"Akbar, Aasiya",1/31/2025,Needs Office Attention - Doctor,4/22/2025,"$1,974.00",PAYMENT WENT TO MEMBER. PT IS AWARE HE WILL NEED TO MAKE PAYMENT THE DAY OF HIS VISIT ,,TRUE
+12/18/2024,BCBS (FEP Blue Dental),(855)504-2583,Sec,,"Akbar, Ayesha",2/17/2025,Needs Office Attention - Doctor,3/26/2025,"$2,037.00",PAYMENT WENT TO MEMBER. PT IS AWARE HE WILL NEED TO MAKE PAYMENT THE DAY OF HIS VISIT ,,TRUE
+11/15/2024,Bcbs,(800)451-0287,Pri,,"Antoine, Cojahnay",1/10/2025,-,1/1/2001,$346.00,,,FALSE
+12/19/2024,Aetna,(800)451-7715,Pri,,"Barraza, Jason",3/17/2025,Needs Office Attention - Doctor,2/12/2025,"$1,798.00",NO BUILD-UP SRAY INS WILL NOT PAY FOR THIS CROWN WITHOUT THE BUILD-UP XRAY ,,TRUE
+3/28/2025,UHC,(866)528-6072,Pri,,"Booker, Paul",3/31/2025,Paid & Cleared,1/1/2001,$694.00,CLAIM WAS SENT LATE DUE TO THAT THE ADDRESS WAS NOT ENTER IN OD AT THE TIME OF THE APPT. UPDATE CLAIM HAS BEEN PAID ,,
+2/5/2025,Bcbs,(800)451-0287,Pri,,"Calderonantoine, Claudia C",2/5/2025,-,1/1/2001,$453.00,,,
+3/18/2025,Aetna,(800)451-7715,Pri,,"Caldwell, Gerald",3/19/2025,Needs Office Attention - Doctor,1/1/2001,$858.00,NO BUILDUP XRAY. INS WILL NOT PAY WITHOUT THIS INFORMATION. ,,TRUE
+3/21/2025,BCBS of TX,(800)820-9994,Pri,,"Carter, Michael",3/24/2025,Appeal 1 Submitted,1/1/2001,$981.00,APPEAL #1 SENT TO INS AND EMAIL SENT TO THE PATIENT ,,
+3/31/2025,BCBS of TX,(800)820-9994,Pri,,"Claverie, Mary",4/1/2025,Paid & Cleared,1/1/2001,"$3,208.00",PAYMENT ENTERED ON 05/02/2025,,FALSE
+2/7/2025,Central States,(800)323-2190,Pri,,"Eagleton, Zachary",3/19/2025,Resubmitted - No Claim on file,1/1/2001,"$2,292.00",SEND CLAIM VIA FAX ,,FALSE
+1/3/2025,BCBS of TN,(800)523-1478,Pri,,"Gutierrez, Breanna",3/24/2025,Resubmitted- Error in sending ,3/24/2025,$794.00,WRONG PAYOR ID. RECEIVED A CHK FROM INS. RESUBMITTED CLAIM ,,
+1/16/2025,BCBS of TN,(800)523-1478,Pri,,"Gutierrez, Breanna",2/3/2025,Resubmitted- Error in sending ,1/1/2001,$290.00,WRONG PAYOR ID. RECEIVED A CHK FROM INS. RESUBMITTED CLAIM ,,FALSE
+1/31/2025,BCBS of TN,(800)523-1478,Pri,,"Gutierrez, Breanna",3/24/2025,Resubmitted- Error in sending ,1/1/2001,"$1,050.00",WRONG PAYOR ID. RECEIVED A CHK FROM INS. RESUBMITTED CLAIM,,
+3/17/2025,BCBS of TN,(800)523-1478,Pri,,"Gutierrez, Breanna",3/24/2025,Resubmitted- Error in sending ,1/1/2001,"$3,347.00",WRONG PAYOR ID. RECEIVED A CHK FROM INS. RESUBMITTED CLAIM,,
+2/15/2025,Metlife,(877)638-3379,Pri,,"Hansen, Kristen",2/18/2025,-,1/1/2001,$435.00,,,
+3/19/2025,Humana,(800)833-2223,Pri,,"Henderson, James",3/19/2025,Resubmitted - No Claim on file,1/1/2001,$812.00,NO CLAIM IN FILE. RESEND ,,
+11/15/2024,BCBS of TX,(800)442-4607,Pri,,"Matthews, Linda",11/18/2024,-,1/1/2001,$453.00,,,
+1/3/2025,Cigna,(866)213-7295,Pri,,"Oneal, Zora",3/14/2025,Resubmitted - No Claim on file,2/13/2025,"$1,216.00",NO CLAIM ON FILE ,,
+2/26/2025,Delta Dental,(800)521-2651,Pri,,"Paragas, Andrew",3/21/2025,Appeal 1 Submitted,1/1/2001,$280.00,APPEAL #1 SENT TO INS AND EMAIL SENT TO THE PATIENT ,,
+2/12/2025,Principal Financial Group,(800)247-4695,Pri,,"Perez, Maria E",3/17/2025,Claim Denied - TFL,1/1/2001,"$1,434.00","NO PAYMENT DUE TO THE XRAYS ARE NOT CLEARED . Tooth #32 is not 
+visible in the x-rays received. ",,TRUE
+1/10/2025,Cigna,(866)213-7295,Pri,,"Pieri, Ethelrose",3/21/2025,Claim Denied - TFL,3/21/2025,$589.00,NO PAYMENT FROM INSURANCE DUE TO THAT THE RCT WAS COMPLETED ON ANOTHER APPT. ,,FALSE
+1/23/2025,Cigna,(866)213-7295,Sec,,"Turner, Paris",3/4/2025,Claim Denied - TFL,1/1/2001,$453.00,NO PAYMENT BY SECONDARY INSURANCE. PRIMARY PAID THE MAX ALLOWED AMOUNT. CLAIM CLOSED ,,FALSE
+9/25/2024,BCBS (FEP Blue Dental),(855)504-2583,Sec,,"Waheeduddin, Aliya",1/31/2025,Paid & Cleared,4/22/2025,"$1,216.00",PT PAID AMOUNT OF 685.20 ,,FALSE
+3/28/2025,Principal Financial Group,(800)247-4695,Pri,,"Williams Jr, Remy",3/28/2025,Claim Denied - TFL,1/1/2001,"$4,054.00","NO PAYMENT DUE TO THE XRAYS ARE NOT CLEARED  Tooth 8 and 9 are not 
+visible in the x-rays submitted.",,TRUE
+,,,,,,,,,,,,
+,,,,,,,,,,,,FALSE
+,,,,,,,,,,,,
+,,,,,,,,,,,,
+,,,,,,,,,,,,FALSE
