@@ -251,7 +251,7 @@ return record.name;
 ## Deliverables
 
 ### Documentation
-- [x] **Comprehensive Plan** - `docs/null-safety-comprehensive-plan.md`
+ - [x] **Comprehensive Plan** - `docs/implementation-guides/null-safety-comprehensive-plan.md`
 - [x] **Technical Guide** - `docs/null-safety-technical-guide.md`
 - [x] **Action Plan** - `docs/null-safety-action-plan.md`
 - [x] **Elimination Plan** - `docs/null-safety-elimination-plan.md`

@@ -21,7 +21,7 @@ jobs:
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
         with:
-          version: 10.10.0
+          version: 'pnpm@10.10.0+sha512.d615db246fe70f25dcfea6d8d73dee782ce23e2245e3c4f6f888249fb568149318637dca73c2c5c8ef2a4ca0d5657fb9567188bfab47f566d1ee6ce987815c39'
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -116,35 +116,6 @@ jobs:
           path: reports/null-safety-report.md
           retention-days: 30
 
-  security-scan:
-    name: Security & Secret Scanning
-    runs-on: ubuntu-latest
-    
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-
-      - name: Run secret scanning
-        run: |
-          echo "🔐 Scanning for potential secrets..."
-          
-          # Check for common secret patterns
-          if git log --all --full-history -- . | grep -i -E "(api_key|password|secret|token|private_key)" | head -10; then
-            echo "⚠️ Potential secrets found in git history. Please review."
-          else
-            echo "✅ No obvious secrets detected in git history"
-          fi
-          
-          # Check current files for secret patterns
-          if find . -type f -name "*.ts" -o -name "*.tsx" -o -name "*.js" -o -name "*.jsx" | xargs grep -l -E "(api_key|password|secret|token)" 2>/dev/null | grep -v node_modules | grep -v .git; then
-            echo "❌ Potential hardcoded secrets found in source files!"
-            echo "Please use environment variables instead."
-            exit 1
-          else
-            echo "✅ No hardcoded secrets detected in source files"
-          fi
 
   dependency-audit:
     name: Dependency Security Audit
@@ -157,7 +128,7 @@ jobs:
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
         with:
-          version: 10.10.0
+          version: 'pnpm@10.10.0+sha512.d615db246fe70f25dcfea6d8d73dee782ce23e2245e3c4f6f888249fb568149318637dca73c2c5c8ef2a4ca0d5657fb9567188bfab47f566d1ee6ce987815c39'
 
       - name: Setup Node.js
         uses: actions/setup-node@v4

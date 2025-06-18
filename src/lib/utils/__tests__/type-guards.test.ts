@@ -298,3 +298,45 @@ describe('Type Guards', () => {
     });
   });
 });
+
+// Example usage of improved testComponentNullSafety
+describe('testComponentNullSafety enhanced functionality', () => {
+  const MockComponent = ({ title, isEnabled, count, onSubmit }: {
+    title: string;
+    isEnabled?: boolean;
+    count?: number;
+    onSubmit?: () => void;
+  }) => <div>{title}</div>;
+
+  it('should use intelligent mock values based on prop names', () => {
+    const { testComponentNullSafety } = require('../../test-utils/null-safety-helpers');
+    
+    // This will now use proper types: isEnabled=true, count=10, onSubmit=vi.fn()
+    // instead of the old string-based approach
+    expect(() => {
+      testComponentNullSafety(
+        MockComponent,
+        { title: 'Test' },
+        ['isEnabled', 'count', 'onSubmit']
+      );
+    }).not.toThrow();
+  });
+
+  it('should allow custom mock values', () => {
+    const { testComponentNullSafety } = require('../../test-utils/null-safety-helpers');
+    
+    // Custom mock values override the intelligent defaults
+    expect(() => {
+      testComponentNullSafety(
+        MockComponent,
+        { title: 'Test' },
+        ['isEnabled', 'count', 'onSubmit'],
+        {
+          isEnabled: false, // Custom boolean
+          count: 42,        // Custom number
+          onSubmit: () => console.log('custom handler') // Custom function
+        }
+      );
+    }).not.toThrow();
+  });
+});

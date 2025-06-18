@@ -88,18 +88,104 @@ export function testAsyncNullSafety<T>(
 }
 
 /**
+ * Get a sensible default mock value based on prop name patterns
+ */
+function getDefaultMockValue(propName: string): unknown {
+  const lowerProp = propName.toLowerCase();
+
+  // Boolean props
+  if (
+    lowerProp.includes('is') ||
+    lowerProp.includes('has') ||
+    lowerProp.includes('can') ||
+    lowerProp.includes('should') ||
+    lowerProp.includes('enabled') ||
+    lowerProp.includes('disabled') ||
+    lowerProp.includes('visible') ||
+    lowerProp.includes('hidden') ||
+    lowerProp.includes('loading')
+  ) {
+    return true;
+  }
+
+  // Number props
+  if (
+    lowerProp.includes('count') ||
+    lowerProp.includes('size') ||
+    lowerProp.includes('length') ||
+    lowerProp.includes('width') ||
+    lowerProp.includes('height') ||
+    lowerProp.includes('index') ||
+    lowerProp.includes('page') ||
+    lowerProp.includes('limit') ||
+    lowerProp.includes('total')
+  ) {
+    return 10;
+  }
+
+  // Date props
+  if (
+    lowerProp.includes('date') ||
+    lowerProp.includes('time') ||
+    lowerProp.includes('created') ||
+    lowerProp.includes('updated') ||
+    lowerProp.includes('modified')
+  ) {
+    return new Date().toISOString();
+  }
+
+  // Array props
+  if (
+    lowerProp.includes('items') ||
+    lowerProp.includes('list') ||
+    lowerProp.includes('data') ||
+    lowerProp.includes('results') ||
+    (lowerProp.includes('children') && lowerProp !== 'children')
+  ) {
+    return [];
+  }
+
+  // Object props
+  if (
+    lowerProp.includes('config') ||
+    lowerProp.includes('options') ||
+    lowerProp.includes('settings') ||
+    lowerProp.includes('meta') ||
+    lowerProp.includes('props')
+  ) {
+    return {};
+  }
+
+  // Function props
+  if (lowerProp.includes('on') && lowerProp.length > 2) {
+    return vi.fn();
+  }
+
+  // ID props
+  if (lowerProp.includes('id')) {
+    return `test-${propName}`;
+  }
+
+  // Default to string
+  return `test-${propName}`;
+}
+
+/**
  * Test component's null safety with various prop combinations
  */
 export function testComponentNullSafety<T extends Record<string, unknown>>(
   Component: React.ComponentType<T>,
   requiredProps: T,
-  optionalProps: string[]
+  optionalProps: string[],
+  mockValues?: Record<string, unknown>
 ) {
   describe('Null Safety', () => {
     it('should render with all props provided', () => {
       const allProps = { ...requiredProps };
       for (const prop of optionalProps) {
-        (allProps as Record<string, unknown>)[prop] = `test-${prop}`;
+        // Use provided mock values or sensible defaults based on prop name patterns
+        const mockValue = mockValues?.[prop] ?? getDefaultMockValue(prop);
+        (allProps as Record<string, unknown>)[prop] = mockValue;
       }
 
       expect(() => render(<Component {...allProps} />)).not.toThrow();
@@ -226,12 +312,16 @@ export function testDatabaseErrorHandling<T, R>(query: (params: T) => Promise<R>
  * Mock fetch for testing API calls
  */
 export function mockFetch(response: unknown, ok = true, status = 200) {
-  global.fetch = vi.fn().mockResolvedValue({
+  const original = global.fetch;
+  (global as typeof global & { fetch: unknown }).fetch = vi.fn().mockResolvedValue({
     ok,
     status,
     json: async () => response,
     text: async () => JSON.stringify(response),
   });
+  return () => {
+    (global as typeof global & { fetch: unknown }).fetch = original;
+  };
 }
 
 /**
