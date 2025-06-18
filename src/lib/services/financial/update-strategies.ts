@@ -79,7 +79,11 @@ export class RecordIdUpdateStrategy extends BaseService implements FinancialUpda
     await this.validate(data, context);
 
     // Check that record exists and belongs to the location
-    const existingRecord = await this.recordService.getRecordById(data.recordId!);
+    if (!data.recordId) {
+      throw new Error('Record ID is required for update operation');
+    }
+
+    const existingRecord = await this.recordService.getRecordById(data.recordId);
     if (!existingRecord) {
       throw new Error('Financial record not found');
     }
@@ -110,7 +114,7 @@ export class RecordIdUpdateStrategy extends BaseService implements FinancialUpda
       updateData.unearned = data.unearned ? this.parseNumeric(data.unearned) : null;
     }
 
-    const record = await this.recordService.updateRecord(data.recordId!, updateData);
+    const record = await this.recordService.updateRecord(data.recordId, updateData);
 
     return {
       record,
@@ -143,7 +147,11 @@ export class DateUpsertStrategy extends BaseService implements FinancialUpdateSt
     this.validateRequired({ date: data.date }, ['date']);
 
     // Validate date format
-    const date = new Date(data.date!);
+    if (!data.date) {
+      throw new Error('Date is required for upsert operation');
+    }
+
+    const date = new Date(data.date);
     if (Number.isNaN(date.getTime())) {
       throw new Error('Invalid date format');
     }
@@ -172,7 +180,12 @@ export class DateUpsertStrategy extends BaseService implements FinancialUpdateSt
   async update(data: UpdateRequestData, context: UpdateContext): Promise<UpdateResult> {
     await this.validate(data, context);
 
-    const date = new Date(data.date!);
+    // Date is already validated in validate() method
+    if (!data.date) {
+      throw new Error('Date is required for upsert operation');
+    }
+
+    const date = new Date(data.date);
 
     // Build upsert data
     const upsertData: CreateFinancialData = {

@@ -206,7 +206,7 @@
         "noNamespace": "error",
         "noNamespaceImport": "off",
         "noNegationElse": "error",
-        "noNonNullAssertion": "warn",
+        "noNonNullAssertion": "error",
         "noParameterAssign": "error",
         "noParameterProperties": "off",
         "noRestrictedGlobals": "off",
@@ -400,7 +400,7 @@
             "useAwait": "warn"
           },
           "style": {
-            "noNonNullAssertion": "warn"
+            "noNonNullAssertion": "error"
           }
         }
       }
