@@ -1,13 +1,23 @@
-# Init Agentic Parallel
+# Init Agentic Parallel (Protected Main Version)
 
-Initialize three parallel git worktree directories with shared coordination infrastructure for concurrent agentic TDD development.
+Initialize three parallel git worktree directories with shared coordination infrastructure for concurrent agentic TDD development on projects with protected main branches.
 
 ## Variables
 FEATURE_NAME: $ARGUMENTS
 
 ## Execute these tasks
 
-CREATE shared coordination infrastructure:
+**STEP 1: CREATE FEATURE BRANCH WORKSPACE**
+
+CREATE base feature branch from main:
+- VERIFY you're on main: `git branch --show-current`
+- ENSURE main is up to date: `git pull origin main`
+- CREATE feature branch: `git checkout -b feature/${FEATURE_NAME}-base`
+- PUSH base branch: `git push -u origin feature/${FEATURE_NAME}-base`
+
+**STEP 2: CREATE SHARED COORDINATION INFRASTRUCTURE**
+
+CREATE shared coordination infrastructure in feature branch:
 - CREATE directory `shared/`
 - CREATE directory `shared/coordination/`
 - CREATE directory `shared/artifacts/`
@@ -17,6 +27,7 @@ CREATE shared coordination infrastructure:
   ```json
   {
     "feature_name": "${FEATURE_NAME}",
+    "base_branch": "feature/${FEATURE_NAME}-base",
     "current_wave": "init",
     "wave1_complete": false,
     "wave2_complete": false,
@@ -27,29 +38,38 @@ CREATE shared coordination infrastructure:
 - CREATE file `shared/coordination/handoff-signals.json` with content: `{}`
 - CREATE file `shared/coordination/mcp-status.json` with content: `{}`
 
+COMMIT shared infrastructure:
+- RUN `git add shared/`
+- RUN `git commit -m "feat(${FEATURE_NAME}): initialize agentic TDD coordination infrastructure"`
+- RUN `git push origin feature/${FEATURE_NAME}-base`
+
+**STEP 3: CREATE PARALLEL WORKTREES**
+
 CREATE new directory `trees/`
 
 > Execute these steps in parallel for concurrency
 >
-> Use absolute paths for all commands
+> All worktrees branch from the feature branch, not main
 
 CREATE first worktree (Task Planner):
-- RUN `git worktree add -b task-planner-${FEATURE_NAME} ./trees/task-planner`
+- RUN `git worktree add -b task-planner-${FEATURE_NAME} ./trees/task-planner feature/${FEATURE_NAME}-base`
 - COPY `.env` to `./trees/task-planner/.env` (if exists)
 - RUN `cd ./trees/task-planner` then `pnpm install`
 - CREATE symlink `cd ./trees/task-planner && ln -sf ../../shared shared`
 
 CREATE second worktree (Test Writer):
-- RUN `git worktree add -b test-writer-${FEATURE_NAME} ./trees/test-writer`
+- RUN `git worktree add -b test-writer-${FEATURE_NAME} ./trees/test-writer feature/${FEATURE_NAME}-base`
 - COPY `.env` to `./trees/test-writer/.env` (if exists)  
 - RUN `cd ./trees/test-writer` then `pnpm install`
 - CREATE symlink `cd ./trees/test-writer && ln -sf ../../shared shared`
 
 CREATE third worktree (Code Writer):
-- RUN `git worktree add -b code-writer-${FEATURE_NAME} ./trees/code-writer`
+- RUN `git worktree add -b code-writer-${FEATURE_NAME} ./trees/code-writer feature/${FEATURE_NAME}-base`
 - COPY `.env` to `./trees/code-writer/.env` (if exists)
 - RUN `cd ./trees/code-writer` then `pnpm install`  
 - CREATE symlink `cd ./trees/code-writer && ln -sf ../../shared shared`
+
+**STEP 4: VERIFY SETUP**
 
 VERIFY setup:
 - RUN `git worktree list`
@@ -58,38 +78,56 @@ VERIFY setup:
 - TEST shared write access: `echo "test" > shared/coordination/init-test.txt`
 - VERIFY all worktrees can see test file: `ls trees/*/shared/coordination/init-test.txt`
 - CLEANUP test file: `rm shared/coordination/init-test.txt`
+- VERIFY base branch is pushed: `git branch -r | grep feature/${FEATURE_NAME}-base`
 
 ## Post-Setup Notes
 
-After running this initialization, each worktree will have:
-- Full project code in its own git branch
-- Symlinked access to the shared coordination directory
-- Independent node_modules and .env files
-- Ability to communicate with other waves through shared JSON files
+After running this initialization with protected main:
+- Your main branch remains untouched and protected
+- All work happens in feature branch ecosystem
+- Each worktree has full project code from the feature branch
+- Shared coordination works through symlinks
+- Final cleanup will create PR against main
 
-## Troubleshooting
+## Protected Main Branch Benefits
 
-If symlinks don't work on your system:
+This approach:
+✅ Never touches protected main branch working directory  
+✅ All coordination happens in feature branch space  
+✅ Supports enterprise git workflows  
+✅ Maintains full audit trail through feature branch commits  
+✅ Cleanup can create PR without main branch access  
+
+## Directory Structure (Protected Main Version)
+
+```
+project-root/                           # Clean main branch (never modified)
+├── feature/${FEATURE_NAME}-base/       # Base feature branch (has shared/)
+│   ├── shared/                         # Coordination infrastructure
+│   │   ├── coordination/               # Wave status and handoff signals
+│   │   ├── artifacts/                  # Tasks, tests, implementation artifacts
+│   │   └── reports/                    # Final wave reports
+│   └── [project files from main]      # Project code copied from main
+├── trees/                              # Parallel worktrees (branch from feature base)
+│   ├── task-planner/                   # Branch: task-planner-${FEATURE_NAME}
+│   │   ├── shared -> ../../shared      # Symlink to shared directory
+│   │   └── [project files]            # Full project copy
+│   ├── test-writer/                    # Branch: test-writer-${FEATURE_NAME}
+│   │   ├── shared -> ../../shared      # Symlink to shared directory
+│   │   └── [project files]            # Full project copy
+│   └── code-writer/                    # Branch: code-writer-${FEATURE_NAME}
+│       ├── shared -> ../../shared      # Symlink to shared directory
+│       └── [project files]            # Full project copy
+└── [main project files]               # Untouched main branch
+```
+
+## Troubleshooting Protected Main
+
+If you get permission errors:
+- Ensure you're not in main branch when running init
+- Verify you have push permissions to create feature branches
+- Check that branch protection rules allow feature branch creation
+
+If symlinks don't work:
 - On Windows: Use `mklink /D shared ..\..\shared` instead of `ln -sf`
-- Alternative: Use relative paths in your wave commands to access `../../shared/`
-
-## Directory Structure
-
-```
-project-root/
-├── shared/                     # Truly shared between all worktrees
-│   ├── coordination/           # Wave status and handoff signals
-│   ├── artifacts/              # Tasks, tests, implementation artifacts
-│   └── reports/                # Final wave reports
-├── trees/                      # Parallel worktrees
-│   ├── task-planner/
-│   │   ├── shared -> ../../shared  # Symlink to shared directory
-│   │   └── [project files]
-│   ├── test-writer/
-│   │   ├── shared -> ../../shared  # Symlink to shared directory
-│   │   └── [project files]
-│   └── code-writer/
-│       ├── shared -> ../../shared  # Symlink to shared directory
-│       └── [project files]
-└── [main project files]
-```
+- Alternative: Use relative paths `../../shared/` in wave commands

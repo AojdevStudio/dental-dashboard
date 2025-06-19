@@ -1,6 +1,6 @@
-# Cleanup Agentic TDD
+# Cleanup Agentic TDD (Protected Main Version)
 
-Merge completed TDD workflow results and cleanup infrastructure.
+Merge completed TDD workflow results and cleanup infrastructure for projects with protected main branches.
 
 ## Variables
 FEATURE_NAME: $ARGUMENTS
@@ -19,26 +19,26 @@ DETERMINE workflow completion level:
 
 If core waves incomplete, EXIT with message: "❌ Core waves (1-3) must complete before cleanup"
 
-**FINAL INTEGRATION TEST**
+**FINAL INTEGRATION ON FEATURE BRANCH**
 
-PREPARE main branch for merge:
-- RUN `git checkout main && git pull origin main`
-- CREATE integration branch: `git checkout -b feature/${FEATURE_NAME}-agentic-tdd`
+SWITCH to base feature branch:
+- RUN `git checkout feature/${FEATURE_NAME}-base`
+- RUN `git pull origin feature/${FEATURE_NAME}-base`
 
-COPY artifacts systematically:
+INTEGRATE all wave results into base feature branch:
 - COPY task documentation: `cp -r shared/artifacts/tasks/* ./docs/tasks/` (create dir if needed)
-- COPY test files to appropriate locations based on codebase structure
+- COPY test files from test-writer worktree to appropriate locations based on codebase structure
 - COPY production code from code-writer worktree to main codebase
 - COPY final report: `cp shared/reports/final-tdd-report.md ./docs/features/`
 - COPY quality report if exists: `cp shared/reports/quality-assurance-report.md ./docs/features/` (if Wave 4 completed)
 
-VERIFY integration:
+VERIFY integration on feature branch:
 - RUN `pnpm install` (in case of new dependencies)
 - RUN `pnpm test` (all tests should pass)
 - RUN `pnpm lint` (code should be clean) 
 - RUN `pnpm typecheck` (types should be valid)
 
-**CREATE COMPREHENSIVE COMMIT**
+**CREATE COMPREHENSIVE COMMIT ON FEATURE BRANCH**
 
 STAGE all changes:
 - RUN `git add .`
@@ -84,6 +84,11 @@ Artifacts included:
 - {Quality assurance report in docs/features/}
 - Final TDD report in docs/features/
 
+Protected Main Workflow:
+- All work completed in feature branch ecosystem
+- Main branch never directly modified
+- Enterprise-compliant git workflow maintained
+
 Co-authored-by: Enhanced-Agentic-TDD-Workflow <agentic@tdd.workflow>
 Co-authored-by: Context7-MCP <context7@upstash.com>
 Co-authored-by: Zen-MCP <zen@beehiveinnovations.com>
@@ -92,13 +97,13 @@ Co-authored-by: Zen-MCP <zen@beehiveinnovations.com>
 COMMIT changes:
 - RUN `git commit -m "{structured commit message}"`
 
-**PUSH AND CREATE PULL REQUEST**
+PUSH updated feature branch:
+- RUN `git push origin feature/${FEATURE_NAME}-base`
 
-PUSH feature branch:
-- RUN `git push origin feature/${FEATURE_NAME}-agentic-tdd`
+**CREATE PULL REQUEST AGAINST MAIN**
 
-CREATE pull request:
-- RUN `gh pr create --title "feat(${FEATURE_NAME}): Agentic TDD Implementation" --body "$(cat shared/reports/final-tdd-report.md)"`
+CREATE pull request from feature branch to main:
+- RUN `gh pr create --base main --head feature/${FEATURE_NAME}-base --title "feat(${FEATURE_NAME}): Agentic TDD Implementation" --body "$(cat shared/reports/final-tdd-report.md)"`
 
 **CLEANUP WORKTREES AND SHARED INFRASTRUCTURE**
 
@@ -107,7 +112,7 @@ REMOVE worktree directories (this also removes symlinks):
 - RUN `git worktree remove trees/test-writer --force`  
 - RUN `git worktree remove trees/code-writer --force`
 
-DELETE feature branches:
+DELETE temporary worktree branches (keep base feature branch):
 - RUN `git branch -D task-planner-${FEATURE_NAME}`
 - RUN `git branch -D test-writer-${FEATURE_NAME}`
 - RUN `git branch -D code-writer-${FEATURE_NAME}`
@@ -119,21 +124,30 @@ CREATE workflow archive before cleanup:
 - COPY all shared artifacts: `cp -r shared/* .agentic-tdd-archives/${FEATURE_NAME}-$(date +%Y%m%d-%H%M%S)/`
 - ADD archive to .gitignore if not already present: `echo ".agentic-tdd-archives/" >> .gitignore`
 
-REMOVE infrastructure:
+REMOVE infrastructure from feature branch:
 - RUN `rm -rf trees/`
 - RUN `rm -rf shared/`
+- RUN `git add .`
+- RUN `git commit -m "chore(${FEATURE_NAME}): cleanup agentic TDD infrastructure"`
+- RUN `git push origin feature/${FEATURE_NAME}-base`
+
+**RETURN TO MAIN BRANCH**
+
+SWITCH back to main branch:
+- RUN `git checkout main`
 
 **FINAL VERIFICATION**
 
 VERIFY cleanup completed:
 - CHECK `git worktree list` shows no agentic worktrees
-- VERIFY `git branch -a` shows feature branches removed
-- CONFIRM main branch is clean and shared/ directory is removed
+- VERIFY `git branch -a` shows only base feature branch remains
+- CONFIRM you're back on main branch: `git branch --show-current`
+- VERIFY feature branch exists: `git branch -r | grep feature/${FEATURE_NAME}-base`
 - TEST pull request link works
 
 OUTPUT completion report:
 ```
-✅ Enhanced Agentic TDD Cleanup Complete!
+✅ Enhanced Agentic TDD Cleanup Complete! (Protected Main)
 
 🎯 Feature: ${FEATURE_NAME}
 📊 Results:
@@ -148,27 +162,37 @@ OUTPUT completion report:
   - Zen: Test generation + code review + multi-model analysis
   - Quality Score: {score}/100 (if Wave 4 completed)
 
-🔗 Pull Request: {PR URL}
+🔒 Protected Main Compliance:
+  - Main branch never directly modified
+  - All work in feature branch ecosystem
+  - Enterprise git workflow maintained
+
+🔗 Pull Request: {PR URL} (feature/${FEATURE_NAME}-base → main)
 📁 Archive: .agentic-tdd-archives/${FEATURE_NAME}-{timestamp}
 
 📋 Next Steps:
 1. Review PR: {PR URL}
-2. Verify MCP tool integration in CI/CD
-3. Request code review from team
-4. Deploy to staging with enhanced monitoring
-5. Merge when approved
+2. Request code review from team
+3. Ensure CI/CD passes on feature branch
+4. Merge PR when approved (squash recommended)
+5. Delete feature branch after merge
 
 🏆 Enhanced Agentic TDD workflow completed successfully!
-   Fresh sessions + MCP tools = Superior code quality
+   Protected main + Fresh sessions + MCP tools = Enterprise-grade development
 ```
 
-**TROUBLESHOOTING**
+**TROUBLESHOOTING PROTECTED MAIN**
 
-If worktree removal fails:
-- RUN `git worktree prune` to clean up broken references
-- Manually remove directories: `rm -rf trees/`
-- Force delete branches: `git branch -D {branch-name} --force`
+If you get permission errors during cleanup:
+- Ensure you have push permissions to the feature branch
+- Verify you're not accidentally trying to commit to main
+- Check branch protection rules don't block feature branch updates
 
-If symlinks cause issues during removal:
-- On Windows: Use `rmdir /S trees` instead of `rm -rf trees/`
-- Remove symlinks first: `find trees/ -type l -delete` (if trees still exists)
+If PR creation fails:
+- Manually create PR: Go to GitHub and create PR from `feature/${FEATURE_NAME}-base` to `main`
+- Ensure you have repository permissions to create PRs
+
+If cleanup leaves artifacts:
+- Manually remove: `rm -rf trees/ shared/`
+- Force cleanup worktrees: `git worktree prune`
+- The feature branch preserves all important artifacts
