@@ -1,1 +1,14 @@
-{}
+{
+  "mcp_tools": {
+    "context7": true,
+    "zen": true,
+    "perplexity": true,
+    "memory": true,
+    "linear": true,
+    "supabase": true,
+    "playwright": true,
+    "puppeteer": true
+  },
+  "last_updated": "2025-06-19T00:00:00Z",
+  "status": "available"
+}

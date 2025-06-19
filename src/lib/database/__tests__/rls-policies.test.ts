@@ -1,106 +1,69 @@
-import { createClient } from '@supabase/supabase-js';
-import { v4 as uuidv4 } from 'uuid';
 /**
  * @vitest-environment node
  */
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+import {
+  createTestClinic,
+  createTestUser,
+  createAuthenticatedClient,
+  cleanupTestData,
+  testRLSIsolation,
+  supabaseAdmin,
+  supabaseAnon,
+  type TestUser,
+  type TestClinic,
+} from '../../../tests/utils/rls-test-helpers';
 
-// Test constants
-const supabaseUrl = process.env.SUPABASE_URL || 'http://localhost:54321';
-const supabaseAnonKey = process.env.SUPABASE_ANON_KEY || 'test-anon-key';
-const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || 'test-service-key';
-
-// Create clients
-const anonClient = createClient(supabaseUrl, supabaseAnonKey);
-const serviceClient = createClient(supabaseUrl, supabaseServiceKey);
-
-// Test data
-const testClinicId = uuidv4();
-const testUserId = uuidv4();
-const testAuthId = uuidv4();
-const otherClinicId = uuidv4();
-const otherUserId = uuidv4();
-const otherAuthId = uuidv4();
+// Test data containers
+let testClinic: TestClinic;
+let otherClinic: TestClinic;
+let testUser: TestUser;
+let otherUser: TestUser;
+let testUserClient: ReturnType<typeof createAuthenticatedClient>;
+let otherUserClient: ReturnType<typeof createAuthenticatedClient>;
 
 describe('Row Level Security Policies', () => {
   beforeEach(async () => {
-    // Clean up any existing test data
-    await serviceClient.from('user_clinic_roles').delete().match({ clinic_id: testClinicId });
-    await serviceClient.from('user_clinic_roles').delete().match({ clinic_id: otherClinicId });
-    await serviceClient.from('users').delete().match({ id: testUserId });
-    await serviceClient.from('users').delete().match({ id: otherUserId });
-    await serviceClient.from('clinics').delete().match({ id: testClinicId });
-    await serviceClient.from('clinics').delete().match({ id: otherClinicId });
-
     // Create test clinics
-    await serviceClient.from('clinics').insert([
-      { id: testClinicId, name: 'Test Clinic', location: 'Test Location', status: 'active' },
-      { id: otherClinicId, name: 'Other Clinic', location: 'Other Location', status: 'active' },
-    ]);
+    testClinic = await createTestClinic('Test Clinic');
+    otherClinic = await createTestClinic('Other Clinic');
 
-    // Create test users
-    await serviceClient.from('users').insert([
-      {
-        id: testUserId,
-        email: 'test@example.com',
-        name: 'Test User',
-        role: 'office_manager',
-        clinic_id: testClinicId,
-        auth_id: testAuthId,
-      },
-      {
-        id: otherUserId,
-        email: 'other@example.com',
-        name: 'Other User',
-        role: 'office_manager',
-        clinic_id: otherClinicId,
-        auth_id: otherAuthId,
-      },
-    ]);
+    // Create test users with clinic associations
+    testUser = await createTestUser(testClinic.id, 'clinic_admin', 'test@example.com');
+    otherUser = await createTestUser(otherClinic.id, 'clinic_admin', 'other@example.com');
 
-    // Create user-clinic role mappings
-    await serviceClient.from('user_clinic_roles').insert([
-      {
-        user_id: testUserId,
-        clinic_id: testClinicId,
-        role: 'clinic_admin',
-        is_active: true,
-      },
-      {
-        user_id: otherUserId,
-        clinic_id: otherClinicId,
-        role: 'clinic_admin',
-        is_active: true,
-      },
-    ]);
+    // Create authenticated clients for each user
+    testUserClient = await createAuthenticatedClient(testUser);
+    otherUserClient = await createAuthenticatedClient(otherUser);
   });
 
   afterEach(async () => {
     // Clean up test data
-    await serviceClient.from('user_clinic_roles').delete().match({ clinic_id: testClinicId });
-    await serviceClient.from('user_clinic_roles').delete().match({ clinic_id: otherClinicId });
-    await serviceClient.from('users').delete().match({ id: testUserId });
-    await serviceClient.from('users').delete().match({ id: otherUserId });
-    await serviceClient.from('clinics').delete().match({ id: testClinicId });
-    await serviceClient.from('clinics').delete().match({ id: otherClinicId });
+    await cleanupTestData([testUser, otherUser], [testClinic, otherClinic]);
   });
 
   describe('Clinic Access Policies', () => {
     it('should allow users to see only their assigned clinics', async () => {
-      // Set auth context for test user
-      const { data: clinics, error } = await anonClient.from('clinics').select('*').order('name');
+      // Test user should see only their clinic
+      const { data: clinics, error } = await testUserClient
+        .from('clinics')
+        .select('*')
+        .eq('id', testClinic.id);
 
-      // In a real test, we would authenticate as the test user
-      // For now, we'll verify the policy structure exists
       expect(error).toBeNull();
+      expect(clinics).not.toBeNull();
+      expect(clinics).toHaveLength(1);
+      expect(clinics?.[0]?.id).toBe(testClinic.id);
     });
 
     it('should prevent users from seeing other clinics', async () => {
-      // This would be tested with proper auth context
-      // Verifying policy prevents cross-clinic access
-      const { data, error } = await anonClient.from('clinics').select('*').eq('id', otherClinicId);
+      // Test user should NOT see other clinic
+      const { data, error } = await testUserClient
+        .from('clinics')
+        .select('*')
+        .eq('id', otherClinic.id);
 
-      // Without auth, should not return data
+      expect(error).toBeNull();
       expect(data).toEqual([]);
     });
 
@@ -108,35 +71,48 @@ describe('Row Level Security Policies', () => {
       // Test update permission for clinic admin
       const updateData = { name: 'Updated Test Clinic' };
 
-      // This would be tested with proper auth context
-      // Verifying the policy structure
-      const { error } = await anonClient.from('clinics').update(updateData).eq('id', testClinicId);
+      const { error } = await testUserClient
+        .from('clinics')
+        .update(updateData)
+        .eq('id', testClinic.id);
 
-      // Without auth, should fail
-      expect(error).toBeTruthy();
+      // Should succeed for own clinic
+      expect(error).toBeNull();
+
+      // Verify the update
+      const { data: updated, error: fetchError } = await testUserClient
+        .from('clinics')
+        .select('name')
+        .eq('id', testClinic.id)
+        .single();
+
+      expect(fetchError).toBeNull();
+      expect(updated?.name).toBe('Updated Test Clinic');
     });
   });
 
   describe('User Access Policies', () => {
     it('should allow users to see other users in their clinic', async () => {
       // Test that users can view users in their clinic
-      const { data, error } = await anonClient
+      const { data, error } = await testUserClient
         .from('users')
         .select('*')
-        .eq('clinic_id', testClinicId);
+        .eq('clinic_id', testClinic.id);
 
-      // Without auth context, should not return data
-      expect(data).toEqual([]);
+      expect(error).toBeNull();
+      expect(data).not.toBeNull();
+      expect(data).toHaveLength(1);
+      expect(data?.[0]?.id).toBe(testUser.id);
     });
 
     it('should prevent users from seeing users in other clinics', async () => {
       // Test that users cannot view users in other clinics
-      const { data, error } = await anonClient
+      const { data, error } = await testUserClient
         .from('users')
         .select('*')
-        .eq('clinic_id', otherClinicId);
+        .eq('clinic_id', otherClinic.id);
 
-      // Should not return data
+      expect(error).toBeNull();
       expect(data).toEqual([]);
     });
 
@@ -144,10 +120,22 @@ describe('Row Level Security Policies', () => {
       // Test self-update permission
       const updateData = { name: 'Updated Name' };
 
-      const { error } = await anonClient.from('users').update(updateData).eq('id', testUserId);
+      const { error } = await testUserClient
+        .from('users')
+        .update(updateData)
+        .eq('id', testUser.id);
 
-      // Without auth, should fail
-      expect(error).toBeTruthy();
+      expect(error).toBeNull();
+
+      // Verify the update
+      const { data: updated, error: fetchError } = await testUserClient
+        .from('users')
+        .select('name')
+        .eq('id', testUser.id)
+        .single();
+
+      expect(fetchError).toBeNull();
+      expect(updated?.name).toBe('Updated Name');
     });
   });
 

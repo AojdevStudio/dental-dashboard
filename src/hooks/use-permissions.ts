@@ -59,7 +59,6 @@ export function usePermissions(): PermissionsContextValue {
   const context = useContext(PermissionsContext);
 
   if (!context) {
-    // biome-ignore lint/nursery/noSecrets: This is an error message, not a secret
     throw new Error('usePermissions must be used within a PermissionsProvider');
   }
 

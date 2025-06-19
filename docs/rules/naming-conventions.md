@@ -1,11 +1,6 @@
----
-description: Naming conventions for the project
-globs: 
-alwaysApply: false
----
 ## File Naming and Organization
 - Use kebab case for route directories (e.g., `api/hello-world/route`)
-- Use locawercase for components (e.g. `components/button.tsx`)
+- Use lowercase for components (e.g. `components/button.tsx`)
 
 ## New Pages
 

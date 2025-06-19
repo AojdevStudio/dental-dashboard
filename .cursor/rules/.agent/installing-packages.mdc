@@ -1,5 +1,5 @@
 ---
-description: Helpful for installing packages
+description: Helpful for installing packages and running terminal commands
 globs: 
 alwaysApply: false
 ---
