@@ -7,7 +7,8 @@
 'use client';
 
 import { ChevronLeft, ChevronRight } from 'lucide-react';
-import type React from 'react';
+// biome-ignore lint/style/useImportType: React.ComponentProps and React.SVGProps require runtime import
+import React from 'react';
 import { DayPicker } from 'react-day-picker';
 
 import { buttonVariants } from '@/components/ui/button';

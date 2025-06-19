@@ -8,7 +8,8 @@
 'use client';
 
 import { useTheme } from 'next-themes';
-import type React from 'react';
+// biome-ignore lint/style/useImportType: React.CSSProperties requires runtime import
+import React from 'react';
 import { Toaster as Sonner, type ToasterProps } from 'sonner';
 
 /**

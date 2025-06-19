@@ -7,7 +7,11 @@ CREATE SCHEMA IF NOT EXISTS auth;
 
 -- Function to set clinic context for the current session
 CREATE OR REPLACE FUNCTION auth.set_clinic_context(clinic_id UUID)
-RETURNS VOID AS $$
+RETURNS VOID
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = auth, pg_temp
+AS $$
 BEGIN
   -- Validate that clinic_id is not null
   IF clinic_id IS NULL THEN
@@ -17,11 +21,16 @@ BEGIN
   -- Set the clinic context in session-scoped variable
   PERFORM set_config('app.current_clinic_id', clinic_id::text, false);
 END;
-$$ LANGUAGE plpgsql SECURITY DEFINER;
+$$;
 
 -- Function to get current clinic context from session
 CREATE OR REPLACE FUNCTION auth.get_current_clinic_id()
-RETURNS UUID AS $$
+RETURNS UUID
+LANGUAGE plpgsql
+SECURITY DEFINER
+STABLE
+SET search_path = auth, pg_temp
+AS $$
 DECLARE
   clinic_id_text TEXT;
   clinic_id UUID;
@@ -45,7 +54,7 @@ BEGIN
       RETURN NULL;
   END;
 END;
-$$ LANGUAGE plpgsql SECURITY DEFINER STABLE;
+$$;
 
 -- Grant execute permissions to authenticated users
 GRANT EXECUTE ON FUNCTION auth.set_clinic_context(UUID) TO authenticated;

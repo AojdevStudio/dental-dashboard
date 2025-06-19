@@ -9,7 +9,8 @@
  */
 
 import * as TabsPrimitive from '@radix-ui/react-tabs';
-import type React from 'react';
+// biome-ignore lint/style/useImportType: React.ComponentProps requires runtime import
+import React from 'react';
 
 import { cn } from '@/lib/utils';
 

@@ -11,8 +11,9 @@ BEGIN;
 
 -- Clinics: Users can only see their own clinic
 CREATE POLICY clinics_clinic_isolation ON public.clinics
-  FOR ALL 
-  USING (id = auth.get_current_clinic_id());
+  FOR ALL
+  USING (id = auth.get_current_clinic_id())
+  WITH CHECK (id = auth.get_current_clinic_id());
 
 -- ================================
 -- USER TABLE POLICIES  
@@ -21,7 +22,8 @@ CREATE POLICY clinics_clinic_isolation ON public.clinics
 -- Users: Users can only see users from their own clinic
 CREATE POLICY users_clinic_isolation ON public.users
   FOR ALL
-  USING (clinic_id = auth.get_current_clinic_id());
+  USING (clinic_id = auth.get_current_clinic_id())
+  WITH CHECK (clinic_id = auth.get_current_clinic_id());
 
 -- ================================
 -- USER-CLINIC ROLES POLICIES
@@ -30,7 +32,8 @@ CREATE POLICY users_clinic_isolation ON public.users
 -- User clinic roles: Users can only see roles for their clinic
 CREATE POLICY user_clinic_roles_clinic_isolation ON public.user_clinic_roles
   FOR ALL
-  USING (clinic_id = auth.get_current_clinic_id());
+  USING (clinic_id = auth.get_current_clinic_id())
+  WITH CHECK (clinic_id = auth.get_current_clinic_id());
 
 -- ================================
 -- PROVIDER TABLE POLICIES
@@ -39,7 +42,8 @@ CREATE POLICY user_clinic_roles_clinic_isolation ON public.user_clinic_roles
 -- Providers: Clinic-based isolation
 CREATE POLICY providers_clinic_isolation ON public.providers
   FOR ALL
-  USING (clinic_id = auth.get_current_clinic_id());
+  USING (clinic_id = auth.get_current_clinic_id())
+  WITH CHECK (clinic_id = auth.get_current_clinic_id());
 
 -- ================================
 -- LOCATION TABLE POLICIES
@@ -48,7 +52,8 @@ CREATE POLICY providers_clinic_isolation ON public.providers
 -- Locations: Clinic-based isolation  
 CREATE POLICY locations_clinic_isolation ON public.locations
   FOR ALL
-  USING (clinic_id = auth.get_current_clinic_id());
+  USING (clinic_id = auth.get_current_clinic_id())
+  WITH CHECK (clinic_id = auth.get_current_clinic_id());
 
 -- ================================
 -- PRODUCTION TABLE POLICIES
@@ -63,12 +68,26 @@ CREATE POLICY dentist_production_clinic_isolation ON public.dentist_production
       WHERE l.id = dentist_production.location_id 
       AND l.clinic_id = auth.get_current_clinic_id()
     )
+  )
+  WITH CHECK (
+    EXISTS (
+      SELECT 1 FROM public.locations l 
+      WHERE l.id = dentist_production.location_id 
+      AND l.clinic_id = auth.get_current_clinic_id()
+    )
   );
 
 -- Hygiene Production: Access through location's clinic
 CREATE POLICY hygiene_production_clinic_isolation ON public.hygiene_production
   FOR ALL
   USING (
+    EXISTS (
+      SELECT 1 FROM public.locations l 
+      WHERE l.id = hygiene_production.location_id 
+      AND l.clinic_id = auth.get_current_clinic_id()
+    )
+  )
+  WITH CHECK (
     EXISTS (
       SELECT 1 FROM public.locations l 
       WHERE l.id = hygiene_production.location_id 
@@ -89,6 +108,13 @@ CREATE POLICY location_financials_clinic_isolation ON public.location_financials
       WHERE l.id = location_financials.location_id 
       AND l.clinic_id = auth.get_current_clinic_id()
     )
+  )
+  WITH CHECK (
+    EXISTS (
+      SELECT 1 FROM public.locations l 
+      WHERE l.id = location_financials.location_id 
+      AND l.clinic_id = auth.get_current_clinic_id()
+    )
   );
 
 -- ================================
@@ -99,6 +125,13 @@ CREATE POLICY location_financials_clinic_isolation ON public.location_financials
 CREATE POLICY metric_values_clinic_isolation ON public.metric_values
   FOR ALL
   USING (
+    EXISTS (
+      SELECT 1 FROM public.locations l 
+      WHERE l.id = metric_values.location_id 
+      AND l.clinic_id = auth.get_current_clinic_id()
+    )
+  )
+  WITH CHECK (
     EXISTS (
       SELECT 1 FROM public.locations l 
       WHERE l.id = metric_values.location_id 
@@ -119,12 +152,27 @@ CREATE POLICY dashboard_configs_clinic_isolation ON public.dashboard_configs
       WHERE u.id = dashboard_configs.user_id 
       AND u.clinic_id = auth.get_current_clinic_id()
     )
+  )
+  WITH CHECK (
+    EXISTS (
+      SELECT 1 FROM public.users u 
+      WHERE u.id = dashboard_configs.user_id 
+      AND u.clinic_id = auth.get_current_clinic_id()
+    )
   );
 
 -- Dashboard Widgets: Access through dashboard's user's clinic
 CREATE POLICY dashboard_widgets_clinic_isolation ON public.dashboard_widgets
   FOR ALL
   USING (
+    EXISTS (
+      SELECT 1 FROM public.dashboard_configs dc
+      JOIN public.users u ON u.id = dc.user_id
+      WHERE dc.id = dashboard_widgets.dashboard_id 
+      AND u.clinic_id = auth.get_current_clinic_id()
+    )
+  )
+  WITH CHECK (
     EXISTS (
       SELECT 1 FROM public.dashboard_configs dc
       JOIN public.users u ON u.id = dc.user_id
