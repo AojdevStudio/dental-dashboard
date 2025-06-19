@@ -1,0 +1,9 @@
+{
+  "feature_name": "AOJ-59-Test-Suite-Modernization",
+  "base_branch": "feature/AOJ-59-Test-Suite-Modernization-base",
+  "current_wave": "init",
+  "wave1_complete": false,
+  "wave2_complete": false,
+  "wave3_complete": false,
+  "created_at": "2025-06-19T18:33:45Z"
+}
