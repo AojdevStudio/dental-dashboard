@@ -1,9 +1,9 @@
-# Cleanup Agentic TDD (Protected Main Version)
+# Cleanup Agentic TDD (Improved - Selective Cleanup)
 
-Merge completed TDD workflow results and cleanup infrastructure for projects with protected main branches.
+Smart cleanup for completed TDD workflow with selective preservation of valuable artifacts.
 
 ## Variables
-FEATURE_NAME: $ARGUMENTS
+FEATURE_NAME: ${1:Enter feature name (e.g., AOJ-59-Test-Infrastructure)}
 
 **PREREQUISITE VERIFICATION**
 
@@ -11,188 +11,188 @@ VERIFY all waves completed:
 - CHECK `shared/coordination/handoff-signals.json` for completion flags
 - VERIFY `shared/reports/final-tdd-report.md` exists
 - CHECK if `shared/reports/quality-assurance-report.md` exists (Wave 4 optional)
-- RUN final test verification: `cd trees/code-writer && pnpm test`
+- RUN final test verification: `pnpm test`
 
 DETERMINE workflow completion level:
-- 3-Wave completion: Task Planning → Test Writing → Code Writing
+- 3-Wave completion: Task Planning → Test Writing → Code Writing  
 - 4-Wave completion: All above + Quality Review (recommended)
 
 If core waves incomplete, EXIT with message: "❌ Core waves (1-3) must complete before cleanup"
 
 **FINAL INTEGRATION ON FEATURE BRANCH**
 
-SWITCH to base feature branch:
-- RUN `git checkout feature/${FEATURE_NAME}-base`
+VERIFY current branch:
+- RUN `git branch --show-current` (should be feature/${FEATURE_NAME}-base)
 - RUN `git pull origin feature/${FEATURE_NAME}-base`
 
-INTEGRATE all wave results into base feature branch:
-- COPY task documentation: `cp -r shared/artifacts/tasks/* ./docs/tasks/` (create dir if needed)
-- COPY test files from test-writer worktree to appropriate locations based on codebase structure
-- COPY production code from code-writer worktree to main codebase
-- COPY final report: `cp shared/reports/final-tdd-report.md ./docs/features/`
-- COPY quality report if exists: `cp shared/reports/quality-assurance-report.md ./docs/features/` (if Wave 4 completed)
+ENSURE all changes are committed:
+- RUN `git status` (should be clean or only untracked files)
+- STAGE any remaining changes: `git add .`
+- COMMIT if needed: `git commit -m "feat(${FEATURE_NAME}): final implementation updates"`
 
-VERIFY integration on feature branch:
-- RUN `pnpm install` (in case of new dependencies)
-- RUN `pnpm test` (all tests should pass)
-- RUN `pnpm lint` (code should be clean) 
-- RUN `pnpm typecheck` (types should be valid)
+**SMART CLEANUP STRATEGY**
 
-**CREATE COMPREHENSIVE COMMIT ON FEATURE BRANCH**
-
-STAGE all changes:
-- RUN `git add .`
-
-CREATE structured commit message:
-```
-feat(${FEATURE_NAME}): implement via enhanced agentic TDD workflow
-
-Completed {3 or 4}-wave agentic TDD implementation with MCP enhancement:
-
-Wave 1 - Task Planning:
-- Decomposed PRD into {X} atomic tasks
-- Established dependency ordering
-- Created comprehensive acceptance criteria
-
-Wave 2 - Test Writing (zen!testgen + context7):
-- Generated {Y} failing tests with zen!testgen
-- Enhanced with context7 framework documentation
-- Verified proper test failure (RED phase)
-- Covered {Z} acceptance criteria
-
-Wave 3 - Code Writing (context7 + zen review):
-- Implemented with context7 current patterns
-- Continuous zen!codereview quality assurance
-- Achieved GREEN phase ({A} tests passing)
-- Multi-model validation for complex logic
-
-{If Wave 4 completed:}
-Wave 4 - Quality Review (zen!codereview):
-- Comprehensive codebase analysis
-- Multi-model quality assessment (Gemini + O3)
-- Security and performance validation
-- Quality score: {score}/100
-
-MCP Tools Used:
-- Context7: Up-to-date framework documentation and patterns
-- Zen: Test generation, code review, and multi-model orchestration
-
-Artifacts included:
-- Task documentation in docs/tasks/
-- Comprehensive test coverage with zen-generated edge cases
-- Production code following current best practices
-- {Quality assurance report in docs/features/}
-- Final TDD report in docs/features/
-
-Protected Main Workflow:
-- All work completed in feature branch ecosystem
-- Main branch never directly modified
-- Enterprise-compliant git workflow maintained
-
-Co-authored-by: Enhanced-Agentic-TDD-Workflow <agentic@tdd.workflow>
-Co-authored-by: Context7-MCP <context7@upstash.com>
-Co-authored-by: Zen-MCP <zen@beehiveinnovations.com>
-```
-
-COMMIT changes:
-- RUN `git commit -m "{structured commit message}"`
-
-PUSH updated feature branch:
-- RUN `git push origin feature/${FEATURE_NAME}-base`
-
-**CREATE PULL REQUEST AGAINST MAIN**
-
-CREATE pull request from feature branch to main:
-- RUN `gh pr create --base main --head feature/${FEATURE_NAME}-base --title "feat(${FEATURE_NAME}): Agentic TDD Implementation" --body "$(cat shared/reports/final-tdd-report.md)"`
-
-**CLEANUP WORKTREES AND SHARED INFRASTRUCTURE**
-
-REMOVE worktree directories (this also removes symlinks):
-- RUN `git worktree remove trees/task-planner --force`
-- RUN `git worktree remove trees/test-writer --force`  
-- RUN `git worktree remove trees/code-writer --force`
-
-DELETE temporary worktree branches (keep base feature branch):
-- RUN `git branch -D task-planner-${FEATURE_NAME}`
-- RUN `git branch -D test-writer-${FEATURE_NAME}`
-- RUN `git branch -D code-writer-${FEATURE_NAME}`
-
-**ARCHIVE WORKFLOW ARTIFACTS**
-
-CREATE workflow archive before cleanup:
+CREATE comprehensive archive BEFORE any cleanup:
 - RUN `mkdir -p .agentic-tdd-archives/${FEATURE_NAME}-$(date +%Y%m%d-%H%M%S)`
-- COPY all shared artifacts: `cp -r shared/* .agentic-tdd-archives/${FEATURE_NAME}-$(date +%Y%m%d-%H%M%S)/`
-- ADD archive to .gitignore if not already present: `echo ".agentic-tdd-archives/" >> .gitignore`
+- COPY shared directory: `cp -r shared/ .agentic-tdd-archives/${FEATURE_NAME}-$(date +%Y%m%d-%H%M%S)/shared-backup/`
+- COPY worktree info: `git worktree list > .agentic-tdd-archives/${FEATURE_NAME}-$(date +%Y%m%d-%H%M%S)/worktree-info.txt`
+- COPY branch info: `git branch -a > .agentic-tdd-archives/${FEATURE_NAME}-$(date +%Y%m%d-%H%M%S)/branch-info.txt`
 
-REMOVE infrastructure from feature branch:
-- RUN `rm -rf trees/`
-- RUN `rm -rf shared/`
+**SELECTIVE SHARED DIRECTORY CLEANUP**
+
+INTERACTIVE cleanup with preservation:
+```bash
+echo "🔍 Analyzing shared directory for cleanup..."
+
+# Preserve valuable reports and documentation
+PRESERVE_PATHS=(
+  "shared/reports/"
+  "shared/artifacts/tasks/" 
+  "shared/artifacts/test-strategy.md"
+  "shared/artifacts/test-verification.md"
+)
+
+# Only remove temporary coordination files
+CLEANUP_PATHS=(
+  "shared/coordination/handoff-signals.json"
+  "shared/coordination/mcp-status.json" 
+  "shared/coordination/wave-status.json"
+)
+
+echo "📋 Items to PRESERVE (valuable for future reference):"
+for path in "${PRESERVE_PATHS[@]}"; do
+  if [ -e "$path" ]; then
+    echo "  ✅ $path"
+  fi
+done
+
+echo ""
+echo "🗑️  Items to REMOVE (temporary coordination files):"
+for path in "${CLEANUP_PATHS[@]}"; do
+  if [ -e "$path" ]; then
+    echo "  🔴 $path"
+  fi
+done
+
+echo ""
+read -p "Proceed with selective cleanup? (y/N): " -n 1 -r
+echo
+if [[ $REPLY =~ ^[Yy]$ ]]; then
+  # Remove only temporary coordination files
+  for path in "${CLEANUP_PATHS[@]}"; do
+    if [ -e "$path" ]; then
+      rm "$path"
+      echo "Removed: $path"
+    fi
+  done
+  
+  # Clean up empty directories
+  find shared/coordination -type d -empty -delete 2>/dev/null || true
+  
+  echo "✅ Selective cleanup completed"
+else
+  echo "❌ Cleanup cancelled - all files preserved"
+fi
+```
+
+**WORKTREE CLEANUP**
+
+REMOVE worktree directories (only if they exist):
+- CHECK `git worktree list | grep trees/`
+- IF worktrees exist:
+  - RUN `git worktree remove trees/task-planner --force` (if exists)
+  - RUN `git worktree remove trees/test-writer --force` (if exists)  
+  - RUN `git worktree remove trees/code-writer --force` (if exists)
+
+DELETE temporary worktree branches (preserve base feature branch):
+- CHECK for branches: `git branch | grep -E "(task-planner|test-writer|code-writer)-${FEATURE_NAME}"`
+- IF branches exist:
+  - RUN `git branch -D task-planner-${FEATURE_NAME}` (if exists)
+  - RUN `git branch -D test-writer-${FEATURE_NAME}` (if exists)
+  - RUN `git branch -D code-writer-${FEATURE_NAME}` (if exists)
+
+**COMMIT CLEANUP CHANGES**
+
+IF any files were modified during cleanup:
 - RUN `git add .`
-- RUN `git commit -m "chore(${FEATURE_NAME}): cleanup agentic TDD infrastructure"`
-- RUN `git push origin feature/${FEATURE_NAME}-base`
+- COMMIT: `git commit -m "chore(${FEATURE_NAME}): selective cleanup of temporary agentic TDD coordination files
 
-**RETURN TO MAIN BRANCH**
+- Preserved valuable reports and documentation in shared/
+- Removed only temporary coordination files (handoff-signals, wave-status)
+- Maintained workflow artifacts for future reference and debugging
+- Created comprehensive backup in .agentic-tdd-archives/"`
+- PUSH: `git push origin feature/${FEATURE_NAME}-base`
 
-SWITCH back to main branch:
-- RUN `git checkout main`
+**UPDATE OR CREATE PULL REQUEST**
 
-**FINAL VERIFICATION**
+CHECK if PR exists:
+- RUN `gh pr list --head feature/${FEATURE_NAME}-base`
 
-VERIFY cleanup completed:
-- CHECK `git worktree list` shows no agentic worktrees
-- VERIFY `git branch -a` shows only base feature branch remains
-- CONFIRM you're back on main branch: `git branch --show-current`
-- VERIFY feature branch exists: `git branch -r | grep feature/${FEATURE_NAME}-base`
-- TEST pull request link works
+IF PR exists:
+- UPDATE PR description with completion status
+- ADD comment about cleanup completion
 
-OUTPUT completion report:
-```
-✅ Enhanced Agentic TDD Cleanup Complete! (Protected Main)
+IF NO PR exists:
+- CREATE PR: `gh pr create --base main --head feature/${FEATURE_NAME}-base --title "feat(${FEATURE_NAME}): Enhanced Agentic TDD Implementation" --body "$(cat shared/reports/final-tdd-report.md)"`
 
-🎯 Feature: ${FEATURE_NAME}
-📊 Results:
-  - Waves completed: {3 or 4}
-  - Tasks completed: {X}
-  - Tests passing: {Y}  
-  - Acceptance criteria met: {Z}
-  - Quality gates: ✅ All passed
+**FINAL VERIFICATION AND REPORT**
 
-🤖 MCP Enhancement:
-  - Context7: Up-to-date documentation integration
-  - Zen: Test generation + code review + multi-model analysis
-  - Quality Score: {score}/100 (if Wave 4 completed)
+VERIFY final state:
+- CHECK `git worktree list` (should show only main directory)
+- VERIFY `git branch -a | grep -E "(task-planner|test-writer|code-writer)"` (should be empty)
+- CONFIRM you're on feature branch: `git branch --show-current`
+- TEST main functionality still works: `pnpm typecheck && pnpm lint`
 
-🔒 Protected Main Compliance:
-  - Main branch never directly modified
-  - All work in feature branch ecosystem
-  - Enterprise git workflow maintained
-
-🔗 Pull Request: {PR URL} (feature/${FEATURE_NAME}-base → main)
-📁 Archive: .agentic-tdd-archives/${FEATURE_NAME}-{timestamp}
-
-📋 Next Steps:
-1. Review PR: {PR URL}
-2. Request code review from team
-3. Ensure CI/CD passes on feature branch
-4. Merge PR when approved (squash recommended)
-5. Delete feature branch after merge
-
-🏆 Enhanced Agentic TDD workflow completed successfully!
-   Protected main + Fresh sessions + MCP tools = Enterprise-grade development
+CREATE completion summary:
+```bash
+echo "✅ Enhanced Agentic TDD Cleanup Complete! (Improved)"
+echo ""
+echo "🎯 Feature: ${FEATURE_NAME}"
+echo "📊 Preservation Status:"
+echo "  - ✅ Final reports: preserved in shared/reports/"
+echo "  - ✅ Task documentation: preserved in shared/artifacts/tasks/"
+echo "  - ✅ Test strategy: preserved in shared/artifacts/"
+echo "  - 🗑️  Coordination files: cleaned up (temporary only)"
+echo ""
+echo "🔒 Protected Main Compliance: ✅"
+echo "📁 Archive: .agentic-tdd-archives/${FEATURE_NAME}-{timestamp}/"
+echo "🔗 Pull Request: $(gh pr view --json url -q .url 2>/dev/null || echo 'Create manually')"
+echo ""
+echo "📋 Next Steps:"
+echo "1. Review preserved shared/ directory for valuable artifacts"
+echo "2. Review and merge PR when ready"
+echo "3. Archive can be cleaned up after successful deployment"
+echo ""
+echo "🏆 Smart cleanup preserves valuable artifacts while removing temporary files!"
 ```
 
-**TROUBLESHOOTING PROTECTED MAIN**
+**ROLLBACK INSTRUCTIONS**
 
-If you get permission errors during cleanup:
-- Ensure you have push permissions to the feature branch
-- Verify you're not accidentally trying to commit to main
-- Check branch protection rules don't block feature branch updates
+IF anything was accidentally removed:
+```bash
+# Restore from archive
+ARCHIVE_DIR=$(ls -1t .agentic-tdd-archives/ | head -1)
+echo "Restoring from: .agentic-tdd-archives/$ARCHIVE_DIR"
 
-If PR creation fails:
-- Manually create PR: Go to GitHub and create PR from `feature/${FEATURE_NAME}-base` to `main`
-- Ensure you have repository permissions to create PRs
+# Restore shared directory 
+cp -r ".agentic-tdd-archives/$ARCHIVE_DIR/shared-backup/." shared/
 
-If cleanup leaves artifacts:
-- Manually remove: `rm -rf trees/ shared/`
-- Force cleanup worktrees: `git worktree prune`
-- The feature branch preserves all important artifacts
+# Restore worktrees if needed
+# (Note: worktrees need to be recreated, not just copied)
+
+git add shared/
+git commit -m "restore: recover accidentally removed agentic TDD artifacts"
+git push origin feature/${FEATURE_NAME}-base
+```
+
+**KEY IMPROVEMENTS SUMMARY**
+
+1. **Selective Preservation**: Only removes temporary coordination files, keeps valuable reports
+2. **Interactive Confirmation**: User controls what gets removed  
+3. **Better Archive Organization**: Comprehensive backup with metadata
+4. **Clear Documentation**: Shows exactly what's preserved vs removed
+5. **Easy Rollback**: Simple restoration process if needed
+6. **Status Reporting**: Clear summary of what was preserved
+7. **Safety First**: Multiple confirmation steps and comprehensive backups
+
+This improved cleanup balances cleanliness with preservation of valuable workflow artifacts for future reference and debugging.
