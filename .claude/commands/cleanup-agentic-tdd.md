@@ -42,6 +42,8 @@ CREATE comprehensive archive BEFORE any cleanup:
 
 INTERACTIVE cleanup with preservation:
 ```bash
+set -euo pipefail
+
 echo "🔍 Analyzing shared directory for cleanup..."
 
 # Preserve valuable reports and documentation
@@ -68,11 +70,19 @@ done
 
 echo ""
 echo "🗑️  Items to REMOVE (temporary coordination files):"
+cleanup_items_found=false
 for path in "${CLEANUP_PATHS[@]}"; do
   if [ -e "$path" ]; then
     echo "  🔴 $path"
+    cleanup_items_found=true
   fi
 done
+
+if [ "$cleanup_items_found" = false ]; then
+  echo "  ℹ️  No temporary coordination files found to remove"
+  echo "✅ Nothing to clean up - all temporary files already removed"
+  exit 0
+fi
 
 echo ""
 read -p "Proceed with selective cleanup? (y/N): " -n 1 -r
@@ -81,7 +91,7 @@ if [[ $REPLY =~ ^[Yy]$ ]]; then
   # Remove only temporary coordination files
   for path in "${CLEANUP_PATHS[@]}"; do
     if [ -e "$path" ]; then
-      rm "$path"
+      rm -f "$path"
       echo "Removed: $path"
     fi
   done

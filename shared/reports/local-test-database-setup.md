@@ -21,15 +21,15 @@ NODE_ENV=test
 DATABASE_URL="postgresql://postgres:postgres@localhost:54322/postgres"
 DIRECT_URL="postgresql://postgres:postgres@localhost:54322/postgres"
 NEXT_PUBLIC_SUPABASE_URL="http://localhost:54321"
-NEXT_PUBLIC_SUPABASE_ANON_KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+NEXT_PUBLIC_SUPABASE_ANON_KEY="<YOUR_SUPABASE_ANON_KEY>"
 ```
 
 #### Updated Package Scripts
 ```json
 {
-  "test": "pnpm test:start && vitest --run && pnpm test:stop",
-  "test:watch": "pnpm test:start && vitest",
-  "test:coverage": "pnpm test:start && vitest run --coverage && pnpm test:stop",
+  "test": "node scripts/test-runner.js run",
+  "test:watch": "node scripts/test-runner.js watch",
+  "test:coverage": "node scripts/test-runner.js coverage",
   "test:start": "pnpm supabase start",
   "test:stop": "pnpm supabase stop",
   "test:reset": "DATABASE_URL=\"postgresql://postgres:postgres@localhost:54322/postgres\" DIRECT_URL=\"postgresql://postgres:postgres@localhost:54322/postgres\" pnpm prisma db push --force-reset --skip-generate"

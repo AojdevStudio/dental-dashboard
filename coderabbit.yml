@@ -39,9 +39,12 @@ reviews:
     - "supabase/functions/**/*.ts"
     - "supabase/migrations/**/*.sql"
 
-    # Exclude everything else explicitly
+    # Exclude documentation files completely
     - "!**/*.md"
     - "!**/*.mdc"
+    - "!docs/**"
+    - "!shared/reports/**"
+    - "!shared/artifacts/**"
     - "!**/*.xml"
     - "!**/*.yml"
     - "!**/*.yaml"

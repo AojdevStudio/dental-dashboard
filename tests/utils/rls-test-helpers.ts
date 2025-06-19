@@ -162,31 +162,33 @@ export async function createAuthenticatedClient(user: TestUser): Promise<Supabas
 }
 
 /**
- * Cleanup function to remove test data
+ * Cleanup function to remove test data atomically
+ * Uses a transaction to ensure all deletions succeed or none are applied
  */
 export async function cleanupTestData(users: TestUser[], clinics: TestClinic[]): Promise<void> {
-  // Clean up user-clinic roles
-  for (const user of users) {
-    await supabaseAdmin
-      .from('user_clinic_roles')
-      .delete()
-      .eq('user_id', user.id);
-  }
+  // Use a transaction for atomic cleanup
+  const { error: transactionError } = await supabaseAdmin.rpc('execute_transaction', {
+    queries: [
+      // Clean up user-clinic roles first (foreign key dependency)
+      ...users.map(user => ({
+        sql: 'DELETE FROM user_clinic_roles WHERE user_id = $1',
+        params: [user.id]
+      })),
+      // Clean up users next
+      ...users.map(user => ({
+        sql: 'DELETE FROM users WHERE id = $1',
+        params: [user.id]
+      })),
+      // Clean up clinics last
+      ...clinics.map(clinic => ({
+        sql: 'DELETE FROM clinics WHERE id = $1',
+        params: [clinic.id]
+      }))
+    ]
+  });
 
-  // Clean up users
-  for (const user of users) {
-    await supabaseAdmin
-      .from('users')
-      .delete()
-      .eq('id', user.id);
-  }
-
-  // Clean up clinics
-  for (const clinic of clinics) {
-    await supabaseAdmin
-      .from('clinics')
-      .delete()
-      .eq('id', clinic.id);
+  if (transactionError) {
+    throw new Error(`Failed to cleanup test data: ${transactionError.message}`);
   }
 }
 
