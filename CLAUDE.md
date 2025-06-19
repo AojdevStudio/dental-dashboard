@@ -303,3 +303,17 @@ Required environment variables:
 
 ## Additional Coding Practices
 - Avoid classes that only contain static members
+
+## Linear Information For MCP use: 
+Project name: Dental Dashboard
+Project ID: 31deeedb-112f
+Full Project ID: dental-dashboard-31deeedb112f
+Team: AOJDevStudio
+Team ID: 6b3573d9-0510-4503-b569-b92b37a36105
+
+## Supabase Information For MCP use:
+Organization name: KC Ventures Consulting Group
+Organization slug: hbcnwcsjguowrjnugzye
+Project name: dashboard
+Project ID: yovbdmjwrrgardkgrenc
+Project URL: https://yovbdmjwrrgardkgrenc.supabase.co

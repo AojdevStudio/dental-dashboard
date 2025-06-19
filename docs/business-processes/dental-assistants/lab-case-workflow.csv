@@ -1,0 +1,31 @@
+Lab Cases Management System Documentation,,
+DEPARTMENT,ASSIGNED TASK,POC
+Dental Assistant Responsibilities:,"Add Patient Information:
+ - Enter the patient's name in the designated column.
+ - Record the date the lab case was sent out (Sent Date).
+ - Specify the type of case (Case Type).
+ - Indicate the lab used (Lab).
+ - Input the lab case number (Case Number). Book patient for seating appt. 
+ - Input Dentist involved with case
+ - Input Lab fee associated with case",DAs
+Front Team Responsibilities:,"Update Received and Seating Dates:
+ - Enter the date the lab case is received (Received Date).
+ - Add the date the patient is scheduled for the seating of the lab case (Seat Date).
+ - Update the appointment status (Appointment Status) with one of the following:
+ - Attention Needed: Check patient case details in the schedule notes.
+ - Case Not In: The case has not been received and it is past the Estimated Delivery Date (EDD).
+ - Others: No seat date due to financial issues or other reasons that prevent scheduling.
+ - Scheduled: Patient has a seat date.
+ - Re-due: A new case is requested due to the need for rework. Do not re-add the patient's name for re-due cases to avoid duplicates.",Front Office
+,"This system helps manage lab cases by automatically organizing them based on status. Key features include:                                                                                                                                1. Status-based case organization (e.g., 'Completed', 'Attention Needed').
+2. Automatic timestamp updates for edits.
+3. Monthly fee reporting by doctor.
+4. Automated daily checks for overdue scheduled appointments (updates status to 'Attention Needed').
+5. Duplicate row removal.
+6. Environment configuration for multiple locations. 
+Key Workflows:
+- Lab Case Entry: Dental Assistants enter new lab cases. Crucially, the 'Total Fee' column should be filled with the cost of the lab case, taken directly from the lab invoice.
+- Automated Case Routing: Cases are moved to different sheets based on 'APPOINTMENT STATUS' and 'INSURANCE STATUS'.
+- Automated Overdue Updates: Daily, the system checks for 'SCHEDULED' cases with past 'SEAT DATES' and changes their status to 'ATTENTION NEEDED'.
+- Monthly Fee Reports: The billing department can generate reports. These reports sum the 'Total Fee' (lab case costs) for each doctor from completed cases within a specific month.
+",

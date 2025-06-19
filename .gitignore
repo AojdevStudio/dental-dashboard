@@ -85,3 +85,7 @@ scripts/apply-migrations-supabase.ts
 repomix-*.xml
 repomix.config.json
 
+.agentic-tdd-archives/
+
+#Claude
+*claude.md

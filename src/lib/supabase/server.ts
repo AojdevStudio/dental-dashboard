@@ -24,8 +24,8 @@ import { cookies } from 'next/headers';
  * @returns {Promise<ReturnType<typeof createServerClient>>} A Promise that resolves to a Supabase client instance.
  * @throws {Error} If required environment variables are not properly configured.
  */
-export function createClient() {
-  const cookieStore = cookies();
+export async function createClient() {
+  const cookieStore = await cookies();
 
   // Use validated environment configuration instead of non-null assertions
   // This provides clear error messages if configuration is missing

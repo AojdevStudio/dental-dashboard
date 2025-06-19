@@ -8,11 +8,11 @@
  * - Response formats
  */
 
-import { GET as getClinicsRoute } from '@/app/api/clinics/route';
-import { POST as createGoalRoute, GET as getGoalsRoute } from '@/app/api/goals/route';
-import { POST as createMetricRoute, GET as getMetricsRoute } from '@/app/api/metrics/route';
-import { POST as createUserRoute, GET as getUsersRoute } from '@/app/api/users/route';
-import { prisma } from '@/lib/database/client';
+import { GET as getClinicsRoute } from '../clinics/route';
+import { POST as createGoalRoute, GET as getGoalsRoute } from '../goals/route';
+import { POST as createMetricRoute, GET as getMetricsRoute } from '../metrics/route';
+import { POST as createUserRoute, GET as getUsersRoute } from '../users/route';
+import { prisma } from '@/lib/database/prisma';
 import type { MetricDefinition, User } from '@prisma/client';
 import { NextRequest } from 'next/server';
 import { v4 as uuidv4 } from 'uuid';
