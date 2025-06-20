@@ -86,16 +86,22 @@ class TestRunner {
       // For watch mode, we need to handle it differently
       if (mode === 'watch') {
         console.log('Starting tests in watch mode. Press Ctrl+C to stop.');
-        const child = spawn('pnpm', ['vitest', ...vitestArgs], { 
+        const child = spawn('pnpm', ['vitest', ...vitestArgs], {
           stdio: 'inherit',
-          shell: true 
+          shell: true
         });
-        
-        // Wait for the child process to exit
-        await new Promise((resolve) => {
+
+        // Wait for the child process to exit or error
+        await new Promise((resolve, reject) => {
           child.on('exit', (code) => {
             exitCode = code || 0;
             resolve();
+          });
+
+          child.on('error', (error) => {
+            console.error('Child process error:', error.message);
+            exitCode = 1;
+            reject(error);
           });
         });
       } else {
