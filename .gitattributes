@@ -7,5 +7,8 @@
 *.bak -text
 *.db -text
 
+# Force Git to respect LF
+* text=auto eol=lf
+
 # Custom rule: Warn if a file over 100MB is added (requires pre-commit hook for enforcement)
 # See: https://docs.github.com/en/repositories/working-with-files/managing-large-files/about-large-files-on-github 

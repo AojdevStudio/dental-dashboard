@@ -34,14 +34,25 @@ This is a multi-tenant dental practice dashboard built with Next.js 15, TypeScri
 - `pnpm dlx tsx prisma/seed.ts` - Alternative seed command
 
 ### Testing
-- `pnpm test` - Run unit tests with Vitest
-- `pnpm test:watch` - Run tests in watch mode
-- `pnpm test:coverage` - Generate test coverage report
+- `pnpm test` - Run unit tests with Vitest using local Supabase database
+- `pnpm test:watch` - Run tests in watch mode with local database
+- `pnpm test:coverage` - Generate test coverage report with local database
+- `pnpm test:e2e` - Run end-to-end tests with Playwright
+- `pnpm test:ui` - Run Playwright UI mode for interactive testing
+- `pnpm test:start` - Start local Supabase for testing
+- `pnpm test:stop` - Stop local Supabase
+- `pnpm test:reset` - Reset local test database to clean state
 
 ### Data Migration Scripts
 - `pnpm migrate:uuid` - Run UUID migration script
 - `pnpm migrate:validate` - Validate migration integrity
 - `pnpm migrate:rollback` - Rollback UUID migration
+
+### Security & RLS Scripts
+- `node apply-rls-fixed.mjs` - Apply Row Level Security policies to database
+- `node force-rls.mjs` - Force enable RLS on all tables
+- `node debug-rls.mjs` - Debug and validate RLS configuration
+- `node check-rls.cjs` - Check current RLS status and policies
 
 ## Architecture Overview
 
@@ -52,7 +63,7 @@ This is a multi-tenant dental practice dashboard built with Next.js 15, TypeScri
 - **UI:** React 19, Shadcn UI, Radix UI, Tailwind CSS 4
 - **State Management:** Server Components, React Context, Zustand, TanStack Query
 - **Authentication:** Supabase Auth with SSR
-- **Testing:** Vitest with jsdom environment and separate integration test configuration
+- **Testing:** Hybrid testing with Vitest (unit/integration) and Playwright (E2E) with MCP integration
 - **Code Quality:** Biome for comprehensive linting, formatting, and import organization with Husky pre-commit hooks
 - **API Layer:** Standardized API utilities with error handling, pagination, and validation
 
@@ -75,14 +86,21 @@ src/
 │   └── utils/            # General utilities
 ├── hooks/                # Custom React hooks
 ├── types/                # TypeScript type definitions
-└── styles/               # Global styles
+├── styles/               # Global styles
+└── tests/                # E2E tests and test utilities
+    ├── e2e/              # Playwright end-to-end tests
+    ├── setup/            # Global test setup and teardown
+    ├── utils/            # Test utilities and factories
+    └── fixtures/         # Test data and fixtures
 ```
 
 ### Database Architecture
 - **Multi-tenant design** with clinic-based data isolation
-- **Row Level Security (RLS)** for data access control
+- **Row Level Security (RLS)** for data access control with automated policy enforcement
 - **UUID migration in progress** (dual CUID/UUID support)
 - **Prisma as exclusive data access layer** (Supabase Data API disabled)
+- **Context-aware RLS** using `get_current_clinic_id()` PostgreSQL function
+- **Transaction-based RLS testing** with isolated multi-tenant validation
 
 ## Workflow Guidance
 
@@ -107,9 +125,20 @@ src/
 - Use standardized pagination with `apiPaginated` and `getPaginationParams`
 - Apply multi-tenant security with clinic-based data isolation
 
-## Supabase Project Details
-- **Project ID:** yovbdmjwrrgardkgrenc
-- **Project Name:** dashboard
+## Common Information For MCP use:
+- Linear MCP Quick Reference:
+Project name: Dental Dashboard (always include the project when creating Linear issues)
+Project ID: 31deeedb-112f
+Full Project ID: dental-dashboard-31deeedb112f
+Team: AOJDevStudio
+Team ID: 6b3573d9-0510-4503-b569-b92b37a36105
+
+- Supabase MCP Quick Reference:
+Organization name: KC Ventures Consulting Group
+Organization slug: hbcnwcsjguowrjnugzye
+Project name: dashboard
+Project ID: yovbdmjwrrgardkgrenc
+Project URL: https://yovbdmjwrrgardkgrenc.supabase.co
 
 ## TypeScript Best Practices
 
@@ -184,7 +213,7 @@ Automated quality control via `.husky/pre-commit`:
 
 ### Component Development
 - Use Server Components by default, Client Components only when needed
-- Follow the component structure in `docs/rules/structure/`
+- Follow the component structure in `docs/rules`
 - Use absolute imports with `@/` prefix
 - Group imports in order: React/Next.js, third-party, local absolute, local relative, types
 
@@ -231,10 +260,44 @@ Required environment variables:
 
 ## Testing Strategy
 
-- Unit tests for utilities and pure functions
-- Integration tests for API routes and database operations
-- Component tests for complex UI interactions
-- Use `vitest.config.ts` for unit tests, `vitest.integration.config.ts` for integration tests
+### Test Infrastructure (AOJ-59)
+- **Hybrid Testing Architecture:** Vitest for unit/integration tests, Playwright for E2E tests
+- **Local Test Database:** Docker-based Supabase for isolated testing environment
+- **Environment Isolation:** Development uses cloud database, testing uses local database
+- **MCP Integration:** AI-powered test generation and validation using Model Context Protocol
+- **Advanced Test Organization:** Separate configurations for unit, integration, and E2E tests
+- **Cross-browser Testing:** Chrome, mobile Chrome with responsive testing capabilities
+- **Performance Testing:** Automated performance benchmarks and optimization validation
+
+### Local Test Database Setup
+- **Automatic Management:** Tests automatically start/stop local Supabase
+- **Environment Variables:** `.env.test` for test-specific configuration
+- **Database Isolation:** localhost:54322 for PostgreSQL, localhost:54321 for Supabase API
+- **Schema Deployment:** Prisma schema automatically applied to local database
+- **Production Safety:** Zero risk to production data, complete environment isolation
+
+### Test Types and Structure
+- **Unit Tests:** Pure functions, utilities, isolated components (`src/**/__tests__/`)
+- **Integration Tests:** API routes, database operations, multi-component interactions
+- **E2E Tests:** Full user workflows, authentication, browser compatibility (`tests/e2e/`)
+- **RLS Security Tests:** Multi-tenant data isolation and security policy validation
+- **Performance Tests:** Database query optimization and response time benchmarks
+
+### Test Configuration Files
+- `vitest.config.ts` - Unit test configuration with jsdom environment and `.env.test` loading
+- `vitest.integration.config.ts` - Integration test configuration for local database testing
+- `playwright.config.ts` - E2E test configuration with cross-browser support
+- `tests/setup/global-setup.ts` - Global test environment initialization
+- `tests/setup/global-teardown.ts` - Test cleanup and resource management
+- `.env.test` - Local test database configuration (localhost Supabase)
+- `.env` - Production environment variables and MCP credentials
+
+### Test Data Management
+- **Test Fixtures:** Structured test data with multi-tenant isolation (`tests/fixtures/`)
+- **Test Factories:** Dynamic test data generation for comprehensive coverage
+- **Database Reset:** Automated local test database setup and teardown for isolation
+- **RLS Context Testing:** Transaction-based context switching for security validation
+- **Local Database Control:** Full control over test data scenarios and database state
 
 ## Important Notes
 
@@ -260,11 +323,12 @@ Required environment variables:
 - **GET /api/providers/[providerId]/performance** - Comprehensive provider performance metrics
 
 ### API Utilities and Standards
-- **Standardized Error Handling:** `ApiError` class and `handleApiError` function
-- **Response Utilities:** `apiSuccess`, `apiError`, `apiPaginated` for consistent responses
-- **Pagination Support:** `getPaginationParams` with database-level pagination
-- **Validation Helpers:** Date range and sort parameter validation
-- **UUID Validation:** Built-in UUID format validation
+- **Enhanced Error Handling:** `ApiError` class with status codes and error categorization
+- **Response Utilities:** `apiSuccess`, `apiError`, `apiPaginated` for consistent API responses
+- **Advanced Pagination:** Database-level pagination with metadata and performance optimization
+- **Validation Helpers:** Date range, sort parameter, and UUID format validation
+- **Security Middleware:** Enhanced `withAuth` middleware with role-based access control
+- **Multi-tenant Security:** Automatic clinic-based data isolation and context validation
 
 ### Service Layer Architecture
 - **Base Service Pattern:** Standardized service classes with validation
@@ -272,10 +336,41 @@ Required environment variables:
 - **Financial Services:** Location financial data management and import pipeline
 
 ### Performance Enhancements
-- **Database-level Pagination:** Efficient handling of large datasets
-- **Parallel Query Execution:** Count and data queries executed in parallel
-- **Multi-location Aggregation:** Provider performance across multiple locations
-- **Comprehensive Metrics:** Production tracking, goal achievement, and variance analysis
+- **Database-level Pagination:** Efficient handling of large datasets with metadata calculation
+- **Parallel Query Execution:** Count and data queries executed in parallel for optimal performance
+- **Multi-location Aggregation:** Provider performance across multiple locations with real-time metrics
+- **Comprehensive Analytics:** Production tracking, goal achievement, variance analysis, and KPI dashboards
+- **Query Optimization:** Advanced database indexing and query performance monitoring
+
+## Advanced Features and Infrastructure
+
+### Row Level Security (RLS) Implementation
+- **Automated RLS Setup:** Scripts for applying and validating RLS policies across all tables
+- **Context-aware Security:** PostgreSQL function `get_current_clinic_id()` for dynamic security context
+- **Multi-tenant Isolation:** Transaction-based context switching with automatic tenant data filtering
+- **RLS Testing Framework:** Comprehensive test suite for validating multi-tenant security policies
+- **Policy Management:** Debug and validation tools for RLS configuration management
+
+### Test Infrastructure Modernization (AOJ-59)
+- **Hybrid Testing Framework:** Combined Vitest (unit/integration) and Playwright (E2E) architecture
+- **MCP Integration:** Model Context Protocol for AI-powered test generation and validation
+- **Advanced Test Organization:** Categorized test suites with performance, security, and integration focus
+- **Cross-browser Validation:** Automated testing across Chrome, mobile devices, and responsive layouts
+- **Test Data Factories:** Sophisticated test data generation with multi-tenant isolation support
+- **Global Test Management:** Automated database reset, seeding, and cleanup for isolated test execution
+
+### Shared Coordination System
+- **Inter-process Communication:** Task coordination and handoff management for development workflows
+- **Wave-based Development:** Structured development phases with automated handoff signals
+- **MCP Status Tracking:** Model Context Protocol integration status and coordination
+- **Artifact Management:** Centralized documentation and implementation artifact tracking
+- **Development Workflow:** Enhanced project management with automated task dependencies
+
+### Enhanced Security Features
+- **Force RLS Scripts:** Automated enforcement of Row Level Security across all database tables
+- **Security Validation:** Comprehensive security policy testing and validation framework
+- **Context Isolation:** Advanced multi-tenant data isolation with transaction-based context management
+- **Audit Trail:** Enhanced logging and security event tracking for compliance and monitoring
 
 ## Code Performance and Best Practices
 
@@ -303,17 +398,3 @@ Required environment variables:
 
 ## Additional Coding Practices
 - Avoid classes that only contain static members
-
-## Linear Information For MCP use: 
-Project name: Dental Dashboard
-Project ID: 31deeedb-112f
-Full Project ID: dental-dashboard-31deeedb112f
-Team: AOJDevStudio
-Team ID: 6b3573d9-0510-4503-b569-b92b37a36105
-
-## Supabase Information For MCP use:
-Organization name: KC Ventures Consulting Group
-Organization slug: hbcnwcsjguowrjnugzye
-Project name: dashboard
-Project ID: yovbdmjwrrgardkgrenc
-Project URL: https://yovbdmjwrrgardkgrenc.supabase.co

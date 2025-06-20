@@ -138,7 +138,6 @@ const TableHead = React.forwardRef<
   <th
     ref={ref}
     className={cn(
-      // biome-ignore lint/nursery/noSecrets: This is a CSS selector string, not a secret
       'h-12 px-3 text-left align-middle font-medium text-muted-foreground [&:has([role=checkbox])]:w-px [&:has([role=checkbox])]:pr-0 [&>[role=checkbox]]:translate-y-0.5',
       className
     )}
@@ -165,7 +164,6 @@ const TableCell = React.forwardRef<
   <td
     ref={ref}
     className={cn(
-      // biome-ignore lint/nursery/noSecrets: This is a CSS selector string, not a secret
       'p-3 align-middle [&:has([role=checkbox])]:pr-0 [&>[role=checkbox]]:translate-y-0.5',
       className
     )}

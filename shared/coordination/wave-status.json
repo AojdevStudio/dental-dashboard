@@ -1,0 +1,17 @@
+{
+  "current_wave": 4,
+  "wave_name": "quality-review",
+  "status": "completed",
+  "started_at": "2025-06-19T13:30:00Z",
+  "completed_at": "2025-06-19T13:45:00Z",
+  "issues_identified": 6,
+  "issues_resolved": 4,
+  "issues_partial": 2,
+  "tests_passing": 97,
+  "tests_failing": 80,
+  "tests_executing": 177,
+  "quality_score": 78,
+  "next_wave": 5,
+  "next_wave_name": "cleanup",
+  "completed_waves": [1, 2, 3, 4]
+}

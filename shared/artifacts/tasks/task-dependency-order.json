@@ -1,0 +1,92 @@
+{
+  "execution_order": [
+    {
+      "phase": 1,
+      "tasks": [
+        "test-suite-modernization_playwright-mcp-setup",
+        "test-suite-modernization_e2e-test-utilities",
+        "test-suite-modernization_package-dependencies"
+      ],
+      "description": "Foundation tasks - Set up Playwright MCP infrastructure with no dependencies"
+    },
+    {
+      "phase": 2,
+      "tasks": [
+        "test-suite-modernization_test-categorization-audit",
+        "test-suite-modernization_test-database-setup"
+      ],
+      "description": "Analysis and preparation - Audit failing tests and set up test database"
+    },
+    {
+      "phase": 3,
+      "tasks": ["test-suite-modernization_migrate-server-component-tests"],
+      "description": "Core migration - Move Server Component tests to Playwright MCP"
+    },
+    {
+      "phase": 4,
+      "tasks": [
+        "test-suite-modernization_vitest-config-update",
+        "test-suite-modernization_rls-security-validation"
+      ],
+      "description": "Configuration updates and security validation"
+    },
+    {
+      "phase": 5,
+      "tasks": [
+        "test-suite-modernization_ci-cd-pipeline-update",
+        "test-suite-modernization_performance-optimization"
+      ],
+      "description": "CI/CD integration and performance tuning"
+    },
+    {
+      "phase": 6,
+      "tasks": [
+        "test-suite-modernization_documentation-update",
+        "test-suite-modernization_final-validation"
+      ],
+      "description": "Documentation and final validation before deployment"
+    }
+  ],
+  "critical_path": [
+    "test-suite-modernization_playwright-mcp-setup",
+    "test-suite-modernization_e2e-test-utilities",
+    "test-suite-modernization_test-categorization-audit",
+    "test-suite-modernization_migrate-server-component-tests",
+    "test-suite-modernization_vitest-config-update",
+    "test-suite-modernization_ci-cd-pipeline-update",
+    "test-suite-modernization_final-validation"
+  ],
+  "parallel_opportunities": [
+    [
+      "test-suite-modernization_playwright-mcp-setup",
+      "test-suite-modernization_package-dependencies"
+    ],
+    [
+      "test-suite-modernization_test-categorization-audit",
+      "test-suite-modernization_test-database-setup"
+    ],
+    [
+      "test-suite-modernization_vitest-config-update",
+      "test-suite-modernization_rls-security-validation"
+    ],
+    [
+      "test-suite-modernization_documentation-update",
+      "test-suite-modernization_performance-optimization"
+    ]
+  ],
+  "risk_assessment": {
+    "high_risk_tasks": [
+      "test-suite-modernization_vitest-config-update",
+      "test-suite-modernization_ci-cd-pipeline-update"
+    ],
+    "medium_risk_tasks": [
+      "test-suite-modernization_migrate-server-component-tests",
+      "test-suite-modernization_test-database-setup"
+    ],
+    "low_risk_tasks": [
+      "test-suite-modernization_playwright-mcp-setup",
+      "test-suite-modernization_e2e-test-utilities",
+      "test-suite-modernization_documentation-update"
+    ]
+  }
+}

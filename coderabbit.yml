@@ -39,9 +39,12 @@ reviews:
     - "supabase/functions/**/*.ts"
     - "supabase/migrations/**/*.sql"
 
-    # Exclude everything else explicitly
+    # Exclude documentation files completely
     - "!**/*.md"
     - "!**/*.mdc"
+    - "!docs/**"
+    - "!shared/reports/**"
+    - "!shared/artifacts/**"
     - "!**/*.xml"
     - "!**/*.yml"
     - "!**/*.yaml"
@@ -74,13 +77,17 @@ reviews:
     - "!coverage/**"
     - "!.turbo/**"
 
-    # Exclude test files (focus on production code)
-    - "!**/*.test.ts"
-    - "!**/*.test.tsx"
-    - "!**/*.spec.ts"
-    - "!**/*.spec.tsx"
-    - "!**/__tests__/**"
-    - "!**/tests/**"
+    # Include test files for comprehensive review
+    - "**/*.test.ts"
+    - "**/*.test.tsx"
+    - "**/*.spec.ts"
+    - "**/*.spec.tsx"
+    - "**/__tests__/**/*.ts"
+    - "**/__tests__/**/*.tsx"
+    - "tests/**/*.ts"
+    - "tests/**/*.tsx"
+    - "tests/**/*.spec.ts"
+    - "playwright.config.ts"
 
     # Exclude documentation and config directories
     - "!docs/**"
@@ -262,6 +269,85 @@ reviews:
         - Check for proper credential managemen
         - Validate automation workflow patterns
         - Ensure proper retry logic and fault tolerance
+
+    - path: "**/*.{test,spec}.{ts,tsx}"
+      instructions: |
+        Review test files for comprehensive testing patterns and quality:
+
+        **Test Architecture & Organization:**
+        - Verify proper test structure with clear describe/it blocks
+        - Check for appropriate test categorization (unit, integration, E2E)
+        - Ensure proper test isolation and independence
+        - Validate consistent naming conventions and file organization
+        - Review test setup and teardown patterns for cleanliness
+
+        **Test Quality & Coverage:**
+        - Check for comprehensive test scenarios covering happy path, edge cases, and error conditions
+        - Verify proper assertion patterns and meaningful test descriptions
+        - Ensure tests are focused and test one thing at a time
+        - Validate proper mocking and stubbing strategies
+        - Review for flaky test patterns and race conditions
+
+        **Testing Framework Usage:**
+        - For Vitest: Check proper configuration, environment setup, and mock usage
+        - For Playwright: Verify proper page object patterns, wait strategies, and cross-browser considerations
+        - Ensure proper async/await patterns in test code
+        - Validate correct testing utilities and helper usage
+
+        **React Component Testing:**
+        - Check for proper React Testing Library patterns (user-centric queries)
+        - Verify accessibility testing with screen reader compatibility
+        - Ensure proper user interaction simulation (fireEvent vs userEvent)
+        - Validate component state and prop testing strategies
+        - Review for proper error boundary and loading state testing
+
+        **Database & API Testing:**
+        - Verify proper test database setup and isolation
+        - Check for appropriate API mocking and fixture usage
+        - Ensure proper transaction handling in integration tests
+        - Validate multi-tenant data isolation testing patterns
+        - Review for proper authentication and authorization testing
+
+        **Performance & Security Testing:**
+        - Check for performance regression testing patterns
+        - Verify security testing for authentication flows
+        - Ensure proper input validation and sanitization testing
+        - Review for SQL injection and XSS vulnerability testing
+        - Validate proper error handling and security boundary testing
+
+        **MCP Integration Testing:**
+        - Review AI-powered test generation patterns for maintainability
+        - Ensure generated tests are readable and purposeful
+        - Validate proper integration with Context7 and Zen testing frameworks
+        - Check for appropriate test automation and CI/CD integration
+
+    - path: "**/__tests__/**/*.{ts,tsx}"
+      instructions: |
+        Review test directory organization and patterns:
+        - Ensure proper test file organization and naming
+        - Check for shared test utilities and fixtures
+        - Verify proper test environment configuration
+        - Validate test data management and cleanup patterns
+        - Review for proper test categorization and tagging
+
+    - path: "tests/**/*.{ts,tsx,spec.ts}"
+      instructions: |
+        Review E2E and integration test suites:
+        - Verify proper Playwright configuration and browser management
+        - Check for robust page object patterns and element selection
+        - Ensure proper wait strategies and timeout handling
+        - Validate cross-browser compatibility testing
+        - Review for proper test data setup and cleanup
+        - Check for accessibility and performance testing integration
+
+    - path: "playwright.config.ts"
+      instructions: |
+        Review Playwright configuration for E2E testing:
+        - Verify proper browser configuration and parallelization
+        - Check for appropriate timeout and retry settings
+        - Ensure proper test artifact collection (screenshots, videos)
+        - Validate proper environment configuration and base URLs
+        - Review for security considerations in test configuration
 
     - path: "{package.json,tsconfig.json,*.config.*}"
       instructions: |
