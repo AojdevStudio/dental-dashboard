@@ -15,6 +15,14 @@ devLoadAlwaysFiles:
   - docs/architecture/coding-standards.md
   - docs/architecture/tech-stack.md
   - docs/architecture/source-tree.md
+  - docs/bmad-integration/dev-agent-context.md
+  - docs/bmad-integration/agentic-tdd-integration.md  
+  - docs/prd/dental-dashboard-mvp-completion-brownfield-prd.md
+  - docs/architecture/bmad-brownfield-integration-plan.md
+  - .claude/commands/agentic/init-agentic-tdd.md
+  - .claude/commands/agentic/wave1-task-planning.md
+  - .claude/commands/agentic/wave2-test-writing.md
+  - .claude/commands/agentic/wave3-code-writing.md
 devDebugLog: .ai/debug-log.md
 devStoryLocation: docs/stories
 agentCoreDump: .ai/core-dump{n}.md
