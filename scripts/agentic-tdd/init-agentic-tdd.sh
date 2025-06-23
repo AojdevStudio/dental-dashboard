@@ -24,14 +24,14 @@ if ! git rev-parse --git-dir > /dev/null 2>&1; then
     exit 1
 fi
 
-# Step 2: Check if we're on main/master branch
+# Step 2: Check if we're on develop branch
 current_branch=$(git branch --show-current)
-if [[ "$current_branch" != "main" && "$current_branch" != "master" ]]; then
-    echo "⚠️  Warning: Not on main/master branch (currently on: $current_branch)"
+if [[ "$current_branch" != "develop" ]]; then
+    echo "⚠️  Warning: Not on develop branch (currently on: $current_branch)"
     echo "Continue anyway? (y/N)"
     read -r response
     if [[ ! "$response" =~ ^[Yy]$ ]]; then
-        echo "❌ Aborting. Switch to main/master branch first."
+        echo "❌ Aborting. Switch to develop branch first."
         exit 1
     fi
 fi
