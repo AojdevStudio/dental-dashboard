@@ -1,0 +1,16 @@
+{
+  "context7_available": true,
+  "zen_available": true,
+  "wave3_checked_at": "2025-06-26T17:44:48Z",
+  "test_framework": "vitest",
+  "wave3_mcp_commands": {
+    "context7_patterns": "use context7 for vitest implementation patterns",
+    "zen_codereview": "zen!codereview for comprehensive quality analysis",
+    "context7_current": "use context7 for current framework version best practices"
+  },
+  "development_tools": {
+    "lint_available": true,
+    "typecheck_available": true,
+    "test_command": "node scripts/test-runner.js run node scripts/test-runner.js run"
+  }
+}
