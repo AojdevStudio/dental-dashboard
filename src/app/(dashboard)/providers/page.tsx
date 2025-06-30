@@ -1,3 +1,4 @@
+import { ProviderActions } from '@/components/providers/provider-actions';
 import { ProviderFilters } from '@/components/providers/provider-filters';
 import { ProviderGrid } from '@/components/providers/provider-grid';
 import { prisma } from '@/lib/database/prisma';
@@ -158,20 +159,22 @@ export default async function ProvidersPage({
           className="bg-white dark:bg-gray-800 p-6 rounded-lg border border-gray-200 dark:border-gray-700"
         />
 
-        {/* Provider Grid */}
-        <ProviderGrid
-          providers={providersResult.providers}
-          pagination={{
-            page,
-            limit,
-            total: providersResult.total,
-            totalPages: Math.ceil(providersResult.total / Math.max(1, limit)),
-            hasNextPage: page < Math.ceil(providersResult.total / Math.max(1, limit)),
-            hasPreviousPage: page > 1,
-          }}
-          emptyMessage="No providers found"
-          emptyDescription="Try adjusting your search criteria or add a new provider to get started."
-        />
+        {/* Provider Grid with Actions */}
+        <ProviderActions>
+          <ProviderGrid
+            providers={providersResult.providers}
+            pagination={{
+              page,
+              limit,
+              total: providersResult.total,
+              totalPages: Math.ceil(providersResult.total / Math.max(1, limit)),
+              hasNextPage: page < Math.ceil(providersResult.total / Math.max(1, limit)),
+              hasPreviousPage: page > 1,
+            }}
+            emptyMessage="No providers found"
+            emptyDescription="Try adjusting your search criteria or add a new provider to get started."
+          />
+        </ProviderActions>
       </div>
     </div>
   );

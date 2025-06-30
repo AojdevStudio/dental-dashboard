@@ -1,6 +1,6 @@
 // Conditional imports for server-side only
-const fs = typeof window === 'undefined' ? require('fs') : null;
-const path = typeof window === 'undefined' ? require('path') : null;
+const fs = typeof window === 'undefined' ? require('node:fs') : null;
+const path = typeof window === 'undefined' ? require('node:path') : null;
 
 /**
  * Environment debugging utility to help identify environment loading issues
@@ -88,25 +88,13 @@ export function logEnvDebugInfo(): void {
 
   const info = getEnvDebugInfo();
 
-  console.log('🔍 Environment Debug Info:');
-  console.log(`📁 Current Directory: ${info.currentDir}`);
-  console.log(`🌍 Node Environment: ${info.nodeEnv}`);
-  console.log(`📋 Context: ${info.isClient ? 'Client' : 'Server'}`);
-
   if (info.envFilesFound.length > 0) {
-    console.log(`📄 Environment Files Found: ${info.envFilesFound.join(', ')}`);
   } else {
-    console.log('⚠️  No .env files found in current directory');
   }
-
-  console.log('🔧 Environment Variables Status:');
-  for (const [varName, status] of Object.entries(info.envVariablesStatus)) {
-    const statusIcon = status.value ? '✅' : '❌';
-    const truncatedInfo = status.truncated ? ' (truncated)' : '';
-    console.log(`  ${statusIcon} ${varName}: ${status.value || 'MISSING'}${truncatedInfo}`);
+  for (const [_varName, status] of Object.entries(info.envVariablesStatus)) {
+    const _statusIcon = status.value ? '✅' : '❌';
+    const _truncatedInfo = status.truncated ? ' (truncated)' : '';
   }
-
-  console.log('---');
 }
 
 /**
@@ -149,7 +137,7 @@ export function verifyEnvFileAccess(): { canRead: boolean; path?: string; error?
     return { canRead: false, error: 'Cannot read .env files from client-side' };
   }
 
-  if (!fs || !path) {
+  if (!(fs && path)) {
     return { canRead: false, error: 'File system modules not available' };
   }
 
@@ -165,7 +153,7 @@ export function verifyEnvFileAccess(): { canRead: boolean; path?: string; error?
     const hasSupabaseUrl = content.includes('NEXT_PUBLIC_SUPABASE_URL');
     const hasSupabaseKey = content.includes('NEXT_PUBLIC_SUPABASE_ANON_KEY');
 
-    if (!hasSupabaseUrl || !hasSupabaseKey) {
+    if (!(hasSupabaseUrl && hasSupabaseKey)) {
       return {
         canRead: true,
         path: envPath,

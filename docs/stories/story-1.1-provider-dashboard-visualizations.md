@@ -16,11 +16,11 @@
 ## Acceptance Criteria (ACs)
 
 ### AC1: Provider Detail Page Navigation
-- [ ] Provider "View" buttons navigate to functional detail pages without 404 errors
-- [ ] URL pattern `/dashboard/providers/[providerId]` resolves correctly
-- [ ] Support for both UUID and slug-based provider identification
-- [ ] Proper error boundaries and 404 handling for invalid provider IDs
-- [ ] Breadcrumb navigation integration with back button functionality
+- [x] Provider "View" buttons navigate to functional detail pages without 404 errors
+- [x] URL pattern `/dashboard/providers/[providerId]` resolves correctly
+- [x] Support for both UUID and slug-based provider identification
+- [x] Proper error boundaries and 404 handling for invalid provider IDs
+- [x] Breadcrumb navigation integration with back button functionality
 
 ### AC2: KPI Metrics Dashboard
 - [ ] Financial KPIs display: production totals, collection rates, overhead percentages
