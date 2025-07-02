@@ -1,0 +1,100 @@
+{
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "^(Write|Edit|MultiEdit|Task)$",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node /Users/ossieirondi/Projects/kamdental/dental-dashboard/.claude/hooks/pre-write-validator.cjs"
+          }
+        ]
+      },
+      {
+        "matcher": "^mcp__.*__(write_file|edit_file|create_file)$",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node /Users/ossieirondi/Projects/kamdental/dental-dashboard/.claude/hooks/pre-write-validator.cjs"
+          }
+        ]
+      },
+      {
+        "matcher": "^Bash$",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node /Users/ossieirondi/Projects/kamdental/dental-dashboard/.claude/hooks/commit-message-validator.cjs"
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "^(Write|Edit|MultiEdit|Task)$",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node /Users/ossieirondi/Projects/kamdental/dental-dashboard/.claude/hooks/import-organizer.cjs"
+          },
+          {
+            "type": "command",
+            "command": "node /Users/ossieirondi/Projects/kamdental/dental-dashboard/.claude/hooks/api-standards-checker.cjs"
+          },
+          {
+            "type": "command",
+            "command": "node /Users/ossieirondi/Projects/kamdental/dental-dashboard/.claude/hooks/code-quality-reporter.cjs"
+          }
+        ]
+      },
+      {
+        "matcher": "^mcp__.*__(write_file|edit_file|create_file|read_file)$",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node /Users/ossieirondi/Projects/kamdental/dental-dashboard/.claude/hooks/import-organizer.cjs"
+          },
+          {
+            "type": "command",
+            "command": "node /Users/ossieirondi/Projects/kamdental/dental-dashboard/.claude/hooks/api-standards-checker.cjs"
+          },
+          {
+            "type": "command",
+            "command": "node /Users/ossieirondi/Projects/kamdental/dental-dashboard/.claude/hooks/code-quality-reporter.cjs"
+          }
+        ]
+      },
+      {
+        "matcher": "^Read$",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node /Users/ossieirondi/Projects/kamdental/dental-dashboard/.claude/hooks/code-quality-reporter.cjs"
+          }
+        ]
+      }
+    ],
+    "Notification": [
+      {
+        "matcher": ".*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node /Users/ossieirondi/Projects/kamdental/dental-dashboard/.claude/hooks/notification-handler.cjs"
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "matcher": ".*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node /Users/ossieirondi/Projects/kamdental/dental-dashboard/.claude/hooks/code-quality-reporter.cjs"
+          }
+        ]
+      }
+    ]
+  }
+}
