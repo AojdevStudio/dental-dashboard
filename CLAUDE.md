@@ -310,6 +310,33 @@ Required environment variables:
 - **Performance:** Database-level pagination is implemented for efficient large dataset handling
 - **Provider Management:** Comprehensive provider-location relationship management is available
 
+## Critical Development Issues
+
+### ⚠️ Database Reseeding Breaks Google Apps Script Sync
+**CRITICAL:** Database reseeding generates new clinic IDs, breaking Google Apps Script sync with 500 errors.
+
+**Symptoms:**
+- Google Apps Script sync returns 500 errors
+- Error: "JSON object requested, multiple (or no) rows returned" (PGRST116)
+- No data syncs despite correct payload structure
+
+**Root Cause:** Google Apps Script properties contain old clinic IDs after database reseed.
+
+**Immediate Fix:**
+1. Get current clinic IDs: `SELECT id, name FROM clinics ORDER BY name;`
+2. Update Google Apps Script properties:
+   - `LOCATION_FINANCIAL_BAYTOWN_CLINIC_ID`
+   - `LOCATION_FINANCIAL_HUMBLE_CLINIC_ID`
+3. Or run Google Apps Script setup wizard again
+
+**Prevention:** Always update Google Apps Script clinic IDs after any database reseed.
+
+**Current Clinic IDs (after latest reseed):**
+- **Baytown**: `cmc3jcrs20001i2ht5sn89v66`
+- **Humble**: `cmc3jcrhe0000i2ht9ymqtmzb`
+
+See `docs/troubleshooting/google-apps-script-sync-issues.md` for complete troubleshooting guide.
+
 ## Development Guidelines
 
 ### Code Writing Guidelines
@@ -387,6 +414,48 @@ Required environment variables:
 ## TypeScript Type Practices
 - Do not use the 'any' type whatsoever. Sometimes you can use the type 'unknown' instead of the type 'any'
 
+## 🛡️ DATABASE SAFETY AND ENVIRONMENT PROTECTION
+
+### CRITICAL: Database Environment Safety
+This project implements strict database safety protocols to prevent test data contamination in production.
+
+#### Environment Isolation Rules
+- **Production Database**: Real KamDental clinic data only (`supabase.co` URLs)
+- **Staging Database**: Production-like testing environment (planned)
+- **Local Test Database**: Development and testing only (`localhost:54322`)
+
+#### REQUIRED Safety Checks Before Database Operations
+1. **Always validate environment** before any database operations
+2. **Use test environment guard** for test data operations:
+   ```typescript
+   import { validateTestEnvironment } from '@/lib/utils/test-environment-guard';
+   validateTestEnvironment(); // Throws if production detected
+   ```
+3. **Check for test data contamination** if suspicious activity:
+   ```bash
+   node scripts/scan-contamination.js
+   ```
+
+#### RLS Testing Safety
+- **NEVER run RLS tests against production database**
+- RLS test helpers automatically block production URLs
+- Test helpers require `localhost:54321` Supabase URL
+- Use `.env.test` file for test database configuration
+
+#### Emergency Procedures
+If test data contamination is detected:
+1. **Stop all operations immediately**
+2. **Run contamination scanner**: `node scripts/scan-contamination.js`
+3. **Review findings and generated cleanup scripts**
+4. **Execute cleanup only after careful review**
+5. **Verify cleanup with post-scan validation**
+
+#### Files with Safety Protections
+- `tests/utils/rls-test-helpers.ts` - Blocks production access
+- `prisma/seed.ts` - Validates against test database seeding
+- `src/lib/utils/test-environment-guard.ts` - Universal safety validation
+- `src/lib/database/client.ts` - Environment-validated database client
+
 ## Code Guidelines
 - Regex literals are required to be declared at the top level
 
@@ -398,3 +467,6 @@ Required environment variables:
 
 ## Additional Coding Practices
 - Avoid classes that only contain static members
+
+## Credential Management
+- Credentials for puppeteer or playwright to log into the app is available in the .env file

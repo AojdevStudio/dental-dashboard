@@ -23,10 +23,30 @@ function sendLocationFinancialDataToAPI(records, locationName, options = {}) {
     // Get location-specific clinic ID
     const clinicId = getClinicIdForLocation(locationName);
     
-    // Prepare API payload
+    // Get spreadsheet metadata for data source creation
+    const spreadsheet = SpreadsheetApp.getActiveSpreadsheet();
+    const spreadsheetId = spreadsheet.getId();
+    const spreadsheetName = spreadsheet.getName();
+    
+    // Get the current sheet name (use location name as fallback)
+    let sheetName = locationName + ' Financial Data';
+    try {
+      const activeSheet = SpreadsheetApp.getActiveSheet();
+      if (activeSheet && detectLocationFromSheetName(activeSheet.getName()) === locationName) {
+        sheetName = activeSheet.getName();
+      }
+    } catch (error) {
+      // Use fallback sheetName
+      logLocationFinancialOperation('API_METADATA', `Using fallback sheet name: ${sheetName}`, { error: error.message });
+    }
+    
+    // Prepare API payload with complete metadata
     const payload = {
       clinicId: clinicId,
       dataSourceId: credentials.dataSourceId || 'google-sheets-location-financial-sync',
+      spreadsheetId: spreadsheetId,
+      spreadsheetName: spreadsheetName,
+      sheetName: sheetName,
       records: records,
       upsert: options.upsert !== false, // Default to true
       dryRun: options.dryRun === true    // Default to false
@@ -36,6 +56,10 @@ function sendLocationFinancialDataToAPI(records, locationName, options = {}) {
       recordCount: records.length,
       locationName: locationName,
       clinicId: clinicId,
+      spreadsheetId: payload.spreadsheetId,
+      spreadsheetName: payload.spreadsheetName,
+      sheetName: payload.sheetName,
+      dataSourceId: payload.dataSourceId,
       dryRun: payload.dryRun,
       upsert: payload.upsert
     });
@@ -279,10 +303,18 @@ function testLocationFinancialApiConnection() {
       try {
         const clinicId = getClinicIdForLocation(location);
         
+        // Get spreadsheet metadata for test
+        const spreadsheet = SpreadsheetApp.getActiveSpreadsheet();
+        const spreadsheetId = spreadsheet.getId();
+        const spreadsheetName = spreadsheet.getName();
+        
         // Send a dry-run request with minimal test data
         const testPayload = {
           clinicId: clinicId,
           dataSourceId: 'test-connection',
+          spreadsheetId: spreadsheetId,
+          spreadsheetName: spreadsheetName,
+          sheetName: location + ' Test Sheet',
           records: [{
             date: formatLocationFinancialDate(new Date()),
             locationName: location,

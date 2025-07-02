@@ -1,3 +1,4 @@
+import ProviderKPIDashboard from '@/components/dashboard/provider-kpi-dashboard';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -350,54 +351,15 @@ export default async function ProviderDetailPage({
           </Card>
         )}
 
-        {/* Placeholder for KPI Dashboard (AC2) */}
-        <Card>
-          <CardHeader>
-            <CardTitle>KPI Dashboard</CardTitle>
-            <p className="text-sm text-muted-foreground">
-              Comprehensive performance metrics and visualizations coming soon...
-            </p>
-          </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-              {/* Financial KPIs placeholder */}
-              <div className="p-4 border rounded-lg bg-gray-50">
-                <h4 className="font-medium text-sm text-gray-700 mb-2">Financial KPIs</h4>
-                <div className="space-y-2">
-                  <Skeleton className="h-6 w-20" />
-                  <Skeleton className="h-4 w-24" />
-                </div>
-              </div>
-
-              {/* Performance KPIs placeholder */}
-              <div className="p-4 border rounded-lg bg-gray-50">
-                <h4 className="font-medium text-sm text-gray-700 mb-2">Performance KPIs</h4>
-                <div className="space-y-2">
-                  <Skeleton className="h-6 w-20" />
-                  <Skeleton className="h-4 w-24" />
-                </div>
-              </div>
-
-              {/* Patient KPIs placeholder */}
-              <div className="p-4 border rounded-lg bg-gray-50">
-                <h4 className="font-medium text-sm text-gray-700 mb-2">Patient KPIs</h4>
-                <div className="space-y-2">
-                  <Skeleton className="h-6 w-20" />
-                  <Skeleton className="h-4 w-24" />
-                </div>
-              </div>
-
-              {/* Comparative KPIs placeholder */}
-              <div className="p-4 border rounded-lg bg-gray-50">
-                <h4 className="font-medium text-sm text-gray-700 mb-2">Comparative KPIs</h4>
-                <div className="space-y-2">
-                  <Skeleton className="h-6 w-20" />
-                  <Skeleton className="h-4 w-24" />
-                </div>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+        {/* KPI Dashboard (AC2) - Comprehensive provider performance metrics */}
+        <ProviderKPIDashboard
+          providerId={provider.id}
+          initialParams={{
+            period: 'monthly',
+            includeComparisons: true,
+            includeTrends: true,
+          }}
+        />
 
         {/* Placeholder for Chart Visualizations (AC3) */}
         <Card>

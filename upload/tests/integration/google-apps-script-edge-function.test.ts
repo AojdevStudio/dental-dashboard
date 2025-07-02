@@ -1,0 +1,516 @@
+/**
+ * Integration tests for Google Apps Script to Edge Function interaction
+ * Tests the complete sync pipeline from Apps Script payload to database storage
+ */
+
+import { describe, it, expect, beforeAll, afterAll, beforeEach } from 'vitest';
+import { createClient } from '@supabase/supabase-js';
+
+// Test configuration
+const SUPABASE_URL = process.env.SUPABASE_URL!;
+const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY!;
+const EDGE_FUNCTION_URL = `${SUPABASE_URL}/functions/v1/location-financial-import`;
+
+// Test clinic ID (using the Baytown clinic ID from your setup)
+const TEST_CLINIC_ID = 'cmbk373hc0000i2uk8pel5elu';
+
+describe('Google Apps Script to Edge Function Integration', () => {
+  let supabase: ReturnType<typeof createClient>;
+  let testDataSourceId: string;
+
+  beforeAll(async () => {
+    // Initialize Supabase client
+    supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, {
+      auth: { autoRefreshToken: false, persistSession: false }
+    });
+
+    // Generate unique test data source ID
+    testDataSourceId = `gas-test-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+  });
+
+  beforeEach(async () => {
+    // Clean up any existing test data
+    await supabase
+      .from('location_financial')
+      .delete()
+      .like('data_source_id', 'gas-test-%');
+    
+    await supabase
+      .from('data_sources')
+      .delete()
+      .like('id', 'gas-test-%');
+  });
+
+  afterAll(async () => {
+    // Final cleanup
+    await supabase
+      .from('location_financial')
+      .delete()
+      .like('data_source_id', 'gas-test-%');
+    
+    await supabase
+      .from('data_sources')
+      .delete()
+      .like('id', 'gas-test-%');
+  });
+
+  describe('Payload Structure Validation', () => {
+    it('should accept Google Apps Script payload with complete metadata', async () => {
+      const gasPayload = {
+        clinicId: TEST_CLINIC_ID,
+        dataSourceId: testDataSourceId,
+        spreadsheetId: '1234567890abcdef',
+        spreadsheetName: 'KamDental Location Financial Data',
+        sheetName: 'Baytown Financial Data',
+        records: [
+          {
+            date: '2024-01-15',
+            locationName: 'Baytown',
+            production: 1500.00,
+            adjustments: 50.00,
+            writeOffs: 25.00,
+            patientIncome: 750.00,
+            insuranceIncome: 675.00,
+            unearned: 0
+          }
+        ],
+        upsert: true,
+        dryRun: false
+      };
+
+      const response = await fetch(EDGE_FUNCTION_URL, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${SUPABASE_SERVICE_ROLE_KEY}`,
+          'apikey': SUPABASE_SERVICE_ROLE_KEY
+        },
+        body: JSON.stringify(gasPayload)
+      });
+
+      expect(response.status).toBe(200);
+      
+      const result = await response.json();
+      expect(result.success).toBe(true);
+      expect(result.results.created).toBe(1);
+      expect(result.dataSource.id).toBe(testDataSourceId);
+    });
+
+    it('should create data source record with correct metadata', async () => {
+      const gasPayload = {
+        clinicId: TEST_CLINIC_ID,
+        dataSourceId: testDataSourceId,
+        spreadsheetId: '1234567890abcdef',
+        spreadsheetName: 'KamDental Location Financial Data',
+        sheetName: 'Baytown Financial Data',
+        records: [
+          {
+            date: '2024-01-15',
+            locationName: 'Baytown',
+            production: 1500.00,
+            adjustments: 50.00,
+            writeOffs: 25.00,
+            patientIncome: 750.00,
+            insuranceIncome: 675.00,
+            unearned: 0
+          }
+        ],
+        upsert: true,
+        dryRun: false
+      };
+
+      await fetch(EDGE_FUNCTION_URL, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${SUPABASE_SERVICE_ROLE_KEY}`,
+          'apikey': SUPABASE_SERVICE_ROLE_KEY
+        },
+        body: JSON.stringify(gasPayload)
+      });
+
+      // Verify data source was created correctly
+      const { data: dataSource, error } = await supabase
+        .from('data_sources')
+        .select('*')
+        .eq('id', testDataSourceId)
+        .single();
+
+      expect(error).toBeNull();
+      expect(dataSource).toMatchObject({
+        id: testDataSourceId,
+        name: 'KamDental Location Financial Data',
+        spreadsheet_id: '1234567890abcdef',
+        sheet_name: 'Baytown Financial Data',
+        clinic_id: TEST_CLINIC_ID,
+        sync_frequency: 'manual',
+        connection_status: 'active'
+      });
+    });
+
+    it('should handle missing metadata gracefully with fallbacks', async () => {
+      const gasPayloadWithoutMetadata = {
+        clinicId: TEST_CLINIC_ID,
+        dataSourceId: testDataSourceId,
+        // Missing spreadsheetId, spreadsheetName, sheetName
+        records: [
+          {
+            date: '2024-01-15',
+            locationName: 'Baytown',
+            production: 1500.00,
+            adjustments: 50.00,
+            writeOffs: 25.00,
+            patientIncome: 750.00,
+            insuranceIncome: 675.00,
+            unearned: 0
+          }
+        ],
+        upsert: true,
+        dryRun: false
+      };
+
+      const response = await fetch(EDGE_FUNCTION_URL, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${SUPABASE_SERVICE_ROLE_KEY}`,
+          'apikey': SUPABASE_SERVICE_ROLE_KEY
+        },
+        body: JSON.stringify(gasPayloadWithoutMetadata)
+      });
+
+      expect(response.status).toBe(200);
+      
+      const result = await response.json();
+      expect(result.success).toBe(true);
+      expect(result.results.created).toBe(1);
+
+      // Verify fallback metadata was used
+      const { data: dataSource } = await supabase
+        .from('data_sources')
+        .select('*')
+        .eq('id', testDataSourceId)
+        .single();
+
+      expect(dataSource?.name).toContain('Location Financial Data');
+      expect(dataSource?.sheet_name).toBe('Financial Data');
+    });
+  });
+
+  describe('Data Synchronization', () => {
+    it('should sync financial records with data source reference', async () => {
+      const gasPayload = {
+        clinicId: TEST_CLINIC_ID,
+        dataSourceId: testDataSourceId,
+        spreadsheetId: '1234567890abcdef',
+        spreadsheetName: 'KamDental Location Financial Data',
+        sheetName: 'Baytown Financial Data',
+        records: [
+          {
+            date: '2024-01-15',
+            locationName: 'Baytown',
+            production: 1500.00,
+            adjustments: 50.00,
+            writeOffs: 25.00,
+            patientIncome: 750.00,
+            insuranceIncome: 675.00,
+            unearned: 0
+          },
+          {
+            date: '2024-01-16',
+            locationName: 'Baytown',
+            production: 1750.00,
+            adjustments: 75.00,
+            writeOffs: 30.00,
+            patientIncome: 800.00,
+            insuranceIncome: 845.00,
+            unearned: 0
+          }
+        ],
+        upsert: true,
+        dryRun: false
+      };
+
+      const response = await fetch(EDGE_FUNCTION_URL, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${SUPABASE_SERVICE_ROLE_KEY}`,
+          'apikey': SUPABASE_SERVICE_ROLE_KEY
+        },
+        body: JSON.stringify(gasPayload)
+      });
+
+      expect(response.status).toBe(200);
+      
+      const result = await response.json();
+      expect(result.success).toBe(true);
+      expect(result.results.created).toBe(2);
+
+      // Verify financial records were created with correct data source reference
+      const { data: financialRecords, error } = await supabase
+        .from('location_financial')
+        .select('*')
+        .eq('data_source_id', testDataSourceId);
+
+      expect(error).toBeNull();
+      expect(financialRecords).toHaveLength(2);
+      
+      financialRecords?.forEach(record => {
+        expect(record.data_source_id).toBe(testDataSourceId);
+        expect(record.clinic_id).toBe(TEST_CLINIC_ID);
+        expect(['2024-01-15', '2024-01-16']).toContain(record.date);
+      });
+    });
+
+    it('should handle upsert operations correctly', async () => {
+      // First sync
+      const initialPayload = {
+        clinicId: TEST_CLINIC_ID,
+        dataSourceId: testDataSourceId,
+        spreadsheetId: '1234567890abcdef',
+        spreadsheetName: 'KamDental Location Financial Data',
+        sheetName: 'Baytown Financial Data',
+        records: [
+          {
+            date: '2024-01-15',
+            locationName: 'Baytown',
+            production: 1500.00,
+            adjustments: 50.00,
+            writeOffs: 25.00,
+            patientIncome: 750.00,
+            insuranceIncome: 675.00,
+            unearned: 0
+          }
+        ],
+        upsert: true,
+        dryRun: false
+      };
+
+      await fetch(EDGE_FUNCTION_URL, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${SUPABASE_SERVICE_ROLE_KEY}`,
+          'apikey': SUPABASE_SERVICE_ROLE_KEY
+        },
+        body: JSON.stringify(initialPayload)
+      });
+
+      // Second sync with updated data
+      const updatePayload = {
+        ...initialPayload,
+        records: [
+          {
+            date: '2024-01-15',
+            locationName: 'Baytown',
+            production: 1600.00, // Updated value
+            adjustments: 60.00,   // Updated value
+            writeOffs: 25.00,
+            patientIncome: 750.00,
+            insuranceIncome: 675.00,
+            unearned: 0
+          }
+        ]
+      };
+
+      const response = await fetch(EDGE_FUNCTION_URL, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${SUPABASE_SERVICE_ROLE_KEY}`,
+          'apikey': SUPABASE_SERVICE_ROLE_KEY
+        },
+        body: JSON.stringify(updatePayload)
+      });
+
+      const result = await response.json();
+      expect(result.success).toBe(true);
+      expect(result.results.updated).toBe(1);
+      expect(result.results.created).toBe(0);
+
+      // Verify the record was updated, not duplicated
+      const { data: financialRecords } = await supabase
+        .from('location_financial')
+        .select('*')
+        .eq('data_source_id', testDataSourceId)
+        .eq('date', '2024-01-15');
+
+      expect(financialRecords).toHaveLength(1);
+      expect(financialRecords?.[0].production).toBe(1600.00);
+      expect(financialRecords?.[0].adjustments).toBe(60.00);
+    });
+  });
+
+  describe('Batch Processing', () => {
+    it('should handle large batches of records', async () => {
+      // Create 30 records (larger than BATCH_SIZE of 25)
+      const records = Array.from({ length: 30 }, (_, i) => ({
+        date: `2024-01-${String(i + 1).padStart(2, '0')}`,
+        locationName: 'Baytown',
+        production: 1500.00 + (i * 10),
+        adjustments: 50.00,
+        writeOffs: 25.00,
+        patientIncome: 750.00,
+        insuranceIncome: 675.00,
+        unearned: 0
+      }));
+
+      const gasPayload = {
+        clinicId: TEST_CLINIC_ID,
+        dataSourceId: testDataSourceId,
+        spreadsheetId: '1234567890abcdef',
+        spreadsheetName: 'KamDental Location Financial Data',
+        sheetName: 'Baytown Financial Data',
+        records,
+        upsert: true,
+        dryRun: false
+      };
+
+      const response = await fetch(EDGE_FUNCTION_URL, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${SUPABASE_SERVICE_ROLE_KEY}`,
+          'apikey': SUPABASE_SERVICE_ROLE_KEY
+        },
+        body: JSON.stringify(gasPayload)
+      });
+
+      expect(response.status).toBe(200);
+      
+      const result = await response.json();
+      expect(result.success).toBe(true);
+      expect(result.results.created).toBe(30);
+
+      // Verify all records were created
+      const { data: financialRecords } = await supabase
+        .from('location_financial')
+        .select('*')
+        .eq('data_source_id', testDataSourceId);
+
+      expect(financialRecords).toHaveLength(30);
+    });
+  });
+
+  describe('Error Handling', () => {
+    it('should return 400 for missing required fields', async () => {
+      const invalidPayload = {
+        // Missing clinicId
+        dataSourceId: testDataSourceId,
+        records: []
+      };
+
+      const response = await fetch(EDGE_FUNCTION_URL, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${SUPABASE_SERVICE_ROLE_KEY}`,
+          'apikey': SUPABASE_SERVICE_ROLE_KEY
+        },
+        body: JSON.stringify(invalidPayload)
+      });
+
+      expect(response.status).toBe(400);
+      
+      const result = await response.json();
+      expect(result.success).toBe(false);
+      expect(result.error).toContain('clinicId and records array are required');
+    });
+
+    it('should return 404 for invalid clinic ID', async () => {
+      const gasPayload = {
+        clinicId: 'invalid-clinic-id',
+        dataSourceId: testDataSourceId,
+        records: [
+          {
+            date: '2024-01-15',
+            locationName: 'Baytown',
+            production: 1500.00,
+            adjustments: 50.00,
+            writeOffs: 25.00,
+            patientIncome: 750.00,
+            insuranceIncome: 675.00,
+            unearned: 0
+          }
+        ],
+        upsert: true,
+        dryRun: false
+      };
+
+      const response = await fetch(EDGE_FUNCTION_URL, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${SUPABASE_SERVICE_ROLE_KEY}`,
+          'apikey': SUPABASE_SERVICE_ROLE_KEY
+        },
+        body: JSON.stringify(gasPayload)
+      });
+
+      expect(response.status).toBe(404);
+      
+      const result = await response.json();
+      expect(result.success).toBe(false);
+      expect(result.error).toBe('Clinic not found');
+    });
+  });
+
+  describe('Dry Run Mode', () => {
+    it('should validate data without persisting in dry run mode', async () => {
+      const gasPayload = {
+        clinicId: TEST_CLINIC_ID,
+        dataSourceId: testDataSourceId,
+        spreadsheetId: '1234567890abcdef',
+        spreadsheetName: 'KamDental Location Financial Data',
+        sheetName: 'Baytown Financial Data',
+        records: [
+          {
+            date: '2024-01-15',
+            locationName: 'Baytown',
+            production: 1500.00,
+            adjustments: 50.00,
+            writeOffs: 25.00,
+            patientIncome: 750.00,
+            insuranceIncome: 675.00,
+            unearned: 0
+          }
+        ],
+        upsert: true,
+        dryRun: true // Enable dry run
+      };
+
+      const response = await fetch(EDGE_FUNCTION_URL, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${SUPABASE_SERVICE_ROLE_KEY}`,
+          'apikey': SUPABASE_SERVICE_ROLE_KEY
+        },
+        body: JSON.stringify(gasPayload)
+      });
+
+      expect(response.status).toBe(200);
+      
+      const result = await response.json();
+      expect(result.success).toBe(true);
+      expect(result.dryRun).toBe(true);
+      expect(result.validation.validRecords).toBe(1);
+
+      // Verify no data was persisted
+      const { data: financialRecords } = await supabase
+        .from('location_financial')
+        .select('*')
+        .eq('data_source_id', testDataSourceId);
+
+      expect(financialRecords).toHaveLength(0);
+
+      const { data: dataSources } = await supabase
+        .from('data_sources')
+        .select('*')
+        .eq('id', testDataSourceId);
+
+      expect(dataSources).toHaveLength(0);
+    });
+  });
+});

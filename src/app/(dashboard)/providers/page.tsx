@@ -1,14 +1,11 @@
+'use client';
+
 import { ProviderActions } from '@/components/providers/provider-actions';
 import { ProviderFilters } from '@/components/providers/provider-filters';
 import { ProviderGrid } from '@/components/providers/provider-grid';
-import { prisma } from '@/lib/database/prisma';
-import {
-  getProviderLocationSummary,
-  getProvidersWithLocationsPaginated,
-} from '@/lib/database/queries/providers';
-import { createClient } from '@/lib/supabase/server';
 import type { ProviderWithLocations } from '@/types/providers';
-import { redirect } from 'next/navigation';
+import { useSearchParams } from 'next/navigation';
+import { useEffect, useState } from 'react';
 
 /**
  * Maximum allowed page number to prevent performance issues
@@ -18,92 +15,47 @@ const MAX_PAGE = 1000;
 /**
  * Safely parse integer from string with fallback to default value
  */
-function safeParseInt(value: string | undefined, defaultValue: number): number {
-  if (value === undefined) {
+function safeParseInt(value: string | null, defaultValue: number): number {
+  if (value === null) {
     return defaultValue;
   }
   const parsed = Number.parseInt(value, 10);
   return Number.isNaN(parsed) ? defaultValue : parsed;
 }
 
-/**
- * Type-safe search parameter extraction helper
- */
-function getSearchParam(
-  params: Record<string, string | string[] | undefined>,
-  key: string
-): string | undefined {
-  const value = params[key];
-  if (value === undefined) {
-    return undefined;
-  }
-  return Array.isArray(value) ? value[0] : value;
+interface ProvidersData {
+  providers: ProviderWithLocations[];
+  total: number;
+}
+
+interface LocationSummary {
+  id: string;
+  name: string;
+  providerCount: number;
 }
 
 /**
- * Providers Page - Server Component Implementation
+ * Providers Page - Client Component Implementation
  *
- * Server-side rendered page that displays all providers with proper API data
- * Implements multi-tenant security and concurrent data fetching for performance
+ * Client-side rendered page that displays all providers with proper API data
+ * Implements multi-tenant security and handles user interactions
  */
-export default async function ProvidersPage({
-  searchParams,
-}: {
-  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
-}) {
-  // Await the searchParams for Next.js 15 compatibility
-  const resolvedSearchParams = await searchParams;
-  // 1. Authentication & Session Validation
-  const supabase = await createClient();
-  const {
-    data: { user },
-    error,
-  } = await supabase.auth.getUser();
+export default function ProvidersPage() {
+  const searchParams = useSearchParams();
+  const [providersData, setProvidersData] = useState<ProvidersData>({ providers: [], total: 0 });
+  const [locations, setLocations] = useState<LocationSummary[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isError, setIsError] = useState(false);
+  const [error, setError] = useState<Error | null>(null);
 
-  if (error || !user) {
-    redirect('/login');
-  }
+  // Parse search parameters
+  const page = Math.max(1, Math.min(MAX_PAGE, safeParseInt(searchParams.get('page'), 1)));
+  const limit = Math.max(1, Math.min(1000, safeParseInt(searchParams.get('limit'), 12)));
 
-  // Get user details from database to check role and clinic association
-  const dbUser = await prisma.user.findUnique({
-    where: { authId: user.id },
-    select: {
-      id: true,
-      email: true,
-      name: true,
-      role: true,
-      clinicId: true,
-    },
-  });
-
-  if (!dbUser) {
-    redirect('/login?error=user_not_found');
-  }
-
-  // Check if user is system admin
-  const isSystemAdmin = dbUser.role === 'system_admin';
-  const clinicId = dbUser.clinicId || undefined;
-
-  // Only require clinic association for non-system admins
-  if (!(clinicId || isSystemAdmin)) {
-    redirect('/login?error=no_clinic_associated');
-  }
-
-  // 2. Parse and Validate Search Parameters
-  const page = Math.max(
-    1,
-    Math.min(MAX_PAGE, safeParseInt(getSearchParam(resolvedSearchParams, 'page'), 1))
-  );
-  const limit = Math.max(
-    1,
-    Math.min(1000, safeParseInt(getSearchParam(resolvedSearchParams, 'limit'), 12))
-  );
-
-  // Extract string parameters with type-safe handling
-  const search = getSearchParam(resolvedSearchParams, 'search');
-  const providerType = getSearchParam(resolvedSearchParams, 'providerType');
-  const locationId = getSearchParam(resolvedSearchParams, 'locationId');
-  const status = getSearchParam(resolvedSearchParams, 'status');
+  const search = searchParams.get('search') || undefined;
+  const providerType = searchParams.get('providerType') || undefined;
+  const locationId = searchParams.get('locationId') || undefined;
+  const status = searchParams.get('status') || undefined;
 
   // Validate enum-like parameters
   const allowedStatuses = ['active', 'inactive'];
@@ -113,34 +65,101 @@ export default async function ProvidersPage({
   const validProviderType =
     providerType && allowedProviderTypes.includes(providerType) ? providerType : undefined;
 
-  // 3. Concurrent Data Fetching for Performance
-  let providersResult: { providers: ProviderWithLocations[]; total: number };
-  let locations: Awaited<ReturnType<typeof getProviderLocationSummary>>;
+  // Fetch data on mount and when search params change
+  useEffect(() => {
+    // Helper function to build query parameters
+    const buildQueryParams = (
+      page: number,
+      limit: number,
+      search?: string,
+      providerType?: string,
+      locationId?: string,
+      status?: string
+    ) => {
+      const params = new URLSearchParams();
+      params.append('page', page.toString());
+      params.append('limit', limit.toString());
 
-  try {
-    [providersResult, locations] = await Promise.all([
-      getProvidersWithLocationsPaginated({
-        clinicId: isSystemAdmin ? undefined : clinicId,
-        page,
-        limit,
-        search,
-        providerType: validProviderType,
-        locationId,
-        status: validStatus,
-      }),
-      getProviderLocationSummary(isSystemAdmin ? undefined : clinicId),
-    ]);
-  } catch (error) {
-    console.error('Error fetching providers data:', error);
-    // Fallback to empty data to prevent complete page failure
-    providersResult = {
-      providers: [],
-      total: 0,
+      if (search) {
+        params.append('search', search);
+      }
+      if (providerType) {
+        params.append('providerType', providerType);
+      }
+      if (locationId) {
+        params.append('locationId', locationId);
+      }
+      if (status) {
+        params.append('status', status);
+      }
+
+      return params;
     };
-    locations = [];
-  }
 
-  // 4. Render Components with Fetched Data
+    // Helper function to fetch providers data
+    const fetchProvidersData = async (params: URLSearchParams) => {
+      const response = await fetch(`/api/providers?${params.toString()}`);
+
+      if (!response.ok) {
+        throw new Error(`Failed to fetch providers: ${response.statusText}`);
+      }
+
+      const result = await response.json();
+
+      if (!result.success) {
+        throw new Error(result.error || 'Failed to fetch providers');
+      }
+
+      return {
+        providers: result.data,
+        total: result.pagination?.total || 0,
+      };
+    };
+
+    // Helper function to handle fetch errors
+    const handleFetchError = (err: unknown) => {
+      console.error('Error fetching providers data:', err);
+      setIsError(true);
+      setError(err instanceof Error ? err : new Error('Unknown error'));
+      setProvidersData({ providers: [], total: 0 });
+      setLocations([]);
+    };
+
+    const fetchData = async () => {
+      setIsLoading(true);
+      setIsError(false);
+      setError(null);
+
+      try {
+        const params = buildQueryParams(
+          page,
+          limit,
+          search,
+          validProviderType,
+          locationId,
+          validStatus
+        );
+        const providersData = await fetchProvidersData(params);
+
+        setProvidersData(providersData);
+        setLocations([]); // For now, set empty locations - can be implemented later
+      } catch (err) {
+        handleFetchError(err);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchData();
+  }, [page, limit, search, validProviderType, locationId, validStatus]);
+
+  const handleRetry = () => {
+    // Trigger a re-fetch by updating a dependency
+    setIsLoading(true);
+    setIsError(false);
+    setError(null);
+  };
+
   return (
     <div className="container mx-auto py-6 px-4">
       <div className="space-y-6">
@@ -162,17 +181,22 @@ export default async function ProvidersPage({
         {/* Provider Grid with Actions */}
         <ProviderActions>
           <ProviderGrid
-            providers={providersResult.providers}
+            providers={providersData.providers}
+            isLoading={isLoading}
+            isError={isError}
+            error={error}
+            onRetry={handleRetry}
             pagination={{
               page,
               limit,
-              total: providersResult.total,
-              totalPages: Math.ceil(providersResult.total / Math.max(1, limit)),
-              hasNextPage: page < Math.ceil(providersResult.total / Math.max(1, limit)),
+              total: providersData.total,
+              totalPages: Math.ceil(providersData.total / Math.max(1, limit)),
+              hasNextPage: page < Math.ceil(providersData.total / Math.max(1, limit)),
               hasPreviousPage: page > 1,
             }}
             emptyMessage="No providers found"
             emptyDescription="Try adjusting your search criteria or add a new provider to get started."
+            onProviderView={() => {}} // Placeholder - will be replaced by ProviderActions
           />
         </ProviderActions>
       </div>

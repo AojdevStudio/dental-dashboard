@@ -2,7 +2,30 @@ import { PrismaClient } from '@prisma/client';
 
 const prisma = new PrismaClient();
 
+// CRITICAL SAFETY CHECK: Prevent accidental test data seeding in production
+function validateSeedEnvironment() {
+  const dbUrl = process.env.DATABASE_URL;
+  
+  console.log('🔍 Validating seed environment...');
+  console.log('DATABASE_URL:', dbUrl?.substring(0, 50) + '...');
+  
+  // This seed file contains PRODUCTION data for KamDental clinics
+  // It should ONLY run against production or development databases
+  // It should NEVER run against test databases with fake data
+  
+  if (dbUrl?.includes('localhost:54322')) {
+    throw new Error('❌ Production seed file should not run against local test database (localhost:54322)!');
+  }
+  
+  console.log('✅ Seed environment validation passed');
+}
+
 async function main() {
+  // Validate environment before seeding
+  validateSeedEnvironment();
+  
+  console.log('🌱 Starting KamDental production data seeding...');
+  
   // Upsert the two KamDental clinics (idempotent)
   const clinics = await Promise.all([
     prisma.clinic.upsert({
