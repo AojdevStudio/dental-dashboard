@@ -12,6 +12,7 @@ on:
 
 jobs:
   claude-review:
+    timeout-minutes: 30    # Add this line
     # Optional: Filter by PR author
     # if: |
     #   github.event.pull_request.user.login == 'external-contributor' ||
@@ -20,9 +21,9 @@ jobs:
     
     runs-on: ubuntu-latest
     permissions:
-      contents: write
-      pull-requests: write
-      issues: write
+      contents: write          # For creating commits/branches
+      pull-requests: write     # For creating/updating PRs and comments
+      issues: write           # For updating issue comments
       id-token: write
     
     steps:
@@ -50,7 +51,7 @@ jobs:
             - Test coverage
             
             Be constructive and helpful in your feedback.
-          
+
           # Optional: Customize review based on file types
           # direct_prompt: |
           #   Review this PR focusing on:
