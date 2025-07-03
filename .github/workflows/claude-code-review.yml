@@ -13,6 +13,11 @@ on:
 jobs:
   claude-review:
     timeout-minutes: 30    # Add this line
+    if: |
+      (github.event_name == 'issue_comment' && github.event.comment && contains(github.event.comment.body, '@claude')) ||
+      (github.event_name == 'pull_request_review_comment' && github.event.comment && contains(github.event.comment.body, '@claude')) ||
+      (github.event_name == 'pull_request_review' && github.event.review && contains(github.event.review.body, '@claude')) ||
+      (github.event_name == 'issues' && github.event.issue && (contains(github.event.issue.body, '@claude') || contains(github.event.issue.title, '@claude')))
     # Optional: Filter by PR author
     # if: |
     #   github.event.pull_request.user.login == 'external-contributor' ||
@@ -66,11 +71,29 @@ jobs:
           #   'Welcome! Please review this PR from a first-time contributor. Be encouraging and provide detailed explanations for any suggestions.' ||
           #   'Please provide a thorough code review focusing on our coding standards and best practices.' }}
           
-          # Optional: Add specific tools for running tests or linting
-          # allowed_tools: "Bash(npm run test),Bash(npm run lint),Bash(npm run typecheck)"
-          
-          # Optional: Skip review for certain conditions
-          # if: |
-          #   !contains(github.event.pull_request.title, '[skip-review]') &&
-          #   !contains(github.event.pull_request.title, '[WIP]')
+          # Enable specific tools for the Node.js project
+          allowed_tools: "Bash(pnpm install),Bash(pnpm build),Bash(pnpm lint),Bash(pnpm typecheck),Bash(pnpm test),Bash(pnpm biome:check)"
 
+          # Project-specific instructions for Claude
+          custom_instructions: |
+            Follow our coding standards defined in CLAUDE.md
+            Ensure all new code has tests
+            Use TypeScript for new files
+            Run pnpm biome:check after changes
+            Always use absolute imports with @/ prefix
+                    # Optional: Skip review for certain conditions
+                    # if: |
+                    #   !contains(github.event.pull_request.title, '[skip-review]') &&
+                    #   !contains(github.event.pull_request.title, '[WIP]')
+     
+      - name: Handle Claude Review Failure
+        if: failure()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: '❌ Claude Code review failed. Please check the [workflow run](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}) for details.'
+            })
