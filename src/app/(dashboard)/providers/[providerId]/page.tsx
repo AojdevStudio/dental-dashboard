@@ -3,13 +3,13 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Skeleton } from '@/components/ui/skeleton';
 import { prisma } from '@/lib/database/prisma';
 import { createClient } from '@/lib/supabase/server';
 import type { ProviderWithLocations } from '@/types/providers';
 import { ArrowLeft, Calendar, Mail, MapPin, User } from 'lucide-react';
 import Link from 'next/link';
 import { notFound, redirect } from 'next/navigation';
+import ProviderChartsSection from './provider-charts-section';
 
 /**
  * Get provider initials for avatar fallback
@@ -361,29 +361,16 @@ export default async function ProviderDetailPage({
           }}
         />
 
-        {/* Placeholder for Chart Visualizations (AC3) */}
+        {/* Interactive Chart Visualizations (AC3) */}
         <Card>
           <CardHeader>
-            <CardTitle>Performance Charts</CardTitle>
+            <CardTitle>Performance Charts & Analytics</CardTitle>
             <p className="text-sm text-muted-foreground">
-              Interactive charts and visualizations coming soon...
+              Interactive visualizations of production trends, goals, and performance metrics
             </p>
           </CardHeader>
           <CardContent>
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <div className="p-8 border rounded-lg bg-gray-50 flex items-center justify-center">
-                <div className="text-center">
-                  <Skeleton className="h-32 w-full mb-4" />
-                  <p className="text-sm text-gray-600">Production Trends Chart</p>
-                </div>
-              </div>
-              <div className="p-8 border rounded-lg bg-gray-50 flex items-center justify-center">
-                <div className="text-center">
-                  <Skeleton className="h-32 w-full mb-4" />
-                  <p className="text-sm text-gray-600">Goal Achievement Chart</p>
-                </div>
-              </div>
-            </div>
+            <ProviderChartsSection providerId={provider.id} />
           </CardContent>
         </Card>
       </div>
