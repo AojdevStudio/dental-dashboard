@@ -53,8 +53,8 @@ function seedMissingUuids() {
  */
 function seedSheetUuids_(sheet) {
   try {
-    const headers = getSheetHeaders_(sheet);
-    const mapping = mapHeaders_(headers);
+    const headerInfo = getSheetHeaders_(sheet);
+    const mapping = mapHeaders_(headerInfo.headers);
     
     // Skip if no UUID column or no date column
     if (mapping.uuid === -1 || mapping.date === -1) {
@@ -62,19 +62,7 @@ function seedSheetUuids_(sheet) {
     }
     
     const data = sheet.getDataRange().getValues();
-    
-    // Find header row index
-    let headerRowIndex = -1;
-    for (let i = 0; i < Math.min(5, data.length); i++) {
-      if (data[i].some(cell => String(cell).toLowerCase().includes('date'))) {
-        headerRowIndex = i;
-        break;
-      }
-    }
-    
-    if (headerRowIndex === -1) {
-      return 0;
-    }
+    const headerRowIndex = headerInfo.headerRowIndex;
     
     const dataRows = data.slice(headerRowIndex + 1);
     let seededCount = 0;
@@ -130,8 +118,8 @@ function validateSheetStructure() {
       
       validationResults += `📋 ${sheetName}:\n`;
       
-      const headers = getSheetHeaders_(sheet);
-      const mapping = mapHeaders_(headers);
+      const headerInfo = getSheetHeaders_(sheet);
+      const mapping = mapHeaders_(headerInfo.headers);
       
       // Check required columns
       const requiredFields = ['date', 'hoursWorked', 'verifiedProduction'];
@@ -175,7 +163,7 @@ function validateSheetStructure() {
 
 /**
  * Get sync statistics
- * Shows summary of synced data
+ * Shows summary of synced data using server-side aggregation for scalability
  */
 function getSyncStatistics() {
   const credentials = getSupabaseCredentials_();
@@ -185,40 +173,52 @@ function getSyncStatistics() {
   }
   
   try {
-    // Query Supabase for statistics
-    const url = `${credentials.url}/rest/v1/${SUPABASE_TABLE_NAME}?clinic_id=eq.${credentials.clinicId}&select=month_tab,date,verified_production`;
+    const startTime = new Date();
+    Logger.log(`Starting sync statistics query for clinic_id: ${credentials.clinicId}`);
+    
+    // Call PostgreSQL RPC function for server-side aggregation
+    const url = `${credentials.url}/rest/v1/rpc/get_hygiene_stats`;
+    
+    const requestBody = {
+      p_clinic_id: credentials.clinicId
+    };
     
     const response = UrlFetchApp.fetch(url, {
-      method: 'GET',
+      method: 'POST',
       headers: {
         'Authorization': `Bearer ${credentials.key}`,
         'apikey': credentials.key,
         'Content-Type': 'application/json'
-      }
+      },
+      payload: JSON.stringify(requestBody)
     });
+    
+    const queryDuration = new Date() - startTime;
+    Logger.log(`Database query completed in ${queryDuration}ms`);
     
     if (response.getResponseCode() === 200) {
       const data = JSON.parse(response.getContentText());
       
-      // Process statistics
+      if (!Array.isArray(data)) {
+        throw new Error('Invalid response format from RPC function');
+      }
+      
+      // Process aggregated statistics from server
       const monthStats = {};
-      let totalRecords = data.length;
+      let totalRecords = 0;
       let totalProduction = 0;
       
       data.forEach(record => {
         const month = record.month_tab;
-        const production = parseFloat(record.verified_production) || 0;
+        const count = parseInt(record.record_count) || 0;
+        const production = parseFloat(record.total_production) || 0;
         
-        if (!monthStats[month]) {
-          monthStats[month] = { count: 0, production: 0 };
-        }
-        
-        monthStats[month].count++;
-        monthStats[month].production += production;
+        monthStats[month] = { count: count, production: production };
+        totalRecords += count;
         totalProduction += production;
       });
       
-      // Build results
+      // Build results in same format as original
       let stats = '📊 Sync Statistics:\n\n';
       stats += `Total Records: ${totalRecords}\n`;
       stats += `Total Production: $${totalProduction.toLocaleString()}\n\n`;
@@ -230,14 +230,52 @@ function getSyncStatistics() {
           stats += `  ${month}: ${data.count} records, $${data.production.toLocaleString()}\n`;
         });
       
+      stats += `\n⚡ Query executed in ${queryDuration}ms`;
+      
       SpreadsheetApp.getUi().alert(stats);
       
+      // Log successful operation
+      logToHygieneSheet_(
+        'getSyncStatistics', 
+        'SUCCESS', 
+        totalRecords, 
+        Object.keys(monthStats).length, 
+        null, 
+        `Retrieved stats for ${Object.keys(monthStats).length} months in ${queryDuration}ms`
+      );
+      
     } else {
-      SpreadsheetApp.getUi().alert(`❌ Failed to fetch statistics: ${response.getResponseCode()}`);
+      const errorMsg = `Failed to fetch statistics: HTTP ${response.getResponseCode()}`;
+      Logger.log(`RPC call failed: ${errorMsg}`);
+      Logger.log(`Response: ${response.getContentText()}`);
+      
+      SpreadsheetApp.getUi().alert(`❌ ${errorMsg}`);
+      
+      logToHygieneSheet_(
+        'getSyncStatistics', 
+        'ERROR', 
+        0, 
+        0, 
+        null, 
+        `RPC call failed: ${errorMsg}`
+      );
     }
     
   } catch (error) {
-    SpreadsheetApp.getUi().alert(`❌ Error getting statistics: ${error.message}`);
+    const errorMsg = `Error getting statistics: ${error.message}`;
+    Logger.log(`getSyncStatistics error: ${errorMsg}`);
+    Logger.log(`Stack trace: ${error.stack}`);
+    
+    SpreadsheetApp.getUi().alert(`❌ ${errorMsg}`);
+    
+    logToHygieneSheet_(
+      'getSyncStatistics', 
+      'ERROR', 
+      0, 
+      0, 
+      null, 
+      errorMsg
+    );
   }
 }
 

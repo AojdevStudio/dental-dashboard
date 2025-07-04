@@ -1,9 +1,18 @@
 /**
  * Trigger function for onEdit events
- * Automatically syncs data when the spreadsheet is edited
+ * Automatically syncs only the edited row when the spreadsheet is edited
  */
 function onEditHygieneSync(e) {
+  // Acquire script lock to prevent concurrent edits from causing conflicts
+  const lock = LockService.getScriptLock();
+  
   try {
+    // Try to acquire lock for 5 seconds
+    if (!lock.tryLock(5000)) {
+      Logger.log('onEditHygieneSync: Could not acquire lock, another sync operation is running');
+      return;
+    }
+
     // Only process if this is the hygiene sheet
     if (!e || !e.source || e.source.getId() !== HYGIENE_SHEET_ID) {
       return;
@@ -22,28 +31,47 @@ function onEditHygieneSync(e) {
     const range = e.range;
     const editedRow = range.getRow();
 
-    // Skip header rows (first 3 rows typically)
-    if (editedRow <= 3) {
+    // Find the header row by looking for 'date' in first 5 rows
+    const data = sheet.getDataRange().getValues();
+    let headerRowIndex = -1;
+    for (let i = 0; i < Math.min(5, data.length); i++) {
+      if (data[i].some(cell => String(cell).toLowerCase().includes('date'))) {
+        headerRowIndex = i + 1; // Convert to 1-based row number
+        break;
+      }
+    }
+
+    // Skip if edit is in or before header row
+    if (headerRowIndex === -1 || editedRow <= headerRowIndex) {
+      Logger.log(`onEditHygieneSync: Skipping row ${editedRow} - header row is ${headerRowIndex}`);
       return;
     }
 
-    Logger.log(`Sheet edited: ${sheetName}, row: ${editedRow}, syncing...`);
-    logToHygieneSheet_('onEditHygieneSync', 'START', null, null, null, `Edit detected in ${sheetName} row ${editedRow}`);
-
-    // Add a small delay to allow for multiple rapid edits
-    Utilities.sleep(2000);
+    Logger.log(`onEditHygieneSync: Processing single row ${editedRow} in sheet ${sheetName}`);
+    logToHygieneSheet_('onEditHygieneSync', 'START', null, null, null, `Single row sync for ${sheetName} row ${editedRow}`);
 
     try {
-      // Sync the entire sheet (simpler and more reliable than single row)
-      const rowsProcessed = syncSheetData_(sheet, sheetName);
-      logToHygieneSheet_('onEditHygieneSync', 'SUCCESS', rowsProcessed, 1, null, `Auto-sync completed for ${sheetName}`);
+      // Sync only the specific edited row
+      const syncResult = syncSingleRow_(sheet, editedRow, sheetName);
+      
+      if (syncResult.success) {
+        logToHygieneSheet_('onEditHygieneSync', 'SUCCESS', 1, 1, null, `Single row ${editedRow} synced successfully in ${sheetName}`);
+        Logger.log(`onEditHygieneSync: Successfully synced row ${editedRow} in ${sheetName}`);
+      } else {
+        logToHygieneSheet_('onEditHygieneSync', 'ERROR', 0, 0, null, `Single row ${editedRow} sync failed in ${sheetName}: ${syncResult.error}`);
+        Logger.log(`onEditHygieneSync: Failed to sync row ${editedRow} in ${sheetName}: ${syncResult.error}`);
+      }
     } catch (syncError) {
-      logToHygieneSheet_('onEditHygieneSync', 'ERROR', 0, 0, null, `Auto-sync failed: ${syncError.message}`);
+      logToHygieneSheet_('onEditHygieneSync', 'ERROR', 0, 0, null, `Single row sync failed for row ${editedRow}: ${syncError.message}`);
+      Logger.log(`onEditHygieneSync: Sync error for row ${editedRow}: ${syncError.message}`);
     }
 
   } catch (error) {
     Logger.log(`Error in onEditHygieneSync trigger: ${error.message}`);
     logToHygieneSheet_('onEditHygieneSync', 'ERROR', 0, 0, null, `Trigger error: ${error.message}`);
+  } finally {
+    // Always release the lock
+    lock.releaseLock();
   }
 }
 

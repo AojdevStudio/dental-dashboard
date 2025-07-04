@@ -611,6 +611,12 @@ model DentistProduction {
   productionPerHour       Decimal? @map("production_per_hour") @db.Decimal(8, 2)
   avgDailyProduction      Decimal? @map("avg_daily_production") @db.Decimal(10, 2)
   providerName            String?  @map("provider_name") // e.g., "Dr. Obi" - kept for legacy data
+  
+  // Enhanced provider detection fields (for Google Apps Script sync)
+  providerCode            String?  @map("provider_code") // e.g., "chinyere_enih"
+  providerConfidence      String?  @map("provider_confidence") // none, low, medium, high
+  detectionMethod         String?  @map("detection_method") // multi-provider, legacy, none, error
+  
   createdAt               DateTime @default(now()) @map("created_at")
   updatedAt               DateTime @updatedAt @map("updated_at")
   

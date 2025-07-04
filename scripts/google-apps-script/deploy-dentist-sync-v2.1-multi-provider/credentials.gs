@@ -11,17 +11,20 @@
  */
 
 /**
- * Get resilient Supabase credentials with automatically detected provider
+ * Get resilient Supabase credentials with automatically detected provider and multi-clinic support
  * This function replaces the old hard-coded provider system
  * 
+ * @param {Object} options - Configuration options
+ * @param {string} options.clinicPreference - Preferred clinic for multi-clinic providers
+ * @param {boolean} options.includeAllClinics - Include credentials for all provider clinics
  * @return {object|null} Complete credentials with resolved IDs or null if failed
  */
-function getSupabaseCredentials_() {
+function getSupabaseCredentials_(options = {}) {
   const functionName = 'getSupabaseCredentials_';
   
   try {
     // Use multi-provider detection to get credentials for current provider
-    const credentials = getMultiProviderSyncCredentials(DENTIST_SHEET_ID);
+    const credentials = getMultiProviderSyncCredentials(getDentistSheetId(), options);
     
     if (!credentials) {
       Logger.log(`${functionName}: Failed to get multi-provider sync credentials`);
@@ -33,7 +36,8 @@ function getSupabaseCredentials_() {
         '• Missing Supabase URL/Key in Script Properties\n' +
         '• Database connection issues\n' +
         '• Missing external mapping data for provider\n' +
-        '• Provider not found in database\n\n' +
+        '• Provider not found in database\n' +
+        '• Clinic access issues for multi-clinic providers\n\n' +
         'Please run "Setup Credentials" from the Dentist Sync menu.',
         SpreadsheetApp.getUi().ButtonSet.OK
       );
@@ -143,8 +147,15 @@ function setSupabaseCredentials_() {
     return false;
   }
 
-  // Store credentials (only URL and key needed now)
+  // Store credentials in both User and Script properties for resilience
+  const userProperties = PropertiesService.getUserProperties();
   const scriptProperties = PropertiesService.getScriptProperties();
+
+  // Set User Properties (this is the primary location read from)
+  userProperties.setProperty(SUPABASE_URL_PROPERTY_KEY, tempUrl);
+  userProperties.setProperty(SUPABASE_KEY_PROPERTY_KEY, tempKey);
+
+  // Also set Script Properties as a fallback
   scriptProperties.setProperty(SUPABASE_URL_PROPERTY_KEY, tempUrl);
   scriptProperties.setProperty(SUPABASE_KEY_PROPERTY_KEY, tempKey);
 
@@ -364,9 +375,81 @@ function testSupabaseConnection() {
 }
 
 /**
- * Show multi-provider system information and detection status
+ * Get clinic-specific credentials for multi-clinic providers
+ * @param {string} clinicKey - Clinic key ('HUMBLE' or 'BAYTOWN')
+ * @return {Object|null} Clinic-specific credentials or null if failed
  */
-function showSystemInfo() {
+function getClinicSpecificCredentials_(clinicKey) {
+  try {
+    // Get credentials with clinic preference
+    const credentials = getSupabaseCredentials_({ clinicPreference: clinicKey });
+    if (!credentials) {
+      throw new Error('Base credentials not available');
+    }
+    
+    // Validate clinic access
+    const providerInfo = credentials.detectedProvider;
+    if (!providerInfo.primaryClinics.includes(clinicKey)) {
+      throw new Error(`Clinic ${clinicKey} not accessible for provider ${providerInfo.displayName}`);
+    }
+    
+    Logger.log(`Clinic-specific credentials resolved for ${clinicKey}`);
+    return credentials;
+    
+  } catch (error) {
+    Logger.log(`Error getting clinic-specific credentials for ${clinicKey}: ${error.message}`);
+    return null;
+  }
+}
+
+/**
+ * Test multi-clinic credential resolution
+ * @param {string} clinicKey - Clinic to test ('HUMBLE' or 'BAYTOWN')
+ */
+function testMultiClinicCredentials_(clinicKey) {
+  try {
+    const clinicCredentials = getClinicSpecificCredentials_(clinicKey);
+    
+    if (clinicCredentials) {
+      SpreadsheetApp.getUi().alert(
+        `✅ Multi-Clinic Test Successful (${clinicKey})`,
+        `Clinic-specific credentials resolved:\n\n` +
+        `• Clinic: ${clinicKey}\n` +
+        `• Selected Clinic: ${clinicCredentials.selectedClinic}\n` +
+        `• Provider: ${clinicCredentials.detectedProvider.displayName}\n` +
+        `• Multi-Clinic Access: ${clinicCredentials.isMultiClinic}\n` +
+        `• Clinic ID: ${clinicCredentials.clinicId}\n` +
+        `• Provider ID: ${clinicCredentials.providerId}\n\n` +
+        'Multi-clinic provider sync ready!',
+        SpreadsheetApp.getUi().ButtonSet.OK
+      );
+    } else {
+      SpreadsheetApp.getUi().alert(
+        `❌ Multi-Clinic Test Failed (${clinicKey})`,
+        `Could not resolve clinic-specific credentials.\n\n` +
+        'Please check:\n' +
+        '• Provider has access to this clinic\n' +
+        '• Multi-clinic configuration is correct\n' +
+        '• External mappings are properly set up',
+        SpreadsheetApp.getUi().ButtonSet.OK
+      );
+    }
+    
+  } catch (error) {
+    SpreadsheetApp.getUi().alert(
+      `❌ Multi-Clinic Test Error (${clinicKey})`,
+      `Error: ${error.message}`,
+      SpreadsheetApp.getUi().ButtonSet.OK
+    );
+  }
+}
+
+/**
+ * Show comprehensive multi-clinic system information
+ * @param {Object} options - Display options
+ * @param {boolean} options.includeMultiClinic - Include multi-clinic specific information
+ */
+function showSystemInfo(options = {}) {
   const ui = SpreadsheetApp.getUi();
   
   let info = '📊 Multi-Provider Dentist Sync System V2.1 Information\\n\\n';
@@ -376,13 +459,24 @@ function showSystemInfo() {
   
   // Try to detect current provider
   try {
-    const providerConfig = getCurrentProviderConfig();
+    const providerConfig = getCurrentProviderConfig({ includeAllClinics: true });
     if (providerConfig) {
       info += '🧑‍⚕️ Detected Provider:\\n';
       info += `• Name: ${providerConfig.displayName}\\n`;
       info += `• Code: ${providerConfig.providerCode}\\n`;
       info += `• External ID: ${providerConfig.externalId}\\n`;
-      info += `• Primary Clinic: ${providerConfig.primaryClinicConfig.displayName}\\n\\n`;
+      info += `• Selected Clinic: ${providerConfig.selectedClinicConfig.displayName}\\n`;
+      
+      // Multi-clinic information
+      if (options.includeMultiClinic && providerConfig.hasMultiClinicAccess) {
+        info += `• Multi-Clinic Access: ${providerConfig.hasMultiClinicAccess}\\n`;
+        info += `• Available Clinics: ${providerConfig.availableClinics.join(', ')}\\n`;
+        info += `• Preferred Clinic: ${providerConfig.preferredClinic}\\n`;
+      } else if (providerConfig.hasMultiClinicAccess === false) {
+        info += '• Multi-Clinic Access: Single-clinic provider\\n';
+      }
+      
+      info += '\\n';
     } else {
       info += '⚠️ Provider Detection:\\n';
       info += '• Could not detect provider from spreadsheet name\\n';
@@ -403,8 +497,15 @@ function showSystemInfo() {
   info += '• Dynamic ID resolution\\n';
   info += '• External mapping system\\n';
   info += '• Database reseed protection\\n';
-  info += '• Multi-location support\\n\\n';
+  info += '• Multi-location support\\n';
   
+  if (options.includeMultiClinic) {
+    info += '• Multi-clinic provider support\\n';
+    info += '• Cross-clinic access validation\\n';
+    info += '• Clinic preference management\\n';
+  }
+  
+  info += '\\n';
   info += 'For more details, see the configuration files.';
   
   ui.alert('Multi-Provider System Information', info, ui.ButtonSet.OK);
@@ -454,5 +555,76 @@ function checkMultiProviderDependencies() {
       SpreadsheetApp.getUi().ButtonSet.OK
     );
     return false;
+  }
+}
+
+/**
+ * Test database-driven provider discovery vs fallback system
+ */
+function testDatabaseVsFallbackProviders() {
+  const ui = SpreadsheetApp.getUi();
+  
+  try {
+    // Get current provider info
+    const providerInfo = detectCurrentProvider(getDentistSheetId());
+    if (!providerInfo) {
+      ui.alert(
+        '❌ Provider Detection Failed',
+        'Could not detect provider from spreadsheet name.',
+        ui.ButtonSet.OK
+      );
+      return;
+    }
+    
+    // Test database configuration
+    const dbConfig = getCurrentProviderConfig({ forceFallback: false });
+    const fallbackConfig = getCurrentProviderConfig({ forceFallback: true });
+    
+    let message = `🔄 Provider Discovery Test Results\n\n`;
+    message += `Detected Provider: ${providerInfo.displayName}\n`;
+    message += `Provider Code: ${providerInfo.providerCode}\n\n`;
+    
+    message += `DATABASE-DRIVEN CONFIGURATION:\n`;
+    if (dbConfig && dbConfig.source === 'database') {
+      message += `✅ Status: Active\n`;
+      message += `• Provider: ${dbConfig.displayName}\n`;
+      message += `• Primary Clinic: ${dbConfig.primaryClinicConfig?.displayName || 'Not set'}\n`;
+      message += `• Multi-location Support: ${dbConfig.hasMultiClinicAccess ? 'Yes' : 'No'}\n`;
+      message += `• Available Clinics: ${(dbConfig.availableClinics || []).length}\n`;
+    } else {
+      message += `❌ Status: Failed\n`;
+      message += `• Reason: ${dbConfig ? dbConfig.source : 'Not available'}\n`;
+    }
+    
+    message += `\nFALLBACK CONFIGURATION:\n`;
+    if (fallbackConfig && fallbackConfig.source === 'fallback') {
+      message += `✅ Status: Available\n`;
+      message += `• Provider: ${fallbackConfig.displayName}\n`;
+      message += `• Primary Clinic: ${fallbackConfig.primaryClinicConfig?.displayName || 'Not set'}\n`;
+      message += `• Multi-location Support: ${fallbackConfig.hasMultiClinicAccess ? 'Yes' : 'No'}\n`;
+    } else {
+      message += `❌ Status: Not available\n`;
+    }
+    
+    message += `\nRECOMMENDATION:\n`;
+    if (dbConfig && dbConfig.source === 'database') {
+      message += `✅ Database-driven discovery is working correctly.\n`;
+      message += `The system is ready for production use with automatic provider discovery.`;
+    } else if (fallbackConfig) {
+      message += `⚠️ Database lookup failed, using fallback configuration.\n`;
+      message += `Consider adding this provider to the database for enhanced functionality.`;
+    } else {
+      message += `❌ Both database and fallback failed.\n`;
+      message += `Please check system configuration and provider setup.`;
+    }
+    
+    ui.alert('Database vs Fallback Test', message, ui.ButtonSet.OK);
+    
+  } catch (error) {
+    ui.alert(
+      '❌ Test Error',
+      `Provider discovery test failed:\n\n${error.message}`,
+      ui.ButtonSet.OK
+    );
   }
 }

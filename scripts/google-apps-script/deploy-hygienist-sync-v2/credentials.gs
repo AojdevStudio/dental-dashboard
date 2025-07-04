@@ -256,11 +256,11 @@ function testColumnMapping() {
   for (const tabName of testTabs) {
     const sheet = sheets.find(s => s.getName() === tabName);
     if (sheet) {
-      const headers = getSheetHeaders_(sheet);
-      const mapping = mapHeaders_(headers);
+      const headerInfo = getSheetHeaders_(sheet);
+      const mapping = mapHeaders_(headerInfo.headers);
       
       debugInfo += `📊 TAB: ${tabName}\n`;
-      debugInfo += `Headers: ${JSON.stringify(headers)}\n`;
+      debugInfo += `Headers: ${JSON.stringify(headerInfo.headers)}\n`;
       debugInfo += `Mapping: ${JSON.stringify(mapping)}\n`;
       debugInfo += `Missing: ${Object.keys(mapping).filter(key => mapping[key] === -1).join(', ')}\n\n`;
       
@@ -273,7 +273,8 @@ function testColumnMapping() {
         // Get credentials for testing
         const credentials = getSupabaseCredentials_();
         if (credentials) {
-          const parsed = parseHygieneRow_(testRow, mapping, tabName, credentials.clinicId, credentials.providerId, 2);
+          const timezone = SpreadsheetApp.getActiveSpreadsheet().getSpreadsheetTimeZone();
+          const parsed = parseHygieneRow_(testRow, mapping, tabName, credentials.clinicId, credentials.providerId, 2, timezone);
           debugInfo += `Parsed: ${JSON.stringify(parsed, null, 2)}\n\n`;
         } else {
           debugInfo += `Parsed: Cannot test - credentials not available\n\n`;

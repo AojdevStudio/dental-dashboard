@@ -21,15 +21,10 @@ function setupDentistTriggers() {
     logToDentistSheet_(functionName, 'START', null, null, null, 'Setting up dentist sync triggers.');
     Logger.log(`Starting ${functionName}...`);
 
-    // Check if sheet ID is configured
-    if (!DENTIST_SHEET_ID || DENTIST_SHEET_ID === 'YOUR_DENTIST_SHEET_ID_HERE') {
-      const errMsg = '❌ Error: DENTIST_SHEET_ID is not configured in config.gs\n\nPlease edit config.gs and set your Google Sheet ID.';
-      Logger.log(errMsg);
-      ui.alert(errMsg);
-      return;
-    }
+    // Sheet ID is now dynamic - getDentistSheetId() gets the current active spreadsheet
+    // No configuration check needed since it's automatically determined
 
-    const ss = SpreadsheetApp.openById(DENTIST_SHEET_ID);
+    const ss = SpreadsheetApp.openById(getDentistSheetId());
     
     // Check credentials are available
     const credentials = getSupabaseCredentials_();
@@ -197,15 +192,10 @@ function validateDataIntegrity() {
     logToDentistSheet_(functionName, 'START', null, null, null, 'Starting data integrity validation.');
     Logger.log(`Starting ${functionName}...`);
 
-    // Check configuration
-    if (!DENTIST_SHEET_ID || DENTIST_SHEET_ID === 'YOUR_DENTIST_SHEET_ID_HERE') {
-      const errMsg = 'Error: DENTIST_SHEET_ID is not configured in config.gs';
-      ui.alert(`❌ ${errMsg}`);
-      logToDentistSheet_(functionName, 'ERROR', null, null, null, errMsg);
-      return;
-    }
+    // Sheet ID is now dynamic - getDentistSheetId() gets the current active spreadsheet
+    // No configuration check needed since it's automatically determined
 
-    const ss = SpreadsheetApp.openById(DENTIST_SHEET_ID);
+    const ss = SpreadsheetApp.openById(getDentistSheetId());
     const sheets = ss.getSheets();
     
     let validationResults = '🔍 Data Integrity Validation Results:\n\n';
@@ -402,7 +392,7 @@ function exportSyncLogs() {
     logToDentistSheet_(functionName, 'START', null, null, null, 'Starting sync log export.');
     Logger.log(`Starting ${functionName}...`);
 
-    const ss = SpreadsheetApp.openById(DENTIST_SHEET_ID);
+    const ss = SpreadsheetApp.openById(getDentistSheetId());
     const logSheet = ss.getSheetByName(DENTIST_LOG_TAB_NAME);
     
     if (!logSheet) {
@@ -629,7 +619,7 @@ function clearAllLogs_() {
   try {
     Logger.log(`Starting ${functionName}...`);
 
-    const ss = SpreadsheetApp.openById(DENTIST_SHEET_ID);
+    const ss = SpreadsheetApp.openById(getDentistSheetId());
     const logSheet = ss.getSheetByName(DENTIST_LOG_TAB_NAME);
     
     if (!logSheet) {

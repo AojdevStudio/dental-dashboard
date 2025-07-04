@@ -85,8 +85,9 @@ function syncSheetData_(sheet, monthTab) {
 
   try {
     Logger.log(`syncSheetData_: Starting for sheet '${monthTab}'.`);
-    const headers = getSheetHeaders_(sheet);
-    const mapping = mapHeaders_(headers);
+    const timezone = SpreadsheetApp.getActiveSpreadsheet().getSpreadsheetTimeZone();
+    const headerInfo = getSheetHeaders_(sheet);
+    const mapping = mapHeaders_(headerInfo.headers);
     
     if (mapping.date === -1) {
       const message = `No date column found or mapped in sheet '${monthTab}'. Cannot process.`;
@@ -96,20 +97,7 @@ function syncSheetData_(sheet, monthTab) {
     }
 
     const data = sheet.getDataRange().getValues();
-    let headerRowIndex = -1;
-    for (let i = 0; i < Math.min(5, data.length); i++) {
-      if (data[i].some(cell => String(cell).toLowerCase().includes('date'))) {
-        headerRowIndex = i;
-        break;
-      }
-    }
-
-    if (headerRowIndex === -1) {
-      const message = `No header row containing "date" found in sheet '${monthTab}'. Cannot process.`;
-      Logger.log(`syncSheetData_: ${message}`);
-      logToHygieneSheet_('syncSheetData', 'WARNING', 0, 1, null, message);
-      return { success: true, message: message, recordsAttempted: 0, recordsParsed: 0, recordsSynced: 0, recordsFailedOrSkipped: 0 };
-    }
+    const headerRowIndex = headerInfo.headerRowIndex;
 
     const dataRows = data.slice(headerRowIndex + 1);
     recordsAttempted = dataRows.length;
@@ -136,7 +124,7 @@ function syncSheetData_(sheet, monthTab) {
           continue;
         }
 
-        const record = parseHygieneRow_(currentRowInSheet, mapping, monthTab, credentials.clinicId, credentials.providerId, originalRowIndex);
+        const record = parseHygieneRow_(currentRowInSheet, mapping, monthTab, credentials.clinicId, credentials.providerId, originalRowIndex, timezone);
         if (record) {
           recordsToUpsert.push(record);
         } else {
@@ -188,7 +176,8 @@ function syncSingleRow_(sheet, rowNumber, monthTab) {
   const rowData = sheet.getRange(rowNumber, 1, 1, sheet.getLastColumn()).getValues()[0];
 
   // Pass rowNumber - 1 for 0-based rowIndex expected by parseHygieneRow_
-  const parsedRecord = parseHygieneRow_(rowData, headerMapping, monthTab, credentials.clinicId, credentials.providerId, rowNumber - 1);
+  const timezone = SpreadsheetApp.getActiveSpreadsheet().getSpreadsheetTimeZone();
+  const parsedRecord = parseHygieneRow_(rowData, headerMapping, monthTab, credentials.clinicId, credentials.providerId, rowNumber - 1, timezone);
 
   if (!parsedRecord) {
     logToHygieneSheet_('syncSingleRow', 'ERROR', 0, 0, null, `Failed to sync row ${rowNumber} from ${monthTab}`);

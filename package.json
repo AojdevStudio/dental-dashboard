@@ -30,6 +30,7 @@
     "migrate:rollback": "tsx scripts/data-migration/rollback-uuid-migration.ts",
     "sync:post-reseed": "pnpm dlx tsx scripts/post-reseed-sync.ts",
     "sync:test-resilience": "pnpm dlx tsx scripts/test-sync-resilience.ts",
+    "test:gas": "node scripts/test-google-apps-script-suite.cjs",
     "test:integration": "vitest --config vitest.integration.config.ts",
     "biome:check": "biome check .",
     "biome:fix": "biome check --write .",

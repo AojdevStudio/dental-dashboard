@@ -214,7 +214,96 @@ async function main() {
       } catch (_error) {}
     }
   } else {
+    console.log('⚠️ Unable to find clinics - skipping provider creation');
   }
+
+  // Create provider-location relationships
+  console.log('🔗 Creating provider-location relationships...');
+  
+  const locationMappings = [
+    // Kamdi Irondi - works at both locations (primary: Humble)
+    { providerEmail: 'k.irondi@kamdental.com', locationName: 'Humble', isPrimary: true },
+    { providerEmail: 'k.irondi@kamdental.com', locationName: 'Baytown', isPrimary: false },
+    
+    // Chinyere Enih - works at Humble only
+    { providerEmail: 'cc.enihdds@gmail.com', locationName: 'Humble', isPrimary: true },
+    
+    // Obinna Ezeji - works at Baytown only  
+    { providerEmail: 'obinna.ezeji.dds@gmail.com', locationName: 'Baytown', isPrimary: true },
+    
+    // Adriane Fontenot - works at Baytown only
+    { providerEmail: 'adrianesmile@gmail.com', locationName: 'Baytown', isPrimary: true },
+    
+    // Kia Redfearn - works at Humble only (no email, use name match)
+    { providerFirstName: 'Kia', providerLastName: 'Redfearn', locationName: 'Humble', isPrimary: true },
+  ];
+
+  for (const mapping of locationMappings) {
+    try {
+      // Find provider by email or name
+      let provider;
+      if (mapping.providerEmail) {
+        provider = await prisma.provider.findUnique({
+          where: { email: mapping.providerEmail }
+        });
+      } else if (mapping.providerFirstName && mapping.providerLastName) {
+        provider = await prisma.provider.findFirst({
+          where: {
+            firstName: mapping.providerFirstName,
+            lastName: mapping.providerLastName
+          }
+        });
+      }
+
+      if (!provider) {
+        console.log(`⚠️ Provider not found for mapping: ${mapping.providerEmail || `${mapping.providerFirstName} ${mapping.providerLastName}`}`);
+        continue;
+      }
+
+      // Find location by name and clinic
+      const location = await prisma.location.findFirst({
+        where: {
+          name: mapping.locationName,
+          clinic: {
+            name: mapping.locationName === 'Humble' ? 'KamDental Humble' : 'KamDental Baytown'
+          }
+        }
+      });
+
+      if (!location) {
+        console.log(`⚠️ Location not found: ${mapping.locationName}`);
+        continue;
+      }
+
+      // Create or update provider-location relationship
+      await prisma.providerLocation.upsert({
+        where: {
+          providerId_locationId: {
+            providerId: provider.id,
+            locationId: location.id
+          }
+        },
+        update: {
+          isActive: true,
+          isPrimary: mapping.isPrimary,
+          startDate: new Date('2024-01-01'), // Default start date
+        },
+        create: {
+          providerId: provider.id,
+          locationId: location.id,
+          isActive: true,
+          isPrimary: mapping.isPrimary,
+          startDate: new Date('2024-01-01'), // Default start date
+        }
+      });
+
+      console.log(`✅ Created/updated provider-location: ${provider.name} -> ${mapping.locationName} (primary: ${mapping.isPrimary})`);
+    } catch (error) {
+      console.log(`❌ Failed to create provider-location mapping: ${error}`);
+    }
+  }
+
+  console.log('🔗 Provider-location relationships completed');
 
   await prisma.$executeRawUnsafe('GRANT USAGE ON SCHEMA public TO service_role;');
 

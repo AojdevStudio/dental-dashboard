@@ -242,8 +242,8 @@ function validateDataIntegrity() {
       
       if (isMonthTab) {
         try {
-          const headers = getSheetHeaders_(sheet);
-          const mapping = mapHeaders_(headers);
+          const headerInfo = getSheetHeaders_(sheet);
+          const mapping = mapHeaders_(headerInfo.headers);
           
           if (mapping.date === -1) {
             issues.push(`Sheet "${sheetName}" missing date column mapping`);

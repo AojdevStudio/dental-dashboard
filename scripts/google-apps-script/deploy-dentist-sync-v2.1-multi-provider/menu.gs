@@ -23,7 +23,20 @@ function onOpen() {
       .addSeparator()
       .addItem('Show System Info', 'showSystemInfo')
       .addItem('Validate Spreadsheet', 'validateCurrentSpreadsheet')
+      .addItem('Validate Auto-Discovery', 'validateAutoDiscoverySetupMenu')
       .addItem('Migration Guide', 'showMigrationGuide'))
+    
+    .addSubMenu(ui.createMenu('🛡️ Error Handling & Recovery')
+      .addItem('Run Health Check', 'menuRunHealthCheck')
+      .addItem('Run Full Diagnostics', 'menuRunDiagnostics')
+      .addItem('Auto-Troubleshooting', 'menuRunTroubleshooting')
+      .addSeparator()
+      .addItem('Show Error Report', 'menuShowErrorReport')
+      .addItem('Show Cache Report', 'menuShowCacheReport')
+      .addItem('Clear Error History', 'menuClearErrorHistory')
+      .addSeparator()
+      .addItem('Test Provider Detection', 'menuTestProviderDetection')
+      .addItem('Test Database Connection', 'menuTestDatabaseConnection'))
     
     .addSubMenu(ui.createMenu('▶️ Sync Operations')
       .addItem('Sync All Data', 'syncAllDentistData')
@@ -36,9 +49,47 @@ function onOpen() {
       .addItem('Test Provider Detection', 'testProviderDetection')
       .addItem('Test Location Credentials', 'testAllLocationCredentials')
       .addSeparator()
+      .addItem('Test Database Logging', 'testDatabaseLogging')
+      .addItem('Test Provider Logging', 'testProviderLogging')
+      .addItem('Test Performance Logging', 'testPerformanceLogging')
+      .addSeparator()
+      .addItem('View Detailed Logs', 'viewDetailedLogs')
+      .addItem('Export Logs for Analysis', 'exportLogsForAnalysis')
+      .addSeparator()
+      .addItem('Test Database Provider Lookup', 'testDatabaseProviderLookup')
+      .addItem('Test Database Connectivity', 'testProviderDatabaseConnectivityMenu')
+      .addItem('Compare DB vs Fallback Config', 'compareProviderConfigurationsMenu')
+      .addItem('Test Database vs Fallback System', 'testDatabaseVsFallbackProviders')
+      .addSeparator()
+      .addSubMenu(ui.createMenu('🔧 Function Dependencies')
+        .addItem('Run All Dependency Tests', 'runAllDependencyTests')
+        .addItem('Run Advanced Dependency Tests', 'runAdvancedDependencyTests')
+        .addSeparator()
+        .addItem('Quick Critical Function Check', 'quickCriticalFunctionCheck')
+        .addItem('Quick Provider Detection Test', 'quickProviderDetectionTest')
+        .addItem('Performance Timing Tests', 'runPerformanceTimingTests')
+        .addSeparator()
+        .addItem('Generate Dependency Report', 'generateDependencyReport')
+        .addItem('Reset Test State', 'resetDependencyTestState')
+        .addSeparator()
+        .addItem('Validate System Integration', 'validateDependencySystemIntegration')
+        .addItem('Quick System Check', 'quickDependencySystemCheck')
+        .addItem('Setup Testing System', 'setupDependencyTestingSystem')
+        .addSeparator()
+        .addItem('Initialize Dependency Testing', 'initializeDependencyTesting'))
+      .addSeparator()
       .addItem('Test Sync Utilities', 'testSyncUtilities')
       .addItem('Debug External Mappings', 'debugExternalMappings')
       .addItem('Debug Provider Patterns', 'debugProviderPatterns'))
+    
+    .addSubMenu(ui.createMenu('🔍 Provider Discovery')
+      .addItem('Discover Providers from Database', 'showDiscoveredProviders')
+      .addItem('Test Auto-Discovery', 'testAutoDiscovery')
+      .addItem('Register New Provider', 'startProviderRegistrationWorkflow')
+      .addSeparator()
+      .addItem('Validate Provider Registration', 'validateCurrentProviderRegistration')
+      .addItem('Update Provider Patterns', 'updateProviderPatternsFromDatabaseMenu')
+      .addItem('Clear Discovery Cache', 'clearAutoDiscoveryCache'))
     
     .addSubMenu(ui.createMenu('🏥 Multi-Location')
       .addItem('Test Humble Location', 'testHumbleLocation')
@@ -127,7 +178,7 @@ function syncCurrentSheetData() {
  */
 function testProviderDetection() {
   try {
-    testMultiProviderDetection(DENTIST_SHEET_ID);
+    testMultiProviderDetection(getDentistSheetId());
   } catch (error) {
     SpreadsheetApp.getUi().alert(
       'Test Error',
@@ -174,7 +225,7 @@ function testBaytownLocation() {
  */
 function detectAndShowColumnMapping() {
   try {
-    const ss = SpreadsheetApp.openById(DENTIST_SHEET_ID);
+    const ss = SpreadsheetApp.openById(getDentistSheetId());
     const sheets = ss.getSheets();
     
     // Find a month tab to analyze
@@ -389,6 +440,175 @@ function showMigrationGuide() {
 }
 
 /**
+ * Start provider registration workflow
+ */
+function startProviderRegistrationWorkflow() {
+  try {
+    const spreadsheetId = SpreadsheetApp.getActiveSpreadsheet().getId();
+    const ss = SpreadsheetApp.openById(spreadsheetId);
+    const spreadsheetName = ss.getName();
+    const spreadsheetUrl = ss.getUrl();
+    
+    const registered = startNewProviderRegistration_(spreadsheetName, spreadsheetUrl);
+    
+    if (!registered) {
+      SpreadsheetApp.getUi().alert(
+        'Registration Cancelled',
+        'Provider registration was cancelled or failed.',
+        SpreadsheetApp.getUi().ButtonSet.OK
+      );
+    }
+  } catch (error) {
+    SpreadsheetApp.getUi().alert(
+      'Registration Error',
+      `Provider registration failed: ${error.message}`,
+      SpreadsheetApp.getUi().ButtonSet.OK
+    );
+  }
+}
+
+/**
+ * Validate current provider registration
+ */
+function validateCurrentProviderRegistration() {
+  try {
+    const spreadsheetId = SpreadsheetApp.getActiveSpreadsheet().getId();
+    const validation = validateProviderRegistration(spreadsheetId);
+    const ui = SpreadsheetApp.getUi();
+    
+    let message = `🔍 Provider Registration Validation\n\n`;
+    message += `Spreadsheet: "${validation.spreadsheetName}"\n\n`;
+    
+    if (validation.staticPatternMatch) {
+      message += `✅ Static Pattern Match:\n`;
+      message += `   Provider: ${validation.staticPatternMatch.displayName}\n`;
+      message += `   Confidence: ${validation.staticPatternMatch.confidence}\n\n`;
+    }
+    
+    if (validation.autoDiscoveryMatch) {
+      message += `🔍 Auto-Discovery Match:\n`;
+      message += `   Provider: ${validation.autoDiscoveryMatch.displayName}\n`;
+      message += `   Confidence: ${validation.autoDiscoveryMatch.confidence.toFixed(2)}\n`;
+      message += `   Source: ${validation.autoDiscoveryMatch.source}\n\n`;
+    }
+    
+    if (validation.autoDiscoveryError) {
+      message += `⚠️ Auto-Discovery Error:\n   ${validation.autoDiscoveryError}\n\n`;
+    }
+    
+    if (validation.registrationRequired) {
+      message += `❌ Registration Required:\n`;
+      message += `   No provider detected for this spreadsheet\n\n`;
+    }
+    
+    if (validation.recommendations.length > 0) {
+      message += `💡 Recommendations:\n`;
+      validation.recommendations.forEach(rec => {
+        message += `   • ${rec}\n`;
+      });
+    }
+    
+    ui.alert('Provider Registration Validation', message, ui.ButtonSet.OK);
+    
+  } catch (error) {
+    SpreadsheetApp.getUi().alert(
+      'Validation Error',
+      `Provider registration validation failed: ${error.message}`,
+      SpreadsheetApp.getUi().ButtonSet.OK
+    );
+  }
+}
+
+/**
+ * Validate auto-discovery setup (menu function)
+ */
+function validateAutoDiscoverySetupMenu() {
+  try {
+    const validation = validateAutoDiscoverySetup();
+    const ui = SpreadsheetApp.getUi();
+    
+    let message = `🔍 Auto-Discovery System Validation\n\n`;
+    
+    if (validation.isValid) {
+      message += `✅ System Status: HEALTHY\n\n`;
+    } else {
+      message += `❌ System Status: ISSUES FOUND\n\n`;
+    }
+    
+    // Show system status
+    message += `📊 System Status:\n`;
+    Object.entries(validation.systemStatus).forEach(([key, value]) => {
+      const label = key.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase());
+      message += `   • ${label}: ${value}\n`;
+    });
+    message += '\n';
+    
+    // Show issues if any
+    if (validation.issues.length > 0) {
+      message += `⚠️ Issues Found:\n`;
+      validation.issues.forEach(issue => {
+        message += `   • ${issue}\n`;
+      });
+      message += '\n';
+    }
+    
+    // Show recommendations if any
+    if (validation.recommendations.length > 0) {
+      message += `💡 Recommendations:\n`;
+      validation.recommendations.forEach(rec => {
+        message += `   • ${rec}\n`;
+      });
+    }
+    
+    ui.alert('Auto-Discovery Validation', message, ui.ButtonSet.OK);
+    
+  } catch (error) {
+    SpreadsheetApp.getUi().alert(
+      'Validation Error',
+      `Auto-discovery validation failed: ${error.message}`,
+      SpreadsheetApp.getUi().ButtonSet.OK
+    );
+  }
+}
+
+/**
+ * Update provider patterns from database (menu function)
+ */
+function updateProviderPatternsFromDatabaseMenu() {
+  const ui = SpreadsheetApp.getUi();
+  
+  const response = ui.alert(
+    'Update Provider Patterns',
+    'This will refresh provider patterns from the database.\n\n' +
+    'New providers in the database will be added to detection patterns.\n\n' +
+    'Continue?',
+    ui.ButtonSet.YES_NO
+  );
+  
+  if (response === ui.Button.YES) {
+    try {
+      const updatedPatterns = updateProviderPatternsFromDatabase();
+      const patternCount = Object.keys(updatedPatterns).length;
+      
+      ui.alert(
+        '✅ Patterns Updated',
+        `Provider patterns have been updated!\n\n` +
+        `Total patterns: ${patternCount}\n` +
+        'Database providers are now included in detection.',
+        ui.ButtonSet.OK
+      );
+      
+    } catch (error) {
+      ui.alert(
+        '❌ Update Failed',
+        `Failed to update provider patterns: ${error.message}`,
+        ui.ButtonSet.OK
+      );
+    }
+  }
+}
+
+/**
  * Show help and documentation for multi-provider system
  */
 function showHelp() {
@@ -421,21 +641,831 @@ function showHelp() {
   help += '• Enhanced provider-location relationship validation\n';
   help += '• Database reseed protection\n\n';
   
+  help += 'NEW: AUTO-DISCOVERY FEATURES:\n';
+  help += '• Database-driven provider discovery\n';
+  help += '• Dynamic pattern generation from provider data\n';
+  help += '• New provider registration workflow\n';
+  help += '• Pattern validation and confidence scoring\n';
+  help += '• Automatic cache management\n\n';
+  
   help += 'TROUBLESHOOTING:\n';
   help += '• Use "Check Dependencies" if sync fails\n';
   help += '• Run "Validate Spreadsheet" for setup issues\n';
   help += '• Use "Test Provider Detection" for name issues\n';
+  help += '• Try "Provider Discovery" menu for advanced detection\n';
   help += '• Check Dentist-Sync-Log tab for detailed error info\n';
   help += '• Use "Debug External Mappings" to verify provider setup\n\n';
   
   help += 'SUPPORT:\n';
-  help += '• Provider detection issues: Use "Test Provider Detection"\n';
+  help += '• Provider detection issues: Use "Provider Discovery" menu\n';
   help += '• Multi-location issues: Use "Multi-Location" menu\n';
-  help += '• System info: Use "Show System Info"\n\n';
+  help += '• System info: Use "Show System Info"\n';
+  help += '• New provider registration: Use "Register New Provider"\n\n';
   
   help += 'Version: ' + MIGRATION_INFO.VERSION + '\n';
-  help += 'Multi-provider mode with automatic provider detection.\n';
+  help += 'Multi-provider mode with automatic database-driven discovery.\n';
   help += 'For technical support, contact your administrator.';
   
   ui.alert('Help & Documentation', help, ui.ButtonSet.OK);
+}
+
+// ===== DATABASE PROVIDER TESTING FUNCTIONS =====
+
+/**
+ * Test database provider lookup functionality
+ */
+function testDatabaseProviderLookup() {
+  const ui = SpreadsheetApp.getUi();
+  
+  try {
+    // Get current provider info
+    const providerInfo = detectCurrentProvider(getDentistSheetId());
+    if (!providerInfo) {
+      ui.alert(
+        '❌ Provider Detection Failed',
+        'Could not detect provider from spreadsheet name.\n\n' +
+        'Please ensure the spreadsheet name contains the provider name.',
+        ui.ButtonSet.OK
+      );
+      return;
+    }
+    
+    // Test database lookup
+    const dbConfig = getProviderFromDatabase(providerInfo.providerCode);
+    
+    if (dbConfig) {
+      const totalClinics = Object.keys(dbConfig.clinicMappings || {}).length;
+      const totalLocations = Object.keys(dbConfig.locationMappings || {}).length;
+      
+      ui.alert(
+        '✅ Database Provider Lookup Successful',
+        `Provider: ${dbConfig.displayName}\n` +
+        `Provider Code: ${dbConfig.providerCode}\n` +
+        `Source: ${dbConfig.source}\n` +
+        `Primary Clinic: ${dbConfig.primaryClinicConfig ? dbConfig.primaryClinicConfig.displayName : 'Not set'}\n` +
+        `Total Clinics: ${totalClinics}\n` +
+        `Total Locations: ${totalLocations}\n` +
+        `Multi-location Support: ${dbConfig.totalLocations > 1 ? 'Yes' : 'No'}\n` +
+        `Active Locations: ${dbConfig.activeLocations || 0}\n\n` +
+        `Database provider discovery is working correctly!`,
+        ui.ButtonSet.OK
+      );
+    } else {
+      ui.alert(
+        '⚠️ Database Lookup Failed',
+        `Could not retrieve provider ${providerInfo.providerCode} from database.\n\n` +
+        'This could indicate:\n' +
+        '• Provider not in database\n' +
+        '• Database connectivity issues\n' +
+        '• Provider code mismatch\n\n' +
+        'The system will use fallback configuration.',
+        ui.ButtonSet.OK
+      );
+    }
+    
+  } catch (error) {
+    ui.alert(
+      '❌ Test Error',
+      `Database provider lookup test failed:\n\n${error.message}\n\n` +
+      'Please check your configuration and try again.',
+      ui.ButtonSet.OK
+    );
+  }
+}
+
+/**
+ * Test database connectivity for provider queries (menu function)
+ */
+function testProviderDatabaseConnectivityMenu() {
+  const ui = SpreadsheetApp.getUi();
+  
+  try {
+    const result = testProviderDatabaseConnectivity();
+    
+    if (result.success) {
+      ui.alert(
+        '✅ Database Connectivity Test Successful',
+        `${result.message}\n\n` +
+        `Providers table: ${result.details.providersTableAccessible ? 'Accessible' : 'Not accessible'}\n` +
+        `Test completed: ${result.details.timestamp}\n\n` +
+        'Database-driven provider discovery is ready to use!',
+        ui.ButtonSet.OK
+      );
+    } else {
+      let alertMessage = `❌ Database Connectivity Test Failed\n\n${result.error}\n\n`;
+      
+      if (result.suggestions && result.suggestions.length > 0) {
+        alertMessage += 'Suggestions:\n';
+        result.suggestions.forEach(suggestion => {
+          alertMessage += `• ${suggestion}\n`;
+        });
+      }
+      
+      ui.alert('Database Connectivity Test', alertMessage, ui.ButtonSet.OK);
+    }
+    
+  } catch (error) {
+    ui.alert(
+      '❌ Test Error',
+      `Connectivity test failed:\n\n${error.message}`,
+      ui.ButtonSet.OK
+    );
+  }
+}
+
+/**
+ * Compare database vs fallback provider configurations
+ */
+function compareProviderConfigurationsMenu() {
+  const ui = SpreadsheetApp.getUi();
+  
+  try {
+    // Get current provider info
+    const providerInfo = detectCurrentProvider(getDentistSheetId());
+    if (!providerInfo) {
+      ui.alert(
+        '❌ Provider Detection Failed',
+        'Could not detect provider from spreadsheet name.',
+        ui.ButtonSet.OK
+      );
+      return;
+    }
+    
+    // Compare configurations
+    const comparison = compareProviderConfigurations(providerInfo.providerCode);
+    
+    let message = `📊 Configuration Comparison for ${comparison.providerCode}\n\n`;
+    
+    message += `DATABASE CONFIGURATION:\n`;
+    message += `• Available: ${comparison.database.available ? 'Yes' : 'No'}\n`;
+    message += `• Source: ${comparison.database.source || 'N/A'}\n`;
+    message += `• Primary Clinic: ${comparison.database.primaryClinic || 'Not set'}\n\n`;
+    
+    message += `FALLBACK CONFIGURATION:\n`;
+    message += `• Available: ${comparison.fallback.available ? 'Yes' : 'No'}\n`;
+    message += `• Source: ${comparison.fallback.source || 'N/A'}\n`;
+    message += `• Primary Clinic: ${comparison.fallback.primaryClinic || 'Not set'}\n\n`;
+    
+    if (comparison.differences && comparison.differences.length > 0) {
+      message += `DIFFERENCES FOUND:\n`;
+      comparison.differences.forEach(diff => {
+        message += `• ${diff}\n`;
+      });
+      message += '\n';
+    } else if (comparison.database.available && comparison.fallback.available) {
+      message += `✅ NO DIFFERENCES - Configurations match\n\n`;
+    }
+    
+    if (comparison.recommendations && comparison.recommendations.length > 0) {
+      message += `RECOMMENDATIONS:\n`;
+      comparison.recommendations.forEach(rec => {
+        message += `• ${rec}\n`;
+      });
+    }
+    
+    ui.alert('Configuration Comparison', message, ui.ButtonSet.OK);
+    
+  } catch (error) {
+    ui.alert(
+      '❌ Comparison Error',
+      `Configuration comparison failed:\n\n${error.message}`,
+      ui.ButtonSet.OK
+    );
+  }
+}
+
+// ===== ERROR HANDLING & DIAGNOSTICS MENU FUNCTIONS =====
+
+/**
+ * Run health check from menu
+ */
+function menuRunHealthCheck() {
+  const ui = SpreadsheetApp.getUi();
+  
+  try {
+    ui.alert(
+      'Running Health Check',
+      'Performing basic system health check...\n\n' +
+      'This will test:\n' +
+      '• Network connectivity\n' +
+      '• Spreadsheet access\n' +
+      '• Basic functionality\n\n' +
+      'Check the console for detailed results.',
+      ui.ButtonSet.OK
+    );
+    
+    // Run health check (simulate async behavior)
+    if (typeof runHealthCheck === 'function') {
+      runHealthCheck().then(results => {
+        const status = results.summary.overallStatus;
+        const statusEmoji = status === 'HEALTHY' ? '✅' : status === 'WARNING' ? '⚠️' : '❌';
+        
+        ui.alert(
+          'Health Check Results',
+          `${statusEmoji} System Status: ${status}\n\n` +
+          `Tests Run: ${results.summary.totalTests}\n` +
+          `Passed: ${results.summary.passed}\n` +
+          `Failed: ${results.summary.failed}\n` +
+          `Warnings: ${results.summary.warnings}\n\n` +
+          `Duration: ${results.duration}ms`,
+          ui.ButtonSet.OK
+        );
+        
+        // Show detailed report in console
+        showDiagnosticReport(results);
+      }).catch(error => {
+        ui.alert('Health Check Error', `Error: ${error.message}`, ui.ButtonSet.OK);
+      });
+    } else {
+      ui.alert('Feature Not Available', 'Health check functionality not loaded.', ui.ButtonSet.OK);
+    }
+    
+  } catch (error) {
+    ui.alert('Error', `Failed to run health check: ${error.message}`, ui.ButtonSet.OK);
+  }
+}
+
+/**
+ * Run full diagnostics from menu
+ */
+function menuRunDiagnostics() {
+  const ui = SpreadsheetApp.getUi();
+  
+  try {
+    const response = ui.alert(
+      'Run Full Diagnostics',
+      'This will run comprehensive system diagnostics including:\n\n' +
+      '• Database connectivity tests\n' +
+      '• Provider detection validation\n' +
+      '• Network connectivity checks\n' +
+      '• Spreadsheet access verification\n\n' +
+      'This may take 30-60 seconds. Continue?',
+      ui.ButtonSet.YES_NO
+    );
+    
+    if (response === ui.Button.YES) {
+      if (typeof runComprehensiveDiagnostics === 'function') {
+        runComprehensiveDiagnostics().then(results => {
+          const status = results.summary.overallStatus;
+          const statusEmoji = status === 'HEALTHY' ? '✅' : status === 'WARNING' ? '⚠️' : '❌';
+          
+          ui.alert(
+            'Comprehensive Diagnostics Complete',
+            `${statusEmoji} Overall Status: ${status}\n\n` +
+            `Tests Completed: ${results.summary.totalTests}\n` +
+            `Passed: ${results.summary.passed}\n` +
+            `Failed: ${results.summary.failed}\n` +
+            `Warnings: ${results.summary.warnings}\n\n` +
+            `Total Duration: ${Math.round(results.duration / 1000)}s\n\n` +
+            'Check the console for detailed analysis.',
+            ui.ButtonSet.OK
+          );
+          
+          // Show detailed report
+          showDiagnosticReport(results);
+        }).catch(error => {
+          ui.alert('Diagnostics Error', `Error: ${error.message}`, ui.ButtonSet.OK);
+        });
+      } else {
+        ui.alert('Feature Not Available', 'Comprehensive diagnostics not loaded.', ui.ButtonSet.OK);
+      }
+    }
+    
+  } catch (error) {
+    ui.alert('Error', `Failed to run diagnostics: ${error.message}`, ui.ButtonSet.OK);
+  }
+}
+
+/**
+ * Run auto-troubleshooting from menu
+ */
+function menuRunTroubleshooting() {
+  const ui = SpreadsheetApp.getUi();
+  
+  try {
+    const response = ui.alert(
+      'Auto-Troubleshooting',
+      'This will automatically detect and fix common issues:\n\n' +
+      '• Identify problem areas\n' +
+      '• Apply automated fixes where possible\n' +
+      '• Provide recommendations for manual fixes\n' +
+      '• Clear problematic cache data\n\n' +
+      'Continue with automated troubleshooting?',
+      ui.ButtonSet.YES_NO
+    );
+    
+    if (response === ui.Button.YES) {
+      if (typeof runAutomatedTroubleshooting === 'function') {
+        runAutomatedTroubleshooting().then(results => {
+          const statusEmoji = results.status === 'HEALTHY' ? '✅' : '⚠️';
+          
+          ui.alert(
+            'Auto-Troubleshooting Complete',
+            `${statusEmoji} Final Status: ${results.status}\n\n` +
+            `Initial Problems: ${results.initialProblems}\n` +
+            `Fixes Applied: ${results.fixesApplied}\n` +
+            `Troubleshooting Steps: ${results.troubleshootingSteps.length}\n\n` +
+            'Check the console for detailed information about fixes applied.',
+            ui.ButtonSet.OK
+          );
+          
+          // Log detailed results
+          console.log('Auto-Troubleshooting Results:', results);
+        }).catch(error => {
+          ui.alert('Troubleshooting Error', `Error: ${error.message}`, ui.ButtonSet.OK);
+        });
+      } else {
+        ui.alert('Feature Not Available', 'Auto-troubleshooting not loaded.', ui.ButtonSet.OK);
+      }
+    }
+    
+  } catch (error) {
+    ui.alert('Error', `Failed to run auto-troubleshooting: ${error.message}`, ui.ButtonSet.OK);
+  }
+}
+
+/**
+ * Show error report from menu
+ */
+function menuShowErrorReport() {
+  const ui = SpreadsheetApp.getUi();
+  
+  try {
+    if (typeof getErrorStatistics === 'function') {
+      const stats = getErrorStatistics();
+      
+      let message = '📊 Error Handler Report (Last 24 Hours)\n\n';
+      message += `Total Errors: ${stats.totalErrors}\n\n`;
+      
+      if (stats.totalErrors > 0) {
+        message += 'Error Categories:\n';
+        Object.entries(stats.categoryCounts).forEach(([category, count]) => {
+          message += `• ${category}: ${count}\n`;
+        });
+        message += '\n';
+        
+        message += 'Error Severity:\n';
+        Object.entries(stats.severityCounts).forEach(([severity, count]) => {
+          message += `• ${severity}: ${count}\n`;
+        });
+        message += '\n';
+        
+        message += `Recovery Attempts: ${stats.recoveryAttempts.length}\n`;
+        message += `User Interventions Pending: ${stats.userInterventionQueue}\n`;
+      } else {
+        message += '✅ No errors reported in the last 24 hours.';
+      }
+      
+      ui.alert('Error Report', message, ui.ButtonSet.OK);
+      
+      // Also show in console for more detail
+      if (typeof showErrorReport === 'function') {
+        showErrorReport();
+      }
+    } else {
+      ui.alert('Feature Not Available', 'Error reporting not loaded.', ui.ButtonSet.OK);
+    }
+    
+  } catch (error) {
+    ui.alert('Error', `Failed to show error report: ${error.message}`, ui.ButtonSet.OK);
+  }
+}
+
+/**
+ * Show cache report from menu
+ */
+function menuShowCacheReport() {
+  const ui = SpreadsheetApp.getUi();
+  
+  try {
+    if (typeof getCacheStatistics === 'function') {
+      const stats = getCacheStatistics();
+      
+      let message = '📦 Cache Manager Report\n\n';
+      message += `Version: ${stats.version}\n`;
+      message += `Cache Hits: ${stats.hits}\n`;
+      message += `Cache Misses: ${stats.misses}\n`;
+      message += `Hit Ratio: ${(stats.hitRatio * 100).toFixed(2)}%\n`;
+      message += `Cache Sets: ${stats.sets}\n`;
+      message += `Invalidations: ${stats.invalidations}\n`;
+      message += `Errors: ${stats.errors}\n\n`;
+      
+      if (stats.hitRatio < 0.5) {
+        message += '⚠️ Low cache hit ratio - consider reviewing cache strategy.';
+      } else if (stats.hitRatio > 0.8) {
+        message += '✅ Good cache performance!';
+      } else {
+        message += '📊 Cache performance is acceptable.';
+      }
+      
+      ui.alert('Cache Report', message, ui.ButtonSet.OK);
+      
+      // Show detailed console report
+      if (typeof showCacheReport === 'function') {
+        showCacheReport();
+      }
+    } else {
+      ui.alert('Feature Not Available', 'Cache reporting not loaded.', ui.ButtonSet.OK);
+    }
+    
+  } catch (error) {
+    ui.alert('Error', `Failed to show cache report: ${error.message}`, ui.ButtonSet.OK);
+  }
+}
+
+/**
+ * Clear error history from menu
+ */
+function menuClearErrorHistory() {
+  const ui = SpreadsheetApp.getUi();
+  
+  try {
+    const response = ui.alert(
+      'Clear Error History',
+      'This will clear all error history and reset error counters.\n\n' +
+      'This action cannot be undone.\n\n' +
+      'Continue?',
+      ui.ButtonSet.YES_NO
+    );
+    
+    if (response === ui.Button.YES) {
+      if (typeof clearErrorHistory === 'function') {
+        clearErrorHistory();
+        ui.alert(
+          '✅ Error History Cleared',
+          'All error history has been cleared.\n\n' +
+          'Error tracking will start fresh.',
+          ui.ButtonSet.OK
+        );
+      } else {
+        ui.alert('Feature Not Available', 'Error history clearing not loaded.', ui.ButtonSet.OK);
+      }
+    }
+    
+  } catch (error) {
+    ui.alert('Error', `Failed to clear error history: ${error.message}`, ui.ButtonSet.OK);
+  }
+}
+
+/**
+ * Test provider detection from menu
+ */
+function menuTestProviderDetection() {
+  const ui = SpreadsheetApp.getUi();
+  
+  try {
+    if (typeof testProviderDetection === 'function') {
+      testProviderDetection().then(result => {
+        if (result.status === 'PASS') {
+          ui.alert(
+            '✅ Provider Detection Test Passed',
+            `${result.message}\n\n` +
+            `Provider: ${result.details?.detection?.providerInfo?.displayName || 'Unknown'}\n` +
+            `Duration: ${result.duration}ms`,
+            ui.ButtonSet.OK
+          );
+        } else {
+          ui.alert(
+            '❌ Provider Detection Test Failed',
+            `${result.message}\n\n` +
+            `Details: ${JSON.stringify(result.details, null, 2)}`,
+            ui.ButtonSet.OK
+          );
+        }
+      }).catch(error => {
+        ui.alert('Test Error', `Error: ${error.message}`, ui.ButtonSet.OK);
+      });
+    } else {
+      // Fallback to existing function
+      testProviderDetection();
+    }
+    
+  } catch (error) {
+    ui.alert('Error', `Failed to test provider detection: ${error.message}`, ui.ButtonSet.OK);
+  }
+}
+
+/**
+ * Test database connection from menu
+ */
+function menuTestDatabaseConnection() {
+  const ui = SpreadsheetApp.getUi();
+  
+  try {
+    if (typeof testDatabaseConnectivity === 'function') {
+      testDatabaseConnectivity().then(result => {
+        if (result.status === 'PASS') {
+          ui.alert(
+            '✅ Database Connection Test Passed',
+            `${result.message}\n\n` +
+            `Response Time: ${result.details?.connectivity?.responseTime || 'Unknown'}ms\n` +
+            `Functions Available: ${result.details?.functions?.endpoints?.length || 0}\n` +
+            `Duration: ${result.duration}ms`,
+            ui.ButtonSet.OK
+          );
+        } else {
+          ui.alert(
+            '❌ Database Connection Test Failed',
+            `${result.message}\n\n` +
+            `Check credentials and network connectivity.`,
+            ui.ButtonSet.OK
+          );
+        }
+      }).catch(error => {
+        ui.alert('Test Error', `Error: ${error.message}`, ui.ButtonSet.OK);
+      });
+    } else {
+      // Fallback to existing function
+      testSupabaseConnection();
+    }
+    
+  } catch (error) {
+    ui.alert('Error', `Failed to test database connection: ${error.message}`, ui.ButtonSet.OK);
+  }
+}
+
+// ===== ENHANCED LOGGING TEST FUNCTIONS =====
+
+/**
+ * Test database operation logging
+ */
+function testDatabaseLogging() {
+  const ui = SpreadsheetApp.getUi();
+  const correlationId = generateCorrelationId_();
+  
+  try {
+    logWithMetadata('testDatabaseLogging', 'START', null, null, null, 
+      'Testing database operation logging system', 
+      { test_type: 'database_logging', correlation_id: correlationId }, 
+      correlationId);
+    
+    // Test provider lookup
+    const testProvider = getProviderFromDatabase('obinna_ezeji');
+    
+    // Test credential resolution
+    const testCredentials = getSyncCredentials('test_system', {
+      clinicCode: 'KAMDENTAL_BAYTOWN',
+      providerCode: 'obinna_ezeji'
+    });
+    
+    logWithMetadata('testDatabaseLogging', 'SUCCESS', null, null, null, 
+      'Database logging test completed successfully', 
+      { 
+        provider_found: !!testProvider,
+        credentials_resolved: !!testCredentials,
+        correlation_id: correlationId
+      }, 
+      correlationId);
+    
+    ui.alert(
+      '✅ Database Logging Test Complete',
+      `Test completed successfully.\n\n` +
+      `Provider lookup: ${testProvider ? 'SUCCESS' : 'FAILED'}\n` +
+      `Credential resolution: ${testCredentials ? 'SUCCESS' : 'FAILED'}\n\n` +
+      `Correlation ID: ${correlationId}\n\n` +
+      'Check the "Dentist-Sync-Log" sheet for detailed logs.',
+      ui.ButtonSet.OK
+    );
+    
+  } catch (error) {
+    logWithMetadata('testDatabaseLogging', 'ERROR', null, null, null, 
+      `Database logging test failed: ${error.message}`, 
+      { 
+        error_type: 'TEST_ERROR',
+        error_message: error.message,
+        correlation_id: correlationId
+      }, 
+      correlationId);
+    
+    ui.alert('❌ Database Logging Test Failed', `Error: ${error.message}`, ui.ButtonSet.OK);
+  }
+}
+
+/**
+ * Test provider detection logging
+ */
+function testProviderLogging() {
+  const ui = SpreadsheetApp.getUi();
+  const spreadsheetId = SpreadsheetApp.getActiveSpreadsheet().getId();
+  const correlationId = generateCorrelationId_();
+  
+  try {
+    logWithMetadata('testProviderLogging', 'START', null, null, null, 
+      'Testing provider detection logging system', 
+      { test_type: 'provider_logging', spreadsheet_id: spreadsheetId }, 
+      correlationId);
+    
+    // Test provider detection
+    const detectedProvider = detectCurrentProvider(spreadsheetId);
+    
+    // Test multi-provider credentials
+    const multiProviderCreds = getMultiProviderSyncCredentials(spreadsheetId);
+    
+    logWithMetadata('testProviderLogging', 'SUCCESS', null, null, null, 
+      'Provider logging test completed successfully', 
+      { 
+        provider_detected: !!detectedProvider,
+        provider_name: detectedProvider ? detectedProvider.displayName : null,
+        credentials_resolved: !!multiProviderCreds,
+        correlation_id: correlationId
+      }, 
+      correlationId);
+    
+    ui.alert(
+      '✅ Provider Logging Test Complete',
+      `Test completed successfully.\n\n` +
+      `Provider detected: ${detectedProvider ? detectedProvider.displayName : 'NONE'}\n` +
+      `Detection method: ${detectedProvider ? detectedProvider.source : 'N/A'}\n` +
+      `Multi-provider credentials: ${multiProviderCreds ? 'SUCCESS' : 'FAILED'}\n\n` +
+      `Correlation ID: ${correlationId}\n\n` +
+      'Check the "Dentist-Sync-Log" sheet for detailed logs.',
+      ui.ButtonSet.OK
+    );
+    
+  } catch (error) {
+    logWithMetadata('testProviderLogging', 'ERROR', null, null, null, 
+      `Provider logging test failed: ${error.message}`, 
+      { 
+        error_type: 'TEST_ERROR',
+        error_message: error.message,
+        correlation_id: correlationId
+      }, 
+      correlationId);
+    
+    ui.alert('❌ Provider Logging Test Failed', `Error: ${error.message}`, ui.ButtonSet.OK);
+  }
+}
+
+/**
+ * Test performance logging with timing
+ */
+function testPerformanceLogging() {
+  const ui = SpreadsheetApp.getUi();
+  const correlationId = generateCorrelationId_();
+  const startTime = Date.now();
+  
+  try {
+    logWithMetadata('testPerformanceLogging', 'START', null, null, null, 
+      'Testing performance logging system', 
+      { test_type: 'performance_logging' }, 
+      correlationId);
+    
+    // Test cache operations
+    const testKey = 'performance_test_key';
+    const testData = { test: 'data', timestamp: new Date().toISOString() };
+    
+    // Test cache set
+    setCachedResult_(testKey, JSON.stringify(testData));
+    
+    // Test cache get
+    const cachedData = getCachedResult_(testKey);
+    
+    // Test database operation timing
+    const dbStartTime = Date.now();
+    logDatabaseOperation('PERFORMANCE_TEST', 'test_endpoint', dbStartTime, 'SUCCESS', {
+      test_operation: true,
+      cache_hit: !!cachedData,
+      data_size: JSON.stringify(testData).length
+    }, correlationId);
+    
+    const totalDuration = (Date.now() - startTime) / 1000;
+    
+    logWithMetadata('testPerformanceLogging', 'SUCCESS', null, null, totalDuration, 
+      'Performance logging test completed successfully', 
+      { 
+        cache_set: true,
+        cache_retrieved: !!cachedData,
+        total_duration_ms: Date.now() - startTime,
+        correlation_id: correlationId
+      }, 
+      correlationId);
+    
+    ui.alert(
+      '✅ Performance Logging Test Complete',
+      `Test completed successfully.\n\n` +
+      `Cache operations: SUCCESS\n` +
+      `Performance tracking: SUCCESS\n` +
+      `Total duration: ${totalDuration.toFixed(2)}s\n\n` +
+      `Correlation ID: ${correlationId}\n\n` +
+      'Check the "Dentist-Sync-Log" sheet for detailed performance logs.',
+      ui.ButtonSet.OK
+    );
+    
+  } catch (error) {
+    const errorDuration = (Date.now() - startTime) / 1000;
+    
+    logWithMetadata('testPerformanceLogging', 'ERROR', null, null, errorDuration, 
+      `Performance logging test failed: ${error.message}`, 
+      { 
+        error_type: 'TEST_ERROR',
+        error_message: error.message,
+        error_duration_ms: Date.now() - startTime,
+        correlation_id: correlationId
+      }, 
+      correlationId);
+    
+    ui.alert('❌ Performance Logging Test Failed', `Error: ${error.message}`, ui.ButtonSet.OK);
+  }
+}
+
+/**
+ * View detailed logs with filtering options
+ */
+function viewDetailedLogs() {
+  const ui = SpreadsheetApp.getUi();
+  
+  try {
+    const ss = SpreadsheetApp.openById(getDentistSheetId());
+    const logSheet = ss.getSheetByName(DENTIST_LOG_TAB_NAME);
+    
+    if (!logSheet) {
+      ui.alert('❌ No Log Sheet Found', 'No "Dentist-Sync-Log" sheet exists. Run a sync operation first.', ui.ButtonSet.OK);
+      return;
+    }
+    
+    const lastRow = logSheet.getLastRow();
+    const recentLogs = Math.min(10, lastRow - 1); // Get last 10 entries
+    
+    if (recentLogs <= 0) {
+      ui.alert('📝 Log Sheet Empty', 'No log entries found.', ui.ButtonSet.OK);
+      return;
+    }
+    
+    const range = logSheet.getRange(lastRow - recentLogs + 1, 1, recentLogs, 9); // 9 columns including new ones
+    const data = range.getValues();
+    
+    let logSummary = 'Recent Log Entries:\n\n';
+    data.forEach((row, index) => {
+      const [timestamp, functionName, status, rowsProcessed, sheetsProcessed, duration, message, correlationId, metadata] = row;
+      logSummary += `${index + 1}. [${status}] ${functionName}\n`;
+      logSummary += `   Time: ${timestamp}\n`;
+      if (correlationId) logSummary += `   Correlation ID: ${correlationId}\n`;
+      if (duration) logSummary += `   Duration: ${duration}s\n`;
+      logSummary += `   Message: ${message}\n\n`;
+    });
+    
+    ui.alert(
+      '📊 Recent Detailed Logs',
+      logSummary + `\nTotal entries: ${lastRow - 1}\nSheet: "${DENTIST_LOG_TAB_NAME}"`,
+      ui.ButtonSet.OK
+    );
+    
+  } catch (error) {
+    ui.alert('❌ View Logs Failed', `Error: ${error.message}`, ui.ButtonSet.OK);
+  }
+}
+
+/**
+ * Export logs for external analysis
+ */
+function exportLogsForAnalysis() {
+  const ui = SpreadsheetApp.getUi();
+  
+  try {
+    const ss = SpreadsheetApp.openById(getDentistSheetId());
+    const logSheet = ss.getSheetByName(DENTIST_LOG_TAB_NAME);
+    
+    if (!logSheet) {
+      ui.alert('❌ No Log Sheet Found', 'No "Dentist-Sync-Log" sheet exists.', ui.ButtonSet.OK);
+      return;
+    }
+    
+    const lastRow = logSheet.getLastRow();
+    if (lastRow <= 1) {
+      ui.alert('📝 No Data to Export', 'Log sheet contains no data.', ui.ButtonSet.OK);
+      return;
+    }
+    
+    // Create export sheet
+    const exportSheetName = `Log-Export-${Utilities.formatDate(new Date(), Session.getScriptTimeZone(), 'yyyyMMdd-HHmmss')}`;
+    const exportSheet = ss.insertSheet(exportSheetName);
+    
+    // Copy all log data
+    const sourceRange = logSheet.getRange(1, 1, lastRow, 9);
+    const targetRange = exportSheet.getRange(1, 1, lastRow, 9);
+    sourceRange.copyTo(targetRange);
+    
+    // Add analysis columns
+    exportSheet.getRange(1, 10).setValue('Error Count');
+    exportSheet.getRange(1, 11).setValue('Avg Duration');
+    exportSheet.getRange(1, 12).setValue('Performance Level');
+    
+    // Format the export sheet
+    const headerRange = exportSheet.getRange(1, 1, 1, 12);
+    headerRange.setFontWeight('bold');
+    headerRange.setBackground('#4285f4');
+    headerRange.setFontColor('white');
+    
+    ui.alert(
+      '✅ Logs Exported Successfully',
+      `Logs exported to sheet: "${exportSheetName}"\n\n` +
+      `Total entries: ${lastRow - 1}\n` +
+      `Export includes: timestamps, correlation IDs, metadata\n\n` +
+      'You can now analyze the data or download the sheet.',
+      ui.ButtonSet.OK
+    );
+    
+  } catch (error) {
+    ui.alert('❌ Export Failed', `Error: ${error.message}`, ui.ButtonSet.OK);
+  }
 }

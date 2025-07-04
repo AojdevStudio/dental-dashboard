@@ -31,10 +31,10 @@ const SYNC_FUNCTION_NAME = 'syncAllHygieneData';
 /** @const {string} Name of the on-edit sync function for trigger management. */
 const ON_EDIT_FUNCTION_NAME = 'onEditHygieneSync';
 
-/** @const {array} Month tab patterns to sync (MMM-YY format). */
+/** @const {array} Month tab patterns to sync (MMM-YY format). Case-insensitive matching. */
 const MONTH_TAB_PATTERNS = [
-  /^[A-Za-z]{3}-\d{2}$/,  // Dec-23, Jan-24, etc.
-  /^[A-Za-z]{3} \d{4}$/   // Dec 2023, Jan 2024, etc.
+  /^[a-z]{3}-\d{2}$/i,  // Dec-23, Jan-24, etc. (case-insensitive)
+  /^[a-z]{3} \d{4}$/i   // Dec 2023, Jan 2024, etc. (case-insensitive)
 ];
 
 /** @const {object} Column header mappings for hygiene production data. */

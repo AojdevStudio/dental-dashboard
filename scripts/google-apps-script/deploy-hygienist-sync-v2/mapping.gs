@@ -1,7 +1,7 @@
 /**
- * Get headers from a sheet (first row that contains data)
+ * Get headers from a sheet (first row that contains data) and header row index
  * @param {Sheet} sheet - The Google Sheet
- * @return {array} Array of header strings
+ * @return {object} Object containing headers array and headerRowIndex (0-based)
  */
 function getSheetHeaders_(sheet) {
   const data = sheet.getDataRange().getValues();
@@ -15,13 +15,19 @@ function getSheetHeaders_(sheet) {
     );
     if (hasDateColumn) {
       Logger.log(`getSheetHeaders_: Header row found at index ${i} in sheet '${sheet.getName()}'. Headers: ${JSON.stringify(row.map(cell => String(cell).trim()))}`);
-      return row.map(cell => String(cell).trim());
+      return {
+        headers: row.map(cell => String(cell).trim()),
+        headerRowIndex: i
+      };
     }
   }
   
   Logger.log(`getSheetHeaders_: No header row containing "date" or "day" found within the first 5 rows for sheet '${sheet.getName()}'. Falling back to first row if available.`);
   // Fallback to first row
-  return data.length > 0 ? data[0].map(cell => String(cell).trim()) : [];
+  return {
+    headers: data.length > 0 ? data[0].map(cell => String(cell).trim()) : [],
+    headerRowIndex: 0
+  };
 }
 
 /**
@@ -105,7 +111,7 @@ function mapHeaders_(headers) {
 
   // Log a warning to the sheet if critical columns are missing
   const criticalColumns = ['date', 'verifiedProduction']; // Add other critical columns as needed (keys from HYGIENE_COLUMN_HEADERS)
-  const missingCritical = criticalColumns.filter(key => mapping[key.toLowerCase()] === -1 || mapping[key.toUpperCase()] === -1 ); // Check for both cases just in case config keys change case
+  const missingCritical = criticalColumns.filter(key => mapping[key] === -1);
   
   // Attempt to get sheet name for logging, may not be available here directly
   // This function is generic, so sheet name isn't passed. Consider if context is needed for log sheet.
@@ -131,9 +137,10 @@ function mapHeaders_(headers) {
  * @param {string} clinicId The ID of the clinic.
  * @param {string} providerId The ID of the provider.
  * @param {number} rowIndex The index of the row being processed.
+ * @param {string} timezone The spreadsheet timezone for date formatting.
  * @return {object|null} A structured object for the hygiene record or null if key data is missing.
  */
-function parseHygieneRow_(row, mapping, monthTab, clinicId, providerId, rowIndex) {
+function parseHygieneRow_(row, mapping, monthTab, clinicId, providerId, rowIndex, timezone) {
   try {
     const record = {};
     let hasEssentialData = false; // Flag to check if core financial data is present
@@ -145,7 +152,7 @@ function parseHygieneRow_(row, mapping, monthTab, clinicId, providerId, rowIndex
         return null;
     }
     const dateValue = row[dateColumnIndex];
-    const date = parseDateForSupabase_(dateValue, SpreadsheetApp.getActiveSpreadsheet().getSpreadsheetTimeZone());
+    const date = parseDateForSupabase_(dateValue, timezone);
     if (!date) {
       Logger.log(`parseHygieneRow_: Skipped row ${rowIndex !== undefined ? '#' + (rowIndex + 1) : '(unknown_row)'} in '${monthTab}' due to invalid or missing date. Value: '${dateValue}'`);
       return null; 
@@ -153,7 +160,7 @@ function parseHygieneRow_(row, mapping, monthTab, clinicId, providerId, rowIndex
     
     // Validate that the date is not in the future (beyond today)
     const today = new Date();
-    const todayString = Utilities.formatDate(today, SpreadsheetApp.getActiveSpreadsheet().getSpreadsheetTimeZone(), "yyyy-MM-dd");
+    const todayString = Utilities.formatDate(today, timezone, "yyyy-MM-dd");
     if (date > todayString) {
       Logger.log(`parseHygieneRow_: Skipped row ${rowIndex !== undefined ? '#' + (rowIndex + 1) : '(unknown_row)'} in '${monthTab}' due to future date. Date: '${date}' is after today: '${todayString}'`);
       return null;
@@ -243,27 +250,66 @@ function parseHygieneRow_(row, mapping, monthTab, clinicId, providerId, rowIndex
 
 /**
  * Clean numeric values (remove $, commas, spaces, %)
+ * Expects US-style number format: 1,234.56 (comma as thousands separator, period as decimal)
  * @param {any} value - Value to clean
  * @return {string} Cleaned numeric string
  */
 function cleanNumeric_(value) {
-  if (!value) return '0';
-  return String(value).replace(/[\$,\s%]/g, '');
+  if (!value && value !== 0) return '0';
+  
+  // Handle edge cases
+  if (typeof value === 'number') {
+    return String(value);
+  }
+  
+  let stringValue = String(value).trim();
+  
+  // Handle empty string after trimming
+  if (stringValue === '') return '0';
+  
+  // Remove currency symbols, commas (thousands separators), spaces, and percentage signs
+  // This assumes US format where comma is thousands separator and period is decimal
+  stringValue = stringValue.replace(/[\$,\s%]/g, '');
+  
+  // Handle parentheses for negative numbers (accounting format)
+  if (stringValue.startsWith('(') && stringValue.endsWith(')')) {
+    stringValue = '-' + stringValue.slice(1, -1);
+  }
+  
+  // Validate that result is a valid number format
+  if (!/^-?\d*\.?\d*$/.test(stringValue)) {
+    Logger.log(`cleanNumeric_: Warning - unusual number format detected: '${value}' -> '${stringValue}'`);
+  }
+  
+  return stringValue;
 }
 
 /**
  * Parse date value into Supabase-compatible format
+ * Supports multiple date formats including DD-MMM-YYYY, DD/MM/YYYY, MM/DD/YYYY
  * @param {any} dateValue - The date value to parse
  * @param {string} timeZone - The timezone to use for formatting
  * @return {string|null} A formatted date string in YYYY-MM-DD format or null if invalid
  */
 function parseDateForSupabase_(dateValue, timeZone) {
+  // Handle null, undefined, or empty values
+  if (!dateValue || dateValue === '') {
+    Logger.log(`parseDateForSupabase_: Empty or null date value provided`);
+    return null;
+  }
+
   // If already a Date object and valid
   if (dateValue instanceof Date && !Number.isNaN(dateValue.getTime())) {
     try {
+      // Validate date is reasonable (not too far in past/future)
+      const year = dateValue.getFullYear();
+      if (year < 1900 || year > 2100) {
+        Logger.log(`parseDateForSupabase_: Date year ${year} is outside reasonable range (1900-2100)`);
+        return null;
+      }
       return Utilities.formatDate(dateValue, timeZone, "yyyy-MM-dd");
     } catch (err) {
-      Logger.log(`Error formatting date: ${err.message}`);
+      Logger.log(`parseDateForSupabase_: Error formatting Date object: ${err.message}`);
       return null;
     }
   }
@@ -272,40 +318,111 @@ function parseDateForSupabase_(dateValue, timeZone) {
   if (dateValue) {
     try {
       let dateObj;
-
+      const originalValue = dateValue;
+      
       if (typeof dateValue === 'string') {
-        // Try JavaScript parsing first
-        dateObj = new Date(dateValue);
+        const trimmedValue = dateValue.trim();
+        
+        // Handle empty string after trimming
+        if (trimmedValue === '') {
+          Logger.log(`parseDateForSupabase_: Empty string after trimming`);
+          return null;
+        }
 
-        // If that failed, try manual parsing for common formats
-        if (Number.isNaN(dateObj.getTime())) {
-          // Try US format MM/DD/YYYY
-          const usParts = dateValue.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
-          if (usParts) {
-            dateObj = new Date(usParts[3], usParts[1] - 1, usParts[2]);
+        // Try specific regex patterns for common formats first (more reliable than Date constructor)
+        
+        // DD-MMM-YYYY format (e.g., "15-Jan-2024", "03-Dec-2023")
+        const ddMmmYyyyMatch = trimmedValue.match(/^(\d{1,2})-([A-Za-z]{3})-(\d{4})$/);
+        if (ddMmmYyyyMatch) {
+          const day = parseInt(ddMmmYyyyMatch[1], 10);
+          const monthAbbr = ddMmmYyyyMatch[2].toLowerCase();
+          const year = parseInt(ddMmmYyyyMatch[3], 10);
+          
+          const monthMap = {
+            'jan': 0, 'feb': 1, 'mar': 2, 'apr': 3, 'may': 4, 'jun': 5,
+            'jul': 6, 'aug': 7, 'sep': 8, 'oct': 9, 'nov': 10, 'dec': 11
+          };
+          
+          if (monthMap.hasOwnProperty(monthAbbr)) {
+            dateObj = new Date(year, monthMap[monthAbbr], day);
+            Logger.log(`parseDateForSupabase_: Successfully parsed DD-MMM-YYYY format: ${trimmedValue}`);
           } else {
-            Logger.log(`Could not parse date string: ${dateValue}`);
+            Logger.log(`parseDateForSupabase_: Unknown month abbreviation in DD-MMM-YYYY format: ${monthAbbr}`);
             return null;
           }
         }
+        
+        // DD/MM/YYYY format (European style - be careful with ambiguous dates)
+        else {
+          const ddMmYyyyMatch = trimmedValue.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
+          if (ddMmYyyyMatch) {
+            const first = parseInt(ddMmYyyyMatch[1], 10);
+            const second = parseInt(ddMmYyyyMatch[2], 10);
+            const year = parseInt(ddMmYyyyMatch[3], 10);
+            
+            // Heuristic: if first number > 12, it's likely DD/MM/YYYY
+            // if second number > 12, it's likely MM/DD/YYYY
+            // if both <= 12, assume MM/DD/YYYY (US format) unless configured otherwise
+            if (first > 12 && second <= 12) {
+              // DD/MM/YYYY format
+              dateObj = new Date(year, second - 1, first);
+              Logger.log(`parseDateForSupabase_: Parsed as DD/MM/YYYY format: ${trimmedValue}`);
+            } else if (second > 12 && first <= 12) {
+              // MM/DD/YYYY format
+              dateObj = new Date(year, first - 1, second);
+              Logger.log(`parseDateForSupabase_: Parsed as MM/DD/YYYY format: ${trimmedValue}`);
+            } else {
+              // Ambiguous - default to MM/DD/YYYY (US format)
+              dateObj = new Date(year, first - 1, second);
+              Logger.log(`parseDateForSupabase_: Ambiguous date format, defaulting to MM/DD/YYYY: ${trimmedValue}`);
+            }
+          }
+          
+          // Try JavaScript Date constructor as fallback
+          else {
+            dateObj = new Date(trimmedValue);
+            if (!Number.isNaN(dateObj.getTime())) {
+              Logger.log(`parseDateForSupabase_: Successfully parsed with Date constructor: ${trimmedValue}`);
+            }
+          }
+        }
+
       } else {
-        // For other types, try direct conversion
+        // For other types (numbers, etc.), try direct conversion
         dateObj = new Date(dateValue);
+        Logger.log(`parseDateForSupabase_: Attempting to parse non-string value: ${dateValue} (type: ${typeof dateValue})`);
       }
 
-      // Ensure the date is valid before formatting
-      if (!Number.isNaN(dateObj.getTime())) {
+      // Validate the resulting date object
+      if (dateObj && !Number.isNaN(dateObj.getTime())) {
+        // Additional validation: check if date is reasonable
+        const year = dateObj.getFullYear();
+        if (year < 1900 || year > 2100) {
+          Logger.log(`parseDateForSupabase_: Parsed date year ${year} is outside reasonable range (1900-2100) for input: ${originalValue}`);
+          return null;
+        }
+        
+        // Check for invalid dates like February 30th
+        const month = dateObj.getMonth();
+        const day = dateObj.getDate();
+        const testDate = new Date(year, month, day);
+        if (testDate.getFullYear() !== year || testDate.getMonth() !== month || testDate.getDate() !== day) {
+          Logger.log(`parseDateForSupabase_: Invalid date detected (e.g., Feb 30th) for input: ${originalValue}`);
+          return null;
+        }
+        
         return Utilities.formatDate(dateObj, timeZone, "yyyy-MM-dd");
       } else {
-        Logger.log(`Invalid date object: ${dateValue}`);
+        Logger.log(`parseDateForSupabase_: Failed to parse date value: ${originalValue} (type: ${typeof originalValue})`);
         return null;
       }
 
     } catch (err) {
-      Logger.log(`Error parsing date: ${err.message}`);
+      Logger.log(`parseDateForSupabase_: Error parsing date value '${dateValue}': ${err.message}`);
       return null;
     }
   }
 
+  Logger.log(`parseDateForSupabase_: No valid date value provided: ${dateValue}`);
   return null;
 }

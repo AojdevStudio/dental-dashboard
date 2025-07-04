@@ -1,8 +1,17 @@
 // --- Dentist Production Sync Configuration V2.1 (Multi-Provider) ---
 // Updated to support dynamic multi-provider detection and multi-location sync
 
-/** @const {string} ID of the Google Spreadsheet containing dentist data. CHANGE THIS! */
-const DENTIST_SHEET_ID = '1bcbzCiPHMRATJe2koBpvyadZaDvxfSA7tpJ84-o-x2c';
+/** 
+ * DYNAMIC SHEET ID - Gets the current active spreadsheet ID
+ * This allows the same script to work for any provider's spreadsheet
+ * NO MORE HARDCODED SHEET IDs!
+ */
+function getDentistSheetId() {
+  return SpreadsheetApp.getActiveSpreadsheet().getId();
+}
+
+// Legacy hardcoded ID for reference only (DO NOT USE)
+// const DENTIST_SHEET_ID_LEGACY = '1bcbzCiPHMRATJe2koBpvyadZaDvxfSA7tpJ84-o-x2c'; // Dr. Obinna's sheet
 
 /** @const {string} Name of the sheet tab for logging sync operations. */
 const DENTIST_LOG_TAB_NAME = 'Dentist-Sync-Log';
@@ -78,19 +87,36 @@ const DENTIST_SYNC_CONFIG = {
     }
   },
   
-  // Supported providers (dynamically detected)
+  // DEPRECATED: Hardcoded providers configuration - Multi-Clinic Support
+  // NEW: Provider discovery now uses database queries via getProviderFromDatabase()
+  // This section serves as fallback during transition period
   PROVIDERS: {
     OBINNA: {
       providerCode: 'obinna_ezeji',
       externalId: 'OBINNA_PROVIDER',
       displayName: 'Dr. Obinna Ezeji',
-      primaryClinic: 'BAYTOWN'
+      primaryClinics: ['BAYTOWN'], // Array to support multiple primary clinics
+      preferredClinic: 'BAYTOWN',  // Default clinic for single-clinic operations
+      multiClinicAccess: false,    // Currently single-clinic provider
+      primaryClinic: 'BAYTOWN'     // Legacy compatibility
     },
     KAMDI: {
       providerCode: 'kamdi_irondi',
       externalId: 'KAMDI_PROVIDER', 
       displayName: 'Dr. Kamdi Irondi',
-      primaryClinic: 'HUMBLE'
+      primaryClinics: ['HUMBLE'],  // Array to support multiple primary clinics
+      preferredClinic: 'HUMBLE',   // Default clinic for single-clinic operations
+      multiClinicAccess: false,    // Currently single-clinic provider
+      primaryClinic: 'HUMBLE'      // Legacy compatibility
+    },
+    // Example multi-clinic provider (for future expansion)
+    MULTI_CLINIC_EXAMPLE: {
+      providerCode: 'multi_clinic_provider',
+      externalId: 'MULTI_PROVIDER',
+      displayName: 'Dr. Multi Clinic Provider',
+      primaryClinics: ['HUMBLE', 'BAYTOWN'], // Multiple primary clinics
+      preferredClinic: 'HUMBLE',              // Default clinic preference
+      multiClinicAccess: true                 // Multi-clinic enabled
     }
   },
   
@@ -198,30 +224,107 @@ const ENHANCED_COLUMN_DETECTION = {
 // ===== PROVIDER DETECTION FUNCTIONS =====
 
 /**
- * Get current provider configuration dynamically
+ * Get current provider configuration dynamically with database-driven discovery
+ * Now uses database queries with fallback to hardcoded configurations
+ * @param {Object} options - Configuration options
+ * @param {string} options.clinicPreference - Preferred clinic for multi-clinic providers
+ * @param {boolean} options.includeAllClinics - Include all clinic configurations
+ * @param {boolean} options.forceFallback - Force use of fallback configuration
  * @return {Object|null} Current provider config or null if not detected
  */
-function getCurrentProviderConfig() {
+function getCurrentProviderConfig(options = {}) {
   try {
     // Use multi-provider detection from shared utilities
-    const providerInfo = detectCurrentProvider(DENTIST_SHEET_ID);
+    const providerInfo = detectCurrentProvider(getDentistSheetId());
     if (!providerInfo) {
       return null;
     }
     
-    // Map detected provider to configuration
+    // PRIMARY: Try database-driven provider discovery (unless forced to use fallback)
+    if (!options.forceFallback) {
+      const dbProviderConfig = getProviderFromDatabase(providerInfo.providerCode);
+      if (dbProviderConfig) {
+        Logger.log(`Using database configuration for provider ${providerInfo.providerCode}`);
+        
+        // Handle clinic preference for database config
+        let selectedClinic = null;
+        let selectedClinicConfig = null;
+        
+        if (options.clinicPreference && dbProviderConfig.clinicMappings) {
+          // Look for preferred clinic in database mappings
+          for (const [clinicCode, mapping] of Object.entries(dbProviderConfig.clinicMappings)) {
+            if (clinicCode.includes(options.clinicPreference.toUpperCase())) {
+              selectedClinic = clinicCode;
+              selectedClinicConfig = mapping;
+              break;
+            }
+          }
+        }
+        
+        // Default to primary clinic from database
+        if (!selectedClinicConfig) {
+          selectedClinic = dbProviderConfig.primaryClinic;
+          selectedClinicConfig = dbProviderConfig.primaryClinicConfig;
+        }
+        
+        return {
+          ...dbProviderConfig,
+          detectedInfo: providerInfo,
+          // Legacy support for single-clinic systems
+          primaryClinic: selectedClinic,
+          primaryClinicConfig: selectedClinicConfig,
+          // Multi-clinic support from database
+          selectedClinic: selectedClinic,
+          selectedClinicConfig: selectedClinicConfig,
+          allClinicConfigs: options.includeAllClinics ? dbProviderConfig.clinicMappings : undefined,
+          hasMultiClinicAccess: dbProviderConfig.totalLocations > 1,
+          availableClinics: Object.keys(dbProviderConfig.clinicMappings || {}),
+          source: 'database'
+        };
+      } else {
+        Logger.log(`Database provider lookup failed for ${providerInfo.providerCode}, falling back to hardcoded configuration`);
+      }
+    }
+    
+    // FALLBACK: Use hardcoded configuration
     const providerKey = providerInfo.providerCode.toUpperCase().replace('_', '');
     const providerConfig = DENTIST_SYNC_CONFIG.PROVIDERS[providerKey];
     
     if (!providerConfig) {
-      Logger.log(`Provider ${providerInfo.providerCode} not found in configuration`);
+      Logger.log(`Provider ${providerInfo.providerCode} not found in fallback configuration`);
+      return null;
+    }
+    
+    // Handle multi-clinic support for fallback configuration
+    const selectedClinic = options.clinicPreference || providerConfig.primaryClinic;
+    const allClinicConfigs = {};
+    
+    // Get configurations for primary clinic (legacy system assumes single primary)
+    const primaryClinicConfig = DENTIST_SYNC_CONFIG.CLINICS[providerConfig.primaryClinic];
+    if (primaryClinicConfig) {
+      allClinicConfigs[providerConfig.primaryClinic] = primaryClinicConfig;
+    }
+    
+    // Get the selected clinic configuration
+    const selectedClinicConfig = DENTIST_SYNC_CONFIG.CLINICS[selectedClinic];
+    if (!selectedClinicConfig) {
+      Logger.log(`Selected clinic ${selectedClinic} not found in configuration`);
       return null;
     }
     
     return {
       ...providerConfig,
       detectedInfo: providerInfo,
-      primaryClinicConfig: DENTIST_SYNC_CONFIG.CLINICS[providerConfig.primaryClinic]
+      // Legacy support for single-clinic systems
+      primaryClinic: selectedClinic,
+      primaryClinicConfig: selectedClinicConfig,
+      // Multi-clinic support
+      selectedClinic: selectedClinic,
+      selectedClinicConfig: selectedClinicConfig,
+      allClinicConfigs: options.includeAllClinics ? allClinicConfigs : undefined,
+      hasMultiClinicAccess: false, // Legacy system doesn't support multi-clinic
+      availableClinics: [providerConfig.primaryClinic],
+      source: 'fallback'
     };
     
   } catch (error) {
@@ -255,16 +358,127 @@ function getLocationConfig(locationKey) {
 }
 
 /**
- * Validate current spreadsheet for multi-provider compatibility
+ * Get multi-clinic credentials for a provider across all their primary clinics
+ * @param {Object} options - Configuration options
+ * @param {string} options.clinicFilter - Filter to specific clinic ('HUMBLE', 'BAYTOWN', or null for all)
+ * @return {Object|null} Multi-clinic credentials or null if failed
+ */
+function getMultiClinicCredentials(options = {}) {
+  try {
+    const providerConfig = getCurrentProviderConfig({ includeAllClinics: true });
+    if (!providerConfig) {
+      return null;
+    }
+    
+    const clinicCredentials = {};
+    const clinicsToProcess = options.clinicFilter 
+      ? [options.clinicFilter] 
+      : providerConfig.primaryClinics;
+    
+    for (const clinicKey of clinicsToProcess) {
+      if (!providerConfig.primaryClinics.includes(clinicKey)) {
+        Logger.log(`Clinic ${clinicKey} not in provider's primary clinics`);
+        continue;
+      }
+      
+      const clinicConfig = DENTIST_SYNC_CONFIG.CLINICS[clinicKey];
+      if (clinicConfig) {
+        clinicCredentials[clinicKey] = {
+          clinicConfig: clinicConfig,
+          locationConfig: getLocationConfig(clinicKey.toLowerCase())
+        };
+      }
+    }
+    
+    return {
+      provider: providerConfig,
+      clinicCredentials: clinicCredentials,
+      defaultClinic: providerConfig.preferredClinic,
+      multiClinicMode: providerConfig.multiClinicAccess
+    };
+    
+  } catch (error) {
+    Logger.log(`Error getting multi-clinic credentials: ${error.message}`);
+    return null;
+  }
+}
+
+/**
+ * Select clinic for multi-clinic provider operations
+ * @param {string} clinicKey - Clinic to select ('HUMBLE' or 'BAYTOWN')
+ * @return {Object|null} Selected clinic configuration or null if invalid
+ */
+function selectClinicForProvider(clinicKey) {
+  try {
+    const providerConfig = getCurrentProviderConfig();
+    if (!providerConfig) {
+      throw new Error('Provider not detected');
+    }
+    
+    if (!providerConfig.primaryClinics.includes(clinicKey)) {
+      throw new Error(`Clinic ${clinicKey} not available for provider ${providerConfig.displayName}`);
+    }
+    
+    // Get updated configuration with selected clinic
+    const selectedConfig = getCurrentProviderConfig({ 
+      clinicPreference: clinicKey,
+      includeAllClinics: false 
+    });
+    
+    Logger.log(`Selected clinic ${clinicKey} for provider ${providerConfig.displayName}`);
+    return selectedConfig;
+    
+  } catch (error) {
+    Logger.log(`Error selecting clinic: ${error.message}`);
+    return null;
+  }
+}
+
+/**
+ * Get location-specific sync configuration for multi-clinic scenarios
+ * @param {string} clinicKey - Clinic key ('HUMBLE' or 'BAYTOWN')
+ * @param {string} locationKey - Location key ('humble' or 'baytown')
+ * @return {Object|null} Combined configuration for clinic-location sync
+ */
+function getMultiClinicLocationConfig(clinicKey, locationKey) {
+  try {
+    const providerConfig = selectClinicForProvider(clinicKey);
+    if (!providerConfig) {
+      return null;
+    }
+    
+    const locationConfig = getLocationConfig(locationKey);
+    if (!locationConfig) {
+      return null;
+    }
+    
+    return {
+      provider: providerConfig,
+      location: locationConfig,
+      isMultiClinic: providerConfig.hasMultiClinicAccess,
+      syncKey: `${clinicKey}_${locationKey}`,
+      clinicMatches: clinicKey.toLowerCase() === locationKey.toLowerCase()
+    };
+    
+  } catch (error) {
+    Logger.log(`Error getting multi-clinic location config: ${error.message}`);
+    return null;
+  }
+}
+
+/**
+ * Validate current spreadsheet for multi-provider and multi-clinic compatibility
+ * @param {Object} options - Validation options
+ * @param {boolean} options.checkMultiClinic - Check multi-clinic support
  * @return {Object} Validation results
  */
-function validateMultiProviderSpreadsheet() {
+function validateMultiProviderSpreadsheet(options = {}) {
   try {
-    const ss = SpreadsheetApp.openById(DENTIST_SHEET_ID);
+    const ss = SpreadsheetApp.openById(getDentistSheetId());
     const spreadsheetName = ss.getName();
     
     // Check provider detection
-    const providerConfig = getCurrentProviderConfig();
+    const providerConfig = getCurrentProviderConfig({ includeAllClinics: true });
     if (!providerConfig) {
       return {
         isValid: false,
@@ -293,13 +507,29 @@ function validateMultiProviderSpreadsheet() {
       };
     }
     
+    // Multi-clinic validation
+    const multiClinicInfo = {};
+    if (options.checkMultiClinic && providerConfig.hasMultiClinicAccess) {
+      multiClinicInfo.multiClinicSupported = true;
+      multiClinicInfo.availableClinics = providerConfig.availableClinics;
+      multiClinicInfo.preferredClinic = providerConfig.preferredClinic;
+      
+      // Validate all clinic access
+      const multiClinicCreds = getMultiClinicCredentials();
+      multiClinicInfo.clinicCredentialsResolved = !!multiClinicCreds;
+    }
+    
     return {
       isValid: true,
       provider: providerConfig.displayName,
       providerCode: providerConfig.providerCode,
       primaryClinic: providerConfig.primaryClinicConfig.displayName,
+      selectedClinic: providerConfig.selectedClinic,
+      availableClinics: providerConfig.availableClinics,
+      hasMultiClinicAccess: providerConfig.hasMultiClinicAccess,
       monthTabsFound: monthTabs.length,
-      spreadsheetName: spreadsheetName
+      spreadsheetName: spreadsheetName,
+      multiClinic: multiClinicInfo
     };
     
   } catch (error) {

@@ -64,35 +64,126 @@ const SHARED_SYNC_CONFIG = {
  */
 function getSyncCredentials(systemName, options = {}) {
   const functionName = 'getSyncCredentials';
+  const startTime = Date.now();
+  const correlationId = generateCorrelationId_();
+  
+  logWithMetadata(functionName, 'START', null, null, null, 
+    `Starting sync credential resolution for: ${systemName}`, 
+    { 
+      system_name: systemName, 
+      options: options,
+      operation: 'credential_resolution'
+    }, 
+    correlationId);
   
   try {
     // Get basic Supabase credentials
+    const credStartTime = Date.now();
     const basicCredentials = getBasicSupabaseCredentials_();
+    const credDuration = Date.now() - credStartTime;
+    
     if (!basicCredentials) {
-      Logger.log(`${functionName}: Basic Supabase credentials not available`);
+      const errorMsg = 'Basic Supabase credentials not available';
+      logCredentialResolution('sync', systemName, 'FAILED', {}, correlationId);
+      logWithMetadata(functionName, 'ERROR', null, null, (Date.now() - startTime) / 1000, 
+        errorMsg, 
+        { 
+          system_name: systemName,
+          error_type: 'CREDENTIALS_MISSING',
+          credential_check_duration_ms: credDuration
+        }, 
+        correlationId);
       return null;
     }
     
+    logWithMetadata(functionName, 'INFO', null, null, null, 
+      'Basic Supabase credentials resolved', 
+      { 
+        system_name: systemName,
+        has_url: !!basicCredentials.url,
+        has_key: !!basicCredentials.key,
+        credential_duration_ms: credDuration
+      }, 
+      correlationId);
+    
     // Resolve IDs using stable identifiers
-    const resolvedIds = resolveStableIds_(systemName, options, basicCredentials);
+    const idResolutionStartTime = Date.now();
+    const resolvedIds = resolveStableIds_(systemName, options, basicCredentials, correlationId);
+    const idResolutionDuration = Date.now() - idResolutionStartTime;
+    
     if (!resolvedIds.success) {
-      Logger.log(`${functionName}: Failed to resolve stable IDs: ${resolvedIds.error}`);
+      const errorMsg = `Failed to resolve stable IDs: ${resolvedIds.error}`;
+      logCredentialResolution('sync', systemName, 'FAILED', {}, correlationId);
+      logWithMetadata(functionName, 'ERROR', null, null, (Date.now() - startTime) / 1000, 
+        errorMsg, 
+        { 
+          system_name: systemName,
+          error_type: 'ID_RESOLUTION_FAILED',
+          resolution_error: resolvedIds.error,
+          id_resolution_duration_ms: idResolutionDuration
+        }, 
+        correlationId);
       return null;
     }
+    
+    logWithMetadata(functionName, 'INFO', null, null, null, 
+      'Stable IDs resolved successfully', 
+      { 
+        system_name: systemName,
+        resolved_fields: Object.keys(resolvedIds.data),
+        has_clinic_id: !!resolvedIds.data.clinicId,
+        has_provider_id: !!resolvedIds.data.providerId,
+        has_location_id: !!resolvedIds.data.locationId,
+        id_resolution_duration_ms: idResolutionDuration
+      }, 
+      correlationId);
     
     // Combine credentials with resolved IDs
     const fullCredentials = {
       ...basicCredentials,
       ...resolvedIds.data,
+      // Map to expected property names for compatibility
+      supabaseUrl: basicCredentials.url,
+      supabaseKey: basicCredentials.key,
       systemName: systemName,
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
+      correlationId: correlationId
     };
     
-    Logger.log(`${functionName}: Successfully resolved credentials for ${systemName}`);
+    const totalDuration = (Date.now() - startTime) / 1000;
+    const successMsg = `Successfully resolved credentials for ${systemName}`;
+    
+    logCredentialResolution('sync', systemName, 'SUCCESS', fullCredentials, correlationId);
+    logWithMetadata(functionName, 'SUCCESS', null, null, totalDuration, 
+      successMsg, 
+      { 
+        system_name: systemName,
+        resolved_fields: Object.keys(resolvedIds.data),
+        has_clinic_id: !!fullCredentials.clinicId,
+        has_provider_id: !!fullCredentials.providerId,
+        has_location_id: !!fullCredentials.locationId,
+        total_duration_ms: Date.now() - startTime
+      }, 
+      correlationId);
+    
     return fullCredentials;
     
   } catch (error) {
-    Logger.log(`${functionName}: Error getting sync credentials: ${error.message}`);
+    const errorDuration = (Date.now() - startTime) / 1000;
+    const errorMsg = `Error getting sync credentials: ${error.message}`;
+    
+    logCredentialResolution('sync', systemName, 'FAILED', {}, correlationId);
+    logWithMetadata(functionName, 'ERROR', null, null, errorDuration, 
+      errorMsg, 
+      { 
+        system_name: systemName,
+        error_type: 'CREDENTIAL_ERROR',
+        error_message: error.message,
+        error_stack: error.stack,
+        error_duration_ms: Date.now() - startTime
+      }, 
+      correlationId);
+    
     return null;
   }
 }
@@ -267,14 +358,21 @@ function lookupByExternalMapping_(systemName, externalId, entityType, credential
 function callDatabaseFunction_(endpoint, params, credentials, callerName) {
   const cacheKey = `${endpoint}_${JSON.stringify(params)}`;
   
-  // Try cache first
-  const cached = getCachedResult_(cacheKey);
+  // Try cache first with cache manager if available
+  let cached = null;
+  if (typeof getCachedDatabaseFunction === 'function') {
+    cached = getCachedDatabaseFunction(endpoint, params);
+  } else {
+    cached = getCachedResult_(cacheKey);
+  }
+  
   if (cached !== null) {
     Logger.log(`${callerName}: Using cached result for ${endpoint}`);
     return cached;
   }
   
   let lastError = null;
+  const startTime = Date.now();
   
   for (let attempt = 1; attempt <= SHARED_SYNC_CONFIG.MAX_RETRIES; attempt++) {
     try {
@@ -295,6 +393,7 @@ function callDatabaseFunction_(endpoint, params, credentials, callerName) {
       const response = UrlFetchApp.fetch(url, payload);
       const responseCode = response.getResponseCode();
       const responseText = response.getContentText();
+      const duration = Date.now() - startTime;
       
       if (responseCode >= 200 && responseCode < 300) {
         const result = JSON.parse(responseText);
@@ -302,18 +401,38 @@ function callDatabaseFunction_(endpoint, params, credentials, callerName) {
         // PostgreSQL functions return the result directly
         const resultValue = result && typeof result === 'string' ? result : (result && result.length > 0 ? result[0] : null);
         
-        // Cache the result
-        setCachedResult_(cacheKey, resultValue);
+        // Cache the result with enhanced cache manager if available
+        if (typeof cacheDatabaseFunction === 'function') {
+          cacheDatabaseFunction(endpoint, params, resultValue);
+        } else {
+          setCachedResult_(cacheKey, resultValue);
+        }
         
-        Logger.log(`${callerName}: Success on attempt ${attempt}. Result: ${resultValue}`);
+        // Log performance for monitoring
+        if (typeof logMessage === 'function') {
+          logMessage('DATABASE_FUNCTION', 
+            `${callerName}: Success on attempt ${attempt}. Duration: ${duration}ms`, 
+            duration > 3000 ? 'WARN' : 'INFO');
+        }
+        
+        Logger.log(`${callerName}: Success on attempt ${attempt}. Result: ${resultValue}. Duration: ${duration}ms`);
         return resultValue;
         
       } else {
         lastError = `HTTP ${responseCode}: ${responseText}`;
         Logger.log(`${callerName}: Attempt ${attempt} failed: ${lastError}`);
         
+        // Log error for diagnostics
+        if (typeof logMessage === 'function') {
+          logMessage('DATABASE_FUNCTION', 
+            `${callerName}: Attempt ${attempt} failed: ${lastError}`, 
+            'ERROR');
+        }
+        
         if (attempt < SHARED_SYNC_CONFIG.MAX_RETRIES) {
-          Utilities.sleep(SHARED_SYNC_CONFIG.RETRY_DELAY_MS * attempt);
+          const delayMs = SHARED_SYNC_CONFIG.RETRY_DELAY_MS * attempt;
+          Logger.log(`${callerName}: Waiting ${delayMs}ms before retry...`);
+          Utilities.sleep(delayMs);
         }
       }
       
@@ -321,13 +440,50 @@ function callDatabaseFunction_(endpoint, params, credentials, callerName) {
       lastError = error.message;
       Logger.log(`${callerName}: Attempt ${attempt} error: ${lastError}`);
       
+      // Log network/connectivity errors
+      if (typeof logMessage === 'function') {
+        logMessage('DATABASE_FUNCTION', 
+          `${callerName}: Network error on attempt ${attempt}: ${lastError}`, 
+          'ERROR');
+      }
+      
       if (attempt < SHARED_SYNC_CONFIG.MAX_RETRIES) {
-        Utilities.sleep(SHARED_SYNC_CONFIG.RETRY_DELAY_MS * attempt);
+        const delayMs = SHARED_SYNC_CONFIG.RETRY_DELAY_MS * attempt;
+        Utilities.sleep(delayMs);
       }
     }
   }
   
-  Logger.log(`${callerName}: All attempts failed. Last error: ${lastError}`);
+  const totalDuration = Date.now() - startTime;
+  
+  // Try to handle error with error handler if available
+  if (typeof handleSyncError === 'function') {
+    const context = {
+      function: 'callDatabaseFunction_',
+      endpoint: endpoint,
+      params: params,
+      callerName: callerName,
+      attempts: SHARED_SYNC_CONFIG.MAX_RETRIES,
+      duration: totalDuration
+    };
+    
+    const syncError = typeof createSyncError === 'function' ? 
+      createSyncError(
+        `Database function ${endpoint} failed after ${SHARED_SYNC_CONFIG.MAX_RETRIES} attempts: ${lastError}`,
+        'DATABASE_CONNECTION',
+        'HIGH',
+        'DB_FUNCTION_FAILED',
+        { context: context }
+      ) : new Error(lastError);
+    
+    const result = handleSyncError(syncError, context);
+    
+    if (result.success) {
+      return result.data;
+    }
+  }
+  
+  Logger.log(`${callerName}: All attempts failed after ${totalDuration}ms. Last error: ${lastError}`);
   return null;
 }
 
@@ -453,6 +609,199 @@ function getHygienistSyncCredentials() {
   });
 }
 
+// ===== SUPABASE REQUEST UTILITIES =====
+
+/**
+ * Make a request to Supabase REST API with comprehensive error handling and retry logic
+ * This is the core function used by the auto-discovery system for database queries
+ * 
+ * @param {string} url - Full Supabase API endpoint URL
+ * @param {string} method - HTTP method ('GET', 'POST', 'PATCH', 'DELETE')
+ * @param {object} payload - Request payload for POST/PATCH requests
+ * @param {string} apiKey - Supabase API key for authentication
+ * @return {object} Parsed JSON response
+ * @throws {Error} Descriptive error for failed requests
+ */
+function makeSupabaseRequest_(url, method, payload, apiKey) {
+  const functionName = 'makeSupabaseRequest_';
+  const maxRetries = SHARED_SYNC_CONFIG.MAX_RETRIES;
+  const baseDelay = SHARED_SYNC_CONFIG.RETRY_DELAY_MS;
+  
+  // Validate input parameters
+  if (!url || typeof url !== 'string') {
+    throw new Error(`${functionName}: Invalid URL parameter`);
+  }
+  if (!method || typeof method !== 'string') {
+    throw new Error(`${functionName}: Invalid method parameter`);
+  }
+  if (!apiKey || typeof apiKey !== 'string') {
+    throw new Error(`${functionName}: Invalid API key parameter`);
+  }
+  
+  const validMethods = ['GET', 'POST', 'PATCH', 'PUT', 'DELETE'];
+  if (!validMethods.includes(method.toUpperCase())) {
+    throw new Error(`${functionName}: Invalid HTTP method: ${method}`);
+  }
+  
+  Logger.log(`${functionName}: Starting request to ${url} with method ${method}`);
+  
+  let lastError = null;
+  const startTime = Date.now();
+  
+  for (let attempt = 1; attempt <= maxRetries; attempt++) {
+    try {
+      // Prepare request options
+      const requestOptions = {
+        method: method.toUpperCase(),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${apiKey}`,
+          'apikey': apiKey,
+          'Prefer': 'return=representation'
+        },
+        muteHttpExceptions: true
+      };
+      
+      // Add payload for POST/PATCH/PUT requests
+      if (['POST', 'PATCH', 'PUT'].includes(method.toUpperCase()) && payload) {
+        try {
+          requestOptions.payload = JSON.stringify(payload);
+        } catch (jsonError) {
+          throw new Error(`${functionName}: Failed to serialize payload: ${jsonError.message}`);
+        }
+      }
+      
+      Logger.log(`${functionName}: Attempt ${attempt}/${maxRetries} - Making request...`);
+      
+      // Make the HTTP request
+      const response = UrlFetchApp.fetch(url, requestOptions);
+      const responseCode = response.getResponseCode();
+      const responseText = response.getContentText();
+      const duration = Date.now() - startTime;
+      
+      Logger.log(`${functionName}: Response code: ${responseCode}, Duration: ${duration}ms`);
+      
+      // Handle successful responses (2xx status codes)
+      if (responseCode >= 200 && responseCode < 300) {
+        let parsedResponse;
+        
+        try {
+          parsedResponse = JSON.parse(responseText);
+        } catch (parseError) {
+          // If JSON parsing fails, return the raw text wrapped in an object
+          Logger.log(`${functionName}: Warning - Response is not valid JSON, returning raw text`);
+          parsedResponse = { 
+            result: responseText,
+            rawResponse: true,
+            statusCode: responseCode
+          };
+        }
+        
+        Logger.log(`${functionName}: Success on attempt ${attempt}. Duration: ${duration}ms`);
+        
+        // Log performance warning for slow requests
+        if (duration > 3000) {
+          Logger.log(`${functionName}: WARNING - Slow request detected (${duration}ms)`);
+        }
+        
+        return parsedResponse;
+      }
+      
+      // Handle client and server errors
+      lastError = `HTTP ${responseCode}: ${responseText}`;
+      
+      // Parse error response if possible
+      let errorDetails = responseText;
+      try {
+        const errorObj = JSON.parse(responseText);
+        if (errorObj.message) {
+          errorDetails = errorObj.message;
+        } else if (errorObj.error) {
+          errorDetails = errorObj.error;
+        } else if (errorObj.details) {
+          errorDetails = errorObj.details;
+        }
+      } catch (parseError) {
+        // Use raw response text if JSON parsing fails
+      }
+      
+      Logger.log(`${functionName}: Attempt ${attempt} failed: ${lastError}`);
+      
+      // Don't retry for certain client errors
+      if (responseCode === 401) {
+        throw new Error(`${functionName}: Authentication failed - Invalid API key or insufficient permissions`);
+      }
+      if (responseCode === 403) {
+        throw new Error(`${functionName}: Access forbidden - Check Row Level Security policies and API key permissions`);
+      }
+      if (responseCode === 404) {
+        throw new Error(`${functionName}: Resource not found - Check endpoint URL: ${url}`);
+      }
+      if (responseCode >= 400 && responseCode < 500) {
+        throw new Error(`${functionName}: Client error (${responseCode}): ${errorDetails}`);
+      }
+      
+      // Server errors (5xx) should be retried
+      if (attempt < maxRetries && responseCode >= 500) {
+        const delayMs = baseDelay * Math.pow(2, attempt - 1); // Exponential backoff
+        Logger.log(`${functionName}: Server error, waiting ${delayMs}ms before retry...`);
+        Utilities.sleep(delayMs);
+        continue;
+      }
+      
+      // If we're here, it's the last attempt or a non-retryable error
+      lastError = `${functionName}: Request failed with HTTP ${responseCode}: ${errorDetails}`;
+      
+    } catch (error) {
+      // Handle network/connectivity errors
+      lastError = `${functionName}: Network error - ${error.message}`;
+      Logger.log(`${functionName}: Attempt ${attempt} network error: ${error.message}`);
+      
+      // Don't retry certain error types
+      if (error.message.includes('Authentication failed') || 
+          error.message.includes('Access forbidden') ||
+          error.message.includes('Client error')) {
+        throw error;
+      }
+      
+      // Retry network errors with exponential backoff
+      if (attempt < maxRetries) {
+        const delayMs = baseDelay * Math.pow(2, attempt - 1);
+        Logger.log(`${functionName}: Network error, waiting ${delayMs}ms before retry...`);
+        Utilities.sleep(delayMs);
+        continue;
+      }
+    }
+  }
+  
+  const totalDuration = Date.now() - startTime;
+  const finalError = `${functionName}: All ${maxRetries} attempts failed after ${totalDuration}ms. Last error: ${lastError}`;
+  
+  Logger.log(finalError);
+  throw new Error(finalError);
+}
+
+/**
+ * Simplified wrapper for GET requests to Supabase
+ * @param {string} url - Supabase API endpoint URL
+ * @param {string} apiKey - Supabase API key
+ * @return {object} Parsed JSON response
+ */
+function makeSupabaseGetRequest_(url, apiKey) {
+  return makeSupabaseRequest_(url, 'GET', null, apiKey);
+}
+
+/**
+ * Simplified wrapper for POST requests to Supabase
+ * @param {string} url - Supabase API endpoint URL
+ * @param {object} payload - Request payload
+ * @param {string} apiKey - Supabase API key
+ * @return {object} Parsed JSON response
+ */
+function makeSupabasePostRequest_(url, payload, apiKey) {
+  return makeSupabaseRequest_(url, 'POST', payload, apiKey);
+}
+
 // ===== TESTING AND VALIDATION =====
 
 /**
@@ -493,6 +842,106 @@ function testSyncUtilities() {
   console.log(`   Hygienist mappings: ${hygienistMappings ? hygienistMappings.length : 0} found`);
   
   console.log('\n🎉 Sync utilities testing complete!');
+}
+
+/**
+ * Test the makeSupabaseRequest_ function with a simple query
+ * This function validates that the Supabase request utility works correctly
+ */
+function testMakeSupabaseRequest() {
+  console.log('🧪 Testing makeSupabaseRequest_ function...');
+  
+  try {
+    // Get basic credentials
+    const credentials = getBasicSupabaseCredentials_();
+    if (!credentials) {
+      console.log('❌ No Supabase credentials available for testing');
+      return false;
+    }
+    
+    // Test with a simple health check query
+    const testUrl = `${credentials.url}/rest/v1/rpc/get_current_clinic_id`;
+    
+    console.log(`Testing request to: ${testUrl}`);
+    
+    const response = makeSupabaseRequest_(testUrl, 'POST', {}, credentials.key);
+    
+    console.log('✅ makeSupabaseRequest_ test successful');
+    console.log(`   Response type: ${typeof response}`);
+    console.log(`   Response keys: ${Object.keys(response)}`);
+    
+    return true;
+    
+  } catch (error) {
+    console.log(`❌ makeSupabaseRequest_ test failed: ${error.message}`);
+    return false;
+  }
+}
+
+/**
+ * Test the full auto-discovery integration with makeSupabaseRequest_
+ * This validates that the provider discovery system can use the new function
+ */
+function testAutoDiscoveryIntegration() {
+  console.log('🧪 Testing Auto-Discovery Integration...');
+  
+  try {
+    // Test getSyncCredentials with dentist_sync (as used in auto-discovery)
+    const credentials = getSyncCredentials('dentist_sync');
+    if (!credentials) {
+      console.log('❌ Failed to get dentist_sync credentials');
+      return false;
+    }
+    
+    console.log('✅ Retrieved dentist_sync credentials');
+    console.log(`   Has supabaseUrl: ${!!credentials.supabaseUrl}`);
+    console.log(`   Has supabaseKey: ${!!credentials.supabaseKey}`);
+    
+    // Test the exact query used in auto-discovery
+    const testQuery = `
+      SELECT 
+        p.id,
+        p.external_id,
+        p.first_name,
+        p.last_name,
+        p.email,
+        p.title,
+        p.specialization,
+        p.created_at,
+        p.updated_at
+      FROM providers p
+      WHERE p.deleted_at IS NULL
+      ORDER BY p.last_name, p.first_name
+      LIMIT 5
+    `;
+    
+    console.log('Testing provider query with makeSupabaseRequest_...');
+    
+    const response = makeSupabaseRequest_(
+      `${credentials.supabaseUrl}/rest/v1/rpc/execute_sql`,
+      'POST',
+      { query: testQuery },
+      credentials.supabaseKey
+    );
+    
+    console.log('✅ Auto-discovery integration test successful');
+    console.log(`   Response type: ${typeof response}`);
+    
+    if (response && response.result) {
+      console.log(`   Found ${response.result.length} providers`);
+      if (response.result.length > 0) {
+        const firstProvider = response.result[0];
+        console.log(`   First provider: ${firstProvider.first_name} ${firstProvider.last_name}`);
+      }
+    }
+    
+    return true;
+    
+  } catch (error) {
+    console.log(`❌ Auto-discovery integration test failed: ${error.message}`);
+    console.log(`   Error details: ${JSON.stringify(error, null, 2)}`);
+    return false;
+  }
 }
 
 /**

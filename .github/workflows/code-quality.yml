@@ -20,6 +20,8 @@ jobs:
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
+        with:
+          version: 9
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -37,10 +39,13 @@ jobs:
           
           # Check specifically for non-null assertions
           echo "🚫 Checking for non-null assertions..."
-          if pnpm biome check --reporter=json 2>/dev/null | jq -e '.diagnostics[] | select(.rule.name == "noNonNullAssertion")' > /dev/null; then
+          BIOME_JSON=$(pnpm biome check --reporter=json 2>/dev/null || echo '{"diagnostics":[]}')
+          NON_NULL_VIOLATIONS=$(echo "$BIOME_JSON" | jq -r '.diagnostics[]? | select(.rule.name == "noNonNullAssertion") | "\(.location.path):\(.location.span.start.line) - \(.message)"' 2>/dev/null || echo "")
+          
+          if [ -n "$NON_NULL_VIOLATIONS" ]; then
             echo "❌ Non-null assertions detected! This violates our null safety policy."
             echo "Please fix these violations before merging:"
-            pnpm biome check --reporter=json 2>/dev/null | jq -r '.diagnostics[] | select(.rule.name == "noNonNullAssertion") | "\(.location.path):\(.location.span.start.line) - \(.message)"'
+            echo "$NON_NULL_VIOLATIONS"
             exit 1
           else
             echo "✅ No non-null assertions found - null safety compliance verified!"
@@ -49,14 +54,18 @@ jobs:
       - name: Run TypeScript type checking
         run: |
           echo "🔧 Running TypeScript type checking..."
-          # Use Next.js build for type checking due to TypeScript 5.8.3 internal error
-          # See: docs/issues/typescript-58-internal-error-analysis.md
-          pnpm build --dry-run || echo "⚠️ TypeScript check completed with known issues"
+          # Use typecheck command for comprehensive type validation
+          pnpm typecheck
 
-      - name: Run tests
+      - name: Run full test suite
         run: |
-          echo "🧪 Running test suite..."
+          echo "🧪 Running full test suite..."
           pnpm test --run
+
+      - name: Check YAML formatting
+        run: |
+          echo "📝 Checking YAML formatting..."
+          pnpm prettier:yaml --check
 
       - name: Build application
         run: |
@@ -72,37 +81,42 @@ jobs:
           mkdir -p reports
           
           # Generate comprehensive report
-          cat > reports/null-safety-report.md << 'EOF'
+          REPORT_DATE=$(date)
+          BIOME_SUMMARY=$(pnpm biome check --reporter=summary 2>&1 || echo "Linting completed")
+          BIOME_JSON=$(pnpm biome check --reporter=json 2>/dev/null || echo '{"diagnostics":[]}')
+          NON_NULL_CHECK=$(echo "$BIOME_JSON" | jq -r '.diagnostics[]? | select(.rule.name == "noNonNullAssertion") | "\(.location.path):\(.location.span.start.line) - \(.message)"' 2>/dev/null || echo "✅ No non-null assertions found")
+          
+          cat > reports/null-safety-report.md << EOF
           # Null Safety Compliance Report
           
-          **Generated:** $(date)
+          **Generated:** $REPORT_DATE
           **Branch:** ${{ github.ref_name }}
           **Commit:** ${{ github.sha }}
           
           ## Summary
           
           This report validates that the codebase maintains null safety compliance by:
-          1. Ensuring zero non-null assertions (`!` operator)
+          1. Ensuring zero non-null assertions (\`!\` operator)
           2. Validating proper type safety patterns
           3. Confirming error handling best practices
           
           ## Biome Linting Results
           
-          ```bash
-          $(pnpm biome check --reporter=summary 2>&1 || echo "Linting completed")
-          ```
+          \`\`\`bash
+          $BIOME_SUMMARY
+          \`\`\`
           
           ## Non-Null Assertion Check
           
-          ```bash
-          $(pnpm biome check --reporter=json 2>/dev/null | jq -r '.diagnostics[] | select(.rule.name == "noNonNullAssertion") | "\(.location.path):\(.location.span.start.line) - \(.message)"' || echo "✅ No non-null assertions found")
-          ```
+          \`\`\`bash
+          $NON_NULL_CHECK
+          \`\`\`
           
           ## Recommendations
           
-          - Continue using type guards from `src/lib/utils/type-guards.ts`
-          - Use environment validation from `src/lib/config/environment.ts`
-          - Follow null safety patterns documented in `docs/null-safety-patterns.md`
+          - Continue using type guards from \`src/lib/utils/type-guards.ts\`
+          - Use environment validation from \`src/lib/config/environment.ts\`
+          - Follow null safety patterns documented in \`docs/null-safety-patterns.md\`
           
           EOF
 
@@ -125,6 +139,8 @@ jobs:
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
+        with:
+          version: 9
 
       - name: Setup Node.js
         uses: actions/setup-node@v4

@@ -17,7 +17,6 @@ devLoadAlwaysFiles:
   - docs/architecture/unified-project-structure.md
   - docs/architecture/dev-command-guidelines.md
   - docs/prds/doing/dental-dashboard-mvp-completion-brownfield-prd.md
-  - docs/architecture/bmad-brownfield-integration-plan.md
 devDebugLog: .ai/debug-log.md
 devStoryLocation: docs/stories
 agentCoreDump: .ai/core-dump{n}.md

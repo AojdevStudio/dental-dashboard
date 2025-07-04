@@ -10,6 +10,57 @@ export type ApiHandler<_TSuccessPayload = unknown> = (
 ) => Promise<NextResponse<unknown>>;
 
 /**
+ * Validate admin access requirements
+ */
+async function validateAdminAccess(
+  authContext: NonNullable<AuthContext>,
+  options?: { requireAdmin?: boolean; requireClinicAdmin?: boolean },
+  req?: Request
+): Promise<NextResponse | null> {
+  // Check admin requirements
+  if (options?.requireAdmin && authContext.role !== 'admin') {
+    return NextResponse.json({ error: 'Admin access required' }, { status: 403 });
+  }
+
+  // Check clinic admin requirements
+  if (options?.requireClinicAdmin && req) {
+    const clinicId =
+      (req as NextRequest).nextUrl.searchParams.get('clinicId') ||
+      (req as NextRequest).headers.get('x-clinic-id');
+
+    if (!clinicId) {
+      return NextResponse.json({ error: 'Clinic ID required' }, { status: 400 });
+    }
+
+    const { isClinicAdmin } = await import('../database/auth-context');
+    const isAdmin = await isClinicAdmin(authContext, clinicId);
+
+    if (!isAdmin) {
+      return NextResponse.json({ error: 'Clinic admin access required' }, { status: 403 });
+    }
+  }
+
+  return null;
+}
+
+/**
+ * Handle middleware errors with appropriate status codes
+ */
+function handleMiddlewareError(error: unknown): NextResponse {
+  if (error instanceof Error) {
+    if (error.message.includes('Access denied')) {
+      return NextResponse.json({ error: error.message }, { status: 403 });
+    }
+
+    if (error.message.includes('not found')) {
+      return NextResponse.json({ error: error.message }, { status: 404 });
+    }
+  }
+
+  return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+}
+
+/**
  * Wraps an API route handler with authentication and auth context
  */
 export function withAuth<TSuccessPayload = unknown>(
@@ -23,60 +74,26 @@ export function withAuth<TSuccessPayload = unknown>(
   context: { params: Promise<Record<string, string | string[]>> }
 ) => Promise<NextResponse> {
   return async (req: Request, context: { params: Promise<Record<string, string | string[]>> }) => {
-    const _nextRequest = req as NextRequest;
     try {
-      // Get auth context
-      // Note: getAuthContext relies on cookies(), which needs NextRequest. This cast should be fine.
-      // getAuthContext uses next/headers cookies() directly.
       const authContext = await getAuthContext();
 
       if (!authContext) {
         return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
       }
 
-      // Check admin requirements
-      if (options?.requireAdmin && authContext.role !== 'admin') {
-        return NextResponse.json({ error: 'Admin access required' }, { status: 403 });
-      }
-
-      // Check clinic admin requirements
-      if (options?.requireClinicAdmin) {
-        const clinicId =
-          (req as NextRequest).nextUrl.searchParams.get('clinicId') ||
-          (req as NextRequest).headers.get('x-clinic-id');
-
-        if (!clinicId) {
-          return NextResponse.json({ error: 'Clinic ID required' }, { status: 400 });
-        }
-
-        const { isClinicAdmin } = await import('../database/auth-context');
-        const isAdmin = await isClinicAdmin(authContext, clinicId);
-
-        if (!isAdmin) {
-          return NextResponse.json({ error: 'Clinic admin access required' }, { status: 403 });
-        }
+      // Validate access requirements
+      const accessError = await validateAdminAccess(authContext, options, req);
+      if (accessError) {
+        return accessError;
       }
 
       // Call the handler with auth context
       return await handler(req, {
-        // Pass base Request 'req' to handler
         ...context,
         authContext,
       });
     } catch (error) {
-      // Handle specific error types
-      if (error instanceof Error) {
-        if (error.message.includes('Access denied')) {
-          return NextResponse.json({ error: error.message }, { status: 403 });
-        }
-
-        if (error.message.includes('not found')) {
-          return NextResponse.json({ error: error.message }, { status: 404 });
-        }
-      }
-
-      // Generic error response
-      return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+      return handleMiddlewareError(error);
     }
   };
 }

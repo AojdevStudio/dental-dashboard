@@ -1,5 +1,8 @@
 /**
  * Main sync function - syncs all hygiene data from all month tabs to Supabase
+ * 
+ * PERFORMANCE OPTIMIZATION: Provider detection is now done once per sheet,
+ * not once per row, to prevent timeout issues.
  */
 function syncAllDentistData() {
   const functionName = 'syncAllDentistData';
@@ -9,15 +12,11 @@ function syncAllDentistData() {
   const startTime = Date.now();
 
   logToDentistSheet_(functionName, 'START', 0, 0, null, 'Full sync initiated.');
-  Logger.log(`Starting ${functionName} for Sheet ID: ${DENTIST_SHEET_ID}...`);
+  Logger.log(`Starting ${functionName} for Sheet ID: ${getDentistSheetId()}...`);
 
   // Check configuration
-  if (!DENTIST_SHEET_ID || DENTIST_SHEET_ID === 'YOUR_DENTIST_SHEET_ID_HERE') {
-    const errMsg = 'Error: DENTIST_SHEET_ID constant is not set in config.gs';
-    Logger.log(errMsg);
-    logToDentistSheet_(functionName, 'ERROR', 0, 0, null, errMsg);
-    return;
-  }
+  // Sheet ID is now dynamic - no need to check configuration
+  // getDentistSheetId() will automatically get the current active spreadsheet
 
   // Check credentials
   const credentials = getSupabaseCredentials_();
@@ -28,7 +27,7 @@ function syncAllDentistData() {
   }
 
   try {
-    const ss = SpreadsheetApp.openById(DENTIST_SHEET_ID);
+    const ss = SpreadsheetApp.openById(getDentistSheetId());
     const sheets = ss.getSheets();
 
     // Process each sheet that matches month tab patterns
@@ -103,6 +102,9 @@ function syncSheetData_(sheet, monthTab) {
     const dataRows = data.slice(headerRowIndex + 1);
     let processedRows = 0;
 
+    // Get provider info ONCE before the loop starts
+    const providerDetection = detectProviderEnhanced_(getDentistSheetId());
+
     // Process rows in batches
     for (let i = 0; i < dataRows.length; i += SUPABASE_BATCH_SIZE) {
       const batch = dataRows.slice(i, i + SUPABASE_BATCH_SIZE);
@@ -114,7 +116,8 @@ function syncSheetData_(sheet, monthTab) {
           continue;
         }
 
-        const record = parseDentistRow_(row, mapping, monthTab, credentials.clinicId, credentials);
+        // Pass the already-detected provider info to the parsing function
+        const record = parseDentistRow_(row, mapping, monthTab, credentials.clinicId, credentials, providerDetection);
         if (record) {
           records.push(record);
         }
@@ -170,7 +173,10 @@ function syncSingleRow_(sheet, rowNumber) {
       return false;
     }
 
-    const record = parseDentistRow_(rowValues, mapping, sheetName, credentials.clinicId, credentials);
+    // Get provider info ONCE for this single row operation
+    const providerDetection = detectProviderEnhanced_(getDentistSheetId());
+    
+    const record = parseDentistRow_(rowValues, mapping, sheetName, credentials.clinicId, credentials, providerDetection);
     if (!record) {
       Logger.log(`Could not parse row ${rowNumber} from ${sheetName}.`);
       return false;

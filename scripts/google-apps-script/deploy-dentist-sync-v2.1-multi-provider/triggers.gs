@@ -5,7 +5,7 @@
 function onEditDentistSync(e) {
   try {
     // Only process if this is the hygiene sheet
-    if (!e || !e.source || e.source.getId() !== DENTIST_SHEET_ID) {
+    if (!e || !e.source || e.source.getId() !== getDentistSheetId()) {
       return;
     }
 
@@ -90,7 +90,7 @@ function testOnEditTrigger() {
   
   // Create a mock edit event
   const mockEvent = {
-    source: SpreadsheetApp.openById(DENTIST_SHEET_ID),
+    source: SpreadsheetApp.openById(getDentistSheetId()),
     range: sheet.getRange('A2') // Simulate editing row 2
   };
   
