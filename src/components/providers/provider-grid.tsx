@@ -5,7 +5,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import type { ProviderWithLocations } from '@/types/providers';
 import { AlertTriangle, Grid3X3, List, RefreshCw, Users } from 'lucide-react';
 import type React from 'react';
-import { CompactProviderCard, DetailedProviderCard } from './provider-card';
+import { CompactProviderCard, DetailedProviderCard, ProviderCard } from './provider-card';
 
 /**
  * Pagination information interface
@@ -38,6 +38,7 @@ export interface ProviderGridProps {
   className?: string;
   emptyMessage?: string;
   emptyDescription?: string;
+  showAdvancedMetrics?: boolean;
 }
 
 /**
@@ -384,6 +385,7 @@ export function ProviderGrid({
   className = '',
   emptyMessage,
   emptyDescription,
+  showAdvancedMetrics = false,
 }: ProviderGridProps) {
   // Handle loading state
   if (isLoading) {
@@ -446,6 +448,55 @@ export function ProviderGrid({
       {/* Provider grid/list */}
       <div className={gridClasses}>
         {providers.map((provider) => {
+          // Use enhanced components with advanced metrics when enabled
+          if (showAdvancedMetrics) {
+            if (viewMode === 'list') {
+              return (
+                <ProviderCard.Root
+                  key={provider.id}
+                  provider={provider}
+                  onClick={onProviderClick ? () => onProviderClick(provider) : undefined}
+                >
+                  <ProviderCard.Header>
+                    <ProviderCard.Title />
+                    <ProviderCard.Actions
+                      onEdit={onProviderEdit}
+                      onViewDetails={onProviderView}
+                      showQuickActions={false}
+                    />
+                  </ProviderCard.Header>
+                  <ProviderCard.Content>
+                    <div className="space-y-3">
+                      <ProviderCard.PreviewMetrics showAdvanced={true} compact={true} />
+                      <ProviderCard.Contact />
+                    </div>
+                  </ProviderCard.Content>
+                </ProviderCard.Root>
+              );
+            } else {
+              return (
+                <ProviderCard.Root
+                  key={provider.id}
+                  provider={provider}
+                  onClick={onProviderClick ? () => onProviderClick(provider) : undefined}
+                >
+                  <ProviderCard.Header>
+                    <ProviderCard.Title />
+                    <ProviderCard.Actions onEdit={onProviderEdit} onViewDetails={onProviderView} />
+                  </ProviderCard.Header>
+                  <ProviderCard.Content>
+                    <div className="space-y-4">
+                      <ProviderCard.PreviewMetrics showAdvanced={true} />
+                      <ProviderCard.Locations />
+                      <ProviderCard.Contact />
+                    </div>
+                  </ProviderCard.Content>
+                </ProviderCard.Root>
+              );
+            }
+          }
+
+          // Use standard components for basic display
           const CardComponent = viewMode === 'list' ? CompactProviderCard : DetailedProviderCard;
 
           return (

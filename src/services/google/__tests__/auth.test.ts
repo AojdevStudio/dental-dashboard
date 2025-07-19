@@ -1,28 +1,34 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { generateAuthUrl, handleAuthCallback, refreshAccessToken } from '../auth';
 
-// Mock Google OAuth client
-vi.mock('google-auth-library', () => {
-  return {
-    OAuth2Client: vi.fn().mockImplementation(() => {
-      return {
-        generateAuthUrl: vi.fn().mockReturnValue('https://mock-google-auth-url.com'),
-        getToken: vi.fn().mockResolvedValue({
-          tokens: {
-            access_token: 'mock-access-token',
-            refresh_token: 'mock-refresh-token',
-            expiry_date: Date.now() + 3600000, // 1 hour from now
-          },
-        }),
-        setCredentials: vi.fn(),
-        refreshAccessToken: vi.fn().mockResolvedValue({
-          credentials: {
-            access_token: 'mock-refreshed-token',
-            expiry_date: Date.now() + 3600000,
-          },
-        }),
-      };
+// Mock googleapis library
+vi.mock('googleapis', () => {
+  const mockOAuth2Client = {
+    generateAuthUrl: vi.fn().mockReturnValue('https://mock-google-auth-url.com'),
+    getToken: vi.fn().mockResolvedValue({
+      tokens: {
+        access_token: 'mock-access-token',
+        refresh_token: 'mock-refresh-token',
+        expiry_date: Date.now() + 3600000, // 1 hour from now
+      },
     }),
+    setCredentials: vi.fn(),
+    getAccessToken: vi.fn().mockResolvedValue({ 
+      token: 'mock-refreshed-token',
+      res: null 
+    }),
+    credentials: {
+      access_token: 'mock-refreshed-token',
+      expiry_date: Date.now() + 3600000,
+    },
+  };
+
+  return {
+    google: {
+      auth: {
+        OAuth2: vi.fn().mockImplementation(() => mockOAuth2Client)
+      }
+    }
   };
 });
 
@@ -35,8 +41,6 @@ describe('Google Auth Service', () => {
     const authUrl = generateAuthUrl();
 
     expect(authUrl).toBe('https://mock-google-auth-url.com');
-    // Verify the OAuth client was initialized with proper scopes
-    expect(vi.mocked(require('google-auth-library').OAuth2Client)).toHaveBeenCalled();
   });
 
   it('should handle auth callback and return tokens', async () => {

@@ -1,5 +1,5 @@
 import { ProviderFilters } from '@/components/providers/provider-filters';
-import { ProviderGrid } from '@/components/providers/provider-grid';
+import { ProviderNavigation } from '@/components/providers/provider-navigation';
 import { prisma } from '@/lib/database/prisma';
 import {
   getProviderLocationSummary,
@@ -158,8 +158,8 @@ export default async function ProvidersPage({
           className="bg-white dark:bg-gray-800 p-6 rounded-lg border border-gray-200 dark:border-gray-700"
         />
 
-        {/* Provider Grid */}
-        <ProviderGrid
+        {/* Provider Navigation */}
+        <ProviderNavigation
           providers={providersResult.providers}
           pagination={{
             page,
