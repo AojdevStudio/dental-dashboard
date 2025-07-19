@@ -12,6 +12,17 @@ jobs:
     name: Code Quality Checks
     runs-on: ubuntu-latest
     
+    env:
+      NODE_ENV: test
+      # Cloud test database configuration
+      NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.TEST_SUPABASE_URL }}
+      NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.TEST_SUPABASE_ANON_KEY }}
+      DATABASE_URL: ${{ secrets.TEST_DATABASE_URL }}
+      DIRECT_URL: ${{ secrets.TEST_DIRECT_URL }}
+      SUPABASE_SERVICE_KEY: ${{ secrets.TEST_SUPABASE_SERVICE_KEY }}
+      # Application configuration
+      NEXT_PUBLIC_SITE_URL: http://localhost:3000
+    
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -31,6 +42,19 @@ jobs:
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
+
+      - name: Verify cloud database connection
+        run: |
+          echo "🔌 Verifying connection to cloud test database..."
+          echo "Database URL: ${DATABASE_URL%%@*}@***"
+          echo "Supabase URL: $NEXT_PUBLIC_SUPABASE_URL"
+          
+          # Test database connectivity
+          if ! pnpm exec prisma db ping --timeout 10; then
+            echo "❌ Failed to connect to cloud test database"
+            exit 1
+          fi
+          echo "✅ Cloud test database connection verified"
 
       - name: Run Biome linting (with null safety checks)
         run: |
@@ -132,6 +156,17 @@ jobs:
   dependency-audit:
     name: Dependency Security Audit
     runs-on: ubuntu-latest
+    
+    env:
+      NODE_ENV: test
+      # Cloud test database configuration
+      NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.TEST_SUPABASE_URL }}
+      NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.TEST_SUPABASE_ANON_KEY }}
+      DATABASE_URL: ${{ secrets.TEST_DATABASE_URL }}
+      DIRECT_URL: ${{ secrets.TEST_DIRECT_URL }}
+      SUPABASE_SERVICE_KEY: ${{ secrets.TEST_SUPABASE_SERVICE_KEY }}
+      # Application configuration
+      NEXT_PUBLIC_SITE_URL: http://localhost:3000
     
     steps:
       - name: Checkout code

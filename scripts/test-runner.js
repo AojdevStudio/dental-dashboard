@@ -2,27 +2,26 @@
 
 import { execSync, spawn } from 'child_process';
 import process from 'process';
+import dotenv from 'dotenv';
 
 /**
- * Test runner that ensures proper cleanup of the test database
- * even if tests fail or are interrupted.
+ * Test runner for cloud-based testing.
+ * Now uses cloud Supabase branch database instead of local setup.
  */
 class TestRunner {
   constructor() {
-    this.testDbStarted = false;
     this.setupSignalHandlers();
   }
 
   /**
-   * Set up signal handlers to ensure cleanup on process termination
+   * Set up signal handlers for graceful shutdown
    */
   setupSignalHandlers() {
     const signals = ['SIGINT', 'SIGTERM', 'SIGHUP'];
     
     signals.forEach(signal => {
       process.on(signal, () => {
-        console.log(`\nReceived ${signal}, cleaning up...`);
-        this.cleanup();
+        console.log(`\nReceived ${signal}, exiting gracefully...`);
         process.exit(0);
       });
     });
@@ -30,52 +29,44 @@ class TestRunner {
     // Handle uncaught exceptions
     process.on('uncaughtException', (error) => {
       console.error('Uncaught exception:', error);
-      this.cleanup();
       process.exit(1);
     });
   }
 
   /**
-   * Start the test database
+   * Verify cloud database connection
    */
-  async startTestDb() {
+  async verifyCloudConnection() {
     try {
-      console.log('Starting test database...');
-      execSync('pnpm supabase start', { stdio: 'inherit' });
-      this.testDbStarted = true;
-      console.log('Test database started successfully');
+      console.log('🔌 Verifying cloud test database configuration...');
+      
+      // Load test environment
+      dotenv.config({ path: '.env.test' });
+      
+      const dbUrl = process.env.DATABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL;
+      if (!dbUrl) {
+        throw new Error('No database configuration found in .env.test');
+      }
+      
+      console.log('✅ Cloud test database configuration verified');
+      console.log(`📍 Using database: ${dbUrl.substring(0, 30)}...`);
     } catch (error) {
-      console.error('Failed to start test database:', error.message);
+      console.error('❌ Failed to verify cloud test database configuration:', error.message);
+      console.error('Please check your .env.test configuration');
       throw error;
     }
   }
 
   /**
-   * Stop the test database
-   */
-  cleanup() {
-    if (this.testDbStarted) {
-      try {
-        console.log('Stopping test database...');
-        execSync('pnpm supabase stop', { stdio: 'inherit' });
-        console.log('Test database stopped successfully');
-      } catch (error) {
-        console.error('Failed to stop test database:', error.message);
-      }
-      this.testDbStarted = false;
-    }
-  }
-
-  /**
-   * Run tests with proper cleanup
+   * Run tests against cloud database
    */
   async runTests(mode = 'run') {
     let exitCode = 0;
     
     try {
-      await this.startTestDb();
+      await this.verifyCloudConnection();
       
-      console.log(`Running tests in ${mode} mode...`);
+      console.log(`🧪 Running tests in ${mode} mode against cloud database...`);
       
       const vitestArgs = mode === 'coverage' 
         ? ['run', '--coverage']
@@ -112,8 +103,6 @@ class TestRunner {
     } catch (error) {
       console.error('Tests failed:', error.message);
       exitCode = 1;
-    } finally {
-      this.cleanup();
     }
     
     process.exit(exitCode);
@@ -125,7 +114,7 @@ class TestRunner {
  */
 function showHelp() {
   console.log(`
-Test Runner - Ensures proper test database cleanup
+Test Runner - Cloud Database Testing
 
 Usage: node scripts/test-runner.js [mode]
 
@@ -136,6 +125,10 @@ Modes:
 
 Options:
   --help    Show this help message
+
+Cloud Database Configuration:
+  Tests now run against cloud Supabase branch database.
+  Configure connection in .env.test file.
 
 Examples:
   node scripts/test-runner.js run

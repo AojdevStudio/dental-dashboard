@@ -109,12 +109,10 @@ This is a multi-tenant dental practice dashboard built with Next.js 15, TypeScri
 - `pnpm prisma:seed` - Seed database with initial data
 
 ### Testing
-- `pnpm test:watch` - Run tests in watch mode with local database
-- `pnpm test:coverage` - Generate test coverage report with local database
+- `pnpm test:watch` - Run tests in watch mode with cloud database
+- `pnpm test:coverage` - Generate test coverage report with cloud database
 - `pnpm test:integration` - Run integration tests with Vitest
-- `pnpm test:start` - Start local Supabase for testing
-- `pnpm test:stop` - Stop local Supabase
-- `pnpm test:reset` - Reset local test database to clean state
+- `pnpm test:cloud` - Display cloud database testing information
 
 ## TypeScript/Next.js-Specific Rules
 
@@ -238,8 +236,17 @@ This project implements strict database safety protocols to prevent test data co
 
 #### Environment Isolation Rules
 - **Production Database**: Real KamDental clinic data only (`supabase.co` URLs)
-- **Staging Database**: Production-like testing environment (planned)
-- **Local Test Database**: Development and testing only (`localhost:54322`)
+- **Cloud Test Database**: CI/CD and testing environment (`.env.test` configuration)
+- **Development Database**: Production database with proper access controls
+
+### 🌩️ CLOUD-ONLY TESTING APPROACH
+**IMPORTANT**: This project has transitioned from local Supabase to cloud-only testing for better CI/CD reliability.
+
+#### Testing Configuration
+- **All tests use cloud Supabase branch database** configured in `.env.test`
+- **No local Supabase dependencies** in CI/CD pipeline
+- **Faster test execution** without local database startup/teardown
+- **Consistent environment** between local development and CI
 
 #### REQUIRED Safety Checks Before Database Operations
 1. **Always validate environment** before any database operations
@@ -495,12 +502,10 @@ This is a multi-tenant dental practice dashboard built with Next.js 15, TypeScri
 - `pnpm prisma:seed` - Seed database with initial data
 
 ### Testing
-- `pnpm test:watch` - Run tests in watch mode with local database
-- `pnpm test:coverage` - Generate test coverage report with local database
+- `pnpm test:watch` - Run tests in watch mode with cloud database
+- `pnpm test:coverage` - Generate test coverage report with cloud database
 - `pnpm test:integration` - Run integration tests with Vitest
-- `pnpm test:start` - Start local Supabase for testing
-- `pnpm test:stop` - Stop local Supabase
-- `pnpm test:reset` - Reset local test database to clean state
+- `pnpm test:cloud` - Display cloud database testing information
 
 ## TypeScript/Next.js-Specific Rules
 
@@ -624,8 +629,17 @@ This project implements strict database safety protocols to prevent test data co
 
 #### Environment Isolation Rules
 - **Production Database**: Real KamDental clinic data only (`supabase.co` URLs)
-- **Staging Database**: Production-like testing environment (planned)
-- **Local Test Database**: Development and testing only (`localhost:54322`)
+- **Cloud Test Database**: CI/CD and testing environment (`.env.test` configuration)
+- **Development Database**: Production database with proper access controls
+
+### 🌩️ CLOUD-ONLY TESTING APPROACH
+**IMPORTANT**: This project has transitioned from local Supabase to cloud-only testing for better CI/CD reliability.
+
+#### Testing Configuration
+- **All tests use cloud Supabase branch database** configured in `.env.test`
+- **No local Supabase dependencies** in CI/CD pipeline
+- **Faster test execution** without local database startup/teardown
+- **Consistent environment** between local development and CI
 
 #### REQUIRED Safety Checks Before Database Operations
 1. **Always validate environment** before any database operations

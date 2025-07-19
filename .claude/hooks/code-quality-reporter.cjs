@@ -11,7 +11,22 @@ const path = require('path');
 class CodeQualityReporter {
   constructor() {
     this.sessionFile = path.join(__dirname, '.session-quality.json');
+    this.reportsDir = path.join(process.cwd(), 'docs', 'reports');
+    this.ensureReportsDirectory();
     this.loadSession();
+  }
+
+  /**
+   * Ensure reports directory exists
+   */
+  ensureReportsDirectory() {
+    try {
+      if (!fs.existsSync(this.reportsDir)) {
+        fs.mkdirSync(this.reportsDir, { recursive: true });
+      }
+    } catch (error) {
+      // Silently fail - don't interrupt the workflow
+    }
   }
 
   /**
@@ -158,55 +173,85 @@ class CodeQualityReporter {
     const fileStats = this.getFileStatistics();
 
     const report = [
-      '📊 Code Quality Session Report',
-      '================================',
+      '# Code Quality Session Report',
       '',
-      `Duration: ${duration}`,
-      `Files Modified: ${this.session.filesModified.size || Array.from(this.session.filesModified).length}`,
+      `**Duration:** ${duration}  `,
+      `**Files Modified:** ${this.session.filesModified.size || Array.from(this.session.filesModified).length}  `,
+      `**Generated:** ${new Date().toISOString()}`,
       '',
-      '📈 Statistics:',
-      `  Total Operations: ${this.session.statistics.totalFiles}`,
-      `  Violations Found: ${this.session.statistics.totalViolations}`,
-      `  Operations Blocked: ${this.session.statistics.blockedOperations}`,
-      `  Auto-fixes Applied: ${this.session.statistics.autoFixed}`,
+      '## Statistics',
+      '',
+      `- **Total Operations:** ${this.session.statistics.totalFiles}`,
+      `- **Violations Found:** ${this.session.statistics.totalViolations}`,
+      `- **Operations Blocked:** ${this.session.statistics.blockedOperations}`,
+      `- **Auto-fixes Applied:** ${this.session.statistics.autoFixed}`,
       ''
     ];
 
     if (topIssues.length > 0) {
-      report.push('🔍 Top Issues:');
+      report.push('## Top Issues');
+      report.push('');
       topIssues.forEach(issue => {
-        report.push(`  - ${issue.type} (${issue.count} occurrences)`);
+        report.push(`- **${issue.type}** (${issue.count} occurrences)`);
       });
       report.push('');
     }
 
     if (this.session.improvements.length > 0) {
-      report.push('✨ Improvements Made:');
+      report.push('## Improvements Made');
+      report.push('');
       this.session.improvements.slice(0, 5).forEach(imp => {
-        report.push(`  - ${path.basename(imp.file)}: ${imp.action}`);
+        report.push(`- **${path.basename(imp.file)}:** ${imp.action}`);
       });
       report.push('');
     }
 
     if (fileStats.mostProblematic.length > 0) {
-      report.push('📁 Files Needing Attention:');
+      report.push('## Files Needing Attention');
+      report.push('');
       fileStats.mostProblematic.forEach(file => {
-        report.push(`  - ${file.path} (${file.issues} issues)`);
+        report.push(`- **${file.path}** (${file.issues} issues)`);
       });
       report.push('');
     }
 
-    report.push('💡 Recommendations:');
-    report.push(...this.getRecommendations());
+    report.push('## Recommendations');
     report.push('');
-    report.push('For detailed coding standards, see: docs/architecture/coding-standards.md');
+    this.getRecommendations().forEach(rec => {
+      report.push(`- ${rec.replace(/^\s*-\s*/, '')}`);
+    });
+    report.push('');
+    report.push('## Reference');
+    report.push('');
+    report.push('For detailed coding standards, see: [docs/architecture/coding-standards.md](../architecture/coding-standards.md)');
+
+    // Save report to file with proper naming
+    this.saveReportToFile(report.join('\n'));
 
     // Clean up session file
     this.cleanup();
 
     return {
-      message: report.join('\n')
+      message: '📊 Code quality session report generated'
     };
+  }
+
+  /**
+   * Save report to file with proper kebab-case naming
+   */
+  saveReportToFile(reportContent) {
+    try {
+      const timestamp = new Date().toISOString().slice(0, 19).replace(/:/g, '-');
+      const filename = `code-quality-session-${timestamp}.md`;
+      const filepath = path.join(this.reportsDir, filename);
+      
+      fs.writeFileSync(filepath, reportContent, 'utf-8');
+      
+      console.error(`📁 Report saved: docs/reports/${filename}`);
+    } catch (error) {
+      // Silently fail - don't interrupt the workflow
+      console.error(`⚠️ Failed to save report: ${error.message}`);
+    }
   }
 
   /**
