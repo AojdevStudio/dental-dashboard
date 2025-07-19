@@ -1,1 +1,0 @@
-Execute BMAD options $ARGUMENTS in parallel using Claude Code's Task Tool with up to 10 concurrent subagents. Create independent task instances for each option number (comma-separated), where each subagent has its own context window. Use the Task Tool to run multiple tasks simultaneously, pulling new tasks from the queue as others complete for efficient execution.

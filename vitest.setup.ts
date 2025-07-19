@@ -6,6 +6,13 @@ import { vi } from 'vitest';
 // Make React available globally in tests
 global.React = React;
 
+// Mock ResizeObserver for JSDOM
+global.ResizeObserver = vi.fn().mockImplementation(() => ({
+  observe: vi.fn(),
+  unobserve: vi.fn(),
+  disconnect: vi.fn(),
+}));
+
 // Mock Next.js server functions to prevent "called outside request scope" errors
 vi.mock('next/headers', () => ({
   cookies: vi.fn(() => ({

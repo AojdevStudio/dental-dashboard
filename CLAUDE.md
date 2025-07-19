@@ -1,787 +1,363 @@
-# CLAUDE.md - Development Partnership & Project Guide
+# CLAUDE.md - Dental Dashboard Development Partnership & Protocol Guide
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+This file provides comprehensive guidance to Claude Code (claude.ai/code) for the Dental Dashboard project - a multi-tenant dental practice insights dashboard.
 
-## 🚨 DEVELOPMENT PARTNERSHIP - MANDATORY WORKFLOW
+## 🏥 PROJECT CONTEXT
 
-We're building production-quality code together. Your role is to create maintainable, efficient solutions while catching potential issues early.
+**What We're Building**: A production-grade dental practice dashboard that provides comprehensive data visualization and KPI tracking for dental clinics. The application integrates with Google Sheets for data synchronization and provides multi-clinic management capabilities with role-based access control.
 
-### AUTOMATED CHECKS ARE MANDATORY
-**ALL hook issues are BLOCKING - EVERYTHING must be ✅ GREEN!**  
-No errors. No formatting issues. No linting problems. No type errors. Zero tolerance.  
-These are not suggestions. Fix ALL issues before continuing.
+**Key Business Value**: 
+- Centralizes practice performance metrics
+- Automates data collection from Google Sheets
+- Provides real-time insights for dental practice management
+- Supports multi-location clinic administration
 
-### CRITICAL WORKFLOW - ALWAYS FOLLOW THIS!
+**Target Users**: Dental clinic owners, practice managers, office administrators, dentists, and hygienists who need data-driven insights to optimize operations and patient care.
 
-#### Research → Plan → Implement
+## 🚨 CRITICAL DEVELOPMENT PARTNERSHIP PROTOCOLS
+
+### Core Meta-Cognitive Protocol
 **NEVER JUMP STRAIGHT TO CODING!** Always follow this sequence:
-1. **Research**: Explore the codebase, understand existing patterns
-2. **Plan**: Create a detailed implementation plan and verify it with me  
-3. **Implement**: Execute the plan with validation checkpoints
+
+1. **Understand** - What problem are we solving? Read relevant docs/PRDs first
+2. **Research** - Explore codebase, understand existing patterns
+3. **Plan** - Create detailed implementation plan and verify with user
+4. **Implement** - Execute plan with validation checkpoints
+5. **Verify** - Ensure all quality checks pass
 
 When asked to implement any feature, you'll first say: "Let me research the codebase and create a plan before implementing."
 
-For complex architectural decisions or challenging problems, use **"ultrathink"** to engage maximum reasoning capacity. Say: "Let me ultrathink about this architecture before proposing a solution."
+### Automated Quality Enforcement
+**ALL hook issues are BLOCKING - EVERYTHING must be ✅ GREEN!**
+- Zero tolerance for errors, formatting issues, linting problems, or type errors
+- When hooks fail (exit code 2), STOP and fix ALL issues immediately
+- Your code must be 100% clean before continuing
 
-#### USE MULTIPLE AGENTS!
-*Leverage subagents aggressively* for better results:
-
-* Spawn agents to explore different parts of the codebase in parallel
-* Use one agent to write tests while another implements features
-* Delegate research tasks: "I'll have an agent investigate the database schema while I analyze the API structure"
-* For complex refactors: One agent identifies changes, another implements them
-
-Say: "I'll spawn agents to tackle different aspects of this problem" whenever a task has multiple independent parts.
-
-#### Reality Checkpoints
-**Stop and validate** at these moments:
-- After implementing a complete feature
-- Before starting a new major component  
-- When something feels wrong
-- Before declaring "done"
-- **WHEN HOOKS FAIL WITH ERRORS** ❌
-
-Run: `pnpm format && pnpm test && pnpm typecheck && pnpm biome:check`
-
-#### 🚨 CRITICAL: Hook Failures Are BLOCKING
-**When hooks report ANY issues (exit code 2), you MUST:**
-1. **STOP IMMEDIATELY** - Do not continue with other tasks
-2. **FIX ALL ISSUES** - Address every ❌ issue until everything is ✅ GREEN
-3. **VERIFY THE FIX** - Re-run the failed command to confirm it's fixed
-4. **CONTINUE ORIGINAL TASK** - Return to what you were doing before the interrupt
-5. **NEVER IGNORE** - There are NO warnings, only requirements
-
-This includes:
-- Formatting issues (Biome format)
-- Linting violations (Biome lint, Next.js lint)
-- Type errors (tsc --noEmit)
-- Import/export issues
-- ALL other checks
-
-Your code must be 100% clean. No exceptions.
-
-#### Working Memory Management
-
-When context gets long:
-- Re-read this CLAUDE.md file
-- Summarize progress in a PROGRESS.md file
-- Document current state before major changes
-
-Maintain TODO.md:
-```
-## Current Task
-- [ ] What we're doing RIGHT NOW
-
-## Completed  
-- [x] What's actually done and tested
-
-## Next Steps
-- [ ] What comes next
+**Reality Checkpoints** - Run after each feature:
+```bash
+pnpm format && pnpm test && pnpm typecheck && pnpm biome:check
 ```
 
-## Project Overview
+### Multi-Agent Collaboration Protocol
+Leverage multiple agents for complex tasks:
+- Spawn agents to explore different parts of the codebase in parallel
+- Use one agent for tests while another implements features
+- Say: "I'll spawn agents to tackle different aspects of this problem"
 
-This is a multi-tenant dental practice dashboard built with Next.js 15, TypeScript, Supabase, and Prisma. The application provides comprehensive data visualization and KPI tracking for dental clinics, with Google Sheets integration for data sync.
+Example delegation patterns:
+- "I'll have an agent investigate the database schema while I analyze the API structure"
+- "One agent will identify provider-related components while another checks the metrics system"
 
-## Development Commands
+### Deep Thinking Protocol
+For complex architectural decisions or challenging problems, use **"ultrathink"** to engage maximum reasoning capacity:
+- "Let me ultrathink about this multi-tenant architecture before proposing a solution"
+- "This RLS implementation requires ultrathinking to ensure security"
 
-### Core Development
-- `pnpm dev` - Start development server with Turbopack
-- `pnpm build` - Build production application
-- `pnpm start` - Start production server
+## 📋 TASK MANAGEMENT PROTOCOL
 
-### Code Quality - MANDATORY WORKFLOW
-- `pnpm format` - Format code with Biome
-- `pnpm test` - Run unit tests with Vitest using local Supabase database
-- `pnpm typecheck` - Run TypeScript type checking
-- `pnpm biome:check` - Check code with Biome (linting + formatting)
-- `pnpm biome:fix` - Auto-fix Biome issues
-- `pnpm lint` - Run Next.js ESLint linter
-- `pnpm lint:fix` - Fix Biome linting issues automatically
-- `pnpm imports:fix` - Organize and fix import statements
-- `pnpm pre-commit` - Manual pre-commit check (Biome + tests)
-- `pnpm code-quality` - Full quality pipeline (Biome + tests + build)
+Use the TodoWrite tool proactively for:
+- Complex multi-step tasks (3+ steps)
+- Non-trivial implementations
+- When the user provides multiple tasks
+- After receiving new instructions
 
-### Database Operations
-- `pnpm prisma:generate` - Generate Prisma client after schema changes
-- `pnpm prisma:push` - Push schema changes to database (development)
-- `pnpm prisma:studio` - Open Prisma Studio for data inspection
-- `pnpm prisma:seed` - Seed database with initial data
+Mark tasks as:
+- `in_progress` - BEFORE starting work (only one at a time)
+- `completed` - IMMEDIATELY after finishing
+- Create new tasks for discovered work
 
-### Testing
-- `pnpm test:watch` - Run tests in watch mode with cloud database
-- `pnpm test:coverage` - Generate test coverage report with cloud database
-- `pnpm test:integration` - Run integration tests with Vitest
-- `pnpm test:cloud` - Display cloud database testing information
+## 🏗️ ARCHITECTURE-SPECIFIC PROTOCOLS
 
-## TypeScript/Next.js-Specific Rules
+### Next.js 15 App Router Protocol
+- **Server Components by default** - Use Client Components only when needed
+- **Route Groups**: `(auth)` for authentication, `(dashboard)` for main app
+- **API Routes**: Located in `src/app/api/`, use standardized patterns
+- **Middleware**: Authentication via `middleware.ts` with Supabase SSR
+- **Loading States**: Always implement `loading.tsx` for Suspense
+- **Error Boundaries**: Always implement `error.tsx` for error handling
 
-### FORBIDDEN - NEVER DO THESE:
-- **NO any or unknown** without proper type guards
-- **NO non-null assertions (!)** without clear justification
-- **NO @ts-ignore** - fix the actual type issue
-- **NO setTimeout/setInterval** for coordination - use Promises/async
-- **NO direct DOM manipulation** in React components
-- **NO mutating props or state** directly
-- **NO keeping old and new code** together
-- **NO migration functions** or compatibility layers
-- **NO versioned function names** (processV2, handleNew)
-- **NO mixing server/client code** in wrong boundaries
-- **NO TODOs** in final code
-- **NO index of array as key** property in React elements
-- **NO forEach with large arrays** - prefer for...of
-- **NO undeclared variables** - explicitly declare all variables
-- **NO classes with only static members**
+### Supabase Multi-Tenant Protocol
+- **Row Level Security (RLS)**: MANDATORY for all data access
+- **Auth Context**: Use `getAuthContextByAuthId` for user clinic access
+- **Clinic Isolation**: All queries must respect `authContext.clinicIds`
+- **Provider Access**: Check `authContext.providerIds` for provider-specific data
+- **Role Validation**: Verify roles via `UserClinicRole` model
 
-> **AUTOMATED ENFORCEMENT**: Biome and TypeScript will BLOCK commits that violate these rules.  
-> When you see `❌ TYPE ERROR` or `❌ LINT ERROR`, you MUST fix it immediately!
+### Database Operations Protocol
+```typescript
+// ALWAYS use auth context
+const authContext = await getAuthContextByAuthId(user.id);
 
-### Required Standards:
-- **Delete** old code when replacing it
-- **Explicit return types** on all functions
-- **Meaningful names**: `userId` not `id`, `UserProfile` not `Profile`
-- **Early returns** to reduce nesting
-- **Type-safe constructors**: proper TypeScript interfaces and types
-- **Proper error handling**: use Error objects, not strings
-- **Custom hooks** for reusable logic
-- **Composition over inheritance**
-- **Server/client boundary respect**: no server code in client components
-- **Regex literals declared at top level**
-- **Prefer const/let over var**
-- **Export from instead of import then export**
+// ALWAYS filter by authorized clinics
+const data = await prisma.model.findMany({
+  where: {
+    clinicId: { in: authContext.clinicIds },
+    // Additional filters
+  }
+});
 
-## Implementation Standards
-
-### Our code is complete when:
-- ✅ All linters pass with zero issues (Biome)
-- ✅ All tests pass (Vitest)
-- ✅ Type checking passes with zero errors
-- ✅ Feature works end-to-end
-- ✅ Old code is deleted
-- ✅ TSDoc on all exported functions/components
-
-### Testing Strategy
-- Complex business logic → Write tests first (Vitest)
-- React components → Write tests after implementation
-- User flows → Add Playwright e2e tests
-- API routes → Test both success and error cases
-- Skip tests for simple presentational components
-
-## Architecture Overview
-
-### Technology Stack
-- **Framework:** Next.js 15 with App Router and Turbopack
-- **Language:** TypeScript 5.8.3 with strict mode
-- **Database:** Supabase PostgreSQL with Prisma ORM
-- **UI:** React 19, Shadcn UI, Radix UI, Tailwind CSS 4
-- **State Management:** Server Components, React Context, Zustand, TanStack Query
-- **Authentication:** Supabase Auth with SSR
-- **Testing:** Hybrid testing with Vitest (unit/integration) and Playwright (E2E) with MCP integration
-- **Code Quality:** Biome for comprehensive linting, formatting, and import organization with Husky pre-commit hooks
-
-### Project Structure
-```
-src/
-├── app/                    # Next.js App Router pages
-│   ├── (auth)/            # Authentication pages
-│   ├── (dashboard)/       # Main application pages
-│   └── api/               # API routes
-├── components/            # React components
-│   ├── ui/               # Generic UI components (Shadcn)
-│   ├── dashboard/        # Dashboard-specific components
-│   ├── auth/             # Authentication components
-│   └── common/           # Shared components
-├── lib/                  # Utilities and configurations
-│   ├── database/         # Prisma client and queries
-│   ├── auth/             # Authentication utilities
-│   ├── supabase/         # Supabase client configurations
-│   └── utils/            # General utilities
-├── hooks/                # Custom React hooks
-├── types/                # TypeScript type definitions
-├── styles/               # Global styles
-└── tests/                # E2E tests and test utilities
+// NEVER use raw SQL without parameterization
+// ALWAYS validate environment before test operations
 ```
 
-## Problem-Solving Together
+### Google Sheets Integration Protocol
+1. **OAuth Flow**: `/api/google/connect` → Google Auth → `/api/google/callback`
+2. **Column Mapping**: Always validate mappings before sync
+3. **Sync Resilience**: Handle partial failures gracefully
+4. **Token Management**: Store securely in `DataSource` model
+5. **Error Recovery**: Log failures to sync history
 
-When you're stuck or confused:
-1. **Stop** - Don't spiral into complex solutions
-2. **Delegate** - Consider spawning agents for parallel investigation
-3. **Ultrathink** - For complex problems, say "I need to ultrathink through this challenge" to engage deeper reasoning
-4. **Step back** - Re-read the requirements
-5. **Simplify** - The simple solution is usually correct
-6. **Ask** - "I see two approaches: [A] vs [B]. Which do you prefer?"
+## 🛡️ SECURITY & SAFETY PROTOCOLS
 
-My insights on better approaches are valued - please ask for them!
-
-## Common Information For MCP use:
-- **Linear MCP Quick Reference:**
-  - Project name: Dental Dashboard (always include the project when creating Linear issues)
-  - Project ID: 31deeedb-112f
-  - Full Project ID: dental-dashboard-31deeedb112f
-  - Team: AOJDevStudio
-  - Team ID: 6b3573d9-0510-4503-b569-b92b37a36105
-
-- **Supabase MCP Quick Reference:**
-  - Organization name: KC Ventures Consulting Group
-  - Organization slug: hbcnwcsjguowrjnugzye
-  - Project name: dashboard
-  - Project ID: yovbdmjwrrgardkgrenc
-  - Project URL: https://yovbdmjwrrgardkgrenc.supabase.co
-
-## 🛡️ DATABASE SAFETY AND ENVIRONMENT PROTECTION
-
-### CRITICAL: Database Environment Safety
-This project implements strict database safety protocols to prevent test data contamination in production.
-
-#### Environment Isolation Rules
-- **Production Database**: Real KamDental clinic data only (`supabase.co` URLs)
-- **Cloud Test Database**: CI/CD and testing environment (`.env.test` configuration)
-- **Development Database**: Production database with proper access controls
-
-### 🌩️ CLOUD-ONLY TESTING APPROACH
-**IMPORTANT**: This project has transitioned from local Supabase to cloud-only testing for better CI/CD reliability.
-
-#### Testing Configuration
-- **All tests use cloud Supabase branch database** configured in `.env.test`
-- **No local Supabase dependencies** in CI/CD pipeline
-- **Faster test execution** without local database startup/teardown
-- **Consistent environment** between local development and CI
-
-#### REQUIRED Safety Checks Before Database Operations
-1. **Always validate environment** before any database operations
-2. **Use test environment guard** for test data operations:
-   ```typescript
-   import { validateTestEnvironment } from '@/lib/utils/test-environment-guard';
-   validateTestEnvironment(); // Throws if production detected
-   ```
-3. **Check for test data contamination** if suspicious activity:
-   ```bash
-   node scripts/scan-contamination.js
-   ```
-
-## Performance & Security
-
-### **Measure First**:
-- No premature optimization
-- Use React DevTools Profiler for performance bottlenecks
-- Benchmark with real data before claiming improvements
-- Monitor Core Web Vitals
-
-### **Security Always**:
-- Validate all inputs (client AND server)
-- Use crypto.getRandomValues() for randomness
-- Sanitize user content before rendering
-- Parameterized queries for database operations (never concatenate!)
-- Proper authentication/authorization boundaries
-
-## TypeScript Best Practices
-
-1. **Enforce Strict Null Checks:**
-   - Always verify that a variable is not null or undefined before using it
-   - Use conditional checks, optional chaining (?.), and the nullish coalescing operator (??)
-
-2. **Define and Validate Types for External Data:**
-   - For any data coming from an external source (APIs, raw SQL, etc.), create a specific interface or type
-   - Use Zod to parse this data at the boundary of your application
-
-3. **Write Type-Safe Prisma Queries:**
-   - Rely on the auto-generated types from your Prisma client
-   - Use IDE autocompletion to prevent errors in include or select clauses
-
-4. **Integrate Type Checking into Your Workflow:**
-   - Run `pnpm typecheck` regularly during development
-   - Pre-commit hooks automatically run Biome formatting and tests before commits
-   - Use `pnpm code-quality` for full quality pipeline before pushing changes
-
-## Code Quality Pipeline
-
-### Biome Configuration
-The project uses a comprehensive Biome setup (`.biome.json`) with:
-
-**Core Features:**
-- **VCS Integration:** Git-aware linting with automatic ignore file handling
-- **Import Organization:** Automatic import sorting and organization
-- **Multi-language Support:** JavaScript/TypeScript, JSON, and CSS formatting
-
-**Rule Categories (300+ rules):**
-- **Accessibility:** Ensures WCAG compliance and semantic HTML
-- **Performance:** Prevents performance anti-patterns (barrel files, unnecessary re-exports)
-- **Security:** XSS prevention and secure coding practices
-- **Complexity:** Maintains code readability and cognitive load
-- **Style:** Consistent code formatting and naming conventions
-- **Correctness:** Prevents runtime errors and type issues
-
-## Communication Protocol
-
-### Progress Updates:
-```
-✓ Implemented user authentication (all tests passing)
-✓ Added rate limiting middleware  
-✗ Found issue with session persistence - investigating
+### Database Environment Safety
+```typescript
+// CRITICAL: Always validate environment for test operations
+import { validateTestEnvironment } from '@/lib/utils/test-environment-guard';
+validateTestEnvironment(); // Throws if production detected
 ```
 
-### Suggesting Improvements:
-"The current approach works, but I notice [observation].
-Would you like me to [specific improvement]?"
+### API Security Protocol
+- All routes must use `withAuth` middleware
+- Role-based access: `requireClinicAdmin`, `requireAdmin`
+- Input validation with Zod schemas
+- Standardized error responses with `ApiError`
+- No direct database access in routes
 
-## Critical Development Issues
+### Critical Security Rules
+- **NO** any or unknown without type guards
+- **NO** non-null assertions (!) without justification
+- **NO** storing secrets in code
+- **NO** raw SQL concatenation
+- **ALWAYS** parameterize queries
+- **ALWAYS** validate external data with Zod
 
-### ⚠️ Database Reseeding Breaks Google Apps Script Sync
-**CRITICAL:** Database reseeding generates new clinic IDs, breaking Google Apps Script sync with 500 errors.
+## 💻 DEVELOPMENT WORKFLOW PROTOCOLS
 
-**Symptoms:**
-- Google Apps Script sync returns 500 errors
-- Error: "JSON object requested, multiple (or no) rows returned" (PGRST116)
-- No data syncs despite correct payload structure
+### Code Quality Pipeline
+```bash
+# Before ANY commit
+pnpm format          # Biome formatting
+pnpm test           # Vitest unit tests
+pnpm typecheck      # TypeScript checking
+pnpm biome:check    # Comprehensive linting
 
-**Root Cause:** Google Apps Script properties contain old clinic IDs after database reseed.
-
-**Immediate Fix:**
-1. Get current clinic IDs: `SELECT id, name FROM clinics ORDER BY name;`
-2. Update Google Apps Script properties:
-   - `LOCATION_FINANCIAL_BAYTOWN_CLINIC_ID`
-   - `LOCATION_FINANCIAL_HUMBLE_CLINIC_ID`
-3. Or run Google Apps Script setup wizard again
-
-**Current Clinic IDs (after latest reseed):**
-- **Baytown**: `cmc3jcrs20001i2ht5sn89v66`
-- **Humble**: `cmc3jcrhe0000i2ht9ymqtmzb`
-
-## Development Guidelines
-
-### Code Writing Guidelines
-- Every time you write new code you must run a typecheck and biome check and fix any issues related to the code you wrote
-- Run `pnpm biome:check` after every major code implementation
-
-### Component Development
-- Use Server Components by default, Client Components only when needed
-- Follow the component structure in `docs/rules`
-- Use absolute imports with `@/` prefix
-- Group imports in order: React/Next.js, third-party, local absolute, local relative, types
-
-### Database Development
-1. **Schema Changes:**
-   - For rapid iteration: `pnpm prisma:push`
-   - For versioned changes: `pnpm prisma migrate dev --name descriptive_name`
-2. **After schema changes:** Always run `pnpm prisma:generate`
-3. **Data seeding:** Use `pnpm dlx tsx prisma/seed.ts` for reliable seeding
-
-### API Development
-- API routes are located in `src/app/api/`
-- Use the `withAuth` middleware for protected routes with role-based access control
-- Follow RESTful conventions for route naming
-- Use Zod for request/response validation
-- Implement proper error handling with `ApiError` and `ApiResponse` utilities
-- Use standardized pagination with `apiPaginated` and `getPaginationParams`
-- Apply multi-tenant security with clinic-based data isolation
-
-## Environment Configuration
-
-Required environment variables:
-- `DATABASE_URL` - Supabase PostgreSQL connection string
-- `DIRECT_URL` - Direct database connection (for migrations)
-- `NEXT_PUBLIC_SUPABASE_URL` - Supabase project URL
-- `NEXT_PUBLIC_SUPABASE_ANON_KEY` - Supabase anonymous key
-- `GOOGLE_REDIRECT_URI` - Google OAuth redirect URI
-
-## Working Together
-
-- This is always a feature branch - no backwards compatibility needed
-- When in doubt, we choose clarity over cleverness
-- **REMINDER**: If this file hasn't been referenced in 30+ minutes, RE-READ IT!
-
-Avoid complex abstractions or "clever" code. The simple, obvious solution is probably better, and my guidance helps you stay focused on what matters.# CLAUDE.md - Development Partnership & Project Guide
-
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
-
-## 🚨 DEVELOPMENT PARTNERSHIP - MANDATORY WORKFLOW
-
-We're building production-quality code together. Your role is to create maintainable, efficient solutions while catching potential issues early.
-
-### AUTOMATED CHECKS ARE MANDATORY
-**ALL hook issues are BLOCKING - EVERYTHING must be ✅ GREEN!**  
-No errors. No formatting issues. No linting problems. No type errors. Zero tolerance.  
-These are not suggestions. Fix ALL issues before continuing.
-
-### CRITICAL WORKFLOW - ALWAYS FOLLOW THIS!
-
-#### Research → Plan → Implement
-**NEVER JUMP STRAIGHT TO CODING!** Always follow this sequence:
-1. **Research**: Explore the codebase, understand existing patterns
-2. **Plan**: Create a detailed implementation plan and verify it with me  
-3. **Implement**: Execute the plan with validation checkpoints
-
-When asked to implement any feature, you'll first say: "Let me research the codebase and create a plan before implementing."
-
-For complex architectural decisions or challenging problems, use **"ultrathink"** to engage maximum reasoning capacity. Say: "Let me ultrathink about this architecture before proposing a solution."
-
-#### USE MULTIPLE AGENTS!
-*Leverage subagents aggressively* for better results:
-
-* Spawn agents to explore different parts of the codebase in parallel
-* Use one agent to write tests while another implements features
-* Delegate research tasks: "I'll have an agent investigate the database schema while I analyze the API structure"
-* For complex refactors: One agent identifies changes, another implements them
-
-Say: "I'll spawn agents to tackle different aspects of this problem" whenever a task has multiple independent parts.
-
-#### Reality Checkpoints
-**Stop and validate** at these moments:
-- After implementing a complete feature
-- Before starting a new major component  
-- When something feels wrong
-- Before declaring "done"
-- **WHEN HOOKS FAIL WITH ERRORS** ❌
-
-Run: `pnpm format && pnpm test && pnpm typecheck && pnpm biome:check`
-
-#### 🚨 CRITICAL: Hook Failures Are BLOCKING
-**When hooks report ANY issues (exit code 2), you MUST:**
-1. **STOP IMMEDIATELY** - Do not continue with other tasks
-2. **FIX ALL ISSUES** - Address every ❌ issue until everything is ✅ GREEN
-3. **VERIFY THE FIX** - Re-run the failed command to confirm it's fixed
-4. **CONTINUE ORIGINAL TASK** - Return to what you were doing before the interrupt
-5. **NEVER IGNORE** - There are NO warnings, only requirements
-
-This includes:
-- Formatting issues (Biome format)
-- Linting violations (Biome lint, Next.js lint)
-- Type errors (tsc --noEmit)
-- Import/export issues
-- ALL other checks
-
-Your code must be 100% clean. No exceptions.
-
-#### Working Memory Management
-
-When context gets long:
-- Re-read this CLAUDE.md file
-- Summarize progress in a PROGRESS.md file
-- Document current state before major changes
-
-Maintain TODO.md:
-```
-## Current Task
-- [ ] What we're doing RIGHT NOW
-
-## Completed  
-- [x] What's actually done and tested
-
-## Next Steps
-- [ ] What comes next
+# Full quality check
+pnpm code-quality   # Runs all checks + build
 ```
 
-## Project Overview
+### Testing Protocol
+- **Unit Tests**: Complex business logic with Vitest
+- **Integration Tests**: API routes and database operations
+- **Cloud Testing**: All tests use cloud Supabase branch
+- **Test Patterns**: Co-locate tests with components
+- **Coverage**: Run `pnpm test:coverage` for reports
 
-This is a multi-tenant dental practice dashboard built with Next.js 15, TypeScript, Supabase, and Prisma. The application provides comprehensive data visualization and KPI tracking for dental clinics, with Google Sheets integration for data sync.
+### Git Workflow Protocol
+1. **Feature Branches**: Always work on feature branches
+2. **Commit Messages**: Clear, descriptive with conventional commits
+3. **PR Ready**: All quality checks must pass
+4. **Never Force Push**: Preserve git history
 
-## Development Commands
+## 🎯 FEATURE-SPECIFIC PROTOCOLS
 
-### Core Development
-- `pnpm dev` - Start development server with Turbopack
-- `pnpm build` - Build production application
-- `pnpm start` - Start production server
+### Provider Management Protocol
+- Providers belong to clinics via many-to-many relationships
+- Support multi-location providers
+- Track provider types: dentist, hygienist, specialist
+- Metrics are provider-specific when applicable
 
-### Code Quality - MANDATORY WORKFLOW
-- `pnpm format` - Format code with Biome
-- `pnpm test` - Run unit tests with Vitest using local Supabase database
-- `pnpm typecheck` - Run TypeScript type checking
-- `pnpm biome:check` - Check code with Biome (linting + formatting)
-- `pnpm biome:fix` - Auto-fix Biome issues
-- `pnpm lint` - Run Next.js ESLint linter
-- `pnpm lint:fix` - Fix Biome linting issues automatically
-- `pnpm imports:fix` - Organize and fix import statements
-- `pnpm pre-commit` - Manual pre-commit check (Biome + tests)
-- `pnpm code-quality` - Full quality pipeline (Biome + tests + build)
+### Metrics & KPI Protocol
+- **Financial Metrics**: Production, collection, adjustments
+- **Patient Metrics**: New, active, retention rates
+- **Appointment Metrics**: Scheduled, completed, no-shows
+- **Aggregations**: Pre-compute daily/weekly/monthly
+- **Real-time Updates**: Use TanStack Query for caching
 
-### Database Operations
-- `pnpm prisma:generate` - Generate Prisma client after schema changes
-- `pnpm prisma:push` - Push schema changes to database (development)
-- `pnpm prisma:studio` - Open Prisma Studio for data inspection
-- `pnpm prisma:seed` - Seed database with initial data
+### Dashboard Customization Protocol
+- User-specific dashboard configurations
+- Widget positioning and sizing
+- Metric selection per widget
+- Responsive grid system
+- Persist layout in database
 
-### Testing
-- `pnpm test:watch` - Run tests in watch mode with cloud database
-- `pnpm test:coverage` - Generate test coverage report with cloud database
-- `pnpm test:integration` - Run integration tests with Vitest
-- `pnpm test:cloud` - Display cloud database testing information
+## 🔧 TECHNOLOGY-SPECIFIC PROTOCOLS
 
-## TypeScript/Next.js-Specific Rules
+### React 19 & TypeScript Protocol
+```typescript
+// REQUIRED: Explicit return types
+function calculateMetric(value: number): MetricResult {
+  // Implementation
+}
 
-### FORBIDDEN - NEVER DO THESE:
-- **NO any or unknown** without proper type guards
-- **NO non-null assertions (!)** without clear justification
-- **NO @ts-ignore** - fix the actual type issue
-- **NO setTimeout/setInterval** for coordination - use Promises/async
-- **NO direct DOM manipulation** in React components
-- **NO mutating props or state** directly
-- **NO keeping old and new code** together
-- **NO migration functions** or compatibility layers
-- **NO versioned function names** (processV2, handleNew)
-- **NO mixing server/client code** in wrong boundaries
-- **NO TODOs** in final code
-- **NO index of array as key** property in React elements
-- **NO forEach with large arrays** - prefer for...of
-- **NO undeclared variables** - explicitly declare all variables
-- **NO classes with only static members**
+// REQUIRED: Proper error handling
+try {
+  const result = await riskyOperation();
+} catch (error) {
+  // Use Error objects, not strings
+  throw new Error(`Operation failed: ${error.message}`);
+}
 
-> **AUTOMATED ENFORCEMENT**: Biome and TypeScript will BLOCK commits that violate these rules.  
-> When you see `❌ TYPE ERROR` or `❌ LINT ERROR`, you MUST fix it immediately!
-
-### Required Standards:
-- **Delete** old code when replacing it
-- **Explicit return types** on all functions
-- **Meaningful names**: `userId` not `id`, `UserProfile` not `Profile`
-- **Early returns** to reduce nesting
-- **Type-safe constructors**: proper TypeScript interfaces and types
-- **Proper error handling**: use Error objects, not strings
-- **Custom hooks** for reusable logic
-- **Composition over inheritance**
-- **Server/client boundary respect**: no server code in client components
-- **Regex literals declared at top level**
-- **Prefer const/let over var**
-- **Export from instead of import then export**
-
-## Implementation Standards
-
-### Our code is complete when:
-- ✅ All linters pass with zero issues (Biome)
-- ✅ All tests pass (Vitest)
-- ✅ Type checking passes with zero errors
-- ✅ Feature works end-to-end
-- ✅ Old code is deleted
-- ✅ TSDoc on all exported functions/components
-
-### Testing Strategy
-- Complex business logic → Write tests first (Vitest)
-- React components → Write tests after implementation
-- User flows → Add Playwright e2e tests
-- API routes → Test both success and error cases
-- Skip tests for simple presentational components
-
-## Architecture Overview
-
-### Technology Stack
-- **Framework:** Next.js 15 with App Router and Turbopack
-- **Language:** TypeScript 5.8.3 with strict mode
-- **Database:** Supabase PostgreSQL with Prisma ORM
-- **UI:** React 19, Shadcn UI, Radix UI, Tailwind CSS 4
-- **State Management:** Server Components, React Context, Zustand, TanStack Query
-- **Authentication:** Supabase Auth with SSR
-- **Testing:** Hybrid testing with Vitest (unit/integration) and Playwright (E2E) with MCP integration
-- **Code Quality:** Biome for comprehensive linting, formatting, and import organization with Husky pre-commit hooks
-
-### Project Structure
-```
-src/
-├── app/                    # Next.js App Router pages
-│   ├── (auth)/            # Authentication pages
-│   ├── (dashboard)/       # Main application pages
-│   └── api/               # API routes
-├── components/            # React components
-│   ├── ui/               # Generic UI components (Shadcn)
-│   ├── dashboard/        # Dashboard-specific components
-│   ├── auth/             # Authentication components
-│   └── common/           # Shared components
-├── lib/                  # Utilities and configurations
-│   ├── database/         # Prisma client and queries
-│   ├── auth/             # Authentication utilities
-│   ├── supabase/         # Supabase client configurations
-│   └── utils/            # General utilities
-├── hooks/                # Custom React hooks
-├── types/                # TypeScript type definitions
-├── styles/               # Global styles
-└── tests/                # E2E tests and test utilities
+// FORBIDDEN: Array index as key
+items.map((item) => <Item key={item.id} />); // ✅
+items.map((item, index) => <Item key={index} />); // ❌
 ```
 
-## Problem-Solving Together
+### Prisma ORM Protocol
+- Run `pnpm prisma:generate` after schema changes
+- Use transactions for multi-table operations
+- Implement proper error handling
+- Use type-safe query builders
+- Avoid N+1 queries with proper includes
 
-When you're stuck or confused:
-1. **Stop** - Don't spiral into complex solutions
-2. **Delegate** - Consider spawning agents for parallel investigation
-3. **Ultrathink** - For complex problems, say "I need to ultrathink through this challenge" to engage deeper reasoning
-4. **Step back** - Re-read the requirements
-5. **Simplify** - The simple solution is usually correct
-6. **Ask** - "I see two approaches: [A] vs [B]. Which do you prefer?"
+### State Management Protocol
+- **Server State**: TanStack Query for API data
+- **Client State**: Zustand for global UI state
+- **Form State**: React Hook Form with Zod
+- **URL State**: Next.js query params
+- **Auth State**: Supabase Auth hooks
 
-My insights on better approaches are valued - please ask for them!
+## 🚀 PERFORMANCE PROTOCOLS
 
-## Common Information For MCP use:
-- **Linear MCP Quick Reference:**
-  - Project name: Dental Dashboard (always include the project when creating Linear issues)
-  - Project ID: 31deeedb-112f
-  - Full Project ID: dental-dashboard-31deeedb112f
-  - Team: AOJDevStudio
-  - Team ID: 6b3573d9-0510-4503-b569-b92b37a36105
+### Optimization Checklist
+- [ ] Use React.memo for expensive components
+- [ ] Implement virtual scrolling for long lists
+- [ ] Lazy load heavy components
+- [ ] Optimize images with Next.js Image
+- [ ] Use database indexes for frequent queries
+- [ ] Implement request deduplication
 
-- **Supabase MCP Quick Reference:**
-  - Organization name: KC Ventures Consulting Group
-  - Organization slug: hbcnwcsjguowrjnugzye
-  - Project name: dashboard
-  - Project ID: yovbdmjwrrgardkgrenc
-  - Project URL: https://yovbdmjwrrgardkgrenc.supabase.co
+### Monitoring Protocol
+- Winston logging for server-side
+- Client logger for browser errors
+- Track Core Web Vitals
+- Monitor API response times
+- Alert on error thresholds
 
-## 🛡️ DATABASE SAFETY AND ENVIRONMENT PROTECTION
+## 📝 DOCUMENTATION PROTOCOLS
 
-### CRITICAL: Database Environment Safety
-This project implements strict database safety protocols to prevent test data contamination in production.
-
-#### Environment Isolation Rules
-- **Production Database**: Real KamDental clinic data only (`supabase.co` URLs)
-- **Cloud Test Database**: CI/CD and testing environment (`.env.test` configuration)
-- **Development Database**: Production database with proper access controls
-
-### 🌩️ CLOUD-ONLY TESTING APPROACH
-**IMPORTANT**: This project has transitioned from local Supabase to cloud-only testing for better CI/CD reliability.
-
-#### Testing Configuration
-- **All tests use cloud Supabase branch database** configured in `.env.test`
-- **No local Supabase dependencies** in CI/CD pipeline
-- **Faster test execution** without local database startup/teardown
-- **Consistent environment** between local development and CI
-
-#### REQUIRED Safety Checks Before Database Operations
-1. **Always validate environment** before any database operations
-2. **Use test environment guard** for test data operations:
-   ```typescript
-   import { validateTestEnvironment } from '@/lib/utils/test-environment-guard';
-   validateTestEnvironment(); // Throws if production detected
-   ```
-3. **Check for test data contamination** if suspicious activity:
-   ```bash
-   node scripts/scan-contamination.js
-   ```
-
-## Performance & Security
-
-### **Measure First**:
-- No premature optimization
-- Use React DevTools Profiler for performance bottlenecks
-- Benchmark with real data before claiming improvements
-- Monitor Core Web Vitals
-
-### **Security Always**:
-- Validate all inputs (client AND server)
-- Use crypto.getRandomValues() for randomness
-- Sanitize user content before rendering
-- Parameterized queries for database operations (never concatenate!)
-- Proper authentication/authorization boundaries
-
-## TypeScript Best Practices
-
-1. **Enforce Strict Null Checks:**
-   - Always verify that a variable is not null or undefined before using it
-   - Use conditional checks, optional chaining (?.), and the nullish coalescing operator (??)
-
-2. **Define and Validate Types for External Data:**
-   - For any data coming from an external source (APIs, raw SQL, etc.), create a specific interface or type
-   - Use Zod to parse this data at the boundary of your application
-
-3. **Write Type-Safe Prisma Queries:**
-   - Rely on the auto-generated types from your Prisma client
-   - Use IDE autocompletion to prevent errors in include or select clauses
-
-4. **Integrate Type Checking into Your Workflow:**
-   - Run `pnpm typecheck` regularly during development
-   - Pre-commit hooks automatically run Biome formatting and tests before commits
-   - Use `pnpm code-quality` for full quality pipeline before pushing changes
-
-## Code Quality Pipeline
-
-### Biome Configuration
-The project uses a comprehensive Biome setup (`.biome.json`) with:
-
-**Core Features:**
-- **VCS Integration:** Git-aware linting with automatic ignore file handling
-- **Import Organization:** Automatic import sorting and organization
-- **Multi-language Support:** JavaScript/TypeScript, JSON, and CSS formatting
-
-**Rule Categories (300+ rules):**
-- **Accessibility:** Ensures WCAG compliance and semantic HTML
-- **Performance:** Prevents performance anti-patterns (barrel files, unnecessary re-exports)
-- **Security:** XSS prevention and secure coding practices
-- **Complexity:** Maintains code readability and cognitive load
-- **Style:** Consistent code formatting and naming conventions
-- **Correctness:** Prevents runtime errors and type issues
-
-## Communication Protocol
-
-### Progress Updates:
-```
-✓ Implemented user authentication (all tests passing)
-✓ Added rate limiting middleware  
-✗ Found issue with session persistence - investigating
+### Code Documentation
+```typescript
+/**
+ * Calculates provider efficiency metrics
+ * @param providerId - The provider's UUID
+ * @param dateRange - Start and end dates for calculation
+ * @returns Provider efficiency metrics including production per hour
+ * @throws {ApiError} If provider not found or unauthorized
+ */
+export async function calculateProviderEfficiency(
+  providerId: string,
+  dateRange: DateRange
+): Promise<ProviderEfficiency> {
+  // Implementation
+}
 ```
 
-### Suggesting Improvements:
-"The current approach works, but I notice [observation].
-Would you like me to [specific improvement]?"
+### PR Documentation Template
+```markdown
+## Summary
+Brief description of changes
 
-## Critical Development Issues
+## Changes Made
+- Specific change 1
+- Specific change 2
 
-### ⚠️ Database Reseeding Breaks Google Apps Script Sync
-**CRITICAL:** Database reseeding generates new clinic IDs, breaking Google Apps Script sync with 500 errors.
+## Testing
+- [ ] Unit tests pass
+- [ ] Integration tests pass
+- [ ] Manual testing completed
 
-**Symptoms:**
-- Google Apps Script sync returns 500 errors
-- Error: "JSON object requested, multiple (or no) rows returned" (PGRST116)
-- No data syncs despite correct payload structure
+## Screenshots
+(If UI changes)
+```
 
-**Root Cause:** Google Apps Script properties contain old clinic IDs after database reseed.
+## 🔄 CONTINUOUS IMPROVEMENT PROTOCOL
 
-**Immediate Fix:**
-1. Get current clinic IDs: `SELECT id, name FROM clinics ORDER BY name;`
-2. Update Google Apps Script properties:
-   - `LOCATION_FINANCIAL_BAYTOWN_CLINIC_ID`
-   - `LOCATION_FINANCIAL_HUMBLE_CLINIC_ID`
-3. Or run Google Apps Script setup wizard again
+### Learning Capture
+- Document new patterns in `/docs`
+- Update this CLAUDE.md with learnings
+- Share knowledge in PR descriptions
+- Create reusable components
 
-**Current Clinic IDs (after latest reseed):**
-- **Baytown**: `cmc3jcrs20001i2ht5sn89v66`
-- **Humble**: `cmc3jcrhe0000i2ht9ymqtmzb`
+### Code Review Checklist
+- [ ] Follows established patterns
+- [ ] Includes proper error handling
+- [ ] Has appropriate test coverage
+- [ ] Respects multi-tenant boundaries
+- [ ] Implements proper authorization
+- [ ] Uses TypeScript strictly
+- [ ] Handles edge cases
 
-## Development Guidelines
+## 🎯 QUICK START COMMANDS
 
-### Code Writing Guidelines
-- Every time you write new code you must run a typecheck and biome check and fix any issues related to the code you wrote
-- Run `pnpm biome:check` after every major code implementation
+```bash
+# Development
+pnpm dev                    # Start dev server
+pnpm prisma:studio         # Inspect database
 
-### Component Development
-- Use Server Components by default, Client Components only when needed
-- Follow the component structure in `docs/rules`
-- Use absolute imports with `@/` prefix
-- Group imports in order: React/Next.js, third-party, local absolute, local relative, types
+# Testing
+pnpm test                  # Run tests
+pnpm test:watch           # Watch mode
+pnpm test:coverage        # Coverage report
 
-### Database Development
-1. **Schema Changes:**
-   - For rapid iteration: `pnpm prisma:push`
-   - For versioned changes: `pnpm prisma migrate dev --name descriptive_name`
-2. **After schema changes:** Always run `pnpm prisma:generate`
-3. **Data seeding:** Use `pnpm dlx tsx prisma/seed.ts` for reliable seeding
+# Code Quality
+pnpm format               # Format code
+pnpm typecheck           # Check types
+pnpm biome:check         # Lint code
+pnpm code-quality        # Full pipeline
 
-### API Development
-- API routes are located in `src/app/api/`
-- Use the `withAuth` middleware for protected routes with role-based access control
-- Follow RESTful conventions for route naming
-- Use Zod for request/response validation
-- Implement proper error handling with `ApiError` and `ApiResponse` utilities
-- Use standardized pagination with `apiPaginated` and `getPaginationParams`
-- Apply multi-tenant security with clinic-based data isolation
+# Database
+pnpm prisma:push         # Push schema changes
+pnpm prisma:generate     # Generate client
+pnpm prisma:seed         # Seed database
 
-## Environment Configuration
+# Google Apps Script
+pnpm gas:deploy          # Deploy scripts
+pnpm gas:health         # Check health
 
-Required environment variables:
-- `DATABASE_URL` - Supabase PostgreSQL connection string
-- `DIRECT_URL` - Direct database connection (for migrations)
-- `NEXT_PUBLIC_SUPABASE_URL` - Supabase project URL
-- `NEXT_PUBLIC_SUPABASE_ANON_KEY` - Supabase anonymous key
-- `GOOGLE_REDIRECT_URI` - Google OAuth redirect URI
+# Debugging
+pnpm null-safety:report  # Find nullish issues
+pnpm security:scan      # Security audit
+```
 
-## Working Together
+## 🔗 KEY INTEGRATIONS
 
-- This is always a feature branch - no backwards compatibility needed
-- When in doubt, we choose clarity over cleverness
-- **REMINDER**: If this file hasn't been referenced in 30+ minutes, RE-READ IT!
+### Linear (Project Management)
+- Project: Dental Dashboard
+- Team: AOJDevStudio
+- Project ID: `31deeedb-112f-4203-b569-b92b37a36105`
 
-Avoid complex abstractions or "clever" code. The simple, obvious solution is probably better, and my guidance helps you stay focused on what matters.
+### Supabase (Backend)
+- Organization: KC Ventures Consulting Group
+- Project: dashboard
+- URL: `https://yovbdmjwrrgardkgrenc.supabase.co`
+
+### Current Clinic IDs (Production)
+- Baytown: `cmc3jcrs20001i2ht5sn89v66`
+- Humble: `cmc3jcrhe0000i2ht9ymqtmzb`
+
+## 🚨 CRITICAL ISSUES & SOLUTIONS
+
+### Database Reseeding Breaks Google Apps Script
+**Problem**: New clinic IDs after reseed break GAS sync
+**Solution**: Update Script Properties with new IDs or re-run setup wizard
+
+### TypeScript Strict Mode
+**Problem**: Legacy code with type issues
+**Solution**: Fix incrementally, never use @ts-ignore
+
+### RLS Performance
+**Problem**: Complex policies slow queries
+**Solution**: Use auth context pattern, optimize with indexes
+
+## 🤝 WORKING TOGETHER
+
+- When stuck, ask: "I see two approaches: [A] vs [B]. Which do you prefer?"
+- Document assumptions in code comments
+- Prefer clarity over cleverness
+- Delete old code when replacing
+- Keep PRs focused and small
+
+Remember: We're building a production system that real dental practices depend on. Quality, security, and reliability are non-negotiable.
+
+---
+*This file should be re-read whenever context gets long or after 30+ minutes of work.*

@@ -30,7 +30,9 @@ export function NavItemComponent({
   const isActive =
     item.href === '/'
       ? pathname === '/'
-      : pathname === item.href || pathname?.startsWith(`${item.href}/`);
+      : item.href === '/dashboard'
+        ? pathname === '/dashboard'
+        : pathname === item.href || pathname?.startsWith(`${item.href}/`);
   const hasChildren = item.children && item.children.length > 0;
 
   const handleClick = (e: React.MouseEvent) => {
@@ -40,6 +42,18 @@ export function NavItemComponent({
     }
     if (onItemClick) {
       onItemClick(item.id);
+    }
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === ' ') {
+      e.preventDefault();
+      if (hasChildren && onToggle) {
+        onToggle();
+      }
+      if (onItemClick) {
+        onItemClick(item.id);
+      }
     }
   };
 
@@ -86,12 +100,14 @@ export function NavItemComponent({
       <a
         href={item.href}
         onClick={handleClick}
+        onKeyDown={handleKeyDown}
         className={className}
         target={item.external ? '_blank' : undefined}
         rel={item.external ? 'noopener noreferrer' : undefined}
         aria-current={isActive ? 'page' : undefined}
         aria-expanded={hasChildren ? isExpanded : undefined}
         aria-disabled={item.disabled}
+        aria-label={isCollapsed ? item.title : undefined}
       >
         {content}
       </a>
@@ -102,9 +118,11 @@ export function NavItemComponent({
     <Link
       href={item.href}
       onClick={handleClick}
+      onKeyDown={handleKeyDown}
       className={className}
       aria-current={isActive ? 'page' : undefined}
       aria-disabled={item.disabled}
+      aria-label={isCollapsed ? item.title : undefined}
     >
       {content}
     </Link>
