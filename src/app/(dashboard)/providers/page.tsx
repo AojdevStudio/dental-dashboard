@@ -1,14 +1,6 @@
 'use client';
-
-import { ProviderActions } from '@/components/providers/provider-actions';
 import { ProviderFilters } from '@/components/providers/provider-filters';
 import { ProviderNavigation } from '@/components/providers/provider-navigation';
-import { prisma } from '@/lib/database/prisma';
-import {
-  getProviderLocationSummary,
-  getProvidersWithLocationsPaginated,
-} from '@/lib/database/queries/providers';
-import { createClient } from '@/lib/supabase/server';
 import type { ProviderWithLocations } from '@/types/providers';
 import { useSearchParams } from 'next/navigation';
 import { useEffect, useState } from 'react';
