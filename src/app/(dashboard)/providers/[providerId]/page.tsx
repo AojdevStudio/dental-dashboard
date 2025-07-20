@@ -1,71 +1,138 @@
-import ProviderKPIDashboard from '@/components/dashboard/provider-kpi-dashboard';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Badge } from '@/components/ui/badge';
+import { ProviderDashboard } from '@/components/dashboard/provider-kpi-dashboard';
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from '@/components/ui/breadcrumb';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { prisma } from '@/lib/database/prisma';
 import { createClient } from '@/lib/supabase/server';
 import type { ProviderWithLocations } from '@/types/providers';
-import { ArrowLeft, Calendar, Mail, MapPin, User } from 'lucide-react';
+import { ArrowLeft, Mail, MapPin, User } from 'lucide-react';
 import Link from 'next/link';
 import { notFound, redirect } from 'next/navigation';
-import ProviderChartsSection from './provider-charts-section';
 
-/**
- * Get provider initials for avatar fallback
- */
-function getProviderInitials(provider: ProviderWithLocations): string {
-  if (provider.firstName && provider.lastName) {
-    return `${provider.firstName[0]}${provider.lastName[0]}`.toUpperCase();
-  }
-  return provider.name
-    .split(' ')
-    .filter((w) => w.length)
-    .map((word) => word[0])
-    .slice(0, 2)
-    .join('')
-    .toUpperCase();
+// Regex constants for provider ID validation
+const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[4][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+const SLUG_REGEX = /^[a-z0-9]+(?:-[a-z0-9]+)*$/i;
+
+interface ProviderDetailPageProps {
+  params: Promise<{
+    providerId: string;
+  }>;
 }
 
 /**
- * Get status badge variant based on provider status
+ * Validate provider ID format (UUID or slug)
  */
-function getStatusVariant(status: string): 'default' | 'secondary' | 'destructive' | 'outline' {
-  switch (status.toLowerCase()) {
-    case 'active':
-      return 'default';
-    case 'inactive':
-      return 'secondary';
-    case 'pending':
-      return 'outline';
-    default:
-      return 'secondary';
-  }
+function isValidProviderId(providerId: string): boolean {
+  return UUID_REGEX.test(providerId) || SLUG_REGEX.test(providerId);
 }
 
 /**
- * Get provider type badge variant
+ * Get provider by ID with location details
  */
-function getProviderTypeVariant(
-  providerType: string
-): 'default' | 'secondary' | 'destructive' | 'outline' {
-  switch (providerType.toLowerCase()) {
-    case 'dentist':
-      return 'default';
-    case 'hygienist':
-      return 'secondary';
-    case 'specialist':
-      return 'outline';
-    default:
-      return 'secondary';
+async function getProviderById(
+  providerId: string,
+  clinicId?: string
+): Promise<ProviderWithLocations | null> {
+  const whereClause: { OR: { id: string }[]; clinicId?: string } = {
+    OR: [
+      { id: providerId },
+      // TODO: Add slug support when provider slugs are implemented
+    ],
+  };
+
+  // Add clinic-based filtering for multi-tenant security
+  if (clinicId) {
+    whereClause.clinicId = clinicId;
   }
+
+  const provider = await prisma.provider.findFirst({
+    where: whereClause,
+    include: {
+      clinic: {
+        select: {
+          id: true,
+          name: true,
+        },
+      },
+      providerLocations: {
+        include: {
+          location: {
+            select: {
+              id: true,
+              name: true,
+              address: true,
+            },
+          },
+        },
+        orderBy: [{ isPrimary: 'desc' }, { location: { name: 'asc' } }],
+      },
+      _count: {
+        select: {
+          hygieneProduction: true,
+          dentistProduction: true,
+        },
+      },
+    },
+  });
+
+  if (!provider) {
+    return null;
+  }
+
+  // Transform to match ProviderWithLocations interface
+  const transformedProvider: ProviderWithLocations = {
+    id: provider.id,
+    name: provider.name,
+    firstName: provider.firstName,
+    lastName: provider.lastName,
+    email: provider.email,
+    providerType: provider.providerType,
+    status: provider.status,
+    clinic: provider.clinic,
+    locations: provider.providerLocations.map((pl) => ({
+      id: pl.id,
+      locationId: pl.location.id,
+      locationName: pl.location.name,
+      locationAddress: pl.location.address,
+      isPrimary: pl.isPrimary,
+      isActive: pl.isActive,
+      startDate: pl.startDate.toISOString() as string,
+      endDate: (pl.endDate?.toISOString() as string) || null,
+    })),
+    primaryLocation: provider.providerLocations.find((pl) => pl.isPrimary)?.location || undefined,
+    _count: {
+      locations: provider.providerLocations.length,
+      hygieneProduction: provider._count.hygieneProduction,
+      dentistProduction: provider._count.dentistProduction,
+    },
+  };
+
+  return transformedProvider;
 }
 
 /**
- * Fetch provider data with proper authentication and multi-tenant security
+ * Provider Detail Page - Server Component Implementation
+ *
+ * Displays comprehensive provider information including KPI dashboards
+ * and performance visualizations. Resolves 404 issues from provider listing.
  */
-async function getProviderData(providerId: string): Promise<ProviderWithLocations | null> {
-  // 1. Authentication & Session Validation
+export default async function ProviderDetailPage({ params }: ProviderDetailPageProps) {
+  const resolvedParams = await params;
+  const { providerId } = resolvedParams;
+
+  // 1. Validate provider ID format
+  if (!isValidProviderId(providerId)) {
+    notFound();
+  }
+
+  // 2. Authentication & Session Validation
   const supabase = await createClient();
   const {
     data: { user },
@@ -81,6 +148,8 @@ async function getProviderData(providerId: string): Promise<ProviderWithLocation
     where: { authId: user.id },
     select: {
       id: true,
+      email: true,
+      name: true,
       role: true,
       clinicId: true,
     },
@@ -99,280 +168,171 @@ async function getProviderData(providerId: string): Promise<ProviderWithLocation
     redirect('/login?error=no_clinic_associated');
   }
 
-  // 2. Fetch provider with multi-tenant security
-  try {
-    const provider = await prisma.provider.findFirst({
-      where: {
-        id: providerId,
-        // Apply multi-tenant filtering for non-system admins
-        ...(isSystemAdmin ? {} : { clinicId }),
-      },
-      include: {
-        clinic: {
-          select: {
-            id: true,
-            name: true,
-          },
-        },
-        providerLocations: {
-          select: {
-            id: true,
-            locationId: true,
-            isPrimary: true,
-            isActive: true,
-            startDate: true,
-            endDate: true,
-            location: {
-              select: {
-                name: true,
-                address: true,
-              },
-            },
-          },
-          where: {
-            isActive: true,
-          },
-          orderBy: [{ isPrimary: 'desc' }, { startDate: 'desc' }],
-        },
-        _count: {
-          select: {
-            providerLocations: true,
-            hygieneProduction: true,
-            dentistProduction: true,
-          },
-        },
-      },
-    });
-
-    if (!provider) {
-      return null;
-    }
-
-    // Transform to match ProviderWithLocations interface
-    return {
-      id: provider.id,
-      name: provider.name,
-      firstName: provider.firstName,
-      lastName: provider.lastName,
-      email: provider.email,
-      providerType: provider.providerType,
-      status: provider.status,
-      clinic: provider.clinic,
-      locations: provider.providerLocations.map((loc) => ({
-        id: loc.id,
-        locationId: loc.locationId,
-        locationName: loc.location.name,
-        locationAddress: loc.location.address,
-        isPrimary: loc.isPrimary,
-        isActive: loc.isActive,
-        startDate: loc.startDate.toISOString() as import('@/types/providers').ISODateString,
-        endDate: (loc.endDate?.toISOString() as import('@/types/providers').ISODateString) || null,
-      })),
-      primaryLocation: (() => {
-        const primaryLoc = provider.providerLocations.find((loc) => loc.isPrimary);
-        return primaryLoc
-          ? {
-              id: primaryLoc.locationId,
-              name: primaryLoc.location.name,
-              address: primaryLoc.location.address,
-            }
-          : undefined;
-      })(),
-      _count: {
-        locations: provider._count.providerLocations,
-        hygieneProduction: provider._count.hygieneProduction,
-        dentistProduction: provider._count.dentistProduction,
-      },
-    };
-  } catch (error) {
-    console.error('Error fetching provider:', error);
-    return null;
-  }
-}
-
-/**
- * Provider Detail Page - Individual provider dashboard with KPI metrics
- *
- * Implements AC1: Provider Detail Page Navigation from Story 1.1
- */
-export default async function ProviderDetailPage({
-  params,
-}: {
-  params: Promise<{ providerId: string }>;
-}) {
-  const { providerId } = await params;
-
-  // Validate providerId format (basic UUID validation)
-  if (!providerId || typeof providerId !== 'string') {
-    notFound();
-  }
-
-  // Fetch provider data
-  const provider = await getProviderData(providerId);
+  // 3. Fetch Provider Data
+  const provider = await getProviderById(providerId, isSystemAdmin ? undefined : clinicId);
 
   if (!provider) {
     notFound();
   }
 
+  // 4. Render Provider Detail Page
   return (
     <div className="container mx-auto py-6 px-4">
       <div className="space-y-6">
-        {/* Header with breadcrumb navigation */}
-        <div className="flex items-center gap-4">
-          <Link href="/dashboard/providers">
-            <Button variant="ghost" size="sm" className="gap-2">
-              <ArrowLeft className="h-4 w-4" />
-              Back to Providers
+        {/* Breadcrumb Navigation */}
+        <Breadcrumb>
+          <BreadcrumbList>
+            <BreadcrumbItem>
+              <BreadcrumbLink href="/dashboard">Dashboard</BreadcrumbLink>
+            </BreadcrumbItem>
+            <BreadcrumbSeparator />
+            <BreadcrumbItem>
+              <BreadcrumbLink href="/dashboard/providers">Providers</BreadcrumbLink>
+            </BreadcrumbItem>
+            <BreadcrumbSeparator />
+            <BreadcrumbItem>
+              <BreadcrumbPage>{provider.name}</BreadcrumbPage>
+            </BreadcrumbItem>
+          </BreadcrumbList>
+        </Breadcrumb>
+
+        {/* Page Header */}
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          <div className="flex items-center gap-4">
+            <Button variant="outline" size="sm" asChild={true}>
+              <Link href="/dashboard/providers">
+                <ArrowLeft className="h-4 w-4 mr-2" />
+                Back to Providers
+              </Link>
             </Button>
-          </Link>
-          <div className="flex-1">
-            <h1 className="text-3xl font-bold tracking-tight">{provider.name}</h1>
-            <p className="text-muted-foreground">Provider Dashboard & Performance Metrics</p>
+            <div>
+              <h1 className="text-3xl font-bold tracking-tight">{provider.name}</h1>
+              <p className="text-muted-foreground">
+                {provider.providerType.charAt(0).toUpperCase() + provider.providerType.slice(1)}
+                {provider.clinic && ` at ${provider.clinic.name}`}
+              </p>
+            </div>
           </div>
         </div>
 
-        {/* Provider Info Card */}
-        <Card>
-          <CardHeader>
-            <div className="flex items-start justify-between">
-              <div className="flex items-center gap-4">
-                <Avatar className="h-16 w-16">
-                  <AvatarImage alt={provider.name} />
-                  <AvatarFallback className="bg-blue-100 text-blue-700 font-medium text-lg">
-                    {getProviderInitials(provider)}
-                  </AvatarFallback>
-                </Avatar>
-                <div>
-                  <CardTitle className="text-2xl">{provider.name}</CardTitle>
-                  <div className="flex items-center gap-2 mt-2">
-                    <Badge variant={getProviderTypeVariant(provider.providerType)}>
-                      {provider.providerType}
-                    </Badge>
-                    <Badge variant={getStatusVariant(provider.status)}>{provider.status}</Badge>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-              {/* Contact Information */}
-              <div className="space-y-3">
-                <h3 className="font-semibold text-sm text-gray-700 flex items-center gap-2">
-                  <Mail className="h-4 w-4" />
-                  Contact
-                </h3>
-                {provider.email ? (
-                  <a
-                    href={`mailto:${provider.email}`}
-                    className="text-blue-600 hover:text-blue-800 text-sm"
-                  >
-                    {provider.email}
-                  </a>
-                ) : (
-                  <span className="text-gray-500 text-sm">No email provided</span>
-                )}
-              </div>
-
-              {/* Clinic Information */}
-              <div className="space-y-3">
-                <h3 className="font-semibold text-sm text-gray-700 flex items-center gap-2">
-                  <User className="h-4 w-4" />
-                  Clinic
-                </h3>
-                <span className="text-sm">{provider.clinic.name}</span>
-              </div>
-
-              {/* Location Summary */}
-              <div className="space-y-3">
-                <h3 className="font-semibold text-sm text-gray-700 flex items-center gap-2">
-                  <MapPin className="h-4 w-4" />
-                  Locations
-                </h3>
-                <div className="text-sm">
-                  <span className="font-medium">{provider._count.locations}</span> location
-                  {provider._count.locations !== 1 ? 's' : ''}
-                  {provider.primaryLocation && (
-                    <div className="text-gray-600 mt-1">
-                      Primary: {provider.primaryLocation.name}
-                    </div>
-                  )}
-                </div>
-              </div>
-
-              {/* Production Summary */}
-              <div className="space-y-3">
-                <h3 className="font-semibold text-sm text-gray-700 flex items-center gap-2">
-                  <Calendar className="h-4 w-4" />
-                  Production Records
-                </h3>
-                <div className="text-sm space-y-1">
-                  <div>Hygiene: {provider._count.hygieneProduction}</div>
-                  <div>Dentist: {provider._count.dentistProduction}</div>
-                </div>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Locations Detail Card */}
-        {provider.locations.length > 0 && (
+        {/* Provider Information Cards */}
+        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+          {/* Basic Information */}
           <Card>
             <CardHeader>
-              <CardTitle>Location Assignments</CardTitle>
+              <CardTitle className="flex items-center gap-2">
+                <User className="h-5 w-5" />
+                Provider Information
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div>
+                <p className="text-sm font-medium text-muted-foreground">Full Name</p>
+                <p className="font-medium">
+                  {provider.firstName && provider.lastName
+                    ? `${provider.firstName} ${provider.lastName}`
+                    : provider.name}
+                </p>
+              </div>
+              <div>
+                <p className="text-sm font-medium text-muted-foreground">Provider Type</p>
+                <p className="font-medium">
+                  {provider.providerType.charAt(0).toUpperCase() + provider.providerType.slice(1)}
+                </p>
+              </div>
+              <div>
+                <p className="text-sm font-medium text-muted-foreground">Status</p>
+                <p
+                  className={`font-medium ${
+                    provider.status === 'active' ? 'text-green-600' : 'text-red-600'
+                  }`}
+                >
+                  {provider.status.charAt(0).toUpperCase() + provider.status.slice(1)}
+                </p>
+              </div>
+              {provider.email && (
+                <div>
+                  <p className="text-sm font-medium text-muted-foreground">Email</p>
+                  <p className="font-medium flex items-center gap-2">
+                    <Mail className="h-4 w-4" />
+                    {provider.email}
+                  </p>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+
+          {/* Location Information */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <MapPin className="h-5 w-5" />
+                Locations ({provider._count.locations})
+              </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="space-y-3">
-                {provider.locations.map((location) => (
-                  <div
-                    key={location.id}
-                    className="flex items-center justify-between p-3 border rounded-lg"
-                  >
-                    <div className="flex-1">
-                      <div className="flex items-center gap-2">
-                        <h4 className="font-medium">{location.locationName}</h4>
+              {provider.locations.length > 0 ? (
+                <div className="space-y-3">
+                  {provider.locations.map((location) => (
+                    <div key={location.id} className="border rounded-lg p-3">
+                      <div className="flex items-center justify-between">
+                        <p className="font-medium">{location.locationName}</p>
                         {location.isPrimary && (
-                          <Badge variant="outline" className="text-xs">
+                          <span className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded">
                             Primary
-                          </Badge>
+                          </span>
                         )}
                       </div>
                       {location.locationAddress && (
-                        <p className="text-sm text-gray-600 mt-1">{location.locationAddress}</p>
+                        <p className="text-sm text-muted-foreground mt-1">
+                          {location.locationAddress}
+                        </p>
                       )}
+                      <div className="flex items-center gap-4 mt-2 text-xs text-muted-foreground">
+                        <span>Status: {location.isActive ? 'Active' : 'Inactive'}</span>
+                      </div>
                     </div>
-                    <div className="text-sm text-gray-500">
-                      Since {new Date(location.startDate).toLocaleDateString()}
-                    </div>
-                  </div>
-                ))}
+                  ))}
+                </div>
+              ) : (
+                <p className="text-muted-foreground">No locations assigned</p>
+              )}
+            </CardContent>
+          </Card>
+
+          {/* Production Summary */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Production Summary</CardTitle>
+              <CardDescription>Overall production statistics</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div>
+                <p className="text-sm font-medium text-muted-foreground">Total Records</p>
+                <p className="text-2xl font-bold">
+                  {provider._count.hygieneProduction + provider._count.dentistProduction}
+                </p>
+              </div>
+              <div className="grid grid-cols-2 gap-4 text-sm">
+                <div>
+                  <p className="text-muted-foreground">Hygiene</p>
+                  <p className="font-medium">{provider._count.hygieneProduction}</p>
+                </div>
+                <div>
+                  <p className="text-muted-foreground">Dentist</p>
+                  <p className="font-medium">{provider._count.dentistProduction}</p>
+                </div>
               </div>
             </CardContent>
           </Card>
-        )}
+        </div>
 
-        {/* KPI Dashboard (AC2) - Comprehensive provider performance metrics */}
-        <ProviderKPIDashboard
+        {/* Provider KPI Dashboard */}
+        <ProviderDashboard
           providerId={provider.id}
-          initialParams={{
-            period: 'monthly',
-            includeComparisons: true,
-            includeTrends: true,
-          }}
+          providerName={provider.name}
+          clinicId={provider.clinic?.id}
         />
-
-        {/* Interactive Chart Visualizations (AC3) */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Performance Charts & Analytics</CardTitle>
-            <p className="text-sm text-muted-foreground">
-              Interactive visualizations of production trends, goals, and performance metrics
-            </p>
-          </CardHeader>
-          <CardContent>
-            <ProviderChartsSection providerId={provider.id} />
-          </CardContent>
-        </Card>
       </div>
     </div>
   );

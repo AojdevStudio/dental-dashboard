@@ -3,10 +3,121 @@ import { apiError, apiSuccess, handleApiError } from '@/lib/api/utils';
 import type { AuthContext } from '@/lib/database/auth-context';
 import { prisma } from '@/lib/database/prisma';
 import type { ProviderWithLocations } from '@/types/providers';
-import { NextResponse } from 'next/server';
+import type { NextResponse } from 'next/server';
+import { z } from 'zod';
 
+// Provider ID validation schema
+const providerIdSchema = z.object({
+  providerId: z.string().min(1, 'Provider ID is required'),
+});
+
+/**
+ * Validate provider ID format (UUID or slug)
+ */
+function isValidProviderId(providerId: string): boolean {
+  // UUID format
+  const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[4][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+  // Simple slug format (alphanumeric + hyphens)
+  const slugRegex = /^[a-z0-9]+(?:-[a-z0-9]+)*$/i;
+
+  return uuidRegex.test(providerId) || slugRegex.test(providerId);
+}
+
+/**
+ * Get provider by ID with location details and multi-tenant security
+ */
+async function getProviderById(
+  providerId: string,
+  authContext: AuthContext
+): Promise<ProviderWithLocations | null> {
+  const whereClause: any = {
+    OR: [
+      { id: providerId },
+      // TODO: Add slug support when provider slugs are implemented
+    ],
+  };
+
+  // Apply multi-tenant filtering - only system admins can see all providers
+  if (authContext.role !== 'system_admin' && authContext.clinicIds.length > 0) {
+    whereClause.clinicId = {
+      in: authContext.clinicIds,
+    };
+  }
+
+  const provider = await prisma.provider.findFirst({
+    where: whereClause,
+    include: {
+      clinic: {
+        select: {
+          id: true,
+          name: true,
+        },
+      },
+      providerLocations: {
+        include: {
+          location: {
+            select: {
+              id: true,
+              name: true,
+              address: true,
+            },
+          },
+        },
+        orderBy: [{ isPrimary: 'desc' }, { location: { name: 'asc' } }],
+      },
+      _count: {
+        select: {
+          hygieneProduction: true,
+          dentistProduction: true,
+        },
+      },
+    },
+  });
+
+  if (!provider) {
+    return null;
+  }
+
+  // Transform to match ProviderWithLocations interface
+  const transformedProvider: ProviderWithLocations = {
+    id: provider.id,
+    name: provider.name,
+    firstName: provider.firstName,
+    lastName: provider.lastName,
+    email: provider.email,
+    providerType: provider.providerType,
+    status: provider.status,
+    clinic: provider.clinic,
+    locations: provider.providerLocations.map((pl) => ({
+      id: pl.id,
+      locationId: pl.location.id,
+      locationName: pl.location.name,
+      locationAddress: pl.location.address,
+      isPrimary: pl.isPrimary,
+      isActive: pl.isActive,
+      startDate: pl.startDate.toISOString() as any,
+      endDate: (pl.endDate?.toISOString() as any) || null,
+    })),
+    primaryLocation: provider.providerLocations.find((pl) => pl.isPrimary)?.location || undefined,
+    _count: {
+      locations: provider.providerLocations.length,
+      hygieneProduction: provider._count.hygieneProduction,
+      dentistProduction: provider._count.dentistProduction,
+    },
+  };
+
+  return transformedProvider;
+}
+
+/**
+ * GET /api/providers/[providerId]
+ *
+ * Retrieve detailed information for a specific provider
+ * Supports both UUID and slug-based identification
+ * Enforces multi-tenant security and role-based access control
+ */
 const getProviderHandler: ApiHandler = async (
-  _request: Request,
+  request: Request,
   {
     params,
     authContext,
@@ -14,23 +125,81 @@ const getProviderHandler: ApiHandler = async (
 ) => {
   try {
     const resolvedParams = await params;
-    const providerId = resolvedParams.providerId as string;
 
-    if (!providerId) {
-      return apiError('Provider ID is required', 400);
+    // Validate provider ID parameter
+    const { providerId } = providerIdSchema.parse(resolvedParams);
+
+    // Validate provider ID format
+    if (!isValidProviderId(providerId)) {
+      return apiError('Invalid provider ID format', 400);
     }
 
-    // Apply multi-tenant filtering - providers can only see providers from their clinic
-    const clinicFilter = authContext.isSystemAdmin
-      ? {}
-      : { clinicId: { in: authContext.clinicIds } };
+    // Fetch provider with multi-tenant security
+    const provider = await getProviderById(providerId, authContext);
 
-    // Fetch provider with multi-tenant filtering
-    const provider = await prisma.provider.findFirst({
-      where: {
-        id: providerId,
-        ...clinicFilter,
-      },
+    if (!provider) {
+      return apiError('Provider not found', 404);
+    }
+
+    return apiSuccess(provider) as NextResponse;
+  } catch (error) {
+    console.error('Error fetching provider:', error);
+    return handleApiError(error);
+  }
+};
+
+export const GET = withAuth(getProviderHandler);
+
+/**
+ * PATCH /api/providers/[providerId]
+ *
+ * Update provider information
+ * TODO: Implement provider update functionality in future phases
+ */
+const updateProviderSchema = z.object({
+  name: z.string().min(1).optional(),
+  firstName: z.string().optional(),
+  lastName: z.string().optional(),
+  email: z.string().email().optional(),
+  providerType: z.enum(['dentist', 'hygienist', 'specialist', 'other']).optional(),
+  status: z.enum(['active', 'inactive']).optional(),
+});
+
+const updateProviderHandler: ApiHandler = async (
+  request: Request,
+  {
+    params,
+    authContext,
+  }: { params: Promise<Record<string, string | string[]>>; authContext: AuthContext }
+) => {
+  try {
+    const resolvedParams = await params;
+    const { providerId } = providerIdSchema.parse(resolvedParams);
+
+    // Validate provider ID format
+    if (!isValidProviderId(providerId)) {
+      return apiError('Invalid provider ID format', 400);
+    }
+
+    // Parse and validate request body
+    const body = await request.json();
+    const updateData = updateProviderSchema.parse(body);
+
+    // Check if provider exists and user has access
+    const existingProvider = await getProviderById(providerId, authContext);
+    if (!existingProvider) {
+      return apiError('Provider not found', 404);
+    }
+
+    // Only allow updates if user has admin role or provider is in user's clinic
+    if (authContext.role !== 'system_admin' && authContext.role !== 'admin') {
+      return apiError('Insufficient permissions to update provider', 403);
+    }
+
+    // Update provider
+    const updatedProvider = await prisma.provider.update({
+      where: { id: providerId },
+      data: updateData,
       include: {
         clinic: {
           select: {
@@ -39,28 +208,19 @@ const getProviderHandler: ApiHandler = async (
           },
         },
         providerLocations: {
-          select: {
-            id: true,
-            locationId: true,
-            isPrimary: true,
-            isActive: true,
-            startDate: true,
-            endDate: true,
+          include: {
             location: {
               select: {
+                id: true,
                 name: true,
                 address: true,
               },
             },
           },
-          where: {
-            isActive: true,
-          },
-          orderBy: [{ isPrimary: 'desc' }, { startDate: 'desc' }],
+          orderBy: [{ isPrimary: 'desc' }, { location: { name: 'asc' } }],
         },
         _count: {
           select: {
-            providerLocations: true,
             hygieneProduction: true,
             dentistProduction: true,
           },
@@ -68,78 +228,11 @@ const getProviderHandler: ApiHandler = async (
       },
     });
 
-    if (!provider) {
-      return apiError('Provider not found', 404);
-    }
-
-    // Transform to match ProviderWithLocations interface
-    const responseData: ProviderWithLocations = {
-      id: provider.id,
-      name: provider.name,
-      firstName: provider.firstName,
-      lastName: provider.lastName,
-      email: provider.email,
-      providerType: provider.providerType,
-      status: provider.status,
-      clinic: provider.clinic,
-      locations: provider.providerLocations.map((loc) => ({
-        id: loc.id,
-        locationId: loc.locationId,
-        locationName: loc.location.name,
-        locationAddress: loc.location.address,
-        isPrimary: loc.isPrimary,
-        isActive: loc.isActive,
-        startDate: loc.startDate.toISOString() as import('@/types/providers').ISODateString,
-        endDate: (loc.endDate?.toISOString() as import('@/types/providers').ISODateString) || null,
-      })),
-      primaryLocation: (() => {
-        const primaryLoc = provider.providerLocations.find((loc) => loc.isPrimary);
-        return primaryLoc
-          ? {
-              id: primaryLoc.locationId,
-              name: primaryLoc.location.name,
-              address: primaryLoc.location.address,
-            }
-          : undefined;
-      })(),
-      _count: {
-        locations: provider._count.providerLocations,
-        hygieneProduction: provider._count.hygieneProduction,
-        dentistProduction: provider._count.dentistProduction,
-      },
-    };
-
-    return apiSuccess(responseData);
+    return apiSuccess(updatedProvider) as NextResponse;
   } catch (error) {
-    console.error('Error fetching provider data:', error);
+    console.error('Error updating provider:', error);
     return handleApiError(error);
   }
 };
 
-/**
- * GET /api/providers/[providerId]
- *
- * Fetch individual provider data with location relationships and metrics
- * Implements multi-tenant security and proper error handling
- */
-export const GET = withAuth(getProviderHandler);
-
-/**
- * PATCH /api/providers/[providerId]
- *
- * Update provider information
- * Placeholder for future implementation (AC4)
- */
-export function PATCH() {
-  return NextResponse.json({ error: 'Provider updates not yet implemented' }, { status: 501 });
-}
-
-/**
- * DELETE /api/providers/[providerId]
- *
- * Soft delete provider (set status to inactive)
- * Placeholder for future implementation (AC4)
- */
-export function DELETE() {
-  return NextResponse.json({ error: 'Provider deletion not yet implemented' }, { status: 501 });
-}
+export const PATCH = withAuth(updateProviderHandler);

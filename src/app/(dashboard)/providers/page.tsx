@@ -2,7 +2,13 @@
 
 import { ProviderActions } from '@/components/providers/provider-actions';
 import { ProviderFilters } from '@/components/providers/provider-filters';
-import { ProviderGrid } from '@/components/providers/provider-grid';
+import { ProviderNavigation } from '@/components/providers/provider-navigation';
+import { prisma } from '@/lib/database/prisma';
+import {
+  getProviderLocationSummary,
+  getProvidersWithLocationsPaginated,
+} from '@/lib/database/queries/providers';
+import { createClient } from '@/lib/supabase/server';
 import type { ProviderWithLocations } from '@/types/providers';
 import { useSearchParams } from 'next/navigation';
 import { useEffect, useState } from 'react';
@@ -178,27 +184,20 @@ export default function ProvidersPage() {
           className="bg-white dark:bg-gray-800 p-6 rounded-lg border border-gray-200 dark:border-gray-700"
         />
 
-        {/* Provider Grid with Actions */}
-        <ProviderActions>
-          <ProviderGrid
-            providers={providersData.providers}
-            isLoading={isLoading}
-            isError={isError}
-            error={error}
-            onRetry={handleRetry}
-            pagination={{
-              page,
-              limit,
-              total: providersData.total,
-              totalPages: Math.ceil(providersData.total / Math.max(1, limit)),
-              hasNextPage: page < Math.ceil(providersData.total / Math.max(1, limit)),
-              hasPreviousPage: page > 1,
-            }}
-            emptyMessage="No providers found"
-            emptyDescription="Try adjusting your search criteria or add a new provider to get started."
-            onProviderView={() => {}} // Placeholder - will be replaced by ProviderActions
-          />
-        </ProviderActions>
+        {/* Provider Navigation */}
+        <ProviderNavigation
+          providers={providersResult.providers}
+          pagination={{
+            page,
+            limit,
+            total: providersResult.total,
+            totalPages: Math.ceil(providersResult.total / Math.max(1, limit)),
+            hasNextPage: page < Math.ceil(providersResult.total / Math.max(1, limit)),
+            hasPreviousPage: page > 1,
+          }}
+          emptyMessage="No providers found"
+          emptyDescription="Try adjusting your search criteria or add a new provider to get started."
+        />
       </div>
     </div>
   );

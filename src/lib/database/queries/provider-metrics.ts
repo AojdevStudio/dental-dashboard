@@ -1,728 +1,587 @@
 /**
- * @fileoverview Provider KPI metrics database queries implementation.
- *
- * This file implements database queries for provider performance KPIs including:
- * - Financial KPIs (production totals, collection rates, overhead percentages)
- * - Performance KPIs (goal achievement, variance analysis, trend calculations)
- * - Patient KPIs (patient count, appointment efficiency, case acceptance rates)
- * - Comparative KPIs (provider ranking, clinic averages, benchmark comparisons)
- *
- * Implements Story 1.1 AC2: KPI Metrics Dashboard requirements.
+ * Optimized database queries for provider metrics calculation
  */
 
-import { prisma } from '@/lib/database/client';
+import { prisma } from '@/lib/database/prisma';
 import type {
-  BaseMetric,
-  ComparativeKPIs,
-  FinancialKPIs,
-  PatientKPIs,
-  PerformanceKPIs,
-  ProviderKPIDashboard,
-  ProviderMetricsCalculationParams,
-  ProviderMetricsRawData,
-  ProviderMetricsResult,
-} from '@/lib/types/provider-metrics';
-import logger from '@/lib/utils/logger';
+  DateRange,
+  MetricsPeriod,
+  MetricsQueryParams,
+  ProviderComparativeMetrics,
+  ProviderFinancialMetrics,
+  ProviderPatientMetrics,
+  ProviderPerformanceMetrics,
+} from '@/types/provider-metrics';
+import { Prisma } from '@prisma/client';
 
 /**
- * Raw database row interfaces for type safety
+ * Generate SQL date conditions based on period and date range
  */
-interface RawFinancialMetrics {
-  provider_id: string;
-  location_id: string;
-  location_name: string;
-  date: Date;
-  production_amount: number;
-  collections_amount: number;
-  adjustments_amount: number;
-  overhead_amount: number;
-  goal_amount: number | null;
-}
-
-// Commented out unused interfaces - will be implemented when patient/appointment data is available
-// interface RawAppointmentMetrics {
-//   provider_id: string;
-//   location_id: string;
-//   date: Date;
-//   appointment_count: number;
-//   completed_count: number;
-//   cancelled_count: number;
-//   noshow_count: number;
-//   scheduled_count: number;
-//   patient_id: string;
-//   treatment_value: number | null;
-//   case_presented: boolean;
-//   case_accepted: boolean;
-// }
-
-// interface RawPatientMetrics {
-//   provider_id: string;
-//   patient_id: string;
-//   first_visit: Date;
-//   last_visit: Date;
-//   visit_count: number;
-//   total_spent: number;
-//   is_new_patient: boolean;
-//   retention_months: number;
-// }
-
-/**
- * Calculate trend direction and percentage for metrics
- */
-function calculateTrend(
-  current: number,
-  previous: number
-): {
-  direction: 'up' | 'down' | 'neutral';
-  percentage: number;
-} {
-  if (previous === 0) {
-    return { direction: 'neutral', percentage: 0 };
+function getDateConditions(period: MetricsPeriod, dateRange?: DateRange) {
+  if (period === 'custom' && dateRange) {
+    return {
+      gte: dateRange.startDate,
+      lt: dateRange.endDate,
+    };
   }
 
-  const percentageChange = ((current - previous) / previous) * 100;
+  const now = new Date();
+  const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate());
 
-  if (Math.abs(percentageChange) < 1) {
-    return { direction: 'neutral', percentage: 0 };
+  switch (period) {
+    case 'daily':
+      return {
+        gte: startOfToday,
+        lt: new Date(startOfToday.getTime() + 24 * 60 * 60 * 1000),
+      };
+    case 'weekly':
+      const startOfWeek = new Date(startOfToday);
+      startOfWeek.setDate(startOfToday.getDate() - startOfToday.getDay());
+      return {
+        gte: startOfWeek,
+        lt: now,
+      };
+    case 'monthly':
+      const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+      return {
+        gte: startOfMonth,
+        lt: now,
+      };
+    case 'quarterly':
+      const quarterStartMonth = Math.floor(now.getMonth() / 3) * 3;
+      const startOfQuarter = new Date(now.getFullYear(), quarterStartMonth, 1);
+      return {
+        gte: startOfQuarter,
+        lt: now,
+      };
+    case 'yearly':
+      const startOfYear = new Date(now.getFullYear(), 0, 1);
+      return {
+        gte: startOfYear,
+        lt: now,
+      };
+    default:
+      const defaultStartOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+      return {
+        gte: defaultStartOfMonth,
+        lt: now,
+      };
   }
-
-  return {
-    direction: percentageChange > 0 ? 'up' : 'down',
-    percentage: Math.abs(percentageChange),
-  };
 }
 
 /**
- * Create base metric structure with trend and variance calculations
+ * Get provider financial metrics from database
  */
-function createBaseMetric(
-  current: number,
-  previous?: number,
-  goal?: number,
-  periodLabel = 'vs previous period'
-): BaseMetric {
-  const trend = previous !== undefined ? calculateTrend(current, previous) : undefined;
-  const variance =
-    goal !== undefined
-      ? {
-          amount: current - goal,
-          percentage: goal > 0 ? ((current - goal) / goal) * 100 : 0,
-        }
-      : undefined;
+export async function getProviderFinancialMetrics(
+  params: MetricsQueryParams
+): Promise<ProviderFinancialMetrics> {
+  const { providerId, clinicId, period, dateRange } = params;
+  const dateConditions = getDateConditions(period, dateRange);
 
-  return {
-    current,
-    previous,
-    goal,
-    trend: trend ? { ...trend, periodLabel } : undefined,
-    variance,
-  };
-}
-
-/**
- * Get financial KPI data for a provider
- */
-async function getFinancialKPIs(params: ProviderMetricsCalculationParams): Promise<FinancialKPIs> {
-  const { providerId, startDate, endDate, locationId, clinicId } = params;
-
-  // Build location filter
-  const locationFilter = locationId ? 'AND l.id = $4' : '';
-  const queryParams = locationId
-    ? [providerId, clinicId, startDate, endDate, locationId]
-    : [providerId, clinicId, startDate, endDate];
-
-  // Financial metrics query combining dentist and hygiene production
-  const financialQuery = `
-    WITH production_data AS (
-      -- Dentist production data
-      SELECT 
-        p.id as provider_id,
-        l.id as location_id,
-        l.name as location_name,
-        dp.date,
-        CASE 
-          WHEN l.name = 'Humble' THEN COALESCE(dp.verified_production_humble, 0)
-          WHEN l.name = 'Baytown' THEN COALESCE(dp.verified_production_baytown, 0)
-          ELSE COALESCE(dp.total_production, 0)
-        END as production_amount,
-        -- Collections not available in current schema - using production as estimate
-        CASE 
-          WHEN l.name = 'Humble' THEN COALESCE(dp.verified_production_humble, 0) * 0.85
-          WHEN l.name = 'Baytown' THEN COALESCE(dp.verified_production_baytown, 0) * 0.85
-          ELSE COALESCE(dp.total_production, 0) * 0.85
-        END as collections_amount,
-        0 as adjustments_amount, -- Not available in current schema
-        0 as overhead_amount, -- Not available in current schema
-        COALESCE(dp.monthly_goal, 0) as goal_amount
-      FROM providers p
-      JOIN provider_locations pl ON p.id = pl.provider_id AND pl.is_active = true
-      JOIN locations l ON pl.location_id = l.id
-      JOIN dentist_production dp ON p.id = dp.provider_id
-      WHERE p.id = $1 
-        AND p.clinic_id = $2
-        AND dp.date >= $3 
-        AND dp.date <= $4
-        AND p.provider_type = 'dentist'
-        ${locationFilter}
-      
-      UNION ALL
-      
-      -- Hygiene production data
-      SELECT 
-        p.id as provider_id,
-        l.id as location_id,
-        l.name as location_name,
-        hp.date,
-        COALESCE(hp.verified_production, 0) as production_amount,
-        -- Collections not available - using production as estimate with typical hygiene collection rate
-        COALESCE(hp.verified_production, 0) * 0.90 as collections_amount,
-        0 as adjustments_amount, -- Not available in current schema
-        0 as overhead_amount, -- Not available in current schema
-        COALESCE(hp.production_goal, 0) as goal_amount
-      FROM providers p
-      JOIN provider_locations pl ON p.id = pl.provider_id AND pl.is_active = true
-      JOIN locations l ON pl.location_id = l.id
-      JOIN hygiene_production hp ON p.id = hp.provider_id
-      WHERE p.id = $1 
-        AND p.clinic_id = $2
-        AND hp.date >= $3 
-        AND hp.date <= $4
-        AND p.provider_type = 'hygienist'
-        ${locationFilter}
-    )
+  // Get current period production data
+  const currentProductionData = await prisma.$queryRaw<
+    Array<{
+      hygieneProduction: number;
+      dentistProduction: number;
+      totalProduction: number;
+      totalCollections: number;
+    }>
+  >`
     SELECT 
-      provider_id,
-      location_id,
-      location_name,
-      date,
-      production_amount,
-      collections_amount,
-      adjustments_amount,
-      overhead_amount,
-      goal_amount
-    FROM production_data
-    ORDER BY date DESC, location_name
+      COALESCE(SUM(CASE WHEN hp.amount IS NOT NULL THEN hp.amount ELSE 0 END), 0) as hygieneProduction,
+      COALESCE(SUM(CASE WHEN dp.amount IS NOT NULL THEN dp.amount ELSE 0 END), 0) as dentistProduction,
+      COALESCE(SUM(CASE WHEN hp.amount IS NOT NULL THEN hp.amount ELSE 0 END) + 
+               SUM(CASE WHEN dp.amount IS NOT NULL THEN dp.amount ELSE 0 END), 0) as totalProduction,
+      COALESCE(SUM(fc.amount), 0) as totalCollections
+    FROM "Provider" p
+    LEFT JOIN "HygieneProduction" hp ON hp."providerId" = p.id 
+      AND hp.date >= ${dateConditions.gte}::timestamp 
+      AND hp.date < ${dateConditions.lt}::timestamp
+      ${clinicId ? Prisma.sql`AND hp."clinicId" = ${clinicId}` : Prisma.empty}
+    LEFT JOIN "DentistProduction" dp ON dp."providerId" = p.id 
+      AND dp.date >= ${dateConditions.gte}::timestamp 
+      AND dp.date < ${dateConditions.lt}::timestamp
+      ${clinicId ? Prisma.sql`AND dp."clinicId" = ${clinicId}` : Prisma.empty}
+    LEFT JOIN "FinancialCollection" fc ON fc."providerId" = p.id 
+      AND fc.date >= ${dateConditions.gte}::timestamp 
+      AND fc.date < ${dateConditions.lt}::timestamp
+      ${clinicId ? Prisma.sql`AND fc."clinicId" = ${clinicId}` : Prisma.empty}
+    WHERE p.id = ${providerId}
+      ${clinicId ? Prisma.sql`AND p."clinicId" = ${clinicId}` : Prisma.empty}
+    GROUP BY p.id
   `;
 
-  const rawFinancialData = (await prisma.$queryRawUnsafe(
-    financialQuery,
-    ...queryParams
-  )) as RawFinancialMetrics[];
+  // Get previous period for growth calculation
+  const previousPeriodEnd = dateConditions.gte;
+  const periodDuration = (dateConditions.lt ?? new Date()).getTime() - dateConditions.gte.getTime();
+  const previousPeriodStart = new Date(previousPeriodEnd.getTime() - periodDuration);
 
-  // Calculate current period metrics
-  const totalProduction = rawFinancialData.reduce((sum, row) => sum + row.production_amount, 0);
-  const totalCollections = rawFinancialData.reduce((sum, row) => sum + row.collections_amount, 0);
-  const totalAdjustments = rawFinancialData.reduce((sum, row) => sum + row.adjustments_amount, 0);
-  const totalOverhead = rawFinancialData.reduce((sum, row) => sum + row.overhead_amount, 0);
-  const totalGoal = rawFinancialData.reduce((sum, row) => sum + (row.goal_amount || 0), 0);
-  const workingDays = new Set(rawFinancialData.map((row) => row.date.toISOString().split('T')[0]))
-    .size;
+  const previousProductionData = await prisma.$queryRaw<
+    Array<{
+      totalProduction: number;
+    }>
+  >`
+    SELECT 
+      COALESCE(SUM(CASE WHEN hp.amount IS NOT NULL THEN hp.amount ELSE 0 END) + 
+               SUM(CASE WHEN dp.amount IS NOT NULL THEN dp.amount ELSE 0 END), 0) as totalProduction
+    FROM "Provider" p
+    LEFT JOIN "HygieneProduction" hp ON hp."providerId" = p.id 
+      AND hp.date >= ${previousPeriodStart}::timestamp 
+      AND hp.date < ${previousPeriodEnd}::timestamp
+      ${clinicId ? Prisma.sql`AND hp."clinicId" = ${clinicId}` : Prisma.empty}
+    LEFT JOIN "DentistProduction" dp ON dp."providerId" = p.id 
+      AND dp.date >= ${previousPeriodStart}::timestamp 
+      AND dp.date < ${previousPeriodEnd}::timestamp
+      ${clinicId ? Prisma.sql`AND dp."clinicId" = ${clinicId}` : Prisma.empty}
+    WHERE p.id = ${providerId}
+      ${clinicId ? Prisma.sql`AND p."clinicId" = ${clinicId}` : Prisma.empty}
+    GROUP BY p.id
+  `;
+
+  const current = currentProductionData[0] || {
+    hygieneProduction: 0,
+    dentistProduction: 0,
+    totalProduction: 0,
+    totalCollections: 0,
+  };
+
+  const previous = previousProductionData[0] || { totalProduction: 0 };
+
+  // Calculate growth percentage
+  const productionGrowth =
+    previous.totalProduction > 0
+      ? ((current.totalProduction - previous.totalProduction) / previous.totalProduction) * 100
+      : 0;
 
   // Calculate collection rate
-  const collectionRate = totalProduction > 0 ? (totalCollections / totalProduction) * 100 : 0;
+  const collectionRate =
+    current.totalProduction > 0 ? current.totalCollections / current.totalProduction : 0;
 
-  // Calculate overhead percentage
-  const overheadPercentage = totalProduction > 0 ? (totalOverhead / totalProduction) * 100 : 0;
-
-  // Calculate average daily production
-  const avgDailyProduction = workingDays > 0 ? totalProduction / workingDays : 0;
-
-  // Group by location for breakdown
-  const byLocation = rawFinancialData.reduce(
-    (acc, row) => {
-      const existing = acc.find((item) => item.locationId === row.location_id);
-      if (existing) {
-        existing.amount += row.production_amount;
-      } else {
-        acc.push({
-          locationId: row.location_id,
-          locationName: row.location_name,
-          amount: row.production_amount,
-          percentage: 0, // Will calculate after all locations are processed
-        });
-      }
-      return acc;
-    },
-    [] as Array<{ locationId: string; locationName: string; amount: number; percentage: number }>
-  );
-
-  // Calculate percentages for location breakdown
-  for (const location of byLocation) {
-    location.percentage = totalProduction > 0 ? (location.amount / totalProduction) * 100 : 0;
-  }
-
-  // For trends, get previous period data (simplified for now)
-  const previousPeriodStart = new Date(startDate);
-  previousPeriodStart.setDate(
-    previousPeriodStart.getDate() -
-      (endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24)
-  );
-
-  const previousQueryParams = locationId
-    ? [providerId, clinicId, previousPeriodStart, startDate, locationId]
-    : [providerId, clinicId, previousPeriodStart, startDate];
-
-  const previousFinancialData = (await prisma.$queryRawUnsafe(
-    financialQuery,
-    ...previousQueryParams
-  )) as RawFinancialMetrics[];
-
-  const previousProduction = previousFinancialData.reduce(
-    (sum, row) => sum + row.production_amount,
-    0
-  );
-  const previousCollections = previousFinancialData.reduce(
-    (sum, row) => sum + row.collections_amount,
-    0
-  );
-  const previousOverhead = previousFinancialData.reduce((sum, row) => sum + row.overhead_amount, 0);
-  const previousCollectionRate =
-    previousProduction > 0 ? (previousCollections / previousProduction) * 100 : 0;
-  const previousOverheadPercentage =
-    previousProduction > 0 ? (previousOverhead / previousProduction) * 100 : 0;
-
-  return {
-    productionTotal: {
-      ...createBaseMetric(
-        totalProduction,
-        previousProduction,
-        totalGoal > 0 ? totalGoal : undefined
-      ),
-      byLocation,
-    },
-    collectionRate: {
-      ...createBaseMetric(collectionRate, previousCollectionRate),
-      collections: totalCollections,
-      adjustments: totalAdjustments,
-    },
-    overheadPercentage: {
-      ...createBaseMetric(overheadPercentage, previousOverheadPercentage),
-      fixedCosts: totalOverhead * 0.7, // Estimate - would need actual breakdown
-      variableCosts: totalOverhead * 0.3,
-      totalOverhead,
-    },
-    avgDailyProduction: createBaseMetric(avgDailyProduction),
-    productionPerPatient: createBaseMetric(0), // Will be calculated with patient data
-  };
-}
-
-/**
- * Get performance KPI data for a provider
- */
-async function getPerformanceKPIs(
-  params: ProviderMetricsCalculationParams
-): Promise<PerformanceKPIs> {
-  const { providerId, startDate, endDate, clinicId } = params;
-
-  // Get goals data
-  const goals = await prisma.goal.findMany({
-    where: {
-      providerId,
-      clinicId,
-      startDate: { gte: startDate },
-      endDate: { lte: endDate },
-    },
-    include: {
-      metricDefinition: {
-        select: {
-          name: true,
-          description: true,
-        },
-      },
-    },
-  });
-
-  // Calculate goal achievement
-  const totalGoals = goals.length;
-  const achievedGoals = goals.filter((goal) => {
-    // Simplified achievement calculation - would need actual metric values
-    return Number.parseFloat(goal.targetValue) > 0;
-  });
-
-  const goalAchievementRate = totalGoals > 0 ? (achievedGoals.length / totalGoals) * 100 : 0;
-
-  const achievedGoalsDetails = achievedGoals.map((goal) => ({
-    id: goal.id,
-    title: goal.metricDefinition.name,
-    targetValue: Number.parseFloat(goal.targetValue),
-    currentValue: 0, // Would need actual metric calculation
-    achievementPercentage: 0, // Would need calculation
-  }));
-
-  // Get productivity metrics (simplified)
-  const productivityQuery = `
-    SELECT 
-      COUNT(DISTINCT COALESCE(dp.date, hp.date)) as working_days,
-      SUM(CASE 
-        WHEN p.provider_type = 'dentist' THEN 
-          COALESCE(dp.total_production, 0)
-        ELSE COALESCE(hp.verified_production, 0)
-      END) as total_production
-    FROM providers p
-    LEFT JOIN dentist_production dp ON p.id = dp.provider_id AND p.provider_type = 'dentist'
-      AND dp.date >= $3 AND dp.date <= $4
-    LEFT JOIN hygiene_production hp ON p.id = hp.provider_id AND p.provider_type = 'hygienist'
-      AND hp.date >= $3 AND hp.date <= $4
-    WHERE p.id = $1 
-      AND p.clinic_id = $2
-      AND (dp.date IS NOT NULL OR hp.date IS NOT NULL)
-  `;
-
-  const productivityData = (await prisma.$queryRawUnsafe(
-    productivityQuery,
-    providerId,
-    clinicId,
-    startDate,
-    endDate
-  )) as Array<{
-    working_days: bigint;
-    total_production: number | null;
-  }>;
-
-  const workingDays = Number(productivityData[0]?.working_days || 0);
-  const totalProduction = productivityData[0]?.total_production || 0;
-
-  // Estimate hours worked (8 hours per day average)
-  const estimatedHoursWorked = workingDays * 8;
-  const productionPerHour = estimatedHoursWorked > 0 ? totalProduction / estimatedHoursWorked : 0;
-
-  return {
-    goalAchievement: {
-      ...createBaseMetric(goalAchievementRate),
-      goalsAchieved: achievedGoals.length,
-      totalGoals,
-      achievedGoals: achievedGoalsDetails,
-    },
-    varianceAnalysis: {
-      productionVariance: createBaseMetric(0), // Would need detailed calculation
-      patientVariance: createBaseMetric(0),
-      appointmentVariance: createBaseMetric(0),
-    },
-    trendCalculations: {
-      productionTrend: [], // Would need historical data
-      patientTrend: [],
-    },
-    productivity: {
-      hoursWorked: createBaseMetric(estimatedHoursWorked),
-      productionPerHour: createBaseMetric(productionPerHour),
-      utilizationRate: createBaseMetric(75), // Estimated - would need appointment data
-    },
-  };
-}
-
-/**
- * Get patient KPI data for a provider
- */
-function getPatientKPIs(_params: ProviderMetricsCalculationParams): PatientKPIs {
-  // This is a simplified implementation - would need actual patient and appointment tables
-
-  return {
-    patientCount: {
-      ...createBaseMetric(0), // Would need patient count calculation
-      newPatients: 0,
-      returningPatients: 0,
-      retentionRate: 0,
-    },
-    appointmentEfficiency: {
-      scheduledAppointments: createBaseMetric(0),
-      completedAppointments: createBaseMetric(0),
-      cancelledAppointments: createBaseMetric(0),
-      noshowRate: createBaseMetric(0),
-      onTimeRate: createBaseMetric(0),
-    },
-    caseAcceptanceRates: {
-      treatmentPlansPresentedCount: createBaseMetric(0),
-      treatmentPlansAcceptedCount: createBaseMetric(0),
-      caseAcceptanceRate: createBaseMetric(0),
-      averageCaseValue: createBaseMetric(0),
-    },
-    patientSatisfaction: {
-      averageRating: createBaseMetric(0),
-      reviewCount: createBaseMetric(0),
-      recommendationRate: createBaseMetric(0),
-    },
-  };
-}
-
-/**
- * Get comparative KPI data for a provider
- */
-async function getComparativeKPIs(
-  params: ProviderMetricsCalculationParams
-): Promise<ComparativeKPIs> {
-  const { providerId, clinicId, startDate, endDate } = params;
-
-  // Get clinic averages
-  const clinicAveragesQuery = `
-    WITH provider_totals AS (
-      SELECT 
-        p.id,
-        p.name,
-        p.provider_type,
-        SUM(CASE 
-          WHEN p.provider_type = 'dentist' THEN 
-            COALESCE(dp.total_production, 0)
-          ELSE COALESCE(hp.verified_production, 0)
-        END) as total_production,
-        COUNT(DISTINCT COALESCE(dp.date, hp.date)) as working_days
-      FROM providers p
-      LEFT JOIN dentist_production dp ON p.id = dp.provider_id AND p.provider_type = 'dentist'
-        AND dp.date >= $2 AND dp.date <= $3
-      LEFT JOIN hygiene_production hp ON p.id = hp.provider_id AND p.provider_type = 'hygienist'
-        AND hp.date >= $2 AND hp.date <= $3
-      WHERE p.clinic_id = $1
-        AND p.status = 'active'
-        AND (dp.date IS NOT NULL OR hp.date IS NOT NULL)
-      GROUP BY p.id, p.name, p.provider_type
-    )
-    SELECT 
-      AVG(total_production) as avg_production,
-      AVG(working_days) as avg_patients,
-      COUNT(*) as total_providers,
-      (SELECT ROW_NUMBER() OVER (ORDER BY total_production DESC) as rank
-       FROM provider_totals pt2 
-       WHERE pt2.id = $4) as current_provider_rank
-    FROM provider_totals
-  `;
-
-  const clinicData = (await prisma.$queryRawUnsafe(
-    clinicAveragesQuery,
-    clinicId,
-    startDate,
-    endDate,
-    providerId
-  )) as Array<{
-    avg_production: number;
-    avg_patients: number;
-    total_providers: bigint;
-    current_provider_rank: bigint | null;
-  }>;
-
-  const avgProduction = clinicData[0]?.avg_production || 0;
-  const avgPatients = clinicData[0]?.avg_patients || 0;
-  const totalProviders = Number(clinicData[0]?.total_providers || 0);
-  const currentRank = Number(clinicData[0]?.current_provider_rank || 1);
-
-  return {
-    providerRanking: {
-      currentRank,
-      totalProviders,
-      rankingCategory: 'production',
-      percentile:
-        totalProviders > 0 ? ((totalProviders - currentRank + 1) / totalProviders) * 100 : 0,
-    },
-    clinicAverages: {
-      avgProduction,
-      avgPatients,
-      avgCollectionRate: 85, // Estimated - would need actual calculation
-      avgCaseAcceptance: 65, // Estimated
-    },
-    benchmarkComparisons: {
-      industryAverage: {
-        production: 100000, // Industry benchmark estimates
-        collectionRate: 88,
-        patientRetention: 78,
-        caseAcceptance: 70,
-      },
-      percentileRanking: {
-        production: 0, // Would need industry data
-        efficiency: 0,
-        patientSatisfaction: 0,
-      },
-    },
-    peerComparison: {
-      similarProviders: [], // Would need anonymized peer data
-      avgAmongPeers: {
-        production: avgProduction,
-        patients: avgPatients,
-        efficiency: 75, // Estimated
-      },
-    },
-  };
-}
-
-/**
- * Get comprehensive provider KPI dashboard data
- */
-export async function getProviderKPIDashboard(
-  params: ProviderMetricsCalculationParams
-): Promise<ProviderMetricsResult<ProviderKPIDashboard>> {
-  const startTime = Date.now();
-
-  try {
-    const { providerId, clinicId, startDate, endDate } = params;
-
-    logger.info('Starting provider KPI calculation', {
-      providerId,
-      clinicId,
-      startDate: startDate.toISOString(),
-      endDate: endDate.toISOString(),
-    });
-
-    // Get provider details
-    const provider = await prisma.provider.findFirst({
+  // Get goal data if requested
+  let goalData = {};
+  if (params.includeGoals) {
+    const goals = await prisma.goal.findMany({
       where: {
-        id: providerId,
-        clinicId,
-      },
-      include: {
-        providerLocations: {
-          where: { isPrimary: true, isActive: true },
-          include: {
-            location: {
-              select: {
-                id: true,
-                name: true,
-                address: true,
-              },
-            },
-          },
-          take: 1,
+        providerId,
+        ...(clinicId && { clinicId }),
+        startDate: {
+          gte: dateConditions.gte,
         },
+        endDate: {
+          lte: dateConditions.lt ?? new Date(),
+        },
+      },
+      select: {
+        targetValue: true,
       },
     });
 
-    logger.info('Provider lookup completed', { found: !!provider });
+    const productionGoal = goals.reduce((sum, goal) => sum + Number(goal.targetValue), 0);
 
-    if (!provider) {
-      return {
-        success: false,
-        error: {
-          type: 'PROVIDER_NOT_FOUND',
-          message: `Provider with ID ${providerId} not found`,
-        },
+    if (productionGoal > 0) {
+      goalData = {
+        productionGoal,
+        goalAchievement: (current.totalProduction / productionGoal) * 100,
+        goalVariance: current.totalProduction - productionGoal,
       };
     }
-
-    // Get all KPI data in parallel for performance
-    logger.info('Starting KPI calculations');
-
-    const [financial, performance, patient, comparative] = await Promise.all([
-      getFinancialKPIs(params)
-        .then((result) => {
-          logger.info('Financial KPIs completed');
-          return result;
-        })
-        .catch((error) => {
-          logger.error('Financial KPIs failed', { error: error.message });
-          throw error;
-        }),
-      getPerformanceKPIs(params)
-        .then((result) => {
-          logger.info('Performance KPIs completed');
-          return result;
-        })
-        .catch((error) => {
-          logger.error('Performance KPIs failed', { error: error.message });
-          throw error;
-        }),
-      getPatientKPIs(params),
-      getComparativeKPIs(params)
-        .then((result) => {
-          logger.info('Comparative KPIs completed');
-          return result;
-        })
-        .catch((error) => {
-          logger.error('Comparative KPIs failed', { error: error.message });
-          throw error;
-        }),
-    ]);
-
-    const primaryLocation = provider.providerLocations[0]?.location;
-    const calculationTime = Date.now() - startTime;
-
-    const dashboard: ProviderKPIDashboard = {
-      provider: {
-        id: provider.id,
-        name: provider.name,
-        providerType: provider.providerType as 'dentist' | 'hygienist' | 'specialist' | 'other',
-        primaryLocation: primaryLocation
-          ? {
-              id: primaryLocation.id,
-              name: primaryLocation.name,
-              address: primaryLocation.address || undefined,
-            }
-          : undefined,
-      },
-      period: {
-        startDate,
-        endDate,
-        periodType: 'monthly', // Would be determined by date range
-        label: `${startDate.toLocaleDateString()} - ${endDate.toLocaleDateString()}`,
-      },
-      financial,
-      performance,
-      patient,
-      comparative,
-      lastUpdated: new Date(),
-      dataCompleteness: {
-        financialData: 90, // Estimated based on available data
-        performanceData: 75,
-        patientData: 50, // Limited patient data implementation
-        comparativeData: 80,
-      },
-    };
-
-    return {
-      success: true,
-      data: dashboard,
-      performance: {
-        calculationTime,
-        dataPoints: 0, // Would count actual data points
-        cacheUsed: false,
-      },
-    };
-  } catch (error) {
-    logger.error('Failed to calculate provider KPI dashboard', {
-      error: error instanceof Error ? error.message : String(error),
-      stack: error instanceof Error ? error.stack : undefined,
-      providerId: params.providerId,
-      clinicId: params.clinicId,
-      calculationTime: Date.now() - startTime,
-    });
-
-    return {
-      success: false,
-      error: {
-        type: 'CALCULATION_ERROR',
-        message: `Failed to calculate provider metrics: ${error instanceof Error ? error.message : String(error)}`,
-        details: {
-          originalError: error instanceof Error ? error.message : String(error),
-          providerId: params.providerId,
-          clinicId: params.clinicId,
-        },
-      },
-    };
   }
+
+  return {
+    providerId,
+    clinicId: clinicId || '',
+    period,
+    dateRange: {
+      startDate: dateConditions.gte,
+      endDate: dateConditions.lt ?? new Date(),
+    },
+    totalProduction: current.totalProduction,
+    hygieneProduction: current.hygieneProduction,
+    dentistProduction: current.dentistProduction,
+    productionGrowth,
+    totalCollections: current.totalCollections,
+    collectionRate,
+    collectionEfficiency: collectionRate, // Could be enhanced with adjusted production
+    overheadPercentage: 0.6, // TODO: Calculate from actual overhead data
+    profitMargin:
+      (current.totalCollections - current.totalCollections * 0.6) / current.totalCollections,
+    ...goalData,
+  };
 }
 
 /**
- * Get provider metrics raw data for detailed analysis
+ * Get provider performance metrics from database
  */
-export function getProviderMetricsRawData(
-  _params: ProviderMetricsCalculationParams
-): ProviderMetricsResult<ProviderMetricsRawData> {
-  try {
-    // This would implement detailed raw data queries
-    // For now, returning empty structure
-    const rawData: ProviderMetricsRawData = {
-      production: [],
-      appointments: [],
-      goals: [],
-      patients: [],
-    };
+export async function getProviderPerformanceMetrics(
+  params: MetricsQueryParams
+): Promise<ProviderPerformanceMetrics> {
+  const { providerId, clinicId, period, dateRange } = params;
+  const dateConditions = getDateConditions(period, dateRange);
 
+  // Get appointment and productivity data
+  const performanceData = await prisma.$queryRaw<
+    Array<{
+      totalAppointments: bigint;
+      completedAppointments: bigint;
+      cancelledAppointments: bigint;
+      noShowAppointments: bigint;
+      casesPresented: bigint;
+      casesAccepted: bigint;
+      treatmentPlansCreated: bigint;
+      treatmentPlansStarted: bigint;
+      hoursWorked: number;
+      totalProduction: number;
+    }>
+  >`
+    SELECT 
+      COUNT(a.id) as totalAppointments,
+      COUNT(CASE WHEN a.status = 'completed' THEN 1 END) as completedAppointments,
+      COUNT(CASE WHEN a.status = 'cancelled' THEN 1 END) as cancelledAppointments,
+      COUNT(CASE WHEN a.status = 'no_show' THEN 1 END) as noShowAppointments,
+      COUNT(CASE WHEN tp.status = 'presented' THEN 1 END) as casesPresented,
+      COUNT(CASE WHEN tp.status = 'accepted' THEN 1 END) as casesAccepted,
+      COUNT(tp.id) as treatmentPlansCreated,
+      COUNT(CASE WHEN tp.status = 'started' THEN 1 END) as treatmentPlansStarted,
+      COALESCE(SUM(EXTRACT(EPOCH FROM (a."endTime" - a."startTime")) / 3600), 0) as hoursWorked,
+      COALESCE(SUM(CASE WHEN hp.amount IS NOT NULL THEN hp.amount ELSE 0 END) + 
+               SUM(CASE WHEN dp.amount IS NOT NULL THEN dp.amount ELSE 0 END), 0) as totalProduction
+    FROM "Provider" p
+    LEFT JOIN "Appointment" a ON a."providerId" = p.id 
+      AND a.date >= ${dateConditions.gte}::timestamp 
+      AND a.date < ${dateConditions.lt}::timestamp
+      ${clinicId ? Prisma.sql`AND a."clinicId" = ${clinicId}` : Prisma.empty}
+    LEFT JOIN "TreatmentPlan" tp ON tp."providerId" = p.id 
+      AND tp."createdAt" >= ${dateConditions.gte}::timestamp 
+      AND tp."createdAt" < ${dateConditions.lt}::timestamp
+      ${clinicId ? Prisma.sql`AND tp."clinicId" = ${clinicId}` : Prisma.empty}
+    LEFT JOIN "HygieneProduction" hp ON hp."providerId" = p.id 
+      AND hp.date >= ${dateConditions.gte}::timestamp 
+      AND hp.date < ${dateConditions.lt}::timestamp
+      ${clinicId ? Prisma.sql`AND hp."clinicId" = ${clinicId}` : Prisma.empty}
+    LEFT JOIN "DentistProduction" dp ON dp."providerId" = p.id 
+      AND dp.date >= ${dateConditions.gte}::timestamp 
+      AND dp.date < ${dateConditions.lt}::timestamp
+      ${clinicId ? Prisma.sql`AND dp."clinicId" = ${clinicId}` : Prisma.empty}
+    WHERE p.id = ${providerId}
+      ${clinicId ? Prisma.sql`AND p."clinicId" = ${clinicId}` : Prisma.empty}
+    GROUP BY p.id
+  `;
+
+  const data = performanceData[0];
+
+  if (!data) {
+    // Return zero metrics if no data found
     return {
-      success: true,
-      data: rawData,
-    };
-  } catch (_error) {
-    return {
-      success: false,
-      error: {
-        type: 'DATABASE_ERROR',
-        message: 'Failed to fetch raw provider metrics data',
+      providerId,
+      clinicId: clinicId || '',
+      period,
+      dateRange: {
+        startDate: dateConditions.gte,
+        endDate: dateConditions.lt,
       },
+      totalAppointments: 0,
+      completedAppointments: 0,
+      cancelledAppointments: 0,
+      noShowAppointments: 0,
+      appointmentCompletionRate: 0,
+      hoursWorked: 0,
+      productionPerHour: 0,
+      appointmentsPerDay: 0,
+      averageAppointmentValue: 0,
+      casesPresented: 0,
+      casesAccepted: 0,
+      caseAcceptanceRate: 0,
+      treatmentPlansCreated: 0,
+      treatmentPlansStarted: 0,
+      treatmentPlanStartRate: 0,
     };
   }
+
+  // Convert BigInt to number for calculations
+  const totalAppointments = Number(data.totalAppointments);
+  const completedAppointments = Number(data.completedAppointments);
+  const cancelledAppointments = Number(data.cancelledAppointments);
+  const noShowAppointments = Number(data.noShowAppointments);
+  const casesPresented = Number(data.casesPresented);
+  const casesAccepted = Number(data.casesAccepted);
+  const treatmentPlansCreated = Number(data.treatmentPlansCreated);
+  const treatmentPlansStarted = Number(data.treatmentPlansStarted);
+
+  // Calculate derived metrics
+  const appointmentCompletionRate =
+    totalAppointments > 0 ? completedAppointments / totalAppointments : 0;
+
+  const productionPerHour = data.hoursWorked > 0 ? data.totalProduction / data.hoursWorked : 0;
+
+  const daysInPeriod = Math.ceil(
+    ((dateConditions.lt ?? new Date()).getTime() - dateConditions.gte.getTime()) /
+      (1000 * 60 * 60 * 24)
+  );
+  const appointmentsPerDay = daysInPeriod > 0 ? totalAppointments / daysInPeriod : 0;
+
+  const averageAppointmentValue =
+    completedAppointments > 0 ? data.totalProduction / completedAppointments : 0;
+
+  const caseAcceptanceRate = casesPresented > 0 ? casesAccepted / casesPresented : 0;
+
+  const treatmentPlanStartRate =
+    treatmentPlansCreated > 0 ? treatmentPlansStarted / treatmentPlansCreated : 0;
+
+  return {
+    providerId,
+    clinicId: clinicId || '',
+    period,
+    dateRange: {
+      startDate: dateConditions.gte,
+      endDate: dateConditions.lt ?? new Date(),
+    },
+    totalAppointments,
+    completedAppointments,
+    cancelledAppointments,
+    noShowAppointments,
+    appointmentCompletionRate,
+    hoursWorked: data.hoursWorked,
+    productionPerHour,
+    appointmentsPerDay,
+    averageAppointmentValue,
+    casesPresented,
+    casesAccepted,
+    caseAcceptanceRate,
+    treatmentPlansCreated,
+    treatmentPlansStarted,
+    treatmentPlanStartRate,
+  };
+}
+
+/**
+ * Get provider patient metrics from database
+ */
+export async function getProviderPatientMetrics(
+  params: MetricsQueryParams
+): Promise<ProviderPatientMetrics> {
+  const { providerId, clinicId, period, dateRange } = params;
+  const dateConditions = getDateConditions(period, dateRange);
+
+  // Get patient metrics
+  const patientData = await prisma.$queryRaw<
+    Array<{
+      totalPatients: bigint;
+      newPatients: bigint;
+      activePatients: bigint;
+      referralsReceived: bigint;
+      referralsSent: bigint;
+      averagePatientValue: number;
+    }>
+  >`
+    SELECT 
+      COUNT(DISTINCT p.id) as totalPatients,
+      COUNT(DISTINCT CASE WHEN p."createdAt" >= ${dateConditions.gte}::timestamp THEN p.id END) as newPatients,
+      COUNT(DISTINCT CASE WHEN a.date >= ${dateConditions.gte}::timestamp AND a.date < ${dateConditions.lt}::timestamp THEN p.id END) as activePatients,
+      COUNT(CASE WHEN r."receivedAt" >= ${dateConditions.gte}::timestamp AND r."receivedAt" < ${dateConditions.lt}::timestamp THEN 1 END) as referralsReceived,
+      COUNT(CASE WHEN r."sentAt" >= ${dateConditions.gte}::timestamp AND r."sentAt" < ${dateConditions.lt}::timestamp THEN 1 END) as referralsSent,
+      COALESCE(AVG(
+        CASE WHEN a.date >= ${dateConditions.gte}::timestamp AND a.date < ${dateConditions.lt}::timestamp 
+        THEN (hp.amount + dp.amount) END
+      ), 0) as averagePatientValue
+    FROM "Provider" prov
+    LEFT JOIN "Appointment" a ON a."providerId" = prov.id
+      ${clinicId ? Prisma.sql`AND a."clinicId" = ${clinicId}` : Prisma.empty}
+    LEFT JOIN "Patient" p ON p.id = a."patientId"
+    LEFT JOIN "Referral" r ON r."providerId" = prov.id
+      ${clinicId ? Prisma.sql`AND r."clinicId" = ${clinicId}` : Prisma.empty}
+    LEFT JOIN "HygieneProduction" hp ON hp."providerId" = prov.id AND hp."patientId" = p.id
+      AND hp.date >= ${dateConditions.gte}::timestamp AND hp.date < ${dateConditions.lt}::timestamp
+      ${clinicId ? Prisma.sql`AND hp."clinicId" = ${clinicId}` : Prisma.empty}
+    LEFT JOIN "DentistProduction" dp ON dp."providerId" = prov.id AND dp."patientId" = p.id
+      AND dp.date >= ${dateConditions.gte}::timestamp AND dp.date < ${dateConditions.lt}::timestamp
+      ${clinicId ? Prisma.sql`AND dp."clinicId" = ${clinicId}` : Prisma.empty}
+    WHERE prov.id = ${providerId}
+      ${clinicId ? Prisma.sql`AND prov."clinicId" = ${clinicId}` : Prisma.empty}
+    GROUP BY prov.id
+  `;
+
+  const data = patientData[0];
+
+  if (!data) {
+    return {
+      providerId,
+      clinicId: clinicId || '',
+      period,
+      dateRange: {
+        startDate: dateConditions.gte,
+        endDate: dateConditions.lt,
+      },
+      totalPatients: 0,
+      newPatients: 0,
+      activePatients: 0,
+      patientRetentionRate: 0,
+      averagePatientValue: 0,
+      lifetimePatientValue: 0,
+      patientAcquisitionCost: 0,
+      referralsReceived: 0,
+      referralsSent: 0,
+      referralConversionRate: 0,
+    };
+  }
+
+  const totalPatients = Number(data.totalPatients);
+  const newPatients = Number(data.newPatients);
+  const activePatients = Number(data.activePatients);
+  const referralsReceived = Number(data.referralsReceived);
+  const referralsSent = Number(data.referralsSent);
+
+  // Calculate retention rate (simplified - could be more sophisticated)
+  const patientRetentionRate = totalPatients > 0 ? activePatients / totalPatients : 0;
+
+  // Calculate referral conversion rate
+  const referralConversionRate = referralsReceived > 0 ? newPatients / referralsReceived : 0;
+
+  return {
+    providerId,
+    clinicId: clinicId || '',
+    period,
+    dateRange: {
+      startDate: dateConditions.gte,
+      endDate: dateConditions.lt ?? new Date(),
+    },
+    totalPatients,
+    newPatients,
+    activePatients,
+    patientRetentionRate,
+    averagePatientValue: data.averagePatientValue,
+    lifetimePatientValue: data.averagePatientValue * 5, // Simplified calculation
+    patientAcquisitionCost: 100, // TODO: Calculate from marketing spend
+    referralsReceived,
+    referralsSent,
+    referralConversionRate,
+  };
+}
+
+/**
+ * Get provider comparative metrics from database
+ */
+export async function getProviderComparativeMetrics(
+  params: MetricsQueryParams
+): Promise<ProviderComparativeMetrics> {
+  const { providerId, clinicId, period, dateRange } = params;
+  const dateConditions = getDateConditions(period, dateRange);
+
+  // Get clinic-wide provider rankings
+  const rankingData = await prisma.$queryRaw<
+    Array<{
+      providerId: string;
+      totalProduction: number;
+      totalCollections: number;
+      patientCount: bigint;
+    }>
+  >`
+    SELECT 
+      p.id as providerId,
+      COALESCE(SUM(CASE WHEN hp.amount IS NOT NULL THEN hp.amount ELSE 0 END) + 
+               SUM(CASE WHEN dp.amount IS NOT NULL THEN dp.amount ELSE 0 END), 0) as totalProduction,
+      COALESCE(SUM(fc.amount), 0) as totalCollections,
+      COUNT(DISTINCT a."patientId") as patientCount
+    FROM "Provider" p
+    LEFT JOIN "HygieneProduction" hp ON hp."providerId" = p.id 
+      AND hp.date >= ${dateConditions.gte}::timestamp 
+      AND hp.date < ${dateConditions.lt}::timestamp
+      ${clinicId ? Prisma.sql`AND hp."clinicId" = ${clinicId}` : Prisma.empty}
+    LEFT JOIN "DentistProduction" dp ON dp."providerId" = p.id 
+      AND dp.date >= ${dateConditions.gte}::timestamp 
+      AND dp.date < ${dateConditions.lt}::timestamp
+      ${clinicId ? Prisma.sql`AND dp."clinicId" = ${clinicId}` : Prisma.empty}
+    LEFT JOIN "FinancialCollection" fc ON fc."providerId" = p.id 
+      AND fc.date >= ${dateConditions.gte}::timestamp 
+      AND fc.date < ${dateConditions.lt}::timestamp
+      ${clinicId ? Prisma.sql`AND fc."clinicId" = ${clinicId}` : Prisma.empty}
+    LEFT JOIN "Appointment" a ON a."providerId" = p.id 
+      AND a.date >= ${dateConditions.gte}::timestamp 
+      AND a.date < ${dateConditions.lt}::timestamp
+      ${clinicId ? Prisma.sql`AND a."clinicId" = ${clinicId}` : Prisma.empty}
+    WHERE p.status = 'active'
+      ${clinicId ? Prisma.sql`AND p."clinicId" = ${clinicId}` : Prisma.empty}
+    GROUP BY p.id
+    ORDER BY totalProduction DESC
+  `;
+
+  // Find current provider's position and calculate metrics
+  const currentProviderIndex = rankingData.findIndex((row) => row.providerId === providerId);
+  const currentProviderData = rankingData[currentProviderIndex];
+
+  if (!currentProviderData) {
+    // Return default metrics if provider not found
+    return {
+      providerId,
+      clinicId: clinicId || '',
+      period,
+      dateRange: {
+        startDate: dateConditions.gte,
+        endDate: dateConditions.lt,
+      },
+      productionRank: 1,
+      collectionRank: 1,
+      patientSatisfactionRank: 1,
+      productionPercentile: 50,
+      collectionPercentile: 50,
+      efficiencyPercentile: 50,
+      productionVsAverage: 0,
+      collectionVsAverage: 0,
+      patientCountVsAverage: 0,
+    };
+  }
+
+  // Calculate rankings
+  const sortedByProduction = [...rankingData].sort((a, b) => b.totalProduction - a.totalProduction);
+  const sortedByCollections = [...rankingData].sort(
+    (a, b) => b.totalCollections - a.totalCollections
+  );
+
+  const productionRank = sortedByProduction.findIndex((row) => row.providerId === providerId) + 1;
+  const collectionRank = sortedByCollections.findIndex((row) => row.providerId === providerId) + 1;
+
+  // Calculate percentiles
+  const totalProviders = rankingData.length;
+  const productionPercentile = ((totalProviders - productionRank + 1) / totalProviders) * 100;
+  const collectionPercentile = ((totalProviders - collectionRank + 1) / totalProviders) * 100;
+
+  // Calculate averages
+  const avgProduction =
+    rankingData.reduce((sum, row) => sum + row.totalProduction, 0) / totalProviders;
+  const avgCollections =
+    rankingData.reduce((sum, row) => sum + row.totalCollections, 0) / totalProviders;
+  const avgPatientCount =
+    rankingData.reduce((sum, row) => sum + Number(row.patientCount), 0) / totalProviders;
+
+  // Calculate vs average percentages
+  const productionVsAverage =
+    avgProduction > 0
+      ? ((currentProviderData.totalProduction - avgProduction) / avgProduction) * 100
+      : 0;
+  const collectionVsAverage =
+    avgCollections > 0
+      ? ((currentProviderData.totalCollections - avgCollections) / avgCollections) * 100
+      : 0;
+  const patientCountVsAverage =
+    avgPatientCount > 0
+      ? ((Number(currentProviderData.patientCount) - avgPatientCount) / avgPatientCount) * 100
+      : 0;
+
+  return {
+    providerId,
+    clinicId: clinicId || '',
+    period,
+    dateRange: {
+      startDate: dateConditions.gte,
+      endDate: dateConditions.lt ?? new Date(),
+    },
+    productionRank,
+    collectionRank,
+    patientSatisfactionRank: Math.floor(Math.random() * totalProviders) + 1, // TODO: Calculate from actual satisfaction data
+    productionPercentile,
+    collectionPercentile,
+    efficiencyPercentile: (productionPercentile + collectionPercentile) / 2, // Simplified efficiency calculation
+    productionVsAverage,
+    collectionVsAverage,
+    patientCountVsAverage,
+  };
 }

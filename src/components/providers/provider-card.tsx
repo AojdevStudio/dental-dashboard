@@ -10,8 +10,20 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import { Skeleton } from '@/components/ui/skeleton';
+// Note: Tooltip component not available, using hover states instead
+import { useProviderMetrics } from '@/hooks/use-provider-metrics';
 import type { ProviderWithLocations } from '@/types/providers';
-import { MapPin, MoreHorizontal, User } from 'lucide-react';
+import {
+  DollarSign,
+  MapPin,
+  MoreHorizontal,
+  Target,
+  TrendingDown,
+  TrendingUp,
+  User,
+  Users,
+} from 'lucide-react';
 import React from 'react';
 
 /**
@@ -236,12 +248,38 @@ function Content({ children, className = '' }: { children: React.ReactNode; clas
 }
 
 /**
- * Provider metrics display
+ * Provider preview metrics component
  */
-function Metrics({ compact = false }: { compact?: boolean }) {
+function PreviewMetrics({
+  showAdvanced = false,
+  compact = false,
+}: {
+  showAdvanced?: boolean;
+  compact?: boolean;
+}) {
   const provider = useProviderCardContext();
 
-  const metrics = [
+  // Fetch preview metrics with lightweight caching
+  const {
+    data: metrics,
+    isLoading,
+    isError,
+  } = useProviderMetrics(
+    {
+      providerId: provider.id,
+      period: 'monthly',
+      includeComparative: false,
+      includeGoals: false,
+    },
+    {
+      enabled: showAdvanced,
+      staleTime: 10 * 60 * 1000, // 10 minutes for preview
+      gcTime: 30 * 60 * 1000, // 30 minutes cache
+      refetchInterval: 0, // No background refetch for previews
+    }
+  );
+
+  const baseMetrics = [
     {
       label: 'Locations',
       value: provider._count.locations,
@@ -260,14 +298,67 @@ function Metrics({ compact = false }: { compact?: boolean }) {
     },
   ];
 
+  // Advanced metrics from the provider metrics API
+  const advancedMetrics = metrics
+    ? [
+        {
+          label: 'Monthly Production',
+          value: `$${metrics.financial.totalProduction.toLocaleString()}`,
+          icon: DollarSign,
+          color: 'text-green-600',
+          trend: metrics.financial.productionGrowth,
+        },
+        {
+          label: 'Collection Rate',
+          value: `${(metrics.financial.collectionRate * 100).toFixed(1)}%`,
+          icon: Target,
+          color: 'text-blue-600',
+          trend: metrics.comparative?.collectionVsAverage || 0,
+        },
+        {
+          label: 'Total Patients',
+          value: metrics.patient.totalPatients.toLocaleString(),
+          icon: Users,
+          color: 'text-purple-600',
+          trend: 0, // Could calculate from patient growth
+        },
+      ]
+    : [];
+
+  const displayMetrics = showAdvanced && !isError ? advancedMetrics : baseMetrics;
+
+  // Loading state for advanced metrics
+  if (showAdvanced && isLoading) {
+    return (
+      <div className={compact ? 'flex items-center gap-4' : 'grid grid-cols-3 gap-3'}>
+        {Array.from({ length: 3 }).map((_, i) => (
+          <div key={i} className={compact ? 'flex items-center gap-1' : 'text-center'}>
+            <Skeleton className={compact ? 'h-3 w-8' : 'h-5 w-12 mb-1'} />
+            <Skeleton className={compact ? 'h-3 w-16' : 'h-3 w-16'} />
+          </div>
+        ))}
+      </div>
+    );
+  }
+
   if (compact) {
     return (
       <div className="flex items-center gap-4 text-xs text-gray-600">
-        {metrics.map((metric) => (
-          <div key={metric.label} className="flex items-center gap-1">
+        {displayMetrics.map((metric) => (
+          <div
+            key={metric.label}
+            className="flex items-center gap-1 hover:bg-gray-50 px-1 py-0.5 rounded cursor-help"
+            title={`${metric.label}${'trend' in metric && metric.trend !== undefined ? ` • ${metric.trend > 0 ? '+' : ''}${(metric.trend * 100).toFixed(1)}% vs average` : ''}`}
+          >
             {metric.icon && <metric.icon className="h-3 w-3" />}
             <span className={metric.color}>{metric.value}</span>
-            <span>{metric.label}</span>
+            {'trend' in metric &&
+              metric.trend !== undefined &&
+              (metric.trend > 0 ? (
+                <TrendingUp className="h-3 w-3 text-green-500" />
+              ) : metric.trend < 0 ? (
+                <TrendingDown className="h-3 w-3 text-red-500" />
+              ) : null)}
           </div>
         ))}
       </div>
@@ -276,14 +367,34 @@ function Metrics({ compact = false }: { compact?: boolean }) {
 
   return (
     <div className="grid grid-cols-3 gap-3">
-      {metrics.map((metric) => (
-        <div key={metric.label} className="text-center">
-          <div className={`text-lg font-semibold ${metric.color}`}>{metric.value}</div>
-          <div className="text-xs text-gray-500">{metric.label}</div>
+      {displayMetrics.map((metric) => (
+        <div
+          key={metric.label}
+          className="text-center hover:bg-gray-50 p-2 rounded transition-colors cursor-help"
+          title={`${metric.label}${'trend' in metric && metric.trend !== undefined ? ` • ${metric.trend > 0 ? '+' : ''}${(metric.trend * 100).toFixed(1)}% vs average` : ''}`}
+        >
+          <div className="flex items-center justify-center gap-1">
+            <span className={`text-lg font-semibold ${metric.color}`}>{metric.value}</span>
+            {'trend' in metric &&
+              metric.trend !== undefined &&
+              (metric.trend > 0 ? (
+                <TrendingUp className="h-4 w-4 text-green-500" />
+              ) : metric.trend < 0 ? (
+                <TrendingDown className="h-4 w-4 text-red-500" />
+              ) : null)}
+          </div>
+          <div className="text-xs text-gray-500 mt-1">{metric.label}</div>
         </div>
       ))}
     </div>
   );
+}
+
+/**
+ * Provider metrics display (legacy)
+ */
+function Metrics({ compact = false }: { compact?: boolean }) {
+  return <PreviewMetrics showAdvanced={false} compact={compact} />;
 }
 
 /**
@@ -360,6 +471,7 @@ export const ProviderCard = {
   Actions,
   Content,
   Metrics,
+  PreviewMetrics,
   Locations,
   Contact,
 };

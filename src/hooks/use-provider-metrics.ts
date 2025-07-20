@@ -1,328 +1,360 @@
 /**
- * @fileoverview React hook for provider KPI metrics data fetching and caching.
- *
- * Implements optimized data fetching for provider performance metrics with
- * automatic caching, error handling, and performance monitoring.
- *
- * Supports Story 1.1 AC2: KPI Metrics Dashboard requirements.
+ * React hook for provider metrics data fetching with caching
  */
 
 import type {
-  ProviderKPIDashboard,
-  ProviderKPIQueryParams,
-  ProviderKPIResponse,
-} from '@/lib/types/provider-metrics';
-import { type UseQueryResult, useQuery } from '@tanstack/react-query';
-import { useCallback, useState } from 'react';
+  MetricsQueryParams,
+  ProviderMetrics,
+  ProviderMetricsTrend,
+} from '@/types/provider-metrics';
+import { type UseQueryResult, useQueries, useQuery } from '@tanstack/react-query';
+import { useCallback, useMemo } from 'react';
 
 /**
- * Hook configuration options
+ * API client for provider metrics
+ */
+class ProviderMetricsClient {
+  private baseUrl = '/api/providers';
+
+  async getProviderMetrics(params: MetricsQueryParams): Promise<ProviderMetrics> {
+    const searchParams = new URLSearchParams({
+      period: params.period,
+      ...(params.clinicId && { clinicId: params.clinicId }),
+      ...(params.dateRange && {
+        startDate: params.dateRange.startDate.toISOString(),
+        endDate: params.dateRange.endDate.toISOString(),
+      }),
+      includeComparative: String(params.includeComparative ?? true),
+      includeGoals: String(params.includeGoals ?? true),
+      refreshCache: String(params.refreshCache ?? false),
+    });
+
+    const response = await fetch(`${this.baseUrl}/${params.providerId}/metrics?${searchParams}`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      throw new Error(errorData.message || `Failed to fetch provider metrics: ${response.status}`);
+    }
+
+    return response.json();
+  }
+
+  async getProviderMetricsTrend(
+    params: MetricsQueryParams,
+    metricName: string,
+    periods = 12
+  ): Promise<ProviderMetricsTrend> {
+    const searchParams = new URLSearchParams({
+      period: params.period,
+      metricName,
+      periods: String(periods),
+      ...(params.clinicId && { clinicId: params.clinicId }),
+      ...(params.dateRange && {
+        startDate: params.dateRange.startDate.toISOString(),
+        endDate: params.dateRange.endDate.toISOString(),
+      }),
+    });
+
+    const response = await fetch(
+      `${this.baseUrl}/${params.providerId}/metrics/trend?${searchParams}`,
+      {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      }
+    );
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      throw new Error(
+        errorData.message || `Failed to fetch provider metrics trend: ${response.status}`
+      );
+    }
+
+    return response.json();
+  }
+
+  async refreshMetricsCache(providerId: string, clinicId?: string): Promise<void> {
+    const searchParams = new URLSearchParams({
+      ...(clinicId && { clinicId }),
+    });
+
+    const response = await fetch(`${this.baseUrl}/${providerId}/metrics/refresh?${searchParams}`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      throw new Error(errorData.message || `Failed to refresh metrics cache: ${response.status}`);
+    }
+  }
+}
+
+// Singleton instance
+const metricsClient = new ProviderMetricsClient();
+
+/**
+ * Query key factory for provider metrics
+ */
+const providerMetricsKeys = {
+  all: ['provider-metrics'] as const,
+  provider: (providerId: string) => [...providerMetricsKeys.all, providerId] as const,
+  metrics: (params: MetricsQueryParams) =>
+    [...providerMetricsKeys.provider(params.providerId), 'metrics', params] as const,
+  trend: (params: MetricsQueryParams, metricName: string, periods: number) =>
+    [
+      ...providerMetricsKeys.provider(params.providerId),
+      'trend',
+      metricName,
+      periods,
+      params,
+    ] as const,
+};
+
+/**
+ * Hook options interface
  */
 interface UseProviderMetricsOptions {
-  /** Enable automatic refetching (default: true) */
   enabled?: boolean;
-  /** Cache time in milliseconds (default: 5 minutes) */
-  staleTime?: number;
-  /** Refetch interval in milliseconds (default: 30 seconds) */
   refetchInterval?: number;
-  /** Retry failed requests (default: 3) */
-  retry?: number;
+  staleTime?: number;
+  gcTime?: number;
 }
 
 /**
- * Provider metrics hook return type
- */
-interface UseProviderMetricsReturn {
-  /** KPI dashboard data */
-  data: ProviderKPIDashboard | undefined;
-  /** Loading state */
-  isLoading: boolean;
-  /** Error state */
-  error: Error | null;
-  /** Is currently fetching data */
-  isFetching: boolean;
-  /** Performance information */
-  performanceInfo?: {
-    queryTime: number;
-    dataFreshness: Date;
-    cacheHit: boolean;
-  };
-  /** Refetch function */
-  refetch: () => Promise<UseQueryResult<ProviderKPIResponse, Error>>;
-  /** Update query parameters */
-  updateParams: (newParams: Partial<ProviderKPIQueryParams>) => void;
-  /** Current query parameters */
-  currentParams: ProviderKPIQueryParams;
-}
-
-/**
- * Fetch provider KPI data from API
- */
-async function fetchProviderKPIs(params: ProviderKPIQueryParams): Promise<ProviderKPIResponse> {
-  const { providerId, ...queryParams } = params;
-
-  // Build query string
-  const searchParams = new URLSearchParams();
-
-  if (queryParams.period) {
-    searchParams.append('period', queryParams.period);
-  }
-  if (queryParams.startDate) {
-    searchParams.append('startDate', queryParams.startDate);
-  }
-  if (queryParams.endDate) {
-    searchParams.append('endDate', queryParams.endDate);
-  }
-  if (queryParams.locationId) {
-    searchParams.append('locationId', queryParams.locationId);
-  }
-  if (queryParams.includeComparisons !== undefined) {
-    searchParams.append('includeComparisons', queryParams.includeComparisons.toString());
-  }
-  if (queryParams.includeTrends !== undefined) {
-    searchParams.append('includeTrends', queryParams.includeTrends.toString());
-  }
-  if (queryParams.compareToProvider) {
-    searchParams.append('compareToProvider', queryParams.compareToProvider);
-  }
-
-  const url = `/api/providers/${providerId}/kpi?${searchParams.toString()}`;
-
-  const response = await fetch(url, {
-    method: 'GET',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-  });
-
-  if (!response.ok) {
-    const errorData = await response.json().catch(() => ({}));
-    throw new Error(errorData.error || `HTTP ${response.status}: ${response.statusText}`);
-  }
-
-  const result = await response.json();
-
-  if (!result.success) {
-    throw new Error(result.error || 'Failed to fetch provider KPI data');
-  }
-
-  return {
-    success: true,
-    data: result.data,
-    performanceInfo: result.performanceInfo,
-  };
-}
-
-/**
- * Hook for fetching and managing provider KPI metrics data
- *
- * @param providerId - Provider ID to fetch metrics for
- * @param initialParams - Initial query parameters
- * @param options - Hook configuration options
- * @returns Provider metrics data and control functions
- *
- * @example
- * ```tsx
- * const {
- *   data,
- *   isLoading,
- *   error,
- *   updateParams
- * } = useProviderMetrics('provider-123', {
- *   period: 'monthly',
- *   includeComparisons: true
- * });
- *
- * // Update to quarterly view
- * updateParams({ period: 'quarterly' });
- * ```
+ * Hook for fetching provider metrics
  */
 export function useProviderMetrics(
-  providerId: string,
-  initialParams: Partial<ProviderKPIQueryParams> = {},
+  params: MetricsQueryParams,
   options: UseProviderMetricsOptions = {}
-): UseProviderMetricsReturn {
+): UseQueryResult<ProviderMetrics, Error> & {
+  refreshCache: () => Promise<void>;
+} {
   const {
     enabled = true,
-    staleTime = 5 * 60 * 1000, // 5 minutes
-    refetchInterval = 30 * 1000, // 30 seconds
-    retry = 3,
+    refetchInterval = 5 * 60 * 1000, // 5 minutes
+    staleTime = 2 * 60 * 1000, // 2 minutes
+    gcTime = 10 * 60 * 1000, // 10 minutes
   } = options;
 
-  // Manage query parameters state
-  const [queryParams, setQueryParams] = useState<ProviderKPIQueryParams>({
-    providerId,
-    period: 'monthly',
-    includeComparisons: true,
-    includeTrends: true,
-    ...initialParams,
-  });
-
-  // Update provider ID when it changes
-  if (queryParams.providerId !== providerId) {
-    setQueryParams((prev) => ({ ...prev, providerId }));
-  }
-
-  // Create query key for caching
-  const queryKey = ['provider-kpi', queryParams];
-
-  // Use React Query for data fetching with caching
-  const query = useQuery({
-    queryKey,
-    queryFn: () => fetchProviderKPIs(queryParams),
-    enabled: enabled && !!providerId,
-    staleTime,
+  const queryResult = useQuery({
+    queryKey: providerMetricsKeys.metrics(params),
+    queryFn: () => metricsClient.getProviderMetrics(params),
+    enabled,
     refetchInterval,
-    retry,
-    // Keep previous data while fetching new data
-    placeholderData: (previousData) => previousData,
+    staleTime,
+    gcTime,
+    retry: (failureCount, error) => {
+      // Don't retry on 4xx errors except 408 (timeout)
+      if (error.message.includes('40') && !error.message.includes('408')) {
+        return false;
+      }
+      return failureCount < 3;
+    },
+    retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
   });
 
-  // Update parameters function
-  const updateParams = useCallback(
-    (newParams: Partial<ProviderKPIQueryParams>) => {
-      setQueryParams((prev) => ({
-        ...prev,
-        ...newParams,
-        providerId, // Ensure provider ID stays consistent
-      }));
-    },
-    [providerId]
-  );
+  const refreshCache = useCallback(async () => {
+    await metricsClient.refreshMetricsCache(params.providerId, params.clinicId);
+    await queryResult.refetch();
+  }, [params.providerId, params.clinicId, queryResult]);
 
   return {
-    data: query.data?.data,
-    isLoading: query.isLoading,
-    error: query.error,
-    isFetching: query.isFetching,
-    performanceInfo: query.data?.performanceInfo,
-    refetch: query.refetch,
-    updateParams,
-    currentParams: queryParams,
+    ...queryResult,
+    refreshCache,
   };
 }
 
 /**
- * Hook for fetching multiple providers' KPI data for comparison
- * Note: This function is designed for a maximum of 10 providers to avoid performance issues
- *
- * @param providerIds - Array of provider IDs to compare (max 10)
- * @param queryParams - Common query parameters for all providers
- * @param options - Hook configuration options
- * @returns Array of provider metrics data
+ * Hook for fetching provider metrics trend
  */
-export function useProviderComparison(
-  providerIds: string[],
-  queryParams: Partial<ProviderKPIQueryParams> = {},
+export function useProviderMetricsTrend(
+  params: MetricsQueryParams,
+  metricName: string,
+  periods = 12,
   options: UseProviderMetricsOptions = {}
-) {
-  // Limit to max 10 providers to prevent performance issues
-  const limitedProviderIds = providerIds.slice(0, 10);
+): UseQueryResult<ProviderMetricsTrend, Error> {
+  const {
+    enabled = true,
+    refetchInterval = 10 * 60 * 1000, // 10 minutes (trends change less frequently)
+    staleTime = 5 * 60 * 1000, // 5 minutes
+    gcTime = 15 * 60 * 1000, // 15 minutes
+  } = options;
 
-  // Always call hooks unconditionally, passing empty string for missing providers
-  const provider1 = useProviderMetrics(limitedProviderIds[0] || '', queryParams, {
-    ...options,
-    enabled: options.enabled && !!limitedProviderIds[0],
+  return useQuery({
+    queryKey: providerMetricsKeys.trend(params, metricName, periods),
+    queryFn: () => metricsClient.getProviderMetricsTrend(params, metricName, periods),
+    enabled: enabled && !!metricName,
+    refetchInterval,
+    staleTime,
+    gcTime,
+    retry: (failureCount, error) => {
+      if (error.message.includes('40') && !error.message.includes('408')) {
+        return false;
+      }
+      return failureCount < 3;
+    },
+    retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
   });
-  const provider2 = useProviderMetrics(limitedProviderIds[1] || '', queryParams, {
-    ...options,
-    enabled: options.enabled && !!limitedProviderIds[1],
-  });
-  const provider3 = useProviderMetrics(limitedProviderIds[2] || '', queryParams, {
-    ...options,
-    enabled: options.enabled && !!limitedProviderIds[2],
-  });
-  const provider4 = useProviderMetrics(limitedProviderIds[3] || '', queryParams, {
-    ...options,
-    enabled: options.enabled && !!limitedProviderIds[3],
-  });
-  const provider5 = useProviderMetrics(limitedProviderIds[4] || '', queryParams, {
-    ...options,
-    enabled: options.enabled && !!limitedProviderIds[4],
-  });
-  const provider6 = useProviderMetrics(limitedProviderIds[5] || '', queryParams, {
-    ...options,
-    enabled: options.enabled && !!limitedProviderIds[5],
-  });
-  const provider7 = useProviderMetrics(limitedProviderIds[6] || '', queryParams, {
-    ...options,
-    enabled: options.enabled && !!limitedProviderIds[6],
-  });
-  const provider8 = useProviderMetrics(limitedProviderIds[7] || '', queryParams, {
-    ...options,
-    enabled: options.enabled && !!limitedProviderIds[7],
-  });
-  const provider9 = useProviderMetrics(limitedProviderIds[8] || '', queryParams, {
-    ...options,
-    enabled: options.enabled && !!limitedProviderIds[8],
-  });
-  const provider10 = useProviderMetrics(limitedProviderIds[9] || '', queryParams, {
-    ...options,
-    enabled: options.enabled && !!limitedProviderIds[9],
+}
+
+/**
+ * Hook for fetching multiple provider metrics trends
+ */
+export function useProviderMetricsTrends(
+  params: MetricsQueryParams,
+  metricNames: string[],
+  periods = 12,
+  options: UseProviderMetricsOptions = {}
+): {
+  trends: UseQueryResult<ProviderMetricsTrend, Error>[];
+  isLoading: boolean;
+  isError: boolean;
+  error: Error | null;
+} {
+  const {
+    enabled = true,
+    refetchInterval = 10 * 60 * 1000,
+    staleTime = 5 * 60 * 1000,
+    gcTime = 15 * 60 * 1000,
+  } = options;
+
+  const trends = useQueries({
+    queries: metricNames.map((metricName) => ({
+      queryKey: providerMetricsKeys.trend(params, metricName, periods),
+      queryFn: () => metricsClient.getProviderMetricsTrend(params, metricName, periods),
+      enabled: enabled && !!metricName,
+      refetchInterval,
+      staleTime,
+      gcTime,
+      retry: (failureCount: number, error: Error) => {
+        if (error.message.includes('40') && !error.message.includes('408')) {
+          return false;
+        }
+        return failureCount < 3;
+      },
+      retryDelay: (attemptIndex: number) => Math.min(1000 * 2 ** attemptIndex, 30000),
+    })),
   });
 
-  const allQueries = [
-    provider1,
-    provider2,
-    provider3,
-    provider4,
-    provider5,
-    provider6,
-    provider7,
-    provider8,
-    provider9,
-    provider10,
-  ];
-
-  // Filter to only include providers with valid IDs
-  const validQueries = allQueries.filter((_, index) => !!limitedProviderIds[index]);
+  const isLoading = trends.some((trend) => trend.isLoading);
+  const isError = trends.some((trend) => trend.isError);
+  const error = trends.find((trend) => trend.error)?.error || null;
 
   return {
-    data: validQueries.map((q) => q.data).filter(Boolean),
-    isLoading: validQueries.some((q) => q.isLoading),
-    errors: validQueries.map((q) => q.error).filter(Boolean),
-    isFetching: validQueries.some((q) => q.isFetching),
-    refetchAll: () => Promise.all(validQueries.map((q) => q.refetch())),
-    providersData: validQueries.map((query, index) => ({
-      providerId: limitedProviderIds[index],
-      ...query,
-    })),
+    trends,
+    isLoading,
+    isError,
+    error,
   };
 }
 
 /**
- * Lightweight hook for basic provider metrics summary
- * Useful for provider cards and summary views
+ * Hook for comparing multiple providers' metrics
  */
-export function useProviderMetricsSummary(
-  providerId: string,
-  period: 'monthly' | 'quarterly' | 'yearly' = 'monthly'
-) {
-  return useProviderMetrics(
-    providerId,
-    {
-      period,
-      includeComparisons: false,
-      includeTrends: false,
-    },
-    {
-      staleTime: 10 * 60 * 1000, // 10 minutes for summary data
-      refetchInterval: 60 * 1000, // 1 minute
-    }
-  );
+export function useMultipleProviderMetrics(
+  providers: Array<{ providerId: string; providerName?: string }>,
+  baseParams: Omit<MetricsQueryParams, 'providerId'>,
+  options: UseProviderMetricsOptions = {}
+): {
+  metrics: Array<
+    UseQueryResult<ProviderMetrics, Error> & { providerId: string; providerName?: string }
+  >;
+  isLoading: boolean;
+  isError: boolean;
+  hasData: boolean;
+  successfulMetrics: ProviderMetrics[];
+} {
+  const {
+    enabled = true,
+    refetchInterval = 5 * 60 * 1000,
+    staleTime = 2 * 60 * 1000,
+    gcTime = 10 * 60 * 1000,
+  } = options;
+
+  const metrics = useQueries({
+    queries: providers.map((provider) => ({
+      queryKey: providerMetricsKeys.metrics({ ...baseParams, providerId: provider.providerId }),
+      queryFn: () =>
+        metricsClient.getProviderMetrics({ ...baseParams, providerId: provider.providerId }),
+      enabled: enabled && !!provider.providerId,
+      refetchInterval,
+      staleTime,
+      gcTime,
+      retry: (failureCount: number, error: Error) => {
+        if (error.message.includes('40') && !error.message.includes('408')) {
+          return false;
+        }
+        return failureCount < 3;
+      },
+      retryDelay: (attemptIndex: number) => Math.min(1000 * 2 ** attemptIndex, 30000),
+    })),
+  });
+
+  const enhancedMetrics = metrics.map((metric, index) => ({
+    ...metric,
+    providerId: providers[index].providerId,
+    providerName: providers[index].providerName,
+  }));
+
+  const isLoading = metrics.some((metric) => metric.isLoading);
+  const isError = metrics.some((metric) => metric.isError);
+  const hasData = metrics.some((metric) => metric.data);
+  const successfulMetrics = metrics.filter((metric) => metric.data).map((metric) => metric.data!);
+
+  return {
+    metrics: enhancedMetrics,
+    isLoading,
+    isError,
+    hasData,
+    successfulMetrics,
+  };
 }
 
 /**
- * Hook for real-time provider performance monitoring
- * Higher refresh rate for dashboard displays
+ * Hook for real-time metrics monitoring
  */
-export function useProviderRealtimeMetrics(
-  providerId: string,
-  queryParams: Partial<ProviderKPIQueryParams> = {}
+export function useRealtimeProviderMetrics(
+  params: MetricsQueryParams,
+  options: UseProviderMetricsOptions & {
+    realtimeEnabled?: boolean;
+    realtimeInterval?: number;
+  } = {}
 ) {
-  return useProviderMetrics(providerId, queryParams, {
-    staleTime: 30 * 1000, // 30 seconds
-    refetchInterval: 15 * 1000, // 15 seconds
-    retry: 5,
-  });
+  const {
+    realtimeEnabled = false,
+    realtimeInterval = 30 * 1000, // 30 seconds
+    ...baseOptions
+  } = options;
+
+  const queryOptions = useMemo(
+    () => ({
+      ...baseOptions,
+      refetchInterval: realtimeEnabled ? realtimeInterval : baseOptions.refetchInterval,
+      staleTime: realtimeEnabled ? 0 : baseOptions.staleTime,
+      gcTime: realtimeEnabled ? 1 * 60 * 1000 : baseOptions.gcTime, // 1 minute in realtime mode
+    }),
+    [realtimeEnabled, realtimeInterval, baseOptions]
+  );
+
+  return useProviderMetrics(params, queryOptions);
 }
+
+/**
+ * Metrics client for direct usage outside of React components
+ */
+export { metricsClient as providerMetricsClient };
+
+/**
+ * Query keys for external cache manipulation
+ */
+export { providerMetricsKeys };
