@@ -1,76 +1,157 @@
+---
+allowed-tools: Task, Bash, WebSearch, Read, Grep, TodoWrite
+description: Comprehensive multi-perspective PR review for production-ready code
+---
+
 # PR Review
 
-**PR Link/Number**: $ARGUMENTS
+Conducts thorough pull request reviews from product, engineering, QA, security, DevOps, and UX perspectives. Handles large PRs (>300 files) gracefully by using file lists and targeted analysis.
 
-> **Instructions**: Execute each task in the order given to conduct a thorough code review.  Update GitHub with this review.
-> **Important**: The future is now—any improvements or "future" recommendations must be addressed **immediately**.
+**variables:**
+PullRequestIdentifier: $ARGUMENTS
 
----
+**Usage Examples:**
 
-## Task 1: Product Manager Review
+- `/pr-review #123` - Review PR #123
+- `/pr-review feature/add-auth` - Review PR by branch name
+- `/pr-review https://github.com/owner/repo/pull/456` - Review by full URL
 
-**Objective**: Assess from a product management perspective, focusing on:
-- **Business Value**: Does this PR clearly advance our core product goals and deliver immediate ROI?
-- **User Experience**: Is the change intuitive and delightful for users right now? If not, make fixes immediately.
-- **Strategic Alignment**: Does the PR align with current (and long-term, i.e., now) strategic objectives?
+```yaml
+pr_review_configuration:
+  instructions:
+    - step: 1
+      action: "Fetch PR details and context"
+      details: "Extract PR number/URL from arguments, fetch file list, commit history, CI status, and linked issues. For large PRs, use file list API instead of full diff"
+    
+    - step: 2
+      action: "Handle large PR analysis"
+      details: "For PRs with >300 files, clone locally and analyze using git diff with specific file patterns. Focus on critical paths and high-impact changes"
+    
+    - step: 3
+      action: "Conduct Product Manager review"
+      details: "Evaluate business value, user impact, strategic alignment, and feature completeness"
+    
+    - step: 4
+      action: "Conduct Developer review"
+      details: "Assess code quality, patterns, performance, scalability, and maintainability. For large PRs, sample key files"
+    
+    - step: 5
+      action: "Conduct Quality Engineer review"
+      details: "Verify test coverage, edge cases, regression risks, and documentation"
+    
+    - step: 6
+      action: "Conduct Security Engineer review"
+      details: "Check authentication, data handling, vulnerabilities, and compliance"
+    
+    - step: 7
+      action: "Conduct DevOps review"
+      details: "Evaluate CI/CD compatibility, infrastructure impacts, and monitoring needs"
+    
+    - step: 8
+      action: "Conduct UI/UX review"
+      details: "Assess visual consistency, accessibility, user flow, and responsive design"
+    
+    - step: 9
+      action: "Synthesize comprehensive review"
+      details: "Compile all findings with priority levels (CRITICAL/HIGH/MEDIUM/LOW) and post to GitHub"
 
-**Action**: Provide clear directives on how to ensure maximum user and business impact. All "future" suggestions must be implemented now.
+  large_pr_handling:
+    detection: "Check file count first using GitHub API"
+    strategies:
+      - "Use file list API endpoint instead of full diff"
+      - "Focus on critical paths: auth, API, database, security"
+      - "Sample representative files from each component"
+      - "Clone locally for detailed analysis if needed"
+    fallback_commands:
+      - "gh pr checkout $PullRequestIdentifier"
+      - "git diff --name-status origin/main | head -100"
+      - "git diff --stat origin/main"
+      - "find . -name '*.ts' -o -name '*.tsx' | xargs git diff origin/main -- | head -5000"
+  
+  context:
+    current_state:
+      - name: "PR Details"
+        command: "!`gh pr view $PullRequestIdentifier --json title,body,author,state,files`"
+        description: "Current PR metadata and description"
+      
+      - name: "PR Files Changed"
+        command: "!`gh api repos/:owner/:repo/pulls/$PullRequestIdentifier/files --paginate | jq -r '.[].filename' | head -50 || gh pr view $PullRequestIdentifier --json files --jq '.files[].path' | head -50`"
+        description: "List of files changed in the pull request (first 50)"
+      
+      - name: "PR Diff Summary"
+        command: "!`gh pr view $PullRequestIdentifier --json additions,deletions,changedFiles --jq '"Files: \(.changedFiles), +\(.additions), -\(.deletions)"' || echo 'Unable to fetch diff summary'`"
+        description: "Summary of changes in the pull request"
+      
+      - name: "Critical File Changes"
+        command: "!`gh api repos/:owner/:repo/pulls/$PullRequestIdentifier/files --paginate | jq -r '.[] | select(.filename | test("(prisma|middleware|auth|api|security|payment)")) | "\(.filename): +\(.additions) -\(.deletions) (\(.status))"' | head -20 || echo 'Run: gh pr checkout $PullRequestIdentifier && git diff --name-status origin/main'`"
+        description: "Changes to critical files (security, auth, API, etc.)"
+      
+      - name: "CI Status"
+        command: "!`gh pr checks $PullRequestIdentifier --watch=false || echo 'CI checks completed with failures - see details above'`"
+        description: "Current build and test status"
+      
+      - name: "Related Issues"
+        command: "!`gh pr view $PullRequestIdentifier --json closingIssuesReferences`"
+        description: "Issues linked to this PR"
+    
+    input_files:
+      - "@CLAUDE.md"
+      - "@.github/pull_request_template.md"
+    
+    reference_docs:
+      - "@project-structure.md"
+      - "@prisma/schema.prisma"
+      - "@docs/architecture.md"
+      - "@docs/security-guidelines.md"
 
----
+  review_criteria:
+    product:
+      - "Clear business value and immediate ROI"
+      - "User experience improvements and delight"
+      - "Strategic alignment with product roadmap"
+      - "Feature completeness with no deferrals"
+    
+    engineering:
+      - "Code quality, readability, and maintainability"
+      - "Performance optimization and scalability"
+      - "Adherence to project patterns and standards"
+      - "Proper error handling and type safety"
+    
+    quality:
+      - "Comprehensive test coverage (unit/integration/E2E)"
+      - "Edge case handling and validation"
+      - "No regression risk to existing features"
+      - "Complete documentation updates"
+    
+    security:
+      - "Proper authentication and authorization"
+      - "Input validation and data sanitization"
+      - "Sensitive data protection and encryption"
+      - "Compliance with security standards"
+    
+    devops:
+      - "CI/CD pipeline compatibility"
+      - "Environment configuration correctness"
+      - "Monitoring and observability setup"
+      - "Zero-downtime deployment capability"
+    
+    design:
+      - "Visual consistency with design system"
+      - "WCAG accessibility compliance"
+      - "Intuitive user flow and interactions"
+      - "Responsive design across devices"
 
-## Task 2: Developer Review
-
-**Objective**: Evaluate the code thoroughly from a senior lead engineer perspective:
-1. **Code Quality & Maintainability**: Is the code structured for readability and easy maintenance? If not, refactor now.
-2. **Performance & Scalability**: Will these changes operate efficiently at scale? If not, optimize immediately.
-3. **Best Practices & Standards**: Note any deviation from coding standards and correct it now.
-
-**Action**: Leave a concise yet complete review comment, ensuring all improvements happen immediately—no deferrals.
-
----
-
-## Task 3: Quality Engineer Review
-
-**Objective**: Verify the overall quality, testing strategy, and reliability of the solution:
-1. **Test Coverage**: Are there sufficient tests (unit, integration, E2E)? If not, add them now.
-2. **Potential Bugs & Edge Cases**: Have all edge cases been considered? If not, address them immediately.
-3. **Regression Risk**: Confirm changes don't undermine existing functionality. If risk is identified, mitigate now with additional checks or tests.
-
-**Action**: Provide a detailed QA assessment, insisting any "future" improvements be completed right away.
-
----
-
-## Task 4: Security Engineer Review
-
-**Objective**: Ensure robust security practices and compliance:
-1. **Vulnerabilities**: Could these changes introduce security vulnerabilities? If so, fix them right away.
-2. **Data Handling**: Are we properly protecting sensitive data (e.g., encryption, sanitization)? Address all gaps now.
-3. **Compliance**: Confirm alignment with any relevant security or privacy standards (e.g., OWASP, GDPR, HIPAA). Implement missing requirements immediately.
-
-**Action**: Provide a security assessment. Any recommended fixes typically scheduled for "later" must be addressed now.
-
----
-
-## Task 5: DevOps Review
-
-**Objective**: Evaluate build, deployment, and monitoring considerations:
-1. **CI/CD Pipeline**: Validate that the PR integrates smoothly with existing build/test/deploy processes. If not, fix it now.
-2. **Infrastructure & Configuration**: Check whether the code changes require immediate updates to infrastructure or configs.
-3. **Monitoring & Alerts**: Identify new monitoring needs or potential improvements and implement them immediately.
-
-**Action**: Provide a DevOps-centric review, insisting that any improvements or tweaks be executed now.
-
----
-
-## Task 6: UI/UX Designer Review
-
-**Objective**: Ensure optimal user-centric design:
-1. **Visual Consistency**: Confirm adherence to brand/design guidelines. If not, adjust now.
-2. **Usability & Accessibility**: Validate that the UI is intuitive and compliant with accessibility standards. Make any corrections immediately.
-3. **Interaction Flow**: Assess whether the user flow is seamless. If friction exists, refine now.
-
-**Action**: Provide a detailed UI/UX evaluation. Any enhancements typically set for "later" must be done immediately.
-
----
-
-**End of PR Review**
+  priority_framework:
+    levels:
+      CRITICAL: "Blocks merge - must fix immediately"
+      HIGH: "Should fix before merge"
+      MEDIUM: "Address in this PR if possible"
+      LOW: "Consider for future improvements"
+    
+    immediate_action_policy:
+      - "All CRITICAL issues must be resolved"
+      - "HIGH priority items fixed before merge"
+      - "No deferring user-facing improvements"
+      - "Security vulnerabilities fixed immediately"
+      - "Performance regressions resolved now"
+```

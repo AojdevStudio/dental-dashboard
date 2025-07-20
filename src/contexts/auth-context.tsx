@@ -104,6 +104,24 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           setSession(session);
           setUser(session.user);
           await fetchDbUser(session.user);
+        } else {
+          // Check if we can get user info from the session API directly
+          try {
+            const response = await fetch('/api/auth/session');
+            const data = await response.json();
+
+            if (data.authenticated && data.user) {
+              // Try to refresh the session
+              const { data: refreshData } = await supabase.auth.refreshSession();
+              if (refreshData.session) {
+                setSession(refreshData.session);
+                setUser(refreshData.session.user);
+                setDbUser(data.user.dbUser);
+              }
+            }
+          } catch (sessionError) {
+            console.error('AuthProvider: Error checking session API:', sessionError);
+          }
         }
       } catch (error) {
         console.error('Error getting initial session:', error);

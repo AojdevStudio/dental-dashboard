@@ -24,6 +24,9 @@ model Clinic {
   // Phase 2: UUID Migration Field
   uuidId           String?  @unique @map("uuid_id") @db.Uuid
   
+  // Phase 3: Stable Identifier for External Systems (sync resilience)
+  clinicCode       String?  @unique @map("clinic_code") // e.g., "KAMDENTAL_MAIN"
+  
   users     User[]
   providers Provider[]
   metrics   MetricValue[]
@@ -72,6 +75,9 @@ model Provider {
   createdAt    DateTime @default(now()) @map("created_at")
   updatedAt    DateTime @updatedAt @map("updated_at")
   
+  // Phase 3: Stable Identifier for External Systems (sync resilience)
+  providerCode String?  @unique @map("provider_code") // e.g., "obinna_ezeji", "adriane_smith"
+  
   // Primary clinic relationship - most providers work primarily at one location
   clinicId     String   @map("clinic_id")
   clinic       Clinic   @relation(fields: [clinicId], references: [id])
@@ -96,6 +102,9 @@ model Location {
   isActive    Boolean  @default(true) @map("is_active")
   createdAt   DateTime @default(now()) @map("created_at")
   updatedAt   DateTime @updatedAt @map("updated_at")
+  
+  // Phase 3: Stable Identifier for External Systems (sync resilience)
+  locationCode String?  @unique @map("location_code") // e.g., "BAYTOWN_MAIN", "HUMBLE_MAIN"
   
   clinic      Clinic   @relation(fields: [clinicId], references: [id])
   financials  LocationFinancial[]
@@ -534,6 +543,27 @@ model ColumnMappingV2 {
   @@map("column_mappings_v2")
 }
 
+// ===== EXTERNAL SYSTEM INTEGRATION =====
+
+// External ID Mappings for Multi-System Sync Resilience
+model ExternalIdMapping {
+  id                 String   @id @default(cuid())
+  externalSystem     String   @map("external_system") // 'dentist_sync', 'hygienist_sync', 'location_sync'
+  externalIdentifier String   @map("external_identifier") // 'BAYTOWN_CLINIC', 'ADRIANE_PROVIDER'
+  entityType         String   @map("entity_type") // 'clinic', 'provider', 'location'
+  entityId           String   @map("entity_id") // The actual database ID
+  isActive           Boolean  @default(true) @map("is_active")
+  notes              String?  // Optional notes about the mapping
+  createdAt          DateTime @default(now()) @map("created_at")
+  updatedAt          DateTime @updatedAt @map("updated_at")
+  
+  @@unique([externalSystem, externalIdentifier, entityType])
+  @@index([externalSystem])
+  @@index([entityType])
+  @@index([entityId])
+  @@map("external_id_mappings")
+}
+
 // ===== HYGIENE PRODUCTION TRACKING =====
 
 // Dedicated table for hygiene production data with enhanced provider tracking
@@ -581,6 +611,12 @@ model DentistProduction {
   productionPerHour       Decimal? @map("production_per_hour") @db.Decimal(8, 2)
   avgDailyProduction      Decimal? @map("avg_daily_production") @db.Decimal(10, 2)
   providerName            String?  @map("provider_name") // e.g., "Dr. Obi" - kept for legacy data
+  
+  // Enhanced provider detection fields (for Google Apps Script sync)
+  providerCode            String?  @map("provider_code") // e.g., "chinyere_enih"
+  providerConfidence      String?  @map("provider_confidence") // none, low, medium, high
+  detectionMethod         String?  @map("detection_method") // multi-provider, legacy, none, error
+  
   createdAt               DateTime @default(now()) @map("created_at")
   updatedAt               DateTime @updatedAt @map("updated_at")
   

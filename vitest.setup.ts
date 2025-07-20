@@ -6,6 +6,13 @@ import { vi } from 'vitest';
 // Make React available globally in tests
 global.React = React;
 
+// Mock ResizeObserver for JSDOM
+global.ResizeObserver = vi.fn().mockImplementation(() => ({
+  observe: vi.fn(),
+  unobserve: vi.fn(),
+  disconnect: vi.fn(),
+}));
+
 // Mock Next.js server functions to prevent "called outside request scope" errors
 vi.mock('next/headers', () => ({
   cookies: vi.fn(() => ({
@@ -42,16 +49,19 @@ vi.mock('next/navigation', () => ({
 }));
 
 // Mock server environment validation to allow server components to run in tests
+// Uses cloud test database configuration from .env.test
 vi.mock('src/lib/config/environment', () => ({
   validateServerEnvironment: vi.fn(() => ({
-    NEXT_PUBLIC_SUPABASE_URL: 'http://localhost:54321',
-    NEXT_PUBLIC_SUPABASE_ANON_KEY: 'test-anon-key',
-    SUPABASE_SERVICE_KEY: 'test-service-key',
+    NEXT_PUBLIC_SUPABASE_URL:
+      process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://bxnkocxoacakljbcnulv.supabase.co',
+    NEXT_PUBLIC_SUPABASE_ANON_KEY: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'test-anon-key',
+    SUPABASE_SERVICE_KEY: process.env.SUPABASE_SERVICE_KEY || 'test-service-key',
     NEXT_PUBLIC_APP_URL: 'http://localhost:3000',
   })),
   validateClientEnvironment: vi.fn(() => ({
-    NEXT_PUBLIC_SUPABASE_URL: 'http://localhost:54321',
-    NEXT_PUBLIC_SUPABASE_ANON_KEY: 'test-anon-key',
+    NEXT_PUBLIC_SUPABASE_URL:
+      process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://bxnkocxoacakljbcnulv.supabase.co',
+    NEXT_PUBLIC_SUPABASE_ANON_KEY: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'test-anon-key',
     NEXT_PUBLIC_APP_URL: 'http://localhost:3000',
   })),
 }));

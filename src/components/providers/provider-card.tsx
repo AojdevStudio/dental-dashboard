@@ -500,7 +500,7 @@ export function CompactProviderCard({
           onEdit={onEdit}
           onViewDetails={onViewDetails}
           onManageLocations={onManageLocations}
-          showQuickActions={false}
+          showQuickActions={true}
         />
       </ProviderCard.Header>
       <ProviderCard.Content>

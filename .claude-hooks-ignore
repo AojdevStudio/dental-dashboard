@@ -1,0 +1,49 @@
+# .claude-hooks-ignore
+# Place this file in your project root: /Users/ossieirondi/Projects/kamdental/dental-dashboard/.claude-hooks-ignore
+
+# Dependencies - never lint these
+node_modules/**
+.next/**
+.nuxt/**
+dist/**
+build/**
+out/**
+
+# Generated files - skip auto-generated code
+*.generated.ts
+*.generated.js
+*_pb.ts
+*_pb.js
+*.d.ts
+
+# Test files - if you want to be less strict with tests
+# *.test.ts
+# *.spec.ts
+# __tests__/**
+# **/*.test.*
+
+# Build and tooling files
+.git/**
+.vscode/**
+.idea/**
+*.log
+*.cache
+.DS_Store
+Thumbs.db
+
+# Large data files
+*.json
+*.sql
+data/**
+uploads/**
+assets/large/**
+
+# Temporary files
+*.tmp
+*.temp
+.env.local
+.env.development.local
+
+# Specific files you want to skip
+# src/legacy-code.ts
+# src/vendor/third-party.js

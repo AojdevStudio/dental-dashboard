@@ -750,6 +750,96 @@ async function fetchProviderGoals(
 }
 
 /**
+ * Fetch production data for a provider with error handling
+ */
+async function fetchProviderProductionData(
+  provider: NonNullable<Awaited<ReturnType<typeof getProviderWithLocationDetails>>>,
+  providerId: string,
+  periodStart: Date,
+  periodEnd: Date,
+  locationFilter: { locationId?: string }
+): Promise<ProviderPerformanceMetrics[]> {
+  if (provider.providerType !== 'dentist' && provider.providerType !== 'hygienist') {
+    return [];
+  }
+
+  try {
+    return await getProviderPerformanceByLocation({
+      providerId,
+      startDate: periodStart,
+      endDate: periodEnd,
+      providerType: provider.providerType as 'dentist' | 'hygienist',
+      clinicId: provider.clinic.id,
+      ...locationFilter,
+    });
+  } catch (error) {
+    logger.error('Failed to fetch provider performance data', {
+      error: error instanceof Error ? error.message : String(error),
+      stack: error instanceof Error ? error.stack : undefined,
+      providerId,
+      providerType: provider.providerType,
+      clinicId: provider.clinic.id,
+      periodStart: periodStart.toISOString(),
+      periodEnd: periodEnd.toISOString(),
+      locationFilter,
+      operation: 'getProviderPerformanceByLocation',
+    });
+    return [];
+  }
+}
+
+/**
+ * Calculate production metrics from performance data
+ */
+function calculateProductionMetrics(productionData: ProviderPerformanceMetrics[]) {
+  const totalProduction = productionData.reduce((sum, data) => sum + data.totalProduction, 0);
+  const totalProductionDays = productionData.reduce((sum, data) => sum + data.productionDays, 0);
+  const averageProduction = totalProductionDays > 0 ? totalProduction / totalProductionDays : 0;
+  const totalGoal = productionData.reduce((sum, data) => sum + (data.productionGoal || 0), 0);
+  const variance = totalGoal > 0 ? totalProduction - totalGoal : undefined;
+  const variancePercentage =
+    totalGoal > 0 ? ((totalProduction - totalGoal) / totalGoal) * 100 : undefined;
+
+  return {
+    totalProduction,
+    averageProduction,
+    totalGoal,
+    variance,
+    variancePercentage,
+  };
+}
+
+/**
+ * Fetch provider goals with error handling
+ */
+async function getProviderGoalsData(
+  providerId: string,
+  clinicId: string,
+  periodStart: Date,
+  periodEnd: Date
+): Promise<Awaited<ReturnType<typeof fetchProviderGoals>> | undefined> {
+  try {
+    return await fetchProviderGoals(providerId, clinicId, periodStart, periodEnd);
+  } catch (error) {
+    logger.error('Failed to fetch provider goals data', {
+      error: error instanceof Error ? error.message : String(error),
+      stack: error instanceof Error ? error.stack : undefined,
+      providerId,
+      clinicId,
+      periodStart: periodStart.toISOString(),
+      periodEnd: periodEnd.toISOString(),
+      operation: 'fetchProviderGoals',
+    });
+
+    throw new Error(
+      `Failed to fetch provider goals for provider ${providerId}: ${
+        error instanceof Error ? error.message : String(error)
+      }`
+    );
+  }
+}
+
+/**
  * Get comprehensive provider performance metrics
  */
 export async function getProviderPerformanceMetrics(params: {
@@ -785,74 +875,27 @@ export async function getProviderPerformanceMetrics(params: {
     return null;
   }
 
-  // Build location filter conditions
+  // Build location filter and fetch production data
   const locationFilter = locationId ? { locationId } : {};
+  const productionData = await fetchProviderProductionData(
+    provider,
+    providerId,
+    periodStart,
+    periodEnd,
+    locationFilter
+  );
 
-  // Get production data based on provider type
-  let productionData: ProviderPerformanceMetrics[] = [];
-
-  if (provider.providerType === 'dentist' || provider.providerType === 'hygienist') {
-    try {
-      productionData = await getProviderPerformanceByLocation({
-        providerId,
-        startDate: periodStart,
-        endDate: periodEnd,
-        providerType: provider.providerType as 'dentist' | 'hygienist',
-        clinicId: provider.clinic.id,
-        ...locationFilter,
-      });
-    } catch (error) {
-      logger.error('Failed to fetch provider performance data', {
-        error: error instanceof Error ? error.message : String(error),
-        stack: error instanceof Error ? error.stack : undefined,
-        providerId,
-        providerType: provider.providerType,
-        clinicId: provider.clinic.id,
-        periodStart: periodStart.toISOString(),
-        periodEnd: periodEnd.toISOString(),
-        locationFilter,
-        operation: 'getProviderPerformanceByLocation',
-      });
-      productionData = [];
-    }
-  }
-
-  // Calculate total production metrics
-  const totalProduction = productionData.reduce((sum, data) => sum + data.totalProduction, 0);
-  const totalProductionDays = productionData.reduce((sum, data) => sum + data.productionDays, 0);
-  const averageProduction = totalProductionDays > 0 ? totalProduction / totalProductionDays : 0;
-  const totalGoal = productionData.reduce((sum, data) => sum + (data.productionGoal || 0), 0);
-  const variance = totalGoal > 0 ? totalProduction - totalGoal : undefined;
-  const variancePercentage =
-    totalGoal > 0 ? ((totalProduction - totalGoal) / totalGoal) * 100 : undefined;
+  // Calculate metrics
+  const { totalProduction, averageProduction, totalGoal, variance, variancePercentage } =
+    calculateProductionMetrics(productionData);
 
   // Group by location for multi-location providers
   const byLocation = aggregateProductionByLocation(productionData);
 
   // Get goals if requested
-  let goalsData: Awaited<ReturnType<typeof fetchProviderGoals>> | undefined;
-  if (includeGoals) {
-    try {
-      goalsData = await fetchProviderGoals(providerId, provider.clinic.id, periodStart, periodEnd);
-    } catch (error) {
-      logger.error('Failed to fetch provider goals data', {
-        error: error instanceof Error ? error.message : String(error),
-        stack: error instanceof Error ? error.stack : undefined,
-        providerId,
-        clinicId: provider.clinic.id,
-        periodStart: periodStart.toISOString(),
-        periodEnd: periodEnd.toISOString(),
-        operation: 'fetchProviderGoals',
-      });
-
-      // Re-throw with additional context for better error handling upstream
-      throw new Error(
-        `Failed to fetch provider goals for provider ${providerId}: ${
-          error instanceof Error ? error.message : String(error)
-        }`
-      );
-    }
-  }
+  const goalsData = includeGoals
+    ? await getProviderGoalsData(providerId, provider.clinic.id, periodStart, periodEnd)
+    : undefined;
 
   return {
     provider: {

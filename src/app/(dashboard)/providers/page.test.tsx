@@ -1,24 +1,26 @@
-import { render, screen, waitFor } from '@testing-library/react';
+import { render, screen, waitFor, act } from '@testing-library/react';
 import { vi } from 'vitest';
-import React, { Suspense } from 'react';
+import React from 'react';
 
-// The component we are testing - will be converted to server component
+// The component we are testing - it's a Client Component that uses useSearchParams
 import ProvidersPage from './page';
 
-// Mock the provider data layer
-const mockGetProvidersWithLocationsPaginated = vi.fn();
-const mockGetProviderLocationSummary = vi.fn();
-const mockCreateClient = vi.fn();
+// Mock Next.js navigation
+const mockPush = vi.fn();
+const mockSearchParams = new URLSearchParams();
+const mockPathname = '/providers';
 
-vi.mock('@/lib/database/queries/providers', () => ({
-  getProvidersWithLocationsPaginated: mockGetProvidersWithLocationsPaginated,
-  getProviderLocationSummary: mockGetProviderLocationSummary,
+vi.mock('next/navigation', () => ({
+  useRouter: () => ({
+    push: mockPush,
+    pathname: mockPathname,
+  }),
+  useSearchParams: () => mockSearchParams,
+  usePathname: () => mockPathname,
 }));
 
-// Mock the auth session layer
-vi.mock('@/lib/auth/session', () => ({
-  createClient: mockCreateClient,
-}));
+// Mock fetch for API calls
+global.fetch = vi.fn();
 
 // Mock child components to prevent their logic/rendering from affecting our tests
 vi.mock('@/components/providers/provider-grid', () => ({
@@ -114,7 +116,7 @@ class TestErrorBoundary extends React.Component<
   }
 }
 
-describe('ProvidersPage Server Component Integration Tests', () => {
+describe('ProvidersPage Client Component Integration Tests', () => {
   const mockProviders: MockProvider[] = [
     {
       id: 'provider-1',
@@ -162,355 +164,157 @@ describe('ProvidersPage Server Component Integration Tests', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     
-    // Default successful session mock - mock Supabase client
-    const mockSupabaseClient = {
-      auth: {
-        getUser: vi.fn().mockResolvedValue({
-          data: { user: mockSession.user },
-          error: null,
-        }),
-      },
-    };
-    mockCreateClient.mockResolvedValue(mockSupabaseClient as never);
+    // Reset search params
+    mockSearchParams.forEach((_, key) => {
+      mockSearchParams.delete(key);
+    });
+    
+    // Mock successful API response by default
+    (global.fetch as any).mockResolvedValue({
+      ok: true,
+      json: async () => ({
+        success: true,
+        data: mockProviders,
+        pagination: mockPagination,
+      }),
+    });
   });
 
-  describe('Server-Side Rendering (SSR)', () => {
-    it('should render providers page with server-fetched data', async () => {
-      // Arrange
-      mockGetProvidersWithLocationsPaginated.mockResolvedValue({
-        providers: mockProviders,
-        total: mockPagination.total,
+  describe('Client-Side Rendering', () => {
+    it('should render providers page and fetch data via API', async () => {
+      // Arrange - Set up search params
+      mockSearchParams.set('page', '1');
+      mockSearchParams.set('limit', '12');
+
+      // Act - Render the component with act()
+      await act(async () => {
+        render(<ProvidersPage />);
       });
-      mockGetProviderLocationSummary.mockResolvedValue(mockFilterOptions.locations);
 
-      // Act - Direct component invocation for server component testing
-      const searchParams = { page: '1', limit: '12' };
-      const component = await ProvidersPage({ searchParams });
-      render(component);
+      // Assert - Should show loading initially
+      expect(screen.getByTestId('provider-grid-loading')).toBeInTheDocument();
 
-      // Assert - Provider data should be rendered server-side
-      expect(screen.getByText('Dr. Alice Johnson')).toBeInTheDocument();
+      // Wait for API call and data loading
+      await waitFor(() => {
+        expect(screen.getByText('Dr. Alice Johnson')).toBeInTheDocument();
+      });
+
       expect(screen.getByText('Dr. Bob Smith')).toBeInTheDocument();
       expect(screen.getByTestId('provider-grid')).toBeInTheDocument();
     });
 
-    it('should call getProvidersWithLocationsPaginated with correctly parsed searchParams', async () => {
+    it('should make API call with correct search parameters', async () => {
       // Arrange
-      mockGetProvidersWithLocationsPaginated.mockResolvedValue({
-        providers: [],
-        total: 0,
-      });
-      mockGetProviderLocationSummary.mockResolvedValue([]);
-
-      const searchParams = {
-        page: '2',
-        limit: '24',
-        search: 'dentist',
-        providerType: 'dentist',
-        status: 'active',
-        locationId: 'loc-1',
-      };
+      mockSearchParams.set('page', '2');
+      mockSearchParams.set('limit', '24');
+      mockSearchParams.set('search', 'dentist');
+      mockSearchParams.set('providerType', 'dentist');
+      mockSearchParams.set('status', 'active');
+      mockSearchParams.set('locationId', 'loc-1');
 
       // Act
-      await ProvidersPage({ searchParams });
+      await act(async () => {
+        render(<ProvidersPage />);
+      });
 
-      // Assert
-      expect(mockGetProvidersWithLocationsPaginated).toHaveBeenCalledWith({
-        page: 2,
-        limit: 24,
-        search: 'dentist',
-        providerType: 'dentist',
-        status: 'active',
-        locationId: 'loc-1',
-        clinicId: 'clinic-123', // Multi-tenant isolation
+      // Wait for API call
+      await waitFor(() => {
+        expect(global.fetch).toHaveBeenCalledWith(
+          expect.stringContaining('/api/providers?page=2&limit=24&search=dentist&providerType=dentist&locationId=loc-1&status=active')
+        );
       });
     });
 
     it('should handle default parameters when searchParams are missing', async () => {
-      // Arrange
-      mockGetProvidersWithLocationsPaginated.mockResolvedValue({
-        providers: [],
-        total: 0,
-      });
-      mockGetProviderLocationSummary.mockResolvedValue([]);
+      // Arrange - No search params set
 
       // Act
-      await ProvidersPage({ searchParams: {} });
+      await act(async () => {
+        render(<ProvidersPage />);
+      });
 
-      // Assert
-      expect(mockGetProvidersWithLocationsPaginated).toHaveBeenCalledWith({
-        page: 1,
-        limit: 12,
-        search: undefined,
-        providerType: undefined,
-        status: undefined,
-        locationId: undefined,
-        clinicId: 'clinic-123',
+      // Wait for API call
+      await waitFor(() => {
+        expect(global.fetch).toHaveBeenCalledWith(
+          expect.stringContaining('/api/providers?page=1&limit=12')
+        );
       });
     });
 
     it('should sanitize and validate numeric parameters', async () => {
-      // Arrange
-      mockGetProvidersWithLocationsPaginated.mockResolvedValue({
-        providers: [],
-        total: 0,
-      });
-      mockGetProviderLocationSummary.mockResolvedValue([]);
-
-      const searchParams = {
-        page: 'invalid',
-        limit: 'NaN',
-      };
+      // Arrange - Set invalid numeric parameters
+      mockSearchParams.set('page', 'invalid');
+      mockSearchParams.set('limit', 'NaN');
 
       // Act
-      await ProvidersPage({ searchParams });
-
-      // Assert - Should fallback to defaults for invalid numbers
-      expect(mockGetProvidersWithLocationsPaginated).toHaveBeenCalledWith({
-        page: 1, // Default fallback
-        limit: 12, // Default fallback
-        search: undefined,
-        providerType: undefined,
-        status: undefined,
-        locationId: undefined,
-        clinicId: 'clinic-123',
+      await act(async () => {
+        render(<ProvidersPage />);
       });
-    });
-  });
 
-  describe('Multi-Tenant Security', () => {
-    it('should enforce clinic-based data isolation', async () => {
-      // Arrange
-      const clinicSession = {
-        ...mockSession,
-        user: { ...mockSession.user, clinicId: 'clinic-456' },
-      };
-      const mockSupabaseClient = {
-        auth: {
-          getUser: vi.fn().mockResolvedValue({
-            data: { user: clinicSession.user },
-            error: null,
-          }),
-        },
-      };
-      mockCreateClient.mockResolvedValue(mockSupabaseClient as never);
-      mockGetProvidersWithLocationsPaginated.mockResolvedValue({
-        providers: mockProviders,
-        total: mockPagination.total,
+      // Wait for API call with sanitized parameters
+      await waitFor(() => {
+        expect(global.fetch).toHaveBeenCalledWith(
+          expect.stringContaining('/api/providers?page=1&limit=12') // Should fallback to defaults
+        );
       });
-      mockGetProviderLocationSummary.mockResolvedValue(mockFilterOptions.locations);
-
-      // Act
-      await ProvidersPage({ searchParams: {} });
-
-      // Assert - Should use the session's clinicId
-expect(mockGetProvidersWithLocationsPaginated).toHaveBeenCalledWith(
-  expect.objectContaining({
-    page: 2,
-    limit: 24,
-    search: 'dentist',
-    providerType: 'dentist',
-    status: 'active',
-    locationId: 'loc-1',
-    clinicId: 'clinic-123',
-  }),
-);
-    });
-
-    it('should handle unauthorized access gracefully', async () => {
-      // Arrange - No authenticated user
-      const mockSupabaseClient = {
-        auth: {
-          getUser: vi.fn().mockResolvedValue({
-            data: { user: null },
-            error: { message: 'Not authenticated' },
-          }),
-        },
-      };
-      mockCreateClient.mockResolvedValue(mockSupabaseClient as never);
-
-      // Act & Assert - Should throw error when no user
-      await expect(ProvidersPage({ searchParams: {} })).rejects.toThrow();
     });
   });
 
   describe('Error Handling', () => {
     it('should handle API errors gracefully', async () => {
-      // Arrange
-      mockGetProvidersWithLocationsPaginated.mockRejectedValue(new Error('API service unavailable'));
-      
-      // Act & Assert
-      await expect(ProvidersPage({ searchParams: {} })).rejects.toThrow('API service unavailable');
+      // Arrange - Mock API error
+      (global.fetch as any).mockResolvedValue({
+        ok: false,
+        statusText: 'Internal Server Error',
+      });
+
+      // Act
+      await act(async () => {
+        render(<ProvidersPage />);
+      });
+
+      // Assert - Should show error state
+      await waitFor(() => {
+        expect(screen.getByTestId('provider-grid-error')).toBeInTheDocument();
+      });
     });
 
     it('should handle network timeouts gracefully', async () => {
-      // Arrange
-      mockGetProvidersWithLocationsPaginated.mockRejectedValue(new Error('Network timeout'));
-      
-      // Act & Assert
-      await expect(ProvidersPage({ searchParams: {} })).rejects.toThrow('Network timeout');
-    });
-
-    it('should handle malformed provider data', async () => {
-      // Arrange
-      mockGetProvidersWithLocationsPaginated.mockResolvedValue({
-        providers: [{ invalid: 'data' } as never], // Malformed data
-        total: 1,
-      });
-
-      // Act & Assert - The server component should validate data structure
-      await expect(ProvidersPage({ searchParams: {} })).rejects.toThrow();
-    });
-  });
-
-  describe('Empty States', () => {
-    it('should display empty state when no providers found', async () => {
-      // Arrange
-      mockGetProvidersWithLocationsPaginated.mockResolvedValue({
-        providers: [],
-        total: 0,
-      });
-      mockGetProviderLocationSummary.mockResolvedValue(mockFilterOptions.locations);
+      // Arrange - Mock network error
+      (global.fetch as any).mockRejectedValue(new Error('Network timeout'));
 
       // Act
-      const component = await ProvidersPage({ searchParams: {} });
-      render(component);
+      await act(async () => {
+        render(<ProvidersPage />);
+      });
 
-      // Assert
-      expect(screen.getByTestId('provider-grid')).toBeInTheDocument();
+      // Assert - Should show error state
+      await waitFor(() => {
+        expect(screen.getByTestId('provider-grid-error')).toBeInTheDocument();
+      });
+    });
+
+    it('should display empty state when no providers found', async () => {
+      // Arrange - Mock empty response
+      (global.fetch as any).mockResolvedValue({
+        ok: true,
+        json: async () => ({
+          success: true,
+          data: [],
+          pagination: { total: 0, page: 1, limit: 12, totalPages: 0 },
+        }),
+      });
+
+      // Act
+      await act(async () => {
+        render(<ProvidersPage />);
+      });
+
+      // Assert - Should render empty grid
+      await waitFor(() => {
+        expect(screen.getByTestId('provider-grid')).toBeInTheDocument();
+      });
       expect(screen.queryByTestId('provider-1')).not.toBeInTheDocument();
     });
-
-    it('should handle empty filter options gracefully', async () => {
-      // Arrange
-      mockGetProvidersWithLocationsPaginated.mockResolvedValue({
-        providers: mockProviders,
-        total: mockPagination.total,
-      });
-      mockGetProviderLocationSummary.mockResolvedValue([]);
-
-      // Act
-      const component = await ProvidersPage({ searchParams: {} });
-      render(component);
-
-      // Assert
-      expect(screen.getByTestId('provider-filters')).toBeInTheDocument();
-      expect(screen.getByText('Filters (0 locations)')).toBeInTheDocument();
-    });
-  });
-
-  describe('Performance Optimization', () => {
-    it('should implement proper caching headers for SSR', async () => {
-      // Arrange
-      mockGetProvidersWithLocationsPaginated.mockResolvedValue({
-        providers: mockProviders,
-        total: mockPagination.total,
-      });
-      mockGetProviderLocationSummary.mockResolvedValue(mockFilterOptions.locations);
-
-      // Act
-      await ProvidersPage({ searchParams: {} });
-
-      // Assert - Verify data fetching functions are called
-      expect(mockGetProvidersWithLocationsPaginated).toHaveBeenCalledTimes(1);
-      expect(mockGetProviderLocationSummary).toHaveBeenCalledTimes(1);
-    });
-
-    it('should handle concurrent data fetching efficiently', async () => {
-      // Arrange
-      const providerPromise = Promise.resolve({
-        providers: mockProviders,
-        total: mockPagination.total,
-      });
-      const filterPromise = Promise.resolve(mockFilterOptions.locations);
-      
-      mockGetProvidersWithLocationsPaginated.mockReturnValue(providerPromise);
-      mockGetProviderLocationSummary.mockReturnValue(filterPromise);
-
-      // Act
-      const startTime = Date.now();
-      await ProvidersPage({ searchParams: {} });
-      const endTime = Date.now();
-
-      // Assert - Both calls should be made in parallel
-      expect(mockGetProvidersWithLocationsPaginated).toHaveBeenCalledTimes(1);
-      expect(mockGetProviderLocationSummary).toHaveBeenCalledTimes(1);
-      
-      // Verify parallel execution (should be faster than sequential)
-      expect(endTime - startTime).toBeLessThan(100); // Assuming mocked promises resolve quickly
-    });
-  });
-
-  describe('TypeScript Integration', () => {
-    it('should have proper type definitions for searchParams', async () => {
-      // Arrange
-      mockGetProvidersWithLocationsPaginated.mockResolvedValue({
-        providers: mockProviders,
-        total: mockPagination.total,
-      });
-      mockGetProviderLocationSummary.mockResolvedValue(mockFilterOptions.locations);
-
-      // Act & Assert - TypeScript should enforce correct prop types
-      const validSearchParams = {
-        page: '1',
-        limit: '12',
-        search: 'test',
-        providerType: 'dentist' as const,
-        status: 'active' as const,
-        locationId: 'loc-1',
-      };
-
-      // This should compile without TypeScript errors
-      await ProvidersPage({ searchParams: validSearchParams });
-      expect(mockGetProvidersWithLocationsPaginated).toHaveBeenCalled();
-    });
-
-    it('should validate provider data structure with TypeScript', async () => {
-      // Arrange - Mock data with correct TypeScript structure
-      const typedProviders: MockProvider[] = [
-        {
-          id: 'provider-1',
-          name: 'Dr. Test',
-          email: 'test@example.com',
-          providerType: 'dentist',
-          status: 'active',
-          locationIds: ['loc-1'],
-        },
-      ];
-
-      mockGetProvidersWithLocationsPaginated.mockResolvedValue({
-        providers: typedProviders,
-        total: 1,
-      });
-      mockGetProviderLocationSummary.mockResolvedValue(mockFilterOptions.locations);
-
-      // Act
-      const component = await ProvidersPage({ searchParams: {} });
-      render(component);
-
-      // Assert
-      expect(screen.getByText('Dr. Test')).toBeInTheDocument();
-    });
-  });
-});
-
-// Additional type-checking tests for development time validation
-describe('ProvidersPage Type Safety', () => {
-  it('should enforce correct searchParams interface', () => {
-    // This test ensures TypeScript compilation fails for incorrect prop types
-    type SearchParamsType = Parameters<typeof ProvidersPage>[0]['searchParams'];
-    
-    // Valid searchParams should include optional string properties
-    const validParams: SearchParamsType = {
-      page: '1',
-      limit: '12',
-      search: 'test',
-      providerType: 'dentist',
-      status: 'active',
-      locationId: 'loc-1',
-    };
-
-    // This validates the type structure at compile time
-    expect(typeof validParams).toBe('object');
   });
 });

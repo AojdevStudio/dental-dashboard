@@ -1,0 +1,73 @@
+{
+  "execution_order": [
+    {
+      "phase": 1,
+      "tasks": ["provider-dashboard-visualizations_routing-foundation"],
+      "description": "Foundation tasks - routing and navigation infrastructure"
+    },
+    {
+      "phase": 2,
+      "tasks": ["provider-dashboard-visualizations_metrics-calculation-system"],
+      "description": "Data layer - metrics calculation and database integration"
+    },
+    {
+      "phase": 3,
+      "tasks": ["provider-dashboard-visualizations_kpi-dashboard-container"],
+      "description": "Container component - dashboard layout and coordination"
+    },
+    {
+      "phase": 4,
+      "tasks": [
+        "provider-dashboard-visualizations_financial-metrics-chart",
+        "provider-dashboard-visualizations_performance-charts",
+        "provider-dashboard-visualizations_patient-analytics-charts"
+      ],
+      "description": "Visualization components - can be developed in parallel"
+    },
+    {
+      "phase": 5,
+      "tasks": ["provider-dashboard-visualizations_comparative-analytics-table"],
+      "description": "Complex components requiring all chart components"
+    },
+    {
+      "phase": 6,
+      "tasks": ["provider-dashboard-visualizations_data-integration-optimization"],
+      "description": "Performance optimization and real data integration"
+    },
+    {
+      "phase": 7,
+      "tasks": ["provider-dashboard-visualizations_provider-listing-integration"],
+      "description": "Final integration with existing provider listing"
+    }
+  ],
+  "critical_path": [
+    "provider-dashboard-visualizations_routing-foundation",
+    "provider-dashboard-visualizations_metrics-calculation-system",
+    "provider-dashboard-visualizations_kpi-dashboard-container",
+    "provider-dashboard-visualizations_data-integration-optimization",
+    "provider-dashboard-visualizations_provider-listing-integration"
+  ],
+  "parallel_opportunities": [
+    {
+      "phase": 4,
+      "tasks": [
+        "provider-dashboard-visualizations_financial-metrics-chart",
+        "provider-dashboard-visualizations_performance-charts",
+        "provider-dashboard-visualizations_patient-analytics-charts"
+      ],
+      "description": "Chart components can be developed simultaneously by different developers"
+    }
+  ],
+  "estimated_duration": {
+    "total_tasks": 9,
+    "sequential_phases": 7,
+    "parallel_phase_4_savings": "3 tasks reduced to 1 phase",
+    "critical_path_length": 5,
+    "development_sessions": "10-12 sessions (with AI guardrails: 1-2 files per session)"
+  },
+  "risk_factors": [
+    "Phase 2 metrics calculation system is most complex and risk-prone",
+    "Phase 6 performance optimization may require significant iteration",
+    "Phase 4 chart components must maintain consistency across parallel development"
+  ]
+}

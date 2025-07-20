@@ -1,0 +1,165 @@
+{
+  "name": "Google Apps Script Complete Test Suite",
+  "version": "1.0.0",
+  "tests": [
+    {
+      "name": "Environment Configuration",
+      "passed": true,
+      "details": {
+        "missing": []
+      },
+      "timestamp": "2025-07-03T15:59:36.542Z"
+    },
+    {
+      "name": "Supabase RPC Connectivity",
+      "passed": true,
+      "details": {
+        "result": [
+          {
+            "test_value": 1
+          }
+        ]
+      },
+      "timestamp": "2025-07-03T15:59:36.891Z"
+    },
+    {
+      "name": "Provider Database Query",
+      "passed": true,
+      "details": {
+        "providerCount": 5,
+        "providers": [
+          {
+            "name": "Chinyere Enih",
+            "code": "chinyere_enih"
+          },
+          {
+            "name": "Obinna Ezeji",
+            "code": "obinna_ezeji"
+          },
+          {
+            "name": "Adriane Fontenot",
+            "code": "adriane_fontenot"
+          },
+          {
+            "name": "Kamdi Irondi",
+            "code": "kamdi_irondi"
+          },
+          {
+            "name": "Kia Redfearn",
+            "code": "kia_redfearn"
+          }
+        ]
+      },
+      "timestamp": "2025-07-03T15:59:37.077Z"
+    },
+    {
+      "name": "Dr. Chinyere Enih Detection",
+      "passed": true,
+      "details": {
+        "id": "cmc3jcsw2000ai2ht9v9j97h4",
+        "external_id": "chinyere_enih",
+        "first_name": "Chinyere",
+        "last_name": "Enih",
+        "email": "cc.enihdds@gmail.com",
+        "title": "dentist",
+        "specialization": null,
+        "clinic_names": null,
+        "clinic_ids": null
+      },
+      "timestamp": "2025-07-03T15:59:37.077Z"
+    },
+    {
+      "name": "Pattern Matching Validation",
+      "passed": true,
+      "details": {
+        "totalTests": 7,
+        "passed": 7,
+        "results": [
+          {
+            "spreadsheetName": "Dr Chinyere Enih Production",
+            "matchedPattern": "/chinyere/i",
+            "confidence": 1,
+            "detected": true
+          },
+          {
+            "spreadsheetName": "Chinyere Production Data",
+            "matchedPattern": "/chinyere/i",
+            "confidence": 1,
+            "detected": true
+          },
+          {
+            "spreadsheetName": "Enih Dental Statistics",
+            "matchedPattern": "/enih/i",
+            "confidence": 1,
+            "detected": true
+          },
+          {
+            "spreadsheetName": "Dr. Chinyere Daily Stats",
+            "matchedPattern": "/chinyere/i",
+            "confidence": 1,
+            "detected": true
+          },
+          {
+            "spreadsheetName": "CHINYERE_ENIH_SYNC_SHEET",
+            "matchedPattern": "/chinyere/i",
+            "confidence": 1,
+            "detected": true
+          },
+          {
+            "spreadsheetName": "chinyere enih data",
+            "matchedPattern": "/chinyere/i",
+            "confidence": 1,
+            "detected": true
+          },
+          {
+            "spreadsheetName": "DR CHINYERE PRODUCTION",
+            "matchedPattern": "/chinyere/i",
+            "confidence": 1,
+            "detected": true
+          }
+        ]
+      },
+      "timestamp": "2025-07-03T15:59:37.078Z"
+    },
+    {
+      "name": "File Structure Validation",
+      "passed": true,
+      "details": {
+        "totalFiles": 5,
+        "existingFiles": 5,
+        "missingFiles": []
+      },
+      "timestamp": "2025-07-03T15:59:37.078Z"
+    },
+    {
+      "name": "Function Definition Validation",
+      "passed": true,
+      "details": {
+        "foundFunctions": [
+          "makeSupabaseRequest_ in shared-sync-utils.gs",
+          "getSyncCredentials in shared-sync-utils.gs",
+          "discoverProvidersFromDatabase in auto-discovery.gs",
+          "autoDetectProvider in auto-discovery.gs",
+          "detectCurrentProvider in shared-multi-provider-utils.gs",
+          "PROVIDER_DETECTION_PATTERNS in shared-multi-provider-utils.gs"
+        ],
+        "missingFunctions": []
+      },
+      "timestamp": "2025-07-03T15:59:37.080Z"
+    },
+    {
+      "name": "Provider Detection Fix Test",
+      "passed": true,
+      "details": {
+        "output": "External test passed"
+      },
+      "timestamp": "2025-07-03T15:59:37.120Z"
+    }
+  ],
+  "results": {
+    "total": 8,
+    "passed": 8,
+    "failed": 0,
+    "skipped": 0
+  }
+}

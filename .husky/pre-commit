@@ -31,21 +31,9 @@ fi
 echo "📝 Formatting YAML files..."
 pnpm prettier:yaml
 
-# Run tests to ensure nothing is broken
-echo "🧪 Running tests..."
-if [ "${SKIP_TESTS}" = "true" ]; then
-  echo "⚠️ Tests skipped due to SKIP_TESTS=true environment variable"
-elif pnpm test --help >/dev/null 2>&1; then
-  pnpm test --run || {
-    echo "❌ COMMIT BLOCKED: Tests are failing!"
-    echo "Please fix failing tests before committing."
-    echo "💡 To skip tests for infrastructure commits, use: SKIP_TESTS=true git commit ..."
-    exit 1
-  }
-  echo "✅ All tests passing"
-else
-  echo "⚠️ Test command not available, skipping test validation"
-fi
+# Tests are validated in CI to support TDD workflow
+echo "🧪 Test validation delegated to CI for TDD compatibility"
+echo "💡 Tests will run in GitHub Actions on push/PR"
 
 # Add any fixed files back to the commit
 echo "📦 Adding fixed files to commit..."

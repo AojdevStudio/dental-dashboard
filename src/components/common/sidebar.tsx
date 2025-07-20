@@ -32,18 +32,18 @@ const navigation: NavSection[] = [
       {
         id: 'production',
         title: 'Production',
-        href: '/production',
+        href: '/dashboard/production',
         icon: TrendingUp,
         children: [
           {
             id: 'dentist-production',
             title: 'Dentist Production',
-            href: '/production/dentist',
+            href: '/dashboard/production/dentist',
           },
           {
             id: 'hygienist-production',
             title: 'Hygienist Production',
-            href: '/production/hygienist',
+            href: '/dashboard/production/hygienist',
           },
         ],
       },
@@ -56,13 +56,13 @@ const navigation: NavSection[] = [
       {
         id: 'reports',
         title: 'Reports',
-        href: '/reports',
+        href: '/dashboard/reports',
         icon: FileText,
       },
       {
         id: 'goals',
         title: 'Goals',
-        href: '/goals',
+        href: '/dashboard/goals',
         icon: Target,
       },
     ],
@@ -74,29 +74,29 @@ const navigation: NavSection[] = [
       {
         id: 'integrations',
         title: 'Integrations',
-        href: '/integrations',
+        href: '/dashboard/integrations',
         icon: Link2,
       },
       {
         id: 'settings',
         title: 'Settings',
-        href: '/settings',
+        href: '/dashboard/settings',
         icon: Settings,
         children: [
           {
             id: 'clinic-settings',
             title: 'Clinic',
-            href: '/settings/clinic',
+            href: '/dashboard/settings/clinic',
           },
           {
             id: 'user-settings',
             title: 'Users',
-            href: '/settings/users',
+            href: '/dashboard/settings/users',
           },
           {
             id: 'provider-settings',
             title: 'Providers',
-            href: '/settings/providers',
+            href: '/dashboard/settings/providers',
           },
         ],
       },
