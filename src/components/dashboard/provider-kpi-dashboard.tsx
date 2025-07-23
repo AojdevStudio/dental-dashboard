@@ -263,9 +263,11 @@ function Section({
  * KPI summary cards for key metrics
  */
 function KPICards() {
-  const { metrics, period } = useDashboardContext();
+  const { metrics } = useDashboardContext();
 
-  if (!metrics) return null;
+  if (!metrics) {
+    return null;
+  }
 
   const kpiData = [
     {
@@ -327,7 +329,7 @@ function LoadingState() {
       {/* KPI Cards Loading */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         {Array.from({ length: 4 }).map((_, i) => (
-          <Card key={i}>
+          <Card key={`kpi-skeleton-${i + 1}`}>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <Skeleton className="h-4 w-20" />
               <Skeleton className="h-4 w-4" />
@@ -343,7 +345,7 @@ function LoadingState() {
       {/* Chart Sections Loading */}
       <div className="grid gap-6 md:grid-cols-2">
         {Array.from({ length: 4 }).map((_, i) => (
-          <Card key={i}>
+          <Card key={`chart-skeleton-${i + 1}`}>
             <CardHeader>
               <Skeleton className="h-5 w-32" />
               <Skeleton className="h-4 w-48" />

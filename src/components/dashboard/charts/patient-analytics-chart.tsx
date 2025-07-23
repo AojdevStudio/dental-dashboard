@@ -11,6 +11,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Skeleton } from '@/components/ui/skeleton';
 import type { ProviderPatientMetrics } from '@/types/provider-metrics';
 import { AlertTriangle, TrendingDown, TrendingUp, Users } from 'lucide-react';
+// biome-ignore lint/style/useImportType: React is needed for ComponentType
+import React from 'react';
 import {
   Bar,
   BarChart,
@@ -55,22 +57,36 @@ interface PatientAnalyticsChartProps {
   className?: string;
 }
 
+interface TooltipPayloadItem {
+  name: string;
+  value: number;
+  color: string;
+  dataKey: string;
+  payload: PatientChartData;
+}
+
+interface PatientTooltipProps {
+  active?: boolean;
+  payload?: TooltipPayloadItem[];
+  label?: string;
+}
+
 /**
  * Custom tooltip for patient data with detailed information
  */
-function PatientTooltip({ active, payload, label }: any) {
-  if (!active || !payload || !payload.length) {
+function PatientTooltip({ active, payload, label }: PatientTooltipProps) {
+  if (!(active && payload && payload.length > 0)) {
     return null;
   }
 
   return (
     <div className="bg-background border border-border rounded-lg shadow-lg p-3 min-w-[220px]">
       <p className="font-medium mb-2">{label}</p>
-      {payload.map((entry: any, index: number) => {
+      {payload.map((entry) => {
         const isPercentage = entry.dataKey.includes('Rate') || entry.dataKey.includes('Efficiency');
         const isValue = entry.dataKey.includes('Value');
 
-        let formattedValue = entry.value;
+        let formattedValue: string;
         if (isPercentage) {
           formattedValue = `${(entry.value * 100).toFixed(1)}%`;
         } else if (isValue) {
@@ -80,7 +96,10 @@ function PatientTooltip({ active, payload, label }: any) {
         }
 
         return (
-          <div key={index} className="flex items-center justify-between gap-4 text-sm">
+          <div
+            key={`${entry.dataKey}-${entry.name}`}
+            className="flex items-center justify-between gap-4 text-sm"
+          >
             <div className="flex items-center gap-2">
               <div className="w-3 h-3 rounded-full" style={{ backgroundColor: entry.color }} />
               <span className="text-muted-foreground">{entry.name}:</span>
@@ -93,11 +112,22 @@ function PatientTooltip({ active, payload, label }: any) {
   );
 }
 
+interface PieLabelProps {
+  cx: number;
+  cy: number;
+  midAngle: number;
+  innerRadius: number;
+  outerRadius: number;
+  percent: number;
+}
+
 /**
  * Custom label for pie charts
  */
-function PieLabel({ cx, cy, midAngle, innerRadius, outerRadius, percent }: any) {
-  if (percent < 0.05) return null; // Don't show labels for slices < 5%
+function PieLabel({ cx, cy, midAngle, innerRadius, outerRadius, percent }: PieLabelProps) {
+  if (percent < 0.05) {
+    return null; // Don't show labels for slices < 5%
+  }
 
   const RADIAN = Math.PI / 180;
   const radius = innerRadius + (outerRadius - innerRadius) * 0.5;
@@ -230,7 +260,7 @@ function PatientAnalyticsLoading() {
           {/* Metrics cards skeleton */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             {Array.from({ length: 4 }).map((_, i) => (
-              <div key={i} className="space-y-2">
+              <div key={`metric-skeleton-item-${i + 1}`} className="space-y-2">
                 <Skeleton className="h-4 w-24" />
                 <Skeleton className="h-6 w-16" />
               </div>
@@ -260,7 +290,7 @@ function PatientAnalyticsError({ error, onRetry }: { error: Error; onRetry?: () 
           {error.message || 'An error occurred while loading patient analytics.'}
         </p>
         {onRetry && (
-          <button onClick={onRetry} className="text-sm text-primary hover:underline">
+          <button type="button" onClick={onRetry} className="text-sm text-primary hover:underline">
             Try Again
           </button>
         )}
@@ -276,7 +306,7 @@ export function PatientAnalyticsChart({
   data,
   title = 'Patient Analytics',
   description = 'Patient counts, efficiency, and case acceptance metrics',
-  showTrends = true,
+  showTrends: _showTrends = true,
   showDistribution = true,
   chartType = 'overview',
   isLoading = false,
@@ -315,7 +345,7 @@ export function PatientAnalyticsChart({
   }
 
   const chartData = formatPatientData(data);
-  const latestData = data[data.length - 1];
+  const latestData = data.at(-1);
   const procedureData = latestData ? generateProcedureDistribution(latestData) : [];
 
   // Calculate trends
@@ -324,7 +354,7 @@ export function PatientAnalyticsChart({
     firstData && latestData
       ? (latestData.totalPatients - firstData.totalPatients) / firstData.totalPatients
       : 0;
-  const efficiencyChange =
+  const _efficiencyChange =
     firstData && latestData
       ? latestData.appointmentEfficiency - firstData.appointmentEfficiency
       : 0;
@@ -381,8 +411,8 @@ export function PatientAnalyticsChart({
                 fill="#8884d8"
                 dataKey="value"
               >
-                {procedureData.map((entry, index) => (
-                  <Cell key={`cell-${index}`} fill={entry.color} />
+                {procedureData.map((entry) => (
+                  <Cell key={`cell-${entry.name}`} fill={entry.color} />
                 ))}
               </Pie>
               <Tooltip formatter={(value: number, name: string) => [`${value} procedures`, name]} />

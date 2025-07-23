@@ -145,21 +145,26 @@ export function createAuthenticatedClient(user: TestUser) {
   );
 
   // Mock the session for this client
+  const mockUser = {
+    id: user.authId,
+    email: user.email,
+    role: 'authenticated' as const,
+    aud: 'authenticated',
+    app_metadata: {},
+    user_metadata: {
+      clinic_id: user.clinicId,
+      role: user.role,
+    },
+    created_at: new Date().toISOString(),
+  };
+
   const mockSession = {
     access_token: 'mock-access-token',
     refresh_token: 'mock-refresh-token',
     expires_in: 3600,
-    expires_at: Date.now() + 3600000,
-    token_type: 'bearer',
-    user: {
-      id: user.authId,
-      email: user.email,
-      role: 'authenticated',
-      user_metadata: {
-        clinic_id: user.clinicId,
-        role: user.role,
-      },
-    },
+    expires_at: Date.now() / 1000 + 3600,
+    token_type: 'bearer' as const,
+    user: mockUser,
   };
 
   // Override the auth methods for testing
@@ -169,7 +174,7 @@ export function createAuthenticatedClient(user: TestUser) {
   });
 
   client.auth.getUser = async () => ({
-    data: { user: mockSession.user },
+    data: { user: mockUser },
     error: null,
   });
 

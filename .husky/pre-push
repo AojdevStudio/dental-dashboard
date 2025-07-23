@@ -1,0 +1,74 @@
+#!/bin/bash
+# Pre-push hook to catch CI failures before they happen
+
+echo "🚀 Running pre-push validation..."
+echo "This ensures your code will pass CI checks before pushing."
+echo ""
+
+# Colors for output
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+NC='\033[0m' # No Color
+
+# Track if any checks fail
+FAILED=0
+
+# 1. TypeScript type checking (fast, catches most issues)
+echo "📘 Running TypeScript type checking..."
+if pnpm typecheck; then
+  echo -e "${GREEN}✅ TypeScript checks passed${NC}"
+else
+  echo -e "${RED}❌ TypeScript errors detected!${NC}"
+  echo "Fix these errors before pushing to avoid CI failures."
+  FAILED=1
+fi
+
+echo ""
+
+# 2. Biome linting (no auto-fix, matches CI behavior)
+echo "🔍 Running Biome linting (CI mode - no auto-fix)..."
+if pnpm biome check .; then
+  echo -e "${GREEN}✅ Biome linting passed${NC}"
+else
+  echo -e "${RED}❌ Biome linting errors detected!${NC}"
+  echo "Run 'pnpm biome:fix' to auto-fix issues, then review changes."
+  FAILED=1
+fi
+
+echo ""
+
+# 3. Check for non-null assertions (critical for this project)
+echo "🚫 Checking null safety compliance..."
+if pnpm biome check --reporter=json 2>/dev/null | jq -e '.diagnostics[] | select(.rule.name == "noNonNullAssertion")' > /dev/null 2>&1; then
+  echo -e "${RED}❌ Non-null assertions detected!${NC}"
+  pnpm biome check --reporter=json 2>/dev/null | jq -r '.diagnostics[] | select(.rule.name == "noNonNullAssertion") | "\(.location.path):\(.location.span.start.line)"' 2>/dev/null || echo ""
+  FAILED=1
+else
+  echo -e "${GREEN}✅ Null safety compliance verified${NC}"
+fi
+
+echo ""
+
+# 4. Quick build check (optional but recommended)
+echo "🏗️  Running quick build validation..."
+echo -e "${YELLOW}Note: Skipping full build for speed. Run 'pnpm build' manually if needed.${NC}"
+
+# Summary
+echo ""
+echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+if [ $FAILED -eq 0 ]; then
+  echo -e "${GREEN}✅ All pre-push checks passed!${NC}"
+  echo "Your code should pass CI. Pushing to remote..."
+  exit 0
+else
+  echo -e "${RED}❌ Pre-push validation failed!${NC}"
+  echo ""
+  echo "💡 Quick fixes:"
+  echo "  • Run 'pnpm biome:fix' for auto-fixable issues"
+  echo "  • Run 'pnpm typecheck' to see TypeScript errors"
+  echo "  • Run 'pnpm ci:test' to simulate full CI locally"
+  echo ""
+  echo "Push blocked to prevent CI failures."
+  exit 1
+fi

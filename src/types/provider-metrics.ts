@@ -45,6 +45,8 @@ export interface ProviderFinancialMetrics {
   // Overhead metrics
   overheadPercentage: number;
   profitMargin: number;
+  totalOverhead: number;
+  netIncome: number;
 }
 
 /**
@@ -78,6 +80,13 @@ export interface ProviderPerformanceMetrics {
   treatmentPlansCreated: number;
   treatmentPlansStarted: number;
   treatmentPlanStartRate: number;
+
+  // Additional performance metrics
+  averageProductionPerDay: number;
+  goalAchievementRate: number;
+  performanceVariance: number;
+  actualProduction?: number;
+  goalProduction?: number;
 }
 
 /**
@@ -104,6 +113,11 @@ export interface ProviderPatientMetrics {
   referralsReceived: number;
   referralsSent: number;
   referralConversionRate: number;
+
+  // Additional patient metrics
+  returningPatients: number;
+  appointmentEfficiency: number;
+  caseAcceptanceRate: number;
 }
 
 /**

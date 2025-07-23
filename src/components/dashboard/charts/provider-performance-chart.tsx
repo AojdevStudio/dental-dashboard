@@ -42,22 +42,36 @@ interface ProviderPerformanceChartProps {
   className?: string;
 }
 
+interface TooltipPayloadItem {
+  name: string;
+  value: number;
+  color: string;
+  dataKey: string;
+  payload: PerformanceChartData;
+}
+
+interface PerformanceTooltipProps {
+  active?: boolean;
+  payload?: TooltipPayloadItem[];
+  label?: string;
+}
+
 /**
  * Custom tooltip for performance data with detailed breakdown
  */
-function PerformanceTooltip({ active, payload, label }: any) {
-  if (!active || !payload || !payload.length) {
+function PerformanceTooltip({ active, payload, label }: PerformanceTooltipProps) {
+  if (!(active && payload && payload.length > 0)) {
     return null;
   }
 
   return (
     <div className="bg-background border border-border rounded-lg shadow-lg p-3 min-w-[250px]">
       <p className="font-medium mb-3">{label}</p>
-      {payload.map((entry: any, index: number) => {
+      {payload.map((entry) => {
         const isPercentage = entry.dataKey.includes('Rate') || entry.dataKey.includes('Completion');
         const isCurrency = entry.dataKey.includes('Production');
 
-        let formattedValue = entry.value;
+        let formattedValue: string;
         if (isPercentage) {
           formattedValue = `${(entry.value * 100).toFixed(1)}%`;
         } else if (isCurrency) {
@@ -67,7 +81,10 @@ function PerformanceTooltip({ active, payload, label }: any) {
         }
 
         return (
-          <div key={index} className="flex items-center justify-between gap-4 text-sm">
+          <div
+            key={`${entry.dataKey}-${entry.name}`}
+            className="flex items-center justify-between gap-4 text-sm"
+          >
             <div className="flex items-center gap-2">
               <div className="w-3 h-3 rounded-full" style={{ backgroundColor: entry.color }} />
               <span className="text-muted-foreground">{entry.name}:</span>
@@ -150,8 +167,8 @@ function PerformanceStatus({
 function formatPerformanceData(data: ProviderPerformanceMetrics[]): PerformanceChartData[] {
   return data.map((metrics, index) => ({
     period: `Period ${index + 1}`, // TODO: Use actual period labels when available
-    actualProduction: metrics.actualProduction,
-    goalProduction: metrics.goalProduction,
+    actualProduction: metrics.actualProduction ?? 0,
+    goalProduction: metrics.goalProduction ?? 0,
     appointmentCompletion: metrics.appointmentCompletionRate,
     goalCompletion: 0.85, // 85% target completion rate
     variance: metrics.performanceVariance,
@@ -179,7 +196,7 @@ function PerformanceChartLoading() {
           {/* Chart skeleton */}
           <div className="h-64 flex items-end justify-between">
             {Array.from({ length: 8 }).map((_, i) => (
-              <div key={i} className="space-y-2">
+              <div key={`chart-skeleton-item-${i + 1}`} className="space-y-2">
                 <Skeleton className="w-4" style={{ height: `${Math.random() * 100 + 50}px` }} />
                 <Skeleton className="w-4" style={{ height: `${Math.random() * 80 + 30}px` }} />
               </div>
@@ -189,7 +206,7 @@ function PerformanceChartLoading() {
           {/* Performance indicators skeleton */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {Array.from({ length: 4 }).map((_, i) => (
-              <div key={i} className="space-y-2">
+              <div key={`indicator-skeleton-item-${i + 1}`} className="space-y-2">
                 <Skeleton className="h-4 w-32" />
                 <Skeleton className="h-2 w-full" />
                 <div className="flex justify-between">
@@ -218,7 +235,7 @@ function PerformanceChartError({ error, onRetry }: { error: Error; onRetry?: () 
           {error.message || 'An error occurred while loading performance metrics.'}
         </p>
         {onRetry && (
-          <button onClick={onRetry} className="text-sm text-primary hover:underline">
+          <button type="button" onClick={onRetry} className="text-sm text-primary hover:underline">
             Try Again
           </button>
         )}
@@ -235,7 +252,7 @@ export function ProviderPerformanceChart({
   title = 'Performance Metrics',
   description = 'Goal achievement and productivity tracking',
   showGoalLines = true,
-  showVariance = true,
+  showVariance: _showVariance = true,
   isLoading = false,
   error = null,
   className = '',
@@ -272,7 +289,7 @@ export function ProviderPerformanceChart({
   }
 
   const chartData = formatPerformanceData(data);
-  const latestData = data[data.length - 1];
+  const latestData = data.at(-1);
 
   // Chart colors
   const colors = {
@@ -357,8 +374,8 @@ export function ProviderPerformanceChart({
             <h4 className="font-medium text-sm">Current Performance Status</h4>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <PerformanceStatus
-                current={latestData.actualProduction}
-                target={latestData.goalProduction}
+                current={latestData.actualProduction ?? 0}
+                target={latestData.goalProduction ?? 0}
                 label="Production Goal"
                 format="currency"
               />

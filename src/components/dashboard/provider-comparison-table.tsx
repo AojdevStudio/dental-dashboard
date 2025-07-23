@@ -132,9 +132,15 @@ function PerformanceIndicator({
  */
 function PercentileBadge({ percentile }: { percentile: number }) {
   const getBadgeStyle = () => {
-    if (percentile >= 90) return 'bg-green-100 text-green-800 border-green-200';
-    if (percentile >= 75) return 'bg-blue-100 text-blue-800 border-blue-200';
-    if (percentile >= 50) return 'bg-yellow-100 text-yellow-800 border-yellow-200';
+    if (percentile >= 90) {
+      return 'bg-green-100 text-green-800 border-green-200';
+    }
+    if (percentile >= 75) {
+      return 'bg-blue-100 text-blue-800 border-blue-200';
+    }
+    if (percentile >= 50) {
+      return 'bg-yellow-100 text-yellow-800 border-yellow-200';
+    }
     return 'bg-gray-100 text-gray-800 border-gray-200';
   };
 
@@ -198,11 +204,11 @@ function exportToCSV(data: ProviderComparisonData[], filename = 'provider-compar
         row.rank,
         `"${row.providerName}"`,
         row.totalProduction,
-        (row.collectionRate * 100).toFixed(1) + '%',
+        `${(row.collectionRate * 100).toFixed(1)}%`,
         row.patientCount,
-        (row.goalAchievement * 100).toFixed(1) + '%',
-        (row.variance * 100).toFixed(1) + '%',
-        row.percentile + 'th',
+        `${(row.goalAchievement * 100).toFixed(1)}%`,
+        `${(row.variance * 100).toFixed(1)}%`,
+        `${row.percentile}th`,
       ].join(',')
     ),
   ].join('\n');
@@ -247,15 +253,15 @@ function ComparisonTableLoading() {
             <div className="p-4 border-b">
               <div className="grid grid-cols-8 gap-4">
                 {Array.from({ length: 8 }).map((_, i) => (
-                  <Skeleton key={i} className="h-4 w-full" />
+                  <Skeleton key={`header-skeleton-col-${i + 1}`} className="h-4 w-full" />
                 ))}
               </div>
             </div>
             {Array.from({ length: 10 }).map((_, i) => (
-              <div key={i} className="p-4 border-b last:border-b-0">
+              <div key={`row-skeleton-row-${i + 1}`} className="p-4 border-b last:border-b-0">
                 <div className="grid grid-cols-8 gap-4">
                   {Array.from({ length: 8 }).map((_, j) => (
-                    <Skeleton key={j} className="h-4 w-full" />
+                    <Skeleton key={`cell-skeleton-r${i + 1}-c${j + 1}`} className="h-4 w-full" />
                   ))}
                 </div>
               </div>
@@ -298,7 +304,7 @@ export function ProviderComparisonTable({
   title = 'Provider Rankings',
   description = 'Comparative performance analytics across all providers',
   showRankings = true,
-  showTrends = true,
+  showTrends: _showTrends = true,
   isLoading = false,
   error = null,
   className = '',
@@ -308,37 +314,10 @@ export function ProviderComparisonTable({
   const [sortDirection, setSortDirection] = useState<SortDirection>('asc');
   const [metricFilter, setMetricFilter] = useState<string>('all');
 
-  // Handle loading state
-  if (isLoading) {
-    return <ComparisonTableLoading />;
-  }
+  // Memoized data transformation - must be before early returns
+  const comparisonData = useMemo(() => (data ? transformToComparisonData(data) : []), [data]);
 
-  // Handle error state
-  if (error) {
-    return <ComparisonTableError error={error} />;
-  }
-
-  // Handle empty data
-  if (!data || data.length === 0) {
-    return (
-      <Card className={className}>
-        <CardHeader>
-          <CardTitle>{title}</CardTitle>
-          {description && <CardDescription>{description}</CardDescription>}
-        </CardHeader>
-        <CardContent>
-          <div className="flex flex-col items-center justify-center h-64 text-center">
-            <Search className="h-8 w-8 text-muted-foreground mb-4" />
-            <p className="text-muted-foreground">No provider data available for comparison</p>
-          </div>
-        </CardContent>
-      </Card>
-    );
-  }
-
-  const comparisonData = useMemo(() => transformToComparisonData(data), [data]);
-
-  // Filter and sort data
+  // Filter and sort data - must be before early returns
   const filteredAndSortedData = useMemo(() => {
     const filtered = comparisonData.filter((provider) =>
       provider.providerName.toLowerCase().includes(searchTerm.toLowerCase())
@@ -368,6 +347,34 @@ export function ProviderComparisonTable({
 
     return filtered;
   }, [comparisonData, searchTerm, sortField, sortDirection, metricFilter]);
+
+  // Handle loading state
+  if (isLoading) {
+    return <ComparisonTableLoading />;
+  }
+
+  // Handle error state
+  if (error) {
+    return <ComparisonTableError error={error} />;
+  }
+
+  // Handle empty data
+  if (!data || data.length === 0) {
+    return (
+      <Card className={className}>
+        <CardHeader>
+          <CardTitle>{title}</CardTitle>
+          {description && <CardDescription>{description}</CardDescription>}
+        </CardHeader>
+        <CardContent>
+          <div className="flex flex-col items-center justify-center h-64 text-center">
+            <Search className="h-8 w-8 text-muted-foreground mb-4" />
+            <p className="text-muted-foreground">No provider data available for comparison</p>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
 
   const handleSort = (field: SortField) => {
     if (sortField === field) {

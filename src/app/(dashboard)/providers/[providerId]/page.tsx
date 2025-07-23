@@ -11,7 +11,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { prisma } from '@/lib/database/prisma';
 import { createClient } from '@/lib/supabase/server';
-import type { ProviderWithLocations } from '@/types/providers';
+import type { ISODateString, ProviderWithLocations } from '@/types/providers';
 import { ArrowLeft, Mail, MapPin, User } from 'lucide-react';
 import Link from 'next/link';
 import { notFound, redirect } from 'next/navigation';
@@ -103,8 +103,8 @@ async function getProviderById(
       locationAddress: pl.location.address,
       isPrimary: pl.isPrimary,
       isActive: pl.isActive,
-      startDate: pl.startDate.toISOString() as string,
-      endDate: (pl.endDate?.toISOString() as string) || null,
+      startDate: pl.startDate.toISOString() as ISODateString,
+      endDate: pl.endDate ? (pl.endDate.toISOString() as ISODateString) : null,
     })),
     primaryLocation: provider.providerLocations.find((pl) => pl.isPrimary)?.location || undefined,
     _count: {

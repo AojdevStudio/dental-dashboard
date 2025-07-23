@@ -103,7 +103,7 @@ class PerformanceMonitor {
   /**
    * Measure API request performance
    */
-  async measureApiRequest<T>(
+  measureApiRequest<T>(
     url: string,
     requestFn: () => Promise<T>,
     metadata?: Record<string, unknown>
@@ -115,7 +115,7 @@ class PerformanceMonitor {
   /**
    * Measure database query performance
    */
-  async measureDatabaseQuery<T>(
+  measureDatabaseQuery<T>(
     queryName: string,
     queryFn: () => Promise<T>,
     metadata?: Record<string, unknown>
@@ -147,7 +147,7 @@ class PerformanceMonitor {
 
       // In production, you might want to send this to a monitoring service
       if (typeof window !== 'undefined' && 'navigator' in window && 'sendBeacon' in navigator) {
-        const data = JSON.stringify({
+        const _data = JSON.stringify({
           type: 'performance_threshold_exceeded',
           metric: name,
           duration,
@@ -168,10 +168,6 @@ class PerformanceMonitor {
    */
   private logMetric(metric: PerformanceMetric): void {
     if (process.env.NODE_ENV === 'development') {
-      console.log(
-        `Performance: ${metric.name} took ${metric.duration?.toFixed(2)}ms`,
-        metric.metadata
-      );
     }
 
     // In production, send to analytics/monitoring service
@@ -272,7 +268,7 @@ export function usePerformanceMonitor(componentName: string) {
   return {
     startMeasure: measure.start,
     endMeasure: measure.end,
-    measureAsync: async <T>(fn: () => Promise<T>) => {
+    measureAsync: <T>(fn: () => Promise<T>) => {
       const name = `${componentName}:async`;
       return performanceMonitor.measure(name, fn);
     },
@@ -283,7 +279,9 @@ export function usePerformanceMonitor(componentName: string) {
  * Decorator for measuring function performance
  */
 export function measurePerformance(name?: string) {
+  // biome-ignore lint/suspicious/noExplicitAny: Decorator pattern requires any for flexibility
   return <T extends (...args: any[]) => any>(
+    // biome-ignore lint/suspicious/noExplicitAny: Target can be any class instance
     target: any,
     propertyKey: string,
     descriptor: TypedPropertyDescriptor<T>
@@ -291,7 +289,8 @@ export function measurePerformance(name?: string) {
     const originalMethod = descriptor.value;
     const measureName = name || `${target.constructor.name}.${propertyKey}`;
 
-    descriptor.value = async function (this: any, ...args: any[]) {
+    // biome-ignore lint/suspicious/noExplicitAny: This context needs to be flexible
+    descriptor.value = async function (this: any, ...args: Parameters<T>) {
       return performanceMonitor.measure(measureName, () => originalMethod?.apply(this, args));
     } as T;
 
@@ -303,7 +302,9 @@ export function measurePerformance(name?: string) {
  * Utility for measuring Web Vitals
  */
 export function measureWebVitals() {
-  if (typeof window === 'undefined') return;
+  if (typeof window === 'undefined') {
+    return;
+  }
 
   // Measure First Contentful Paint
   const observer = new PerformanceObserver((list) => {
@@ -320,12 +321,14 @@ export function measureWebVitals() {
   // Measure Largest Contentful Paint
   const lcpObserver = new PerformanceObserver((list) => {
     const entries = list.getEntries();
-    const lastEntry = entries[entries.length - 1];
+    const lastEntry = entries.at(-1);
 
-    performanceMonitor.start('web-vitals:lcp');
-    setTimeout(() => {
-      performanceMonitor.end('web-vitals:lcp');
-    }, lastEntry.startTime);
+    if (lastEntry) {
+      performanceMonitor.start('web-vitals:lcp');
+      setTimeout(() => {
+        performanceMonitor.end('web-vitals:lcp');
+      }, lastEntry.startTime);
+    }
   });
 
   lcpObserver.observe({ entryTypes: ['largest-contentful-paint'] });
@@ -334,7 +337,9 @@ export function measureWebVitals() {
   let clsValue = 0;
   const clsObserver = new PerformanceObserver((list) => {
     for (const entry of list.getEntries()) {
+      // biome-ignore lint/suspicious/noExplicitAny: PerformanceEntry types don't include CLS properties
       if (!(entry as any).hadRecentInput) {
+        // biome-ignore lint/suspicious/noExplicitAny: PerformanceEntry types don't include CLS properties
         clsValue += (entry as any).value;
       }
     }

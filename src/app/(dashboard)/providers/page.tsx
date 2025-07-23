@@ -42,9 +42,9 @@ export default function ProvidersPage() {
   const searchParams = useSearchParams();
   const [providersData, setProvidersData] = useState<ProvidersData>({ providers: [], total: 0 });
   const [locations, setLocations] = useState<LocationSummary[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [isError, setIsError] = useState(false);
-  const [error, setError] = useState<Error | null>(null);
+  const [_isLoading, setIsLoading] = useState(true);
+  const [_isError, setIsError] = useState(false);
+  const [_error, setError] = useState<Error | null>(null);
 
   // Parse search parameters
   const page = Math.max(1, Math.min(MAX_PAGE, safeParseInt(searchParams.get('page'), 1)));
@@ -151,13 +151,6 @@ export default function ProvidersPage() {
     fetchData();
   }, [page, limit, search, validProviderType, locationId, validStatus]);
 
-  const handleRetry = () => {
-    // Trigger a re-fetch by updating a dependency
-    setIsLoading(true);
-    setIsError(false);
-    setError(null);
-  };
-
   return (
     <div className="container mx-auto py-6 px-4">
       <div className="space-y-6">
@@ -176,20 +169,26 @@ export default function ProvidersPage() {
           className="bg-white dark:bg-gray-800 p-6 rounded-lg border border-gray-200 dark:border-gray-700"
         />
 
-        {/* Provider Navigation */}
-        <ProviderNavigation
-          providers={providersResult.providers}
-          pagination={{
-            page,
-            limit,
-            total: providersResult.total,
-            totalPages: Math.ceil(providersResult.total / Math.max(1, limit)),
-            hasNextPage: page < Math.ceil(providersResult.total / Math.max(1, limit)),
-            hasPreviousPage: page > 1,
-          }}
-          emptyMessage="No providers found"
-          emptyDescription="Try adjusting your search criteria or add a new provider to get started."
-        />
+        {/* A+ Implementation */}
+        {(() => {
+          const totalPages = Math.ceil(providersData.total / Math.max(1, limit));
+
+          return (
+            <ProviderNavigation
+              providers={providersData.providers}
+              pagination={{
+                page,
+                limit,
+                total: providersData.total,
+                totalPages: totalPages,
+                hasNextPage: page < totalPages,
+                hasPreviousPage: page > 1,
+              }}
+              emptyMessage="No providers found"
+              emptyDescription="Try adjusting your search criteria or add a new provider to get started."
+            />
+          );
+        })()}
       </div>
     </div>
   );

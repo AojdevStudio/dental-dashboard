@@ -332,7 +332,10 @@ function PreviewMetrics({
     return (
       <div className={compact ? 'flex items-center gap-4' : 'grid grid-cols-3 gap-3'}>
         {Array.from({ length: 3 }).map((_, i) => (
-          <div key={i} className={compact ? 'flex items-center gap-1' : 'text-center'}>
+          <div
+            key={`metric-skeleton-${i + 1}`}
+            className={compact ? 'flex items-center gap-1' : 'text-center'}
+          >
             <Skeleton className={compact ? 'h-3 w-8' : 'h-5 w-12 mb-1'} />
             <Skeleton className={compact ? 'h-3 w-16' : 'h-3 w-16'} />
           </div>

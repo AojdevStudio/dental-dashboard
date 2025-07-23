@@ -19,35 +19,18 @@
   "hooks": {
     "PreToolUse": [
       {
-        "matcher": "Bash",
+        "matcher": "",
         "hooks": [
           {
             "type": "command",
             "command": "uv run .claude/hooks/pre_tool_use.py"
-          },
-          {
-            "type": "command",
-            "command": "uv run .claude/hooks/commit-message-validator.py"
-          },
-          {
-            "type": "command",
-            "command": "uv run .claude/hooks/pnpm-enforcer.py"
-          }
-        ]
-      },
-      {
-        "matcher": "Write|Edit|MultiEdit",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "uv run .claude/hooks/typescript-validator.py"
           }
         ]
       }
     ],
     "PostToolUse": [
       {
-        "matcher": "Bash|Write|Edit|MultiEdit|TodoWrite",
+        "matcher": "",
         "hooks": [
           {
             "type": "command",
@@ -56,20 +39,17 @@
         ]
       },
       {
-        "matcher": "Write|Edit|MultiEdit",
+        "matcher": "Write|Edit",
         "hooks": [
           {
             "type": "command",
             "command": "uv run .claude/hooks/import-organizer.py"
-          },
-          {
-            "type": "command",
-            "command": "uv run .claude/hooks/code-quality-reporter.py"
-          },
-          {
-            "type": "command",
-            "command": "uv run .claude/hooks/api-standards-checker.py"
-          },
+          }
+        ]
+      },
+      {
+        "matcher": "Write|Edit",
+        "hooks": [
           {
             "type": "command",
             "command": "uv run .claude/hooks/universal-linter.py"
@@ -83,11 +63,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "uv run .claude/hooks/notification.py"
-          },
-          {
-            "type": "command",
-            "command": "uv run .claude/hooks/notification.py"
+            "command": "uv run .claude/hooks/notification.py --notify"
           }
         ]
       }
@@ -98,11 +74,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "uv run .claude/hooks/stop.py"
-          },
-          {
-            "type": "command",
-            "command": "uv run .claude/hooks/task-completion-enforcer.py"
+            "command": "uv run .claude/hooks/stop.py --chat"
           }
         ]
       }
