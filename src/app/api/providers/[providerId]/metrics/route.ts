@@ -3,10 +3,11 @@
  */
 
 import { withAuth } from '@/lib/api/middleware';
-import { ApiError, apiError, apiSuccess } from '@/lib/api/responses';
+import { ApiError, apiError, apiSuccess } from '@/lib/api/utils';
+import type { AuthContext } from '@/lib/database/auth-context';
 import { calculateProviderMetrics } from '@/lib/metrics/provider-calculations';
 import type { MetricsQueryParams, ProviderMetrics } from '@/types/provider-metrics';
-import { type NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 import { z } from 'zod';
 
 // Validation schemas
@@ -102,14 +103,19 @@ function clearProviderCache(providerId: string): void {
   const keysToDelete = Array.from(metricsCache.keys()).filter((key) =>
     key.startsWith(`metrics:${providerId}`)
   );
-  keysToDelete.forEach((key) => metricsCache.delete(key));
+  for (const key of keysToDelete) {
+    metricsCache.delete(key);
+  }
 }
 
 /**
  * GET /api/providers/[providerId]/metrics - Get provider metrics with caching
  */
 export const GET = withAuth(
-  async (req: NextRequest, context: { params: Promise<Record<string, string | string[]>> }) => {
+  async (
+    req: Request,
+    context: { params: Promise<Record<string, string | string[]>>; authContext: AuthContext }
+  ) => {
     try {
       const params = await context.params;
       const { searchParams } = new URL(req.url);
@@ -117,7 +123,7 @@ export const GET = withAuth(
       // Validate provider ID
       const providerValidation = ProviderIdSchema.safeParse(params);
       if (!providerValidation.success) {
-        return apiError('Invalid provider ID format', 400, providerValidation.error.errors);
+        return apiError('Invalid provider ID format', 400);
       }
 
       const { providerId } = providerValidation.data;
@@ -127,7 +133,7 @@ export const GET = withAuth(
         Object.fromEntries(searchParams.entries())
       );
       if (!queryValidation.success) {
-        return apiError('Invalid query parameters', 400, queryValidation.error.errors);
+        return apiError('Invalid query parameters', 400);
       }
 
       const queryParams = queryValidation.data;
@@ -157,10 +163,10 @@ export const GET = withAuth(
       if (!queryParams.refreshCache) {
         const cachedMetrics = getCachedMetrics(cacheKey);
         if (cachedMetrics) {
-          return apiSuccess(cachedMetrics, {
-            'X-Cache': 'HIT',
-            'X-Cache-TTL': String(cacheTtl),
-          });
+          const response = apiSuccess(cachedMetrics);
+          response.headers.set('X-Cache', 'HIT');
+          response.headers.set('X-Cache-TTL', String(cacheTtl));
+          return response;
         }
       }
 
@@ -170,7 +176,7 @@ export const GET = withAuth(
       // Calculate metrics
       const result = await calculateProviderMetrics(metricsParams);
 
-      if (!result.success) {
+      if (!(result.success && result.data)) {
         throw new ApiError(result.error || 'Failed to calculate provider metrics', 500);
       }
 
@@ -180,14 +186,15 @@ export const GET = withAuth(
       setCachedMetrics(cacheKey, result.data, cacheTtl);
 
       // Add performance headers
-      const headers = {
-        'X-Cache': 'MISS',
-        'X-Cache-TTL': String(cacheTtl),
-        'X-Calculation-Time': String(calculationTime),
-        'Cache-Control': `public, max-age=${cacheTtl}, stale-while-revalidate=${cacheTtl * 2}`,
-      };
-
-      return apiSuccess(result.data, headers);
+      const response = apiSuccess(result.data);
+      response.headers.set('X-Cache', 'MISS');
+      response.headers.set('X-Cache-TTL', String(cacheTtl));
+      response.headers.set('X-Calculation-Time', String(calculationTime));
+      response.headers.set(
+        'Cache-Control',
+        `public, max-age=${cacheTtl}, stale-while-revalidate=${cacheTtl * 2}`
+      );
+      return response;
     } catch (error) {
       console.error('Provider metrics API error:', error);
 
@@ -204,14 +211,17 @@ export const GET = withAuth(
  * POST /api/providers/[providerId]/metrics/refresh - Refresh metrics cache
  */
 export const POST = withAuth(
-  async (req: NextRequest, context: { params: Promise<Record<string, string | string[]>> }) => {
+  async (
+    _req: Request,
+    context: { params: Promise<Record<string, string | string[]>>; authContext: AuthContext }
+  ) => {
     try {
       const params = await context.params;
 
       // Validate provider ID
       const providerValidation = ProviderIdSchema.safeParse(params);
       if (!providerValidation.success) {
-        return apiError('Invalid provider ID format', 400, providerValidation.error.errors);
+        return apiError('Invalid provider ID format', 400);
       }
 
       const { providerId } = providerValidation.data;
@@ -240,7 +250,10 @@ export const POST = withAuth(
  * GET /api/providers/[providerId]/metrics/cache-status - Get cache status
  */
 export const HEAD = withAuth(
-  async (req: NextRequest, context: { params: Promise<Record<string, string | string[]>> }) => {
+  async (
+    req: Request,
+    context: { params: Promise<Record<string, string | string[]>>; authContext: AuthContext }
+  ) => {
     try {
       const params = await context.params;
       const { searchParams } = new URL(req.url);
@@ -257,7 +270,7 @@ export const HEAD = withAuth(
       const period = searchParams.get('period') || 'monthly';
       const cacheKey = generateCacheKey(providerId, {
         providerId,
-        period: period as any,
+        period: period as MetricsQueryParams['period'],
         includeComparative: true,
         includeGoals: true,
       });
@@ -285,30 +298,4 @@ export const HEAD = withAuth(
   }
 );
 
-/**
- * Export cache utilities for testing and monitoring
- */
-export const cacheUtils = {
-  getCacheSize: () => metricsCache.size,
-  clearAllCache: () => metricsCache.clear(),
-  getCacheKeys: () => Array.from(metricsCache.keys()),
-  getCacheStats: () => {
-    let totalSize = 0;
-    let expiredCount = 0;
-    const now = Date.now();
-
-    metricsCache.forEach((value) => {
-      totalSize += JSON.stringify(value.data).length;
-      if (now - value.timestamp > value.ttl * 1000) {
-        expiredCount++;
-      }
-    });
-
-    return {
-      totalEntries: metricsCache.size,
-      expiredEntries: expiredCount,
-      totalSizeBytes: totalSize,
-      averageSizeBytes: metricsCache.size > 0 ? totalSize / metricsCache.size : 0,
-    };
-  },
-};
+// Remove cacheUtils export - internal use only

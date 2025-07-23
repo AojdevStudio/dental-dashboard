@@ -4,6 +4,9 @@
 
 import { z } from 'zod';
 
+// UUID validation regex pattern (moved to top-level for performance)
+const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
 /**
  * Date range validation schema
  */
@@ -296,6 +299,5 @@ export function validatePercentage(value: number, allowOver100 = false): boolean
  * Validation helper for UUIDs
  */
 export function validateUUID(uuid: string): boolean {
-  const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
-  return uuidRegex.test(uuid);
+  return UUID_REGEX.test(uuid);
 }

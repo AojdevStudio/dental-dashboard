@@ -473,27 +473,26 @@ export function ProviderGrid({
                   </ProviderCard.Content>
                 </ProviderCard.Root>
               );
-            } else {
-              return (
-                <ProviderCard.Root
-                  key={provider.id}
-                  provider={provider}
-                  onClick={onProviderClick ? () => onProviderClick(provider) : undefined}
-                >
-                  <ProviderCard.Header>
-                    <ProviderCard.Title />
-                    <ProviderCard.Actions onEdit={onProviderEdit} onViewDetails={onProviderView} />
-                  </ProviderCard.Header>
-                  <ProviderCard.Content>
-                    <div className="space-y-4">
-                      <ProviderCard.PreviewMetrics showAdvanced={true} />
-                      <ProviderCard.Locations />
-                      <ProviderCard.Contact />
-                    </div>
-                  </ProviderCard.Content>
-                </ProviderCard.Root>
-              );
             }
+            return (
+              <ProviderCard.Root
+                key={provider.id}
+                provider={provider}
+                onClick={onProviderClick ? () => onProviderClick(provider) : undefined}
+              >
+                <ProviderCard.Header>
+                  <ProviderCard.Title />
+                  <ProviderCard.Actions onEdit={onProviderEdit} onViewDetails={onProviderView} />
+                </ProviderCard.Header>
+                <ProviderCard.Content>
+                  <div className="space-y-4">
+                    <ProviderCard.PreviewMetrics showAdvanced={true} />
+                    <ProviderCard.Locations />
+                    <ProviderCard.Contact />
+                  </div>
+                </ProviderCard.Content>
+              </ProviderCard.Root>
+            );
           }
 
           // Use standard components for basic display
