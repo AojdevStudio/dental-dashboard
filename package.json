@@ -50,7 +50,10 @@
     "gas:health": "node scripts/deployment/gas-health-check.cjs",
     "gas:health:all": "node scripts/deployment/gas-health-check.cjs --all",
     "gas:health:dentist": "node scripts/deployment/gas-health-check.cjs --type=dentist",
-    "gas:health:hygienist": "node scripts/deployment/gas-health-check.cjs --type=hygienist"
+    "gas:health:hygienist": "node scripts/deployment/gas-health-check.cjs --type=hygienist",
+    "ci:test": "./scripts/ci-local.sh",
+    "fix:all": "pnpm biome:fix && pnpm prettier:yaml && pnpm typecheck",
+    "biome:branch": "./scripts/biome-branch-check.sh"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.39.0",
