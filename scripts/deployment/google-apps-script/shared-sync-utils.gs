@@ -439,16 +439,44 @@ function getDentistSyncCredentials() {
 }
 
 /**
- * Get hygienist sync credentials for Adriane
+ * Get hygienist sync credentials dynamically
+ * @param {string} providerCode - Optional provider code (if not provided, will try to detect)
+ * @param {string} clinicCode - Optional clinic code (if not provided, will use provider's primary clinic)
  * @return {object|null} Credentials for hygienist sync system
  */
-function getHygienistSyncCredentials() {
+function getHygienistSyncCredentials(providerCode = null, clinicCode = null) {
+  // If no provider specified, try to detect from spreadsheet
+  if (!providerCode) {
+    try {
+      const detectedProvider = detectCurrentProvider(SpreadsheetApp.getActiveSpreadsheet().getId());
+      if (detectedProvider) {
+        providerCode = detectedProvider.providerCode;
+        clinicCode = clinicCode || detectedProvider.primaryClinic;
+      }
+    } catch (error) {
+      Logger.log('Could not detect provider for hygienist sync: ' + error.message);
+      // Fallback to legacy behavior for backward compatibility
+      return getSyncCredentials('hygienist_sync', {
+        clinicCode: 'KAMDENTAL_BAYTOWN',  // Adriane's clinic
+        providerCode: 'adriane_fontenot', // Adriane's provider code
+        externalMappings: {
+          'ADRIANE_CLINIC': 'clinic',
+          'ADRIANE_PROVIDER': 'provider'
+        }
+      });
+    }
+  }
+  
+  // Generate external ID from provider code
+  const externalId = providerCode ? 
+    providerCode.toUpperCase().split('_')[0] + '_PROVIDER' : 
+    'UNKNOWN_PROVIDER';
+  
   return getSyncCredentials('hygienist_sync', {
-    clinicCode: 'KAMDENTAL_BAYTOWN',  // Adriane's clinic
-    providerCode: 'adriane_fontenot', // Adriane's provider code
+    clinicCode: clinicCode,
+    providerCode: providerCode,
     externalMappings: {
-      'ADRIANE_CLINIC': 'clinic',
-      'ADRIANE_PROVIDER': 'provider'
+      [externalId]: 'provider'
     }
   });
 }
