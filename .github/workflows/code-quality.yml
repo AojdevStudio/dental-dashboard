@@ -7,6 +7,11 @@ on:
     branches: [ main, develop ]
   workflow_dispatch:
 
+# Cancel in-progress runs on same branch
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
 jobs:
   code-quality:
     name: Code Quality Checks
@@ -28,17 +33,38 @@ jobs:
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
+          # Required for auto-fix commits in PRs
+          token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
-        with:
-          version: 9
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '20'
           cache: 'pnpm'
+
+      - name: Get pnpm store directory
+        shell: bash
+        run: |
+          echo "STORE_PATH=$(pnpm store path --silent)" >> $GITHUB_ENV
+
+      - name: Setup pnpm cache
+        uses: actions/cache@v4
+        with:
+          path: ${{ env.STORE_PATH }}
+          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-store-
+
+      - name: Cache Prisma Client
+        uses: actions/cache@v4
+        with:
+          path: node_modules/.prisma
+          key: ${{ runner.os }}-prisma-${{ hashFiles('**/prisma/schema.prisma') }}
+          restore-keys: |
+            ${{ runner.os }}-prisma-
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
@@ -49,17 +75,77 @@ jobs:
           echo "Database URL: ${DATABASE_URL%%@*}@***"
           echo "Supabase URL: $NEXT_PUBLIC_SUPABASE_URL"
           
-          # Test database connectivity
-          if ! pnpm exec prisma db ping --timeout 10; then
-            echo "❌ Failed to connect to cloud test database"
+          # Test database connectivity with retries
+          CONNECTION_SUCCESS=false
+          for i in {1..3}; do
+            echo "🔄 Connection attempt $i of 3..."
+            if pnpm exec prisma db ping --timeout 20; then
+              echo "✅ Cloud test database connection verified"
+              CONNECTION_SUCCESS=true
+              break
+            else
+              echo "⚠️ Connection attempt $i failed"
+              if [ $i -lt 3 ]; then
+                echo "⏳ Waiting 5 seconds before retry..."
+                sleep 5
+              fi
+            fi
+          done
+          
+          if [ "$CONNECTION_SUCCESS" = false ]; then
+            echo "❌ Failed to connect to cloud test database after 3 attempts"
+            echo "Please check:"
+            echo "1. GitHub secrets are properly configured"
+            echo "2. Database URL is correct and accessible"
+            echo "3. Network connectivity from GitHub Actions"
             exit 1
           fi
-          echo "✅ Cloud test database connection verified"
+
+      # Auto-fix formatting issues in PRs
+      - name: Auto-fix formatting issues (PR only)
+        if: github.event_name == 'pull_request'
+        id: autofix
+        run: |
+          echo "🔧 Attempting to auto-fix formatting issues..."
+          
+          # Configure git
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
+          
+          # Run auto-fix
+          pnpm biome check --write . || true
+          pnpm prettier:yaml || true
+          
+          # Check if there are changes
+          if [[ -n $(git status -s) ]]; then
+            echo "📝 Found auto-fixable issues, committing fixes..."
+            git add .
+            git commit -m "🤖 Auto-fix: Format code with Biome and Prettier
+            
+            Co-authored-by: $GITHUB_ACTOR <$GITHUB_ACTOR@users.noreply.github.com>"
+            echo "has_fixes=true" >> $GITHUB_OUTPUT
+          else
+            echo "✅ No auto-fixable issues found"
+            echo "has_fixes=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Push auto-fixes
+        if: steps.autofix.outputs.has_fixes == 'true' && github.event_name == 'pull_request'
+        uses: ad-m/github-push-action@master
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          branch: ${{ github.head_ref }}
 
       - name: Run Biome linting (with null safety checks)
+        id: biome
         run: |
           echo "🔍 Running Biome linting with null safety validation..."
+          
+          # Run Biome and capture exit code
+          set +e
           pnpm biome:check
+          BIOME_EXIT=$?
+          set -e
           
           # Check specifically for non-null assertions
           echo "🚫 Checking for non-null assertions..."
@@ -70,31 +156,50 @@ jobs:
             echo "❌ Non-null assertions detected! This violates our null safety policy."
             echo "Please fix these violations before merging:"
             echo "$NON_NULL_VIOLATIONS"
+            
+            # Create annotation for PR
+            if [ "${{ github.event_name }}" == "pull_request" ]; then
+              echo "::error::Non-null assertions detected. See job logs for details."
+            fi
             exit 1
           else
             echo "✅ No non-null assertions found - null safety compliance verified!"
           fi
+          
+          # Exit with Biome's exit code
+          exit $BIOME_EXIT
 
       - name: Run TypeScript type checking
         run: |
           echo "🔧 Running TypeScript type checking..."
-          # Use typecheck command for comprehensive type validation
-          pnpm typecheck
+          pnpm typecheck || {
+            echo "::error::TypeScript type checking failed. See logs for details."
+            exit 1
+          }
 
       - name: Run full test suite
         run: |
           echo "🧪 Running full test suite..."
-          pnpm test --run
+          pnpm test --run || {
+            echo "::error::Test suite failed. See logs for details."
+            exit 1
+          }
 
       - name: Check YAML formatting
         run: |
           echo "📝 Checking YAML formatting..."
-          pnpm prettier:yaml --check
+          pnpm prettier:yaml --check || {
+            echo "::error::YAML formatting issues found. Run 'pnpm prettier:yaml' locally."
+            exit 1
+          }
 
       - name: Build application
         run: |
           echo "🏗️ Building application..."
-          pnpm build
+          pnpm build || {
+            echo "::error::Build failed. See logs for details."
+            exit 1
+          }
 
       - name: Generate null safety report
         if: always()
@@ -152,21 +257,45 @@ jobs:
           path: reports/null-safety-report.md
           retention-days: 30
 
+      # Add PR comment with helpful info on failure
+      - name: Comment on PR with failure details
+        if: failure() && github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const comment = `## ❌ CI Check Failed
+            
+            The code quality checks have failed. Here's how to fix them:
+            
+            ### 🔧 Quick Fixes:
+            1. **Run locally:** \`pnpm ci:test\` to see all issues
+            2. **Auto-fix:** \`pnpm biome:fix\` for formatting/linting
+            3. **Type errors:** \`pnpm typecheck\` to see details
+            4. **Test failures:** \`pnpm test\` to debug
+            
+            ### 💡 Pro Tips:
+            - Use the pre-push hook to catch issues early
+            - Run \`pnpm code-quality\` before pushing
+            - Check the [CI logs](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}) for details
+            
+            _This comment was auto-generated to help you fix CI issues faster._`;
+            
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: comment
+            });
+
 
   dependency-audit:
     name: Dependency Security Audit
     runs-on: ubuntu-latest
+    # Continue even if code quality fails
+    if: always()
     
     env:
       NODE_ENV: test
-      # Cloud test database configuration
-      NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.TEST_SUPABASE_URL }}
-      NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.TEST_SUPABASE_ANON_KEY }}
-      DATABASE_URL: ${{ secrets.TEST_DATABASE_URL }}
-      DIRECT_URL: ${{ secrets.TEST_DIRECT_URL }}
-      SUPABASE_SERVICE_KEY: ${{ secrets.TEST_SUPABASE_SERVICE_KEY }}
-      # Application configuration
-      NEXT_PUBLIC_SITE_URL: http://localhost:3000
     
     steps:
       - name: Checkout code
@@ -174,8 +303,6 @@ jobs:
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
-        with:
-          version: 9
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -183,7 +310,70 @@ jobs:
           node-version: '20'
           cache: 'pnpm'
 
+      - name: Install dependencies (prod only for audit)
+        run: pnpm install --prod --frozen-lockfile --ignore-scripts
+
       - name: Run security audit
+        id: audit
         run: |
           echo "🔍 Running dependency security audit..."
-          pnpm audit --audit-level moderate || echo "⚠️ Security audit completed with warnings"
+          
+          # Run audit and capture output
+          set +e
+          AUDIT_OUTPUT=$(pnpm audit --audit-level high 2>&1)
+          AUDIT_EXIT=$?
+          set -e
+          
+          echo "$AUDIT_OUTPUT"
+          
+          # Check for high/critical vulnerabilities
+          if [ $AUDIT_EXIT -ne 0 ]; then
+            if echo "$AUDIT_OUTPUT" | grep -q "critical\|high"; then
+              echo "❌ High or critical vulnerabilities found!"
+              echo "high_vulns=true" >> $GITHUB_OUTPUT
+              exit 1
+            else
+              echo "⚠️ Moderate/low vulnerabilities found (non-blocking)"
+              echo "high_vulns=false" >> $GITHUB_OUTPUT
+              # Don't fail for moderate/low
+              exit 0
+            fi
+          else
+            echo "✅ No security vulnerabilities found"
+            echo "high_vulns=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Create security issue for moderate vulnerabilities
+        if: failure() == false && contains(steps.audit.outputs.*, 'moderate')
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const title = '🔒 Moderate security vulnerabilities in dependencies';
+            const body = `Moderate security vulnerabilities were found during the automated audit.
+            
+            **Action Required:**
+            - Run \`pnpm audit\` locally to see details
+            - Update affected packages when possible
+            - Document any false positives
+            
+            This issue was automatically created by the CI pipeline.`;
+            
+            // Check if issue already exists
+            const issues = await github.rest.issues.listForRepo({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              state: 'open',
+              labels: 'security,dependencies'
+            });
+            
+            const existingIssue = issues.data.find(issue => issue.title === title);
+            
+            if (!existingIssue) {
+              await github.rest.issues.create({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                title: title,
+                body: body,
+                labels: ['security', 'dependencies']
+              });
+            }
