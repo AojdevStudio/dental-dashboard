@@ -23,17 +23,6 @@ import {
 import { MetricsQuerySchema } from './validation';
 
 /**
- * Safe division helper to prevent divide by zero errors
- */
-// biome-ignore lint/correctness/noUnusedVariables: May be used in future calculations
-function safeDivide(numerator: number, denominator: number, defaultValue = 0): number {
-  if (denominator === 0 || !Number.isFinite(denominator) || !Number.isFinite(numerator)) {
-    return defaultValue;
-  }
-  return numerator / denominator;
-}
-
-/**
  * Calculate percentage change between two values
  */
 function calculatePercentageChange(current: number, previous: number): number {

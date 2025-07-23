@@ -212,9 +212,7 @@ export async function getProviderFinancialMetrics(
     collectionRate,
     collectionEfficiency: collectionRate, // Could be enhanced with adjusted production
     overheadPercentage,
-    profitMargin:
-      (current.totalCollections - current.totalCollections * overheadPercentage) /
-      current.totalCollections,
+    profitMargin: current.totalCollections > 0 ? netIncome / current.totalCollections : 0,
     totalOverhead,
     netIncome,
     ...goalData,
@@ -640,6 +638,8 @@ export async function getProviderKPIDashboard(params: {
     trendPeriods?: number;
   };
 }) {
+  const startTime = Date.now();
+
   try {
     // Get provider details
     const provider = await prisma.provider.findUnique({
@@ -742,7 +742,7 @@ export async function getProviderKPIDashboard(params: {
       success: true,
       data: dashboardData,
       performance: {
-        calculationTime: Date.now() - params.startDate.getTime(),
+        calculationTime: Date.now() - startTime,
         cacheUsed: false,
       },
     };
