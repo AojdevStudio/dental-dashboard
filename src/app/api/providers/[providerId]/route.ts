@@ -2,9 +2,13 @@ import { type ApiHandler, withAuth } from '@/lib/api/middleware';
 import { apiError, apiSuccess, handleApiError } from '@/lib/api/utils';
 import type { AuthContext } from '@/lib/database/auth-context';
 import { prisma } from '@/lib/database/prisma';
-import type { ProviderWithLocations } from '@/types/providers';
+import type { ISODateString, ProviderWithLocations } from '@/types/providers';
 import type { NextResponse } from 'next/server';
 import { z } from 'zod';
+
+// Provider ID validation regex patterns (moved to top-level for performance)
+const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[4][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+const SLUG_REGEX = /^[a-z0-9]+(?:-[a-z0-9]+)*$/i;
 
 // Provider ID validation schema
 const providerIdSchema = z.object({
@@ -15,12 +19,7 @@ const providerIdSchema = z.object({
  * Validate provider ID format (UUID or slug)
  */
 function isValidProviderId(providerId: string): boolean {
-  // UUID format
-  const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[4][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
-  // Simple slug format (alphanumeric + hyphens)
-  const slugRegex = /^[a-z0-9]+(?:-[a-z0-9]+)*$/i;
-
-  return uuidRegex.test(providerId) || slugRegex.test(providerId);
+  return UUID_REGEX.test(providerId) || SLUG_REGEX.test(providerId);
 }
 
 /**
@@ -30,7 +29,12 @@ async function getProviderById(
   providerId: string,
   authContext: AuthContext
 ): Promise<ProviderWithLocations | null> {
-  const whereClause: any = {
+  interface ProviderWhereClause {
+    OR: Array<{ id: string }>;
+    clinicId?: { in: string[] };
+  }
+
+  const whereClause: ProviderWhereClause = {
     OR: [
       { id: providerId },
       // TODO: Add slug support when provider slugs are implemented
@@ -95,8 +99,8 @@ async function getProviderById(
       locationAddress: pl.location.address,
       isPrimary: pl.isPrimary,
       isActive: pl.isActive,
-      startDate: pl.startDate.toISOString() as any,
-      endDate: (pl.endDate?.toISOString() as any) || null,
+      startDate: pl.startDate.toISOString() as ISODateString,
+      endDate: (pl.endDate?.toISOString() || null) as ISODateString | null,
     })),
     primaryLocation: provider.providerLocations.find((pl) => pl.isPrimary)?.location || undefined,
     _count: {
@@ -117,7 +121,7 @@ async function getProviderById(
  * Enforces multi-tenant security and role-based access control
  */
 const getProviderHandler: ApiHandler = async (
-  request: Request,
+  _request: Request,
   {
     params,
     authContext,

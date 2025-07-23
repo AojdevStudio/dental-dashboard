@@ -59,7 +59,7 @@ export function ProviderNavigation({
     [router]
   );
 
-  const handleManageLocations = useCallback(
+  const _handleManageLocations = useCallback(
     (provider: ProviderWithLocations) => {
       // TODO: Implement location management in future phases
       router.push(`/dashboard/providers/${provider.id}/locations`);

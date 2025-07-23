@@ -46,19 +46,36 @@ interface FinancialMetricsChartProps {
   className?: string;
 }
 
+interface TooltipPayloadItem {
+  name: string;
+  value: number;
+  color: string;
+  dataKey: string;
+  payload: FinancialChartData;
+}
+
+interface FinancialTooltipProps {
+  active?: boolean;
+  payload?: TooltipPayloadItem[];
+  label?: string;
+}
+
 /**
  * Custom tooltip for financial data with proper formatting
  */
-function FinancialTooltip({ active, payload, label }: any) {
-  if (!active || !payload || !payload.length) {
+function FinancialTooltip({ active, payload, label }: FinancialTooltipProps) {
+  if (!(active && payload && payload.length > 0)) {
     return null;
   }
 
   return (
     <div className="bg-background border border-border rounded-lg shadow-lg p-3 min-w-[200px]">
       <p className="font-medium mb-2">{label}</p>
-      {payload.map((entry: any, index: number) => (
-        <div key={index} className="flex items-center justify-between gap-4 text-sm">
+      {payload.map((entry) => (
+        <div
+          key={`${entry.dataKey}-${entry.name}`}
+          className="flex items-center justify-between gap-4 text-sm"
+        >
           <div className="flex items-center gap-2">
             <div className="w-3 h-3 rounded-full" style={{ backgroundColor: entry.color }} />
             <span className="text-muted-foreground">{entry.name}:</span>
@@ -128,7 +145,7 @@ function FinancialChartLoading() {
           <div className="flex justify-between items-end h-48">
             {Array.from({ length: 6 }).map((_, i) => (
               <Skeleton
-                key={i}
+                key={`bar-skeleton-item-${i + 1}`}
                 className="w-8"
                 style={{ height: `${Math.random() * 150 + 50}px` }}
               />
@@ -136,7 +153,7 @@ function FinancialChartLoading() {
           </div>
           <div className="flex justify-center gap-4">
             {Array.from({ length: 4 }).map((_, i) => (
-              <Skeleton key={i} className="h-4 w-16" />
+              <Skeleton key={`legend-skeleton-item-${i + 1}`} className="h-4 w-16" />
             ))}
           </div>
         </div>
@@ -158,7 +175,7 @@ function FinancialChartError({ error, onRetry }: { error: Error; onRetry?: () =>
           {error.message || 'An error occurred while loading financial metrics.'}
         </p>
         {onRetry && (
-          <button onClick={onRetry} className="text-sm text-primary hover:underline">
+          <button type="button" onClick={onRetry} className="text-sm text-primary hover:underline">
             Try Again
           </button>
         )}
@@ -216,7 +233,7 @@ export function FinancialMetricsChart({
 
   // Calculate trends from first to last data point
   const firstData = data[0];
-  const lastData = data[data.length - 1];
+  const lastData = data.at(-1);
   const productionTrend =
     firstData && lastData
       ? ((lastData.totalProduction - firstData.totalProduction) / firstData.totalProduction) * 100

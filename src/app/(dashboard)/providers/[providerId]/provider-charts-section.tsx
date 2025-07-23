@@ -8,7 +8,7 @@
  */
 
 import ProviderCharts from '@/components/dashboard/charts/provider-charts';
-import { useProviderMetrics } from '@/hooks/use-provider-metrics';
+import { useProviderKPIDashboard } from '@/hooks/use-provider-kpi';
 
 interface ProviderChartsSectionProps {
   providerId: string;
@@ -29,10 +29,10 @@ export default function ProviderChartsSection({ providerId }: ProviderChartsSect
     data: dashboardData,
     isLoading,
     error,
-  } = useProviderMetrics(providerId, {
+  } = useProviderKPIDashboard(providerId, {
     period: 'monthly',
-    includeComparisons: true,
-    includeTrends: true,
+    includeComparative: true,
+    includeGoals: true,
   });
 
   return <ProviderCharts data={dashboardData || null} isLoading={isLoading} error={error} />;

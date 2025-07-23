@@ -25,6 +25,7 @@ import { MetricsQuerySchema } from './validation';
 /**
  * Safe division helper to prevent divide by zero errors
  */
+// biome-ignore lint/correctness/noUnusedVariables: May be used in future calculations
 function safeDivide(numerator: number, denominator: number, defaultValue = 0): number {
   if (denominator === 0 || !Number.isFinite(denominator) || !Number.isFinite(numerator)) {
     return defaultValue;
@@ -46,7 +47,7 @@ function calculatePercentageChange(current: number, previous: number): number {
  * Round number to specified decimal places
  */
 function roundToDecimals(value: number, decimals = 2): number {
-  const factor = Math.pow(10, decimals);
+  const factor = 10 ** decimals;
   return Math.round(value * factor) / factor;
 }
 
@@ -62,7 +63,7 @@ function generateDateRangeForPeriod(period: MetricsPeriod): DateRange {
         startDate: new Date(now.getFullYear(), now.getMonth(), now.getDate()),
         endDate: new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1),
       };
-    case 'weekly':
+    case 'weekly': {
       const startOfWeek = new Date(now);
       startOfWeek.setDate(now.getDate() - now.getDay());
       startOfWeek.setHours(0, 0, 0, 0);
@@ -70,17 +71,19 @@ function generateDateRangeForPeriod(period: MetricsPeriod): DateRange {
         startDate: startOfWeek,
         endDate: new Date(startOfWeek.getTime() + 7 * 24 * 60 * 60 * 1000),
       };
+    }
     case 'monthly':
       return {
         startDate: new Date(now.getFullYear(), now.getMonth(), 1),
         endDate: new Date(now.getFullYear(), now.getMonth() + 1, 1),
       };
-    case 'quarterly':
+    case 'quarterly': {
       const quarterStartMonth = Math.floor(now.getMonth() / 3) * 3;
       return {
         startDate: new Date(now.getFullYear(), quarterStartMonth, 1),
         endDate: new Date(now.getFullYear(), quarterStartMonth + 3, 1),
       };
+    }
     case 'yearly':
       return {
         startDate: new Date(now.getFullYear(), 0, 1),
@@ -132,7 +135,7 @@ export async function calculateProviderMetrics(
   try {
     // Validate parameters
     const validationResult = validateAndNormalizeParams(params);
-    if (!validationResult.success || !validationResult.data) {
+    if (!(validationResult.success && validationResult.data)) {
       return {
         success: false,
         error: validationResult.error,
@@ -186,7 +189,7 @@ export async function calculateProviderMetrics(
       providerId: params.providerId,
       clinicId: params.clinicId || '',
       period: params.period,
-      dateRange: validatedParams.dateRange!,
+      dateRange: validatedParams.dateRange || { startDate: new Date(), endDate: new Date() },
       productionRank: 1,
       collectionRank: 1,
       patientSatisfactionRank: 1,
@@ -232,6 +235,101 @@ export async function calculateProviderMetrics(
 }
 
 /**
+ * Calculate period date range
+ */
+function calculatePeriodDateRange(
+  period: MetricsPeriod,
+  index: number
+): { start: Date; end: Date } {
+  const periodStart = new Date();
+  const periodEnd = new Date();
+
+  switch (period) {
+    case 'monthly': {
+      periodStart.setMonth(periodStart.getMonth() - index);
+      periodStart.setDate(1);
+      periodEnd.setMonth(periodEnd.getMonth() - index + 1);
+      periodEnd.setDate(1);
+      break;
+    }
+    case 'weekly': {
+      periodStart.setDate(periodStart.getDate() - index * 7);
+      periodEnd.setDate(periodEnd.getDate() - (index - 1) * 7);
+      break;
+    }
+    case 'daily': {
+      periodStart.setDate(periodStart.getDate() - index);
+      periodEnd.setDate(periodEnd.getDate() - index + 1);
+      break;
+    }
+    default: {
+      // Default to monthly
+      periodStart.setMonth(periodStart.getMonth() - index);
+      periodStart.setDate(1);
+      periodEnd.setMonth(periodEnd.getMonth() - index + 1);
+      periodEnd.setDate(1);
+    }
+  }
+
+  return { start: periodStart, end: periodEnd };
+}
+
+/**
+ * Extract metric value from metrics object
+ */
+function extractMetricValue(
+  metrics: ProviderMetrics,
+  metricName:
+    | keyof ProviderFinancialMetrics
+    | keyof ProviderPerformanceMetrics
+    | keyof ProviderPatientMetrics
+): number {
+  if (metricName in metrics.financial) {
+    return metrics.financial[metricName as keyof ProviderFinancialMetrics] as number;
+  }
+  if (metricName in metrics.performance) {
+    return metrics.performance[metricName as keyof ProviderPerformanceMetrics] as number;
+  }
+  if (metricName in metrics.patient) {
+    return metrics.patient[metricName as keyof ProviderPatientMetrics] as number;
+  }
+  return 0;
+}
+
+/**
+ * Calculate trend statistics
+ */
+function calculateTrendStatistics(changes: number[]): {
+  averageGrowthRate: number;
+  volatility: number;
+  trendDirection: 'up' | 'down' | 'stable';
+} {
+  const validChanges = changes.filter((change) => Number.isFinite(change));
+
+  const averageGrowthRate =
+    validChanges.length > 0
+      ? validChanges.reduce((sum, change) => sum + change, 0) / validChanges.length
+      : 0;
+
+  const volatility =
+    validChanges.length > 1
+      ? Math.sqrt(
+          validChanges.reduce((sum, change) => sum + (change - averageGrowthRate) ** 2, 0) /
+            (validChanges.length - 1)
+        )
+      : 0;
+
+  let trendDirection: 'up' | 'down' | 'stable' = 'stable';
+  if (averageGrowthRate > 5) {
+    trendDirection = 'up';
+  } else if (averageGrowthRate < -5) {
+    trendDirection = 'down';
+  }
+
+  return { averageGrowthRate, volatility, trendDirection };
+}
+
+/**
  * Calculate metrics trend over time
  */
 export async function calculateProviderMetricsTrend(
@@ -250,32 +348,7 @@ export async function calculateProviderMetricsTrend(
 
     // Calculate metrics for each period
     for (let i = periods - 1; i >= 0; i--) {
-      const periodStart = new Date();
-      const periodEnd = new Date();
-
-      // Adjust dates based on period type
-      switch (params.period) {
-        case 'monthly':
-          periodStart.setMonth(periodStart.getMonth() - i);
-          periodStart.setDate(1);
-          periodEnd.setMonth(periodEnd.getMonth() - i + 1);
-          periodEnd.setDate(1);
-          break;
-        case 'weekly':
-          periodStart.setDate(periodStart.getDate() - i * 7);
-          periodEnd.setDate(periodEnd.getDate() - (i - 1) * 7);
-          break;
-        case 'daily':
-          periodStart.setDate(periodStart.getDate() - i);
-          periodEnd.setDate(periodEnd.getDate() - i + 1);
-          break;
-        default:
-          // Default to monthly
-          periodStart.setMonth(periodStart.getMonth() - i);
-          periodStart.setDate(1);
-          periodEnd.setMonth(periodEnd.getMonth() - i + 1);
-          periodEnd.setDate(1);
-      }
+      const { start: periodStart, end: periodEnd } = calculatePeriodDateRange(params.period, i);
 
       const periodParams: MetricsQueryParams = {
         ...params,
@@ -283,33 +356,26 @@ export async function calculateProviderMetricsTrend(
           startDate: periodStart,
           endDate: periodEnd,
         },
-        includeComparative: false, // Skip comparative for trend calculation
+        includeComparative: false,
       };
 
       const metricsResult = await calculateProviderMetrics(periodParams);
 
       if (metricsResult.success && metricsResult.data) {
-        const metrics = metricsResult.data;
-        let value = 0;
-
-        // Extract the specific metric value
-        if (metricName in metrics.financial) {
-          value = metrics.financial[metricName as keyof ProviderFinancialMetrics] as number;
-        } else if (metricName in metrics.performance) {
-          value = metrics.performance[metricName as keyof ProviderPerformanceMetrics] as number;
-        } else if (metricName in metrics.patient) {
-          value = metrics.patient[metricName as keyof ProviderPatientMetrics] as number;
-        }
+        const value = extractMetricValue(metricsResult.data, metricName);
 
         // Calculate change from previous period
         let change: number | undefined;
         let changePercentage: number | undefined;
 
         if (trendData.length > 0) {
-          const previousValue = trendData[trendData.length - 1].value;
-          change = value - previousValue;
-          changePercentage = calculatePercentageChange(value, previousValue);
-          changes.push(changePercentage);
+          const lastDataPoint = trendData.at(-1);
+          if (lastDataPoint) {
+            const previousValue = lastDataPoint.value;
+            change = value - previousValue;
+            changePercentage = calculatePercentageChange(value, previousValue);
+            changes.push(changePercentage);
+          }
         }
 
         trendData.push({
@@ -322,27 +388,8 @@ export async function calculateProviderMetricsTrend(
       }
     }
 
-    // Calculate trend analysis
-    const validChanges = changes.filter((change) => Number.isFinite(change));
-    const averageGrowthRate =
-      validChanges.length > 0
-        ? validChanges.reduce((sum, change) => sum + change, 0) / validChanges.length
-        : 0;
-
-    const volatility =
-      validChanges.length > 1
-        ? Math.sqrt(
-            validChanges.reduce((sum, change) => sum + Math.pow(change - averageGrowthRate, 2), 0) /
-              (validChanges.length - 1)
-          )
-        : 0;
-
-    let trendDirection: 'up' | 'down' | 'stable' = 'stable';
-    if (averageGrowthRate > 5) {
-      trendDirection = 'up';
-    } else if (averageGrowthRate < -5) {
-      trendDirection = 'down';
-    }
+    // Calculate trend statistics
+    const { averageGrowthRate, volatility, trendDirection } = calculateTrendStatistics(changes);
 
     const trend: ProviderMetricsTrend = {
       providerId: params.providerId,
@@ -384,9 +431,10 @@ function formatPeriodLabel(date: Date, period: MetricsPeriod): string {
       return `Week of ${date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}`;
     case 'monthly':
       return date.toLocaleDateString('en-US', { year: 'numeric', month: 'short' });
-    case 'quarterly':
+    case 'quarterly': {
       const quarter = Math.floor(date.getMonth() / 3) + 1;
       return `Q${quarter} ${date.getFullYear()}`;
+    }
     case 'yearly':
       return date.getFullYear().toString();
     default:

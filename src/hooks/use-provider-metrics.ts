@@ -309,7 +309,9 @@ export function useMultipleProviderMetrics(
   const isLoading = metrics.some((metric) => metric.isLoading);
   const isError = metrics.some((metric) => metric.isError);
   const hasData = metrics.some((metric) => metric.data);
-  const successfulMetrics = metrics.filter((metric) => metric.data).map((metric) => metric.data!);
+  const successfulMetrics = metrics
+    .filter((metric) => metric.data !== undefined)
+    .map((metric) => metric.data as NonNullable<typeof metric.data>);
 
   return {
     metrics: enhancedMetrics,
@@ -330,20 +332,16 @@ export function useRealtimeProviderMetrics(
     realtimeInterval?: number;
   } = {}
 ) {
-  const {
-    realtimeEnabled = false,
-    realtimeInterval = 30 * 1000, // 30 seconds
-    ...baseOptions
-  } = options;
+  const { realtimeEnabled = false, realtimeInterval = 30 * 1000 } = options;
 
-  const queryOptions = useMemo(
+  const queryOptions: UseProviderMetricsOptions = useMemo(
     () => ({
-      ...baseOptions,
-      refetchInterval: realtimeEnabled ? realtimeInterval : baseOptions.refetchInterval,
-      staleTime: realtimeEnabled ? 0 : baseOptions.staleTime,
-      gcTime: realtimeEnabled ? 1 * 60 * 1000 : baseOptions.gcTime, // 1 minute in realtime mode
+      ...options,
+      refetchInterval: realtimeEnabled ? realtimeInterval : options.refetchInterval,
+      staleTime: realtimeEnabled ? 0 : options.staleTime,
+      gcTime: realtimeEnabled ? 1 * 60 * 1000 : options.gcTime, // 1 minute in realtime mode
     }),
-    [realtimeEnabled, realtimeInterval, baseOptions]
+    [realtimeEnabled, realtimeInterval, options]
   );
 
   return useProviderMetrics(params, queryOptions);

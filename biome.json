@@ -33,7 +33,8 @@
       "**/vitest.*.config.ts",
       ".claude/**",
       "**/.claude/**",
-      "**/settings.local.json"
+      "**/settings.local.json",
+      "**/*.md"
     ]
   },
   "formatter": {
