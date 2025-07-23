@@ -1,13 +1,27 @@
 {
   "startTime": "2025-07-19T13:05:06.095388",
   "filesModified": [
+    "/Users/ossieirondi/Projects/kamdental/dental-dashboard-db-sync-fixes/scripts/deployment/google-apps-script/deploy-hygienist-sync-v2/test-permissions.gs",
+    "/Users/ossieirondi/Projects/kamdental/dental-dashboard/CLAUDE.md",
+    "/Users/ossieirondi/Projects/kamdental/dental-dashboard-db-sync-fixes/scripts/deployment/google-apps-script/deploy-dentist-sync-v2.1-multi-provider/config.gs",
+    "/Users/ossieirondi/Projects/kamdental/dental-dashboard-db-sync-fixes/scripts/deployment/google-apps-script/deploy-hygienist-sync-v2/triggers.gs",
+    "/Users/ossieirondi/Projects/kamdental/dental-dashboard-db-sync-fixes/scripts/deployment/google-apps-script/deploy-hygienist-sync-v2/credentials.gs",
+    "/Users/ossieirondi/Projects/kamdental/dental-dashboard-db-sync-fixes/scripts/deployment/google-apps-script/deploy-hygienist-sync-v2/config.gs",
+    "/Users/ossieirondi/Projects/kamdental/dental-dashboard-db-sync-fixes/scripts/deployment/google-apps-script/deploy-hygienist-sync-v2/sync.gs",
+    "/Users/ossieirondi/Projects/kamdental/dental-dashboard-db-sync-fixes/scripts/deployment/google-apps-script/deploy-hygienist-sync-v2/setup.gs",
+    "/Users/ossieirondi/Projects/kamdental/dental-dashboard-db-sync-fixes/scripts/deployment/google-apps-script/deploy-dentist-sync-v2.1-multi-provider/mapping.gs",
+    "/Users/ossieirondi/Projects/kamdental/dental-dashboard-db-sync-fixes/scripts/deployment/google-apps-script/deploy-hygienist-sync-v2/mapping.gs",
+    "/Users/ossieirondi/Projects/kamdental/dental-dashboard-db-sync-fixes/scripts/deployment/google-apps-script/deploy-dentist-sync-v2.1-multi-provider/menu.gs",
     "/Users/ossieirondi/Projects/kamdental/dental-dashboard/.gitignore",
-    "/Users/ossieirondi/Projects/kamdental/dental-dashboard/CLAUDE.md"
+    "/Users/ossieirondi/Projects/kamdental/dental-dashboard-db-sync-fixes/scripts/deployment/google-apps-script/deploy-hygienist-sync-v2/utils.gs",
+    "/Users/ossieirondi/Projects/kamdental/dental-dashboard-db-sync-fixes/scripts/deployment/google-apps-script/deploy-dentist-sync-v2.1-multi-provider/sync.gs",
+    "/Users/ossieirondi/Projects/kamdental/dental-dashboard-db-sync-fixes/scripts/deployment/google-apps-script/deploy-hygienist-sync-v2/logging.gs",
+    "/Users/ossieirondi/Projects/kamdental/dental-dashboard-db-sync-fixes/scripts/deployment/google-apps-script/deploy-hygienist-sync-v2/menu.gs"
   ],
   "violations": [],
   "improvements": [],
   "statistics": {
-    "totalFiles": 2,
+    "totalFiles": 25,
     "totalViolations": 0,
     "blockedOperations": 0,
     "autoFixed": 0
