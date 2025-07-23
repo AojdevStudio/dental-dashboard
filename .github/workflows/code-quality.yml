@@ -122,7 +122,7 @@ jobs:
             git add .
             git commit -m "🤖 Auto-fix: Format code with Biome and Prettier
             
-            Co-authored-by: ${{ github.actor }} <${{ github.actor }}@users.noreply.github.com>"
+            Co-authored-by: $GITHUB_ACTOR <$GITHUB_ACTOR@users.noreply.github.com>"
             echo "has_fixes=true" >> $GITHUB_OUTPUT
           else
             echo "✅ No auto-fixable issues found"
