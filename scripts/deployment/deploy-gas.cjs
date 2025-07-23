@@ -79,7 +79,7 @@ const DEPLOYMENT_CONFIGS = {
 };
 
 // Base directory for Google Apps Scripts
-const GAS_BASE_DIR = path.join(__dirname, '..', 'scripts', 'google-apps-script');
+const GAS_BASE_DIR = path.join(__dirname, 'google-apps-script');
 
 class GASDeployment {
   constructor() {

@@ -3,20 +3,15 @@
  */
 function setupHygieneSync() {
   const functionName = 'setupHygieneSync';
-  const ss = SpreadsheetApp.openById(HYGIENE_SHEET_ID);
+  const ss = SpreadsheetApp.getActiveSpreadsheet();
   const ui = SpreadsheetApp.getUi();
 
   try {
     logToHygieneSheet_(functionName, 'START', null, null, null, 'Setup process initiated.');
-    Logger.log(`Starting ${functionName} for Sheet ID: ${HYGIENE_SHEET_ID}...`);
+    Logger.log(`Starting ${functionName} for Sheet ID: ${getHygieneSheetId()}...`);
 
-    // Check if HYGIENE_SHEET_ID is configured
-    if (!HYGIENE_SHEET_ID || HYGIENE_SHEET_ID === 'YOUR_HYGIENE_SHEET_ID_HERE') {
-      const errMsg = '❌ Error: HYGIENE_SHEET_ID is not configured in config.gs\n\nPlease edit config.gs and set your Google Sheet ID.';
-      Logger.log(errMsg);
-      ui.alert(errMsg);
-      return;
-    }
+    // Sheet ID is now dynamic - no need to check configuration
+    // getHygieneSheetId() will automatically get the current active spreadsheet
 
     // Ensure Log Sheet exists
     ensureLogSheet_();
@@ -84,7 +79,7 @@ function setupHygieneSync() {
     // Seed Missing UUIDs
     seedMissingUuids();
 
-    Logger.log(`${functionName} completed successfully. Triggers created for Sheet ID: ${HYGIENE_SHEET_ID}.`);
+    Logger.log(`${functionName} completed successfully. Triggers created for Sheet ID: ${getHygieneSheetId()}.`);
     logToHygieneSheet_(functionName, 'SUCCESS', null, null, null, 'Setup complete. Triggers created.');
     
     ui.alert('🎉 Hygiene Sync Setup Successful!\n\n✅ Credentials stored\n✅ Log sheet created\n✅ Triggers set up\n✅ UUIDs seeded\n\nYour hygiene data will now sync automatically!');

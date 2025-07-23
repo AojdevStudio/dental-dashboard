@@ -193,6 +193,18 @@ function parseHygieneRow_(row, mapping, monthTab, clinicId, providerId, rowIndex
             if (Number.isNaN(numericValue)) {
               numericValue = null;
             }
+            
+            // Cap variance_percentage to prevent database overflow (NUMERIC(5,4) = max ±9.9999)
+            if (mappedKey === 'variancePercentage' && numericValue !== null) {
+              if (numericValue > 9.9999) {
+                Logger.log(`Capping variance_percentage from ${numericValue} to 9.9999 for row ${rowIndex + 1}`);
+                numericValue = 9.9999;
+              } else if (numericValue < -9.9999) {
+                Logger.log(`Capping variance_percentage from ${numericValue} to -9.9999 for row ${rowIndex + 1}`);
+                numericValue = -9.9999;
+              }
+            }
+            
             record[supabaseFieldKey] = numericValue;
             if (numericValue === null && (mappedKey === 'verifiedProduction' || mappedKey === 'estimatedProduction')) {
               Logger.log(`parseHygieneRow_: Null numeric value for critical field '${mappedKey}' in '${monthTab}', row ${rowIndex !== undefined ? '#' + (rowIndex + 1) : '(unknown_row)'}. Original value: '${value}'`);

@@ -208,7 +208,7 @@ function testCredentialResolution_() {
  * @return {string} The extracted provider name
  */
 function testProviderNameExtraction() {
-  const ss = SpreadsheetApp.openById(HYGIENE_SHEET_ID);
+  const ss = SpreadsheetApp.getActiveSpreadsheet();
   const spreadsheetName = ss.getName();
   
   // Use the same extraction function as the mapping
@@ -233,7 +233,7 @@ function testProviderNameExtraction() {
     `Expected for this sync: "${HYGIENIST_SYNC_CONFIG.PROVIDER_INFO.name}"\n\n` +
     '📝 Note: In V2, provider IDs are resolved automatically\n' +
     'using external mappings instead of name extraction.',
-    ui.ButtonSet.OK
+    SpreadsheetApp.getUi().ButtonSet.OK
   );
   
   return providerName;
@@ -243,7 +243,7 @@ function testProviderNameExtraction() {
  * Test column mapping functionality
  */
 function testColumnMapping() {
-  const ss = SpreadsheetApp.openById(HYGIENE_SHEET_ID);
+  const ss = SpreadsheetApp.getActiveSpreadsheet();
   const sheets = ss.getSheets();
   
   let debugInfo = '🔍 HYGIENIST COLUMN MAPPING DEBUG\n\n';

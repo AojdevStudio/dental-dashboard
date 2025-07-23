@@ -314,23 +314,33 @@ function lookupProviderByCode_(providerCode, credentials) {
  */
 function lookupProviderByExternalId_(externalId, credentials) {
   try {
-    // Query the external_id_mappings table directly
-    const url = `${credentials.url}/rest/v1/external_id_mappings?external_identifier=eq.${encodeURIComponent(externalId)}&entity_type=eq.provider&is_active=eq.true&select=entity_id`;
+    // Use RPC function instead of direct table access
+    const url = `${credentials.url}/rest/v1/rpc/get_entity_id_by_external_mapping`;
+    
+    const payload = {
+      system_name: 'dentist_sync',
+      external_id_input: externalId,
+      entity_type_input: 'provider'
+    };
     
     const response = UrlFetchApp.fetch(url, {
-      method: 'GET',
+      method: 'POST',
       headers: {
         'Authorization': `Bearer ${credentials.key}`,
         'apikey': credentials.key,
         'Content-Type': 'application/json'
       },
+      payload: JSON.stringify(payload),
       muteHttpExceptions: true
     });
 
     if (response.getResponseCode() === 200) {
-      const data = JSON.parse(response.getContentText());
-      if (data && data.length > 0) {
-        return data[0].entity_id;
+      const result = JSON.parse(response.getContentText());
+      // PostgreSQL functions return the result directly
+      if (result && typeof result === 'string') {
+        return result;
+      } else if (result && result.length > 0) {
+        return result[0];
       }
     }
 
@@ -447,38 +457,38 @@ function createProviderMapping_(providerDetection, credentials) {
       return null;
     }
 
-    const mappingData = {
-      external_system: 'dentist_sync',
-      external_identifier: externalId,
-      entity_type: 'provider',
-      entity_id: providerId,
-      is_active: true,
-      notes: `Auto-created mapping for ${providerDetection.displayName} (${providerDetection.method} detection)`,
-      created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString()
+    // Use RPC function to upsert external mapping
+    const url = `${credentials.url}/rest/v1/rpc/upsert_external_mapping`;
+    
+    const payload = {
+      system_name: 'dentist_sync',
+      external_id_input: externalId,
+      entity_type_input: 'provider',
+      entity_id_input: providerId,
+      notes_input: `Auto-created mapping for ${providerDetection.displayName} (${providerDetection.method} detection)`
     };
-
-    const url = `${credentials.url}/rest/v1/external_id_mappings`;
     
     const response = UrlFetchApp.fetch(url, {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${credentials.key}`,
         'apikey': credentials.key,
-        'Content-Type': 'application/json',
-        'Prefer': 'return=minimal'
+        'Content-Type': 'application/json'
       },
-      payload: JSON.stringify(mappingData),
+      payload: JSON.stringify(payload),
       muteHttpExceptions: true
     });
 
-    if (response.getResponseCode() === 201) {
-      Logger.log(`✅ Successfully created external mapping: ${externalId} → ${providerId}`);
-      return providerId;
-    } else {
-      Logger.log(`❌ Failed to create external mapping. Status: ${response.getResponseCode()}, Response: ${response.getContentText()}`);
-      return null;
+    if (response.getResponseCode() === 200) {
+      const result = JSON.parse(response.getContentText());
+      if (result === true || result === 'true' || result === 't') {
+        Logger.log(`✅ Successfully created external mapping: ${externalId} → ${providerId}`);
+        return providerId;
+      }
     }
+    
+    Logger.log(`❌ Failed to create external mapping. Status: ${response.getResponseCode()}, Response: ${response.getContentText()}`);
+    return null;
 
   } catch (error) {
     Logger.log(`❌ Error creating provider mapping: ${error.message}`);
@@ -516,6 +526,121 @@ function generateExternalId_(providerDetection) {
   } catch (error) {
     Logger.log(`Error generating external ID: ${error.message}`);
     return null;
+  }
+}
+
+/**
+ * Parse a row of dentist data into multiple location-specific records
+ * @param {array} row - Array of cell values from the sheet
+ * @param {object} mapping - Column mapping from mapHeaders_
+ * @param {string} monthTab - Name of the month tab (e.g., "Nov-24")
+ * @param {object} credentials - Supabase credentials for provider lookup
+ * @param {object} providerDetection - Pre-detected provider info (optional)
+ * @return {array} Array of dentist record objects (one per location with production)
+ */
+function parseDentistRowMultiLocation_(row, mapping, monthTab, credentials = null, providerDetection = null) {
+  const records = [];
+  
+  try {
+    // Extract date
+    const dateValue = mapping.date !== -1 ? row[mapping.date] : null;
+    if (!dateValue) return records;
+
+    const date = parseDateForSupabase_(dateValue, Session.getScriptTimeZone());
+    if (!date) return records;
+
+    // Validate date is not in the future
+    const today = new Date();
+    const recordDate = new Date(date);
+    if (recordDate > today) {
+      Logger.log(`Skipping future date: ${date}`);
+      return records;
+    }
+
+    // Extract production values for each location
+    const humbleProduction = mapping.verifiedProductionHumble !== -1 ? 
+      parseFloat(cleanNumeric_(row[mapping.verifiedProductionHumble])) || 0 : 0;
+    
+    const baytownProduction = mapping.verifiedProductionBaytown !== -1 ? 
+      parseFloat(cleanNumeric_(row[mapping.verifiedProductionBaytown])) || 0 : 0;
+
+    // Extract other numeric values
+    const totalProduction = mapping.totalProduction !== -1 ? 
+      parseFloat(cleanNumeric_(row[mapping.totalProduction])) || null : null;
+    
+    const monthlyGoal = mapping.monthlyGoal !== -1 ? 
+      parseFloat(cleanNumeric_(row[mapping.monthlyGoal])) || null : null;
+    
+    const productionPerHour = mapping.productionPerHour !== -1 ? 
+      parseFloat(cleanNumeric_(row[mapping.productionPerHour])) || null : null;
+    
+    const avgDailyProduction = mapping.avgDailyProduction !== -1 ? 
+      parseFloat(cleanNumeric_(row[mapping.avgDailyProduction])) || null : null;
+
+    // If providerDetection is not passed in, detect it
+    if (!providerDetection) {
+      providerDetection = detectProviderEnhanced_(getDentistSheetId());
+    }
+    
+    // Use enhanced provider ID lookup
+    let providerId = null;
+    if (credentials && providerDetection.success) {
+      providerId = lookupProviderId_(providerDetection, credentials);
+    }
+
+    // Common data for both records
+    const baseRecord = {
+      month_tab: monthTab,
+      date: date,
+      monthly_goal: monthlyGoal,
+      production_per_hour: productionPerHour,
+      avg_daily_production: avgDailyProduction,
+      provider_name: providerDetection.displayName,
+      provider_id: providerId,
+      provider_code: providerDetection.providerCode,
+      provider_confidence: providerDetection.confidence,
+      detection_method: providerDetection.method,
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString()
+    };
+
+    // Create Humble record if has production
+    if (humbleProduction > 0 || (humbleProduction === 0 && baytownProduction === 0)) {
+      records.push({
+        ...baseRecord,
+        id: Utilities.getUuid(),
+        clinic_id: PRODUCTION_CLINIC_IDS.HUMBLE,
+        verified_production_humble: humbleProduction,
+        verified_production_baytown: 0,
+        total_production: humbleProduction
+      });
+    }
+
+    // Create Baytown record if has production
+    if (baytownProduction > 0) {
+      records.push({
+        ...baseRecord,
+        id: Utilities.getUuid(),
+        clinic_id: PRODUCTION_CLINIC_IDS.BAYTOWN,
+        verified_production_humble: 0,
+        verified_production_baytown: baytownProduction,
+        total_production: baytownProduction
+      });
+    }
+
+    // Log provider detection results
+    if (records.length > 0) {
+      Logger.log(`🔍 Created ${records.length} location-specific records for ${date}`);
+      Logger.log(`  Humble: $${humbleProduction}, Baytown: $${baytownProduction}`);
+      Logger.log(`  Provider: ${providerDetection.displayName} (${providerId || 'Not found'})`);
+    }
+
+    return records;
+
+  } catch (error) {
+    Logger.log(`Error parsing dentist row: ${error.message}`);
+    Logger.log(`Stack trace: ${error.stack}`);
+    return records;
   }
 }
 

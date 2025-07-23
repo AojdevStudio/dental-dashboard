@@ -1,8 +1,17 @@
 // --- Hygienist Production Sync Configuration V2 (Resilient) ---
 // Updated to use external mapping system for database reseed resilience
 
-/** @const {string} ID of the Google Spreadsheet containing hygienist data. CHANGE THIS! */
-const HYGIENE_SHEET_ID = 'HYGIENE_SPREADSHEET_ID_HERE';
+/** 
+ * DYNAMIC SHEET ID - Gets the current active spreadsheet ID
+ * This allows the same script to work for any hygienist's spreadsheet
+ * NO MORE HARDCODED SHEET IDs!
+ */
+function getHygieneSheetId() {
+  return SpreadsheetApp.getActiveSpreadsheet().getId();
+}
+
+// Legacy hardcoded ID for reference only (DO NOT USE)
+// const HYGIENE_SHEET_ID_LEGACY = 'HYGIENE_SPREADSHEET_ID_HERE';
 
 /** @const {string} Name of the sheet tab for logging sync operations. */
 const HYGIENE_LOG_TAB_NAME = 'Hygiene-Sync-Log';

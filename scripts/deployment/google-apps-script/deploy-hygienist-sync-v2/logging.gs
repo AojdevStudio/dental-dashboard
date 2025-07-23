@@ -9,7 +9,7 @@
  */
 function logToHygieneSheet_(functionName, status, rowsProcessed, sheetsProcessed, duration, message) {
   try {
-    const ss = SpreadsheetApp.openById(HYGIENE_SHEET_ID);
+    const ss = SpreadsheetApp.getActiveSpreadsheet();
     let logSheet = ss.getSheetByName(HYGIENE_LOG_TAB_NAME);
     
     // Create log sheet if it doesn't exist
@@ -95,7 +95,7 @@ function logToHygieneSheet_(functionName, status, rowsProcessed, sheetsProcessed
  */
 function ensureLogSheet_() {
   try {
-    const ss = SpreadsheetApp.openById(HYGIENE_SHEET_ID);
+    const ss = SpreadsheetApp.getActiveSpreadsheet();
     let logSheet = ss.getSheetByName(HYGIENE_LOG_TAB_NAME);
     
     if (!logSheet) {
@@ -125,7 +125,7 @@ function clearOldLogs() {
   
   if (response === ui.Button.YES) {
     try {
-      const ss = SpreadsheetApp.openById(HYGIENE_SHEET_ID);
+      const ss = SpreadsheetApp.getActiveSpreadsheet();
       const logSheet = ss.getSheetByName(HYGIENE_LOG_TAB_NAME);
       
       if (!logSheet) {
@@ -157,7 +157,7 @@ function clearOldLogs() {
  */
 function exportLogsAsCsv() {
   try {
-    const ss = SpreadsheetApp.openById(HYGIENE_SHEET_ID);
+    const ss = SpreadsheetApp.getActiveSpreadsheet();
     const logSheet = ss.getSheetByName(HYGIENE_LOG_TAB_NAME);
     
     if (!logSheet) {

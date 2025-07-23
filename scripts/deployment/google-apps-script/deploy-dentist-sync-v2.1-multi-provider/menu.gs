@@ -41,6 +41,7 @@ function onOpen() {
     .addSubMenu(ui.createMenu('▶️ Sync Operations')
       .addItem('Sync All Data', 'syncAllDentistData')
       .addItem('Sync Current Sheet', 'syncCurrentSheetData')
+      .addItem('Test Sync (First 3 Rows)', 'testDentistSync')
       .addSeparator()
       .addItem('Clear All Logs', 'clearAllLogs_'))
     

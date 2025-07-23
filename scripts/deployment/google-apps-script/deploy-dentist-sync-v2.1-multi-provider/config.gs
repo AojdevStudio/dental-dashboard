@@ -22,6 +22,12 @@ const SUPABASE_TABLE_NAME = 'dentist_production';
 /** @const {number} Number of rows to process in each batch API call to Supabase. */
 const SUPABASE_BATCH_SIZE = 100;
 
+/** @const {object} Production database clinic IDs for each location. */
+const PRODUCTION_CLINIC_IDS = {
+  HUMBLE: 'cmc3jcrhe0000i2ht9ymqtmzb',
+  BAYTOWN: 'cmc3jcrs20001i2ht5sn89v66'
+};
+
 /** @const {number} Maximum number of retries for API calls on rate limits (429). */
 const MAX_RETRIES = 3;
 

@@ -9,15 +9,10 @@ function syncAllHygieneData() {
   const startTime = Date.now();
 
   logToHygieneSheet_(functionName, 'START', 0, 0, null, 'Full sync initiated.');
-  Logger.log(`Starting ${functionName} for Sheet ID: ${HYGIENE_SHEET_ID}...`);
+  Logger.log(`Starting ${functionName} for Sheet ID: ${getHygieneSheetId()}...`);
 
-  // Check configuration
-  if (!HYGIENE_SHEET_ID || HYGIENE_SHEET_ID === 'YOUR_HYGIENE_SHEET_ID_HERE') {
-    const errMsg = 'Error: HYGIENE_SHEET_ID constant is not set in config.gs';
-    Logger.log(errMsg);
-    logToHygieneSheet_(functionName, 'ERROR', 0, 0, null, errMsg);
-    return;
-  }
+  // Sheet ID is now dynamic - no need to check configuration
+  // getHygieneSheetId() will automatically get the current active spreadsheet
 
   // Check credentials
   const credentials = getSupabaseCredentials_();
@@ -28,7 +23,7 @@ function syncAllHygieneData() {
   }
 
   try {
-    const ss = SpreadsheetApp.openById(HYGIENE_SHEET_ID);
+    const ss = SpreadsheetApp.openById(getHygieneSheetId());
     const sheets = ss.getSheets();
 
     // Process each sheet that matches month tab patterns
