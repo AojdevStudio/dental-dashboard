@@ -36,6 +36,21 @@ run_check() {
   fi
 }
 
+# Function to check for null safety compliance
+check_null_safety() {
+  local violations=$(pnpm biome check --reporter=json 2>/dev/null | jq -r '.diagnostics[] | select(.rule.name == "noNonNullAssertion") | "\(.location.path):\(.location.span.start.line) - \(.message)"' 2>/dev/null || echo "")
+  
+  if [ -z "$violations" ]; then
+    echo -e "${GREEN}✅ Null safety compliance verified${NC}"
+    return 0
+  else
+    echo -e "${RED}❌ Non-null assertions detected! This violates our null safety policy.${NC}"
+    echo "Please fix these violations before merging:"
+    echo "$violations"
+    return 1
+  fi
+}
+
 # Start timer
 START_TIME=$(date +%s)
 
@@ -48,7 +63,7 @@ run_check "Dependency Installation" "pnpm install --frozen-lockfile --prefer-off
 run_check "Biome Linting" "pnpm biome check ."
 
 # 3. Non-null assertion check
-run_check "Null Safety Compliance" "! (pnpm biome check --reporter=json 2>/dev/null | jq -e '.diagnostics[] | select(.rule.name == \"noNonNullAssertion\")' > /dev/null 2>&1)"
+run_check "Null Safety Compliance" "check_null_safety"
 
 # 4. TypeScript type checking
 run_check "TypeScript Type Check" "pnpm typecheck"
