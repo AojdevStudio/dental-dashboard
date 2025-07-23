@@ -37,7 +37,8 @@ function onOpen() {
       .addItem('Test Provider Extraction', 'testProviderNameExtraction')
       .addSeparator()
       .addItem('Test Sync Utilities', 'testSyncUtilities')
-      .addItem('Debug External Mappings', 'debugExternalMappings'))
+      .addItem('Debug External Mappings', 'debugExternalMappings')
+      .addItem('Test External Mapping Permissions', 'testExternalMappingPermissions'))
     
     .addSubMenu(ui.createMenu('⚙️ Advanced')
       .addItem('Setup Triggers', 'setupHygieneTriggers')
@@ -232,7 +233,7 @@ function validateDataIntegrity() {
     
     // 4. Test column mapping on sample sheets
     validations++;
-    const ss = SpreadsheetApp.openById(HYGIENE_SHEET_ID);
+    const ss = SpreadsheetApp.getActiveSpreadsheet();
     const sheets = ss.getSheets();
     let foundValidSheet = false;
     

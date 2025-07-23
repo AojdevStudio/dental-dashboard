@@ -1,4 +1,97 @@
 /**
+ * Test sync function - processes just the first few rows for debugging
+ */
+function testDentistSync() {
+  const functionName = 'testDentistSync';
+  const ui = SpreadsheetApp.getUi();
+  
+  Logger.log(`Starting ${functionName}...`);
+  
+  try {
+    // Get credentials first
+    const credentials = getSupabaseCredentials_();
+    if (!credentials) {
+      ui.alert('Error', 'No credentials available. Please run Setup first.', ui.ButtonSet.OK);
+      return;
+    }
+    
+    // Log credential info (without sensitive data)
+    Logger.log(`Credentials check: has URL=${!!credentials.url}, has key=${!!credentials.key}`);
+    
+    // Get the active sheet
+    const sheet = SpreadsheetApp.getActiveSheet();
+    const sheetName = sheet.getName();
+    
+    Logger.log(`Testing with sheet: ${sheetName}`);
+    
+    // Get headers and mapping
+    const headers = getSheetHeaders_(sheet);
+    const mapping = mapHeaders_(headers);
+    
+    Logger.log(`Header mapping: ${JSON.stringify(mapping)}`);
+    
+    // Check if we have required columns
+    if (mapping.date === -1) {
+      ui.alert('Error', 'No date column found in sheet.', ui.ButtonSet.OK);
+      return;
+    }
+    
+    // Get provider detection
+    const providerDetection = detectProviderEnhanced_(getDentistSheetId());
+    Logger.log(`Provider detection: ${JSON.stringify(providerDetection)}`);
+    
+    // Get first few data rows
+    const data = sheet.getDataRange().getValues();
+    let headerRowIndex = -1;
+    
+    for (let i = 0; i < Math.min(5, data.length); i++) {
+      if (data[i].some(cell => String(cell).toLowerCase().includes('date'))) {
+        headerRowIndex = i;
+        break;
+      }
+    }
+    
+    if (headerRowIndex === -1) {
+      ui.alert('Error', 'No header row found.', ui.ButtonSet.OK);
+      return;
+    }
+    
+    // Process just first 3 data rows
+    const testRows = data.slice(headerRowIndex + 1, headerRowIndex + 4);
+    const records = [];
+    
+    for (const row of testRows) {
+      if (!row[mapping.date]) continue;
+      
+      const locationRecords = parseDentistRowMultiLocation_(row, mapping, sheetName, credentials, providerDetection);
+      if (locationRecords && locationRecords.length > 0) {
+        records.push(...locationRecords);
+      }
+    }
+    
+    Logger.log(`Created ${records.length} test records`);
+    
+    if (records.length > 0) {
+      // Try to sync
+      const success = upsertBatchToSupabase_(records, credentials);
+      
+      if (success) {
+        ui.alert('Success', `Test sync completed! Synced ${records.length} records.`, ui.ButtonSet.OK);
+      } else {
+        ui.alert('Error', 'Test sync failed. Check logs for details.', ui.ButtonSet.OK);
+      }
+    } else {
+      ui.alert('Info', 'No records to sync in test rows.', ui.ButtonSet.OK);
+    }
+    
+  } catch (error) {
+    Logger.log(`Test sync error: ${error.message}`);
+    Logger.log(`Stack: ${error.stack}`);
+    ui.alert('Error', `Test sync failed: ${error.message}`, ui.ButtonSet.OK);
+  }
+}
+
+/**
  * Main sync function - syncs all hygiene data from all month tabs to Supabase
  * 
  * PERFORMANCE OPTIMIZATION: Provider detection is now done once per sheet,
@@ -116,18 +209,23 @@ function syncSheetData_(sheet, monthTab) {
           continue;
         }
 
-        // Pass the already-detected provider info to the parsing function
-        const record = parseDentistRow_(row, mapping, monthTab, credentials.clinicId, credentials, providerDetection);
-        if (record) {
-          records.push(record);
+        // Use the new multi-location parsing function
+        const locationRecords = parseDentistRowMultiLocation_(row, mapping, monthTab, credentials, providerDetection);
+        if (locationRecords && locationRecords.length > 0) {
+          records.push(...locationRecords);
         }
       }
 
       if (records.length > 0) {
+        // Log batch info for debugging
+        Logger.log(`Processing batch with ${records.length} location-specific records`);
+        
         // Call the simplified batch upsert function
         const success = upsertBatchToSupabase_(records, credentials);
         if (success) {
           processedRows += records.length;
+        } else {
+          Logger.log(`Failed to upsert batch of ${records.length} records`);
         }
       }
     }
@@ -176,17 +274,20 @@ function syncSingleRow_(sheet, rowNumber) {
     // Get provider info ONCE for this single row operation
     const providerDetection = detectProviderEnhanced_(getDentistSheetId());
     
-    const record = parseDentistRow_(rowValues, mapping, sheetName, credentials.clinicId, credentials, providerDetection);
-    if (!record) {
-      Logger.log(`Could not parse row ${rowNumber} from ${sheetName}.`);
+    // Use multi-location parsing for single row too
+    const records = parseDentistRowMultiLocation_(rowValues, mapping, sheetName, credentials, providerDetection);
+    if (!records || records.length === 0) {
+      Logger.log(`Could not parse row ${rowNumber} from ${sheetName} or no production data.`);
       return false;
     }
 
-    // Upsert as a batch of one
-    const success = upsertBatchToSupabase_([record], credentials);
+    Logger.log(`Single row sync: Created ${records.length} location-specific records for row ${rowNumber}`);
+
+    // Upsert the location-specific records
+    const success = upsertBatchToSupabase_(records, credentials);
     
     if (success) {
-      logToDentistSheet_('syncSingleRow', 'SUCCESS', 1, 0, null, `Row ${rowNumber} from ${sheetName} synced`);
+      logToDentistSheet_('syncSingleRow', 'SUCCESS', records.length, 0, null, `Row ${rowNumber} from ${sheetName} synced (${records.length} locations)`);
     } else {
       logToDentistSheet_('syncSingleRow', 'ERROR', 0, 0, null, `Failed to sync row ${rowNumber} from ${sheetName}`);
     }
@@ -227,6 +328,15 @@ function upsertBatchToSupabase_(records, credentials) {
     };
 
     Logger.log(`Attempting to upsert ${records.length} records to ${SUPABASE_TABLE_NAME} with 'merge-duplicates'.`);
+    
+    // Log first record for debugging (without sensitive data)
+    if (records.length > 0) {
+      const firstRecord = records[0];
+      Logger.log(`Sample record: date=${firstRecord.date}, clinic_id=${firstRecord.clinic_id}, ` +
+                 `humble_prod=${firstRecord.verified_production_humble}, baytown_prod=${firstRecord.verified_production_baytown}, ` +
+                 `provider=${firstRecord.provider_name}`);
+    }
+    
     const response = UrlFetchApp.fetch(url, payload);
     const responseCode = response.getResponseCode();
     const responseText = response.getContentText();

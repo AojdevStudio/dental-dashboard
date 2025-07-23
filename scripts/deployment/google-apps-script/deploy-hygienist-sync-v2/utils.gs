@@ -11,7 +11,7 @@ function seedMissingUuids() {
   let totalSeeded = 0;
   
   try {
-    const ss = SpreadsheetApp.openById(HYGIENE_SHEET_ID);
+    const ss = SpreadsheetApp.getActiveSpreadsheet();
     const sheets = ss.getSheets();
     
     for (const sheet of sheets) {
@@ -104,7 +104,7 @@ function validateSheetStructure() {
   let hasIssues = false;
   
   try {
-    const ss = SpreadsheetApp.openById(HYGIENE_SHEET_ID);
+    const ss = SpreadsheetApp.getActiveSpreadsheet();
     const sheets = ss.getSheets();
     
     for (const sheet of sheets) {
@@ -293,7 +293,7 @@ function createDataBackup() {
   
   if (response === ui.Button.YES) {
     try {
-      const ss = SpreadsheetApp.openById(HYGIENE_SHEET_ID);
+      const ss = SpreadsheetApp.getActiveSpreadsheet();
       const timestamp = Utilities.formatDate(new Date(), Session.getScriptTimeZone(), 'yyyyMMdd_HHmmss');
       let backedUpSheets = 0;
       

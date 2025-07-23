@@ -14,7 +14,7 @@ function onEditHygieneSync(e) {
     }
 
     // Only process if this is the hygiene sheet
-    if (!e || !e.source || e.source.getId() !== HYGIENE_SHEET_ID) {
+    if (!e || !e.source || e.source.getId() !== getHygieneSheetId()) {
       return;
     }
 
@@ -118,7 +118,7 @@ function testOnEditTrigger() {
   
   // Create a mock edit event
   const mockEvent = {
-    source: SpreadsheetApp.openById(HYGIENE_SHEET_ID),
+    source: SpreadsheetApp.getActiveSpreadsheet(),
     range: sheet.getRange('A2') // Simulate editing row 2
   };
   
