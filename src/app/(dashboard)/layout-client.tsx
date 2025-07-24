@@ -4,7 +4,7 @@ import type React from 'react';
 
 import { AuthGuard } from '@/components/auth/auth-guard';
 import { DashboardLayout as Layout } from '@/components/common/dashboard-layout';
-import { Providers } from './providers';
+import { Providers } from './dashboard-providers';
 
 interface DashboardLayoutProps {
   children: React.ReactNode;
