@@ -1,4 +1,4 @@
-import { type Page, test as base } from '@playwright/test';
+import { type Page, test as base, expect } from '@playwright/test';
 
 /**
  * Mock Authentication Fixture
@@ -60,3 +60,4 @@ export const mockTest = base.extend<MockAuthFixtures>({
     await use(page);
   },
 });
+export { expect };

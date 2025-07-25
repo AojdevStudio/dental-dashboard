@@ -77,18 +77,20 @@ async function testCompleteAuth() {
     console.log('\n3️⃣ Checking user clinic roles...');
     const userRoles = await prisma.userClinicRole.findMany({
       where: { userId: dbUser.id },
-      include: {
-        clinic: true,
-      },
     });
 
     if (userRoles.length === 0) {
       console.log('⚠️  No clinic roles found');
     } else {
       console.log('✅ User clinic roles:');
-      userRoles.forEach(role => {
-        console.log(`   - ${role.role} at ${role.clinic.name}`);
-      });
+      // Get clinic names separately since the relation is commented out
+      for (const role of userRoles) {
+        const clinic = await prisma.clinic.findUnique({
+          where: { id: role.clinicId },
+          select: { name: true },
+        });
+        console.log(`   - ${role.role} at ${clinic?.name || 'Unknown Clinic'}`);
+      }
     }
 
     // Step 4: Test if the user would pass the login checks
