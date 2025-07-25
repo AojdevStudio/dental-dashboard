@@ -1,737 +1,584 @@
-# Project Overview: Dental Dashboard
+# Dental Dashboard - Multi-Tenant Practice Insights Platform
 
-🚧 **Status: In Progress** 🚧
+[![Next.js](https://img.shields.io/badge/Next.js-15.3.2-black?logo=next.js)](https://nextjs.org/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.8.3-blue?logo=typescript)](https://www.typescriptlang.org/)
+[![Supabase](https://img.shields.io/badge/Supabase-PostgreSQL-green?logo=supabase)](https://supabase.com/)
+[![Playwright](https://img.shields.io/badge/Playwright-E2E%20Testing-orange?logo=playwright)](https://playwright.dev/)
+[![Prisma](https://img.shields.io/badge/Prisma-6.12.0-2D3748?logo=prisma)](https://www.prisma.io/)
 
-*This document provides a comprehensive overview of the Dental Dashboard project, compiled from architectural, developer, and product management perspectives. It is intended to be a living document, updated as the project evolves.*
+> **A comprehensive multi-tenant dental practice insights dashboard providing real-time KPI tracking, data visualization, and Google Sheets integration for dental clinics.**
 
-## 1. Introduction
+## 🎯 Project Overview
 
--   **Purpose of this document:** To serve as a central knowledge base for understanding the Dental Dashboard's architecture, development practices, product goals, and overall structure. It aims to onboard new team members, align existing ones, and guide development efforts.
--   **Brief overview of the Dental Dashboard application:** The Dental Practice Insights Dashboard is a Next.js application designed to provide comprehensive data visualization and Key Performance Indicator (KPI) tracking for dental clinics. It aims to offer an intuitive and data-rich platform for dental practices to monitor performance, manage goals, and gain actionable insights from various data sources. The development is notably assisted by an AI-driven "Task Master CLI".
+The Dental Dashboard is a production-grade Next.js application designed to empower dental practices with actionable data insights. Built with a focus on multi-tenancy, security, and performance, it provides comprehensive analytics and KPI tracking for dental clinic owners, practice managers, and healthcare providers.
 
-## 2. Product Manager Perspective
+### Key Features
+- 📊 **Real-time Analytics** - Live KPI tracking and performance metrics
+- 🏥 **Multi-Clinic Support** - Secure multi-tenant architecture with Row Level Security (RLS)
+- 📈 **Provider Performance** - Individual dentist and hygienist performance tracking
+- 🔗 **Google Sheets Integration** - Automated data synchronization from practice spreadsheets
+- 📱 **Responsive Design** - Mobile-first design with accessibility compliance
+- 🔐 **Enterprise Security** - Supabase authentication with comprehensive access controls
+- 🧪 **Comprehensive Testing** - Unit, integration, and E2E test coverage with Playwright
 
--   **2.1. Vision & Mission:** 
-    -   **Vision:** To empower dental practices with accessible, actionable data insights, enabling them to optimize operations, improve patient care, and achieve business growth.
-    -   **Mission:** To deliver a user-friendly, comprehensive dashboard that seamlessly integrates various data sources, visualizes key performance indicators, and facilitates goal tracking for dental clinics.
--   **2.2. Target Audience:** Dental clinic owners, practice managers, and administrative staff who are responsible for monitoring clinic performance, making data-driven decisions, and managing operational goals.
--   **2.3. Core Features & Functionality (based on `project-structure.md` and `README.md`):
-    *   **Dashboard:** Customizable widgets displaying key metrics (financial, patient, appointments, providers, calls).
-    *   **Integrations:** Google Sheets for data input, with potential for other data sources.
-    *   **Goal Management:** Creating, tracking, and visualizing progress towards practice-specific goals.
-    *   **Reporting:** Generating and exporting reports (PDF, CSV).
-    *   **Settings:** Management of clinic details, users, and providers.
-    *   **Authentication:** Secure user login and registration.
--   **2.4. Value Proposition:** Provides dental practices with a centralized, easy-to-understand view of their performance, replacing manual data compilation and analysis. It helps identify trends, track progress against goals, and make informed decisions to improve efficiency and profitability.
--   **2.5. User Stories (Examples - *to be expanded*):
-    *   As a Practice Manager, I want to see a daily overview of key financial metrics (e.g., production, collection) so that I can quickly assess the clinic's financial health.
-    *   As a Clinic Owner, I want to set monthly patient acquisition goals and track progress so that I can measure the effectiveness of marketing campaigns.
-    *   As an Administrator, I want to connect our Google Sheet containing appointment data so that it automatically syncs with the dashboard, reducing manual data entry.
+## 🏗️ Technology Stack
 
-## 3. Software Architect Perspective
+### Frontend
+- **Framework**: [Next.js 15.3.2](https://nextjs.org/) with App Router and Turbopack
+- **Language**: TypeScript 5.8.3 with strict mode
+- **UI Library**: [Shadcn/ui](https://ui.shadcn.com/) with Radix UI primitives
+- **Styling**: [Tailwind CSS 4.1.11](https://tailwindcss.com/) with PostCSS
+- **Icons**: Lucide React 0.510.0
+- **Charts**: Recharts 2.15.4 for data visualization
+- **Animation**: Framer Motion 12.23.6
+- **State Management**: TanStack Query 5.83.0, Zustand 5.0.6
 
--   **3.1. System Architecture Overview:**
-    -   **High-level Diagram:**
-        ```mermaid
-        graph TD
-            User[End User] -->|Browser| Frontend[Next.js Frontend]
-            Frontend -->|API Calls| Backend[Next.js API Routes]
-            Frontend -->|Static Assets, SSR/SSG| NextJSServer[Next.js Server]
-            Backend -->|ORM| Prisma[Prisma ORM]
-            Backend -->|Direct Calls/SDK| Supabase[Supabase BaaS]
-            Prisma --> Database["(Supabase PostgreSQL)"]
-            Supabase --> Database
-            Supabase --> Auth[Supabase Auth]
-            Supabase --> Storage[Supabase Storage]
-            Supabase --> EdgeFunctions[Supabase Edge Functions]
-            Backend -->|External API| GoogleSheets[Google Sheets API]
+### Backend & Database
+- **Runtime**: Node.js with Next.js API Routes
+- **Database**: PostgreSQL via [Supabase](https://supabase.com/)
+- **ORM**: [Prisma 6.12.0](https://www.prisma.io/) with type-safe queries
+- **Authentication**: Supabase Auth with SSR support
+- **File Storage**: Supabase Storage
+- **Real-time**: Supabase Realtime subscriptions
 
-            subgraph "Client-Side (Browser)"
-                Frontend
-            end
+### Development & Testing
+- **Package Manager**: pnpm 10.12.4
+- **Code Quality**: [Biome 1.9.4](https://biomejs.dev/) for linting and formatting
+- **Testing**: 
+  - Unit/Integration: Vitest 3.2.4 with jsdom
+  - E2E Testing: Playwright 1.54.1 with multi-browser support
+  - Cloud Testing: Branch database testing with .env.test
+- **Type Checking**: TypeScript compiler with strict null checks
+- **Pre-commit**: Husky 9.1.7 with automated quality checks
 
-            subgraph "Cloud Services"
-                Supabase
-                GoogleSheets
-            end
+### External Integrations
+- **Google APIs**: Google Sheets API, Google Drive API
+- **Authentication**: Google OAuth 2.0 integration
+- **AI Services**: Anthropic Claude, OpenAI (for development tooling)
+- **Monitoring**: Winston 3.17.0 for structured logging
 
-            subgraph "Server-Side (Vercel/Host)"
-                NextJSServer
-                Backend
-                Prisma
-            end
-        ```
-    -   **Frontend:** Next.js (App Router) application running in the browser, responsible for UI rendering and user interaction. Uses Server Components for data fetching and client components for interactivity.
-    -   **Backend:** Next.js API Routes handle business logic, data processing, and communication with external services. Supabase provides backend-as-a-service functionalities including database, authentication, and potentially edge functions.
-    -   **Database:** PostgreSQL managed by Supabase, accessed via Prisma ORM for type-safe queries.
-    -   **External Services:** Google Sheets API for data integration, Anthropic/OpenAI for AI-assisted development workflows (Task Master CLI) and potentially in-app AI features.
+### Deployment & Infrastructure
+- **Hosting**: Vercel (Next.js optimized)
+- **Database**: Supabase managed PostgreSQL
+- **CDN**: Vercel Edge Network
+- **Environment**: Environment-specific configurations (.env files)
 
--   **3.2. Technology Stack (Primary):
-    *   **Framework:** Next.js 15.3.2 (App Router, Turbopack for dev)
-    *   **Language:** TypeScript (version 5.8.3)
-    *   **Backend as a Service (BaaS):** Supabase (PostgreSQL, Auth, Storage, Edge Functions)
-    *   **ORM:** Prisma 6.8.2
-    *   **UI Libraries:** React 19.1.0, Shadcn UI, Radix UI Primitives
-    *   **Styling:** Tailwind CSS 4.1.8, PostCSS
-    *   **State Management:** Next.js Server Components, React Context (client-side UI), Zustand, TanStack React Query / SWR
-    *   **Forms:** React Hook Form 7.56.4, Zod 3.25.36 (validation)
-    *   **Charting:** Recharts 2.15.3
-    *   **Icons:** Lucide React 0.510.0
-    *   **Animations:** Framer Motion 12.15.0
-    *   **API SDKs:** `@googleapis/drive`, `@googleapis/sheets`, `@anthropic-ai/sdk`, `openai`
-    *   **Testing:** Vitest 3.1.4
-    *   **Linting/Formatting:** Biome 1.9.4
-    *   **Package Management:** pnpm 10.10.0
-    *   **Logging:** Winston 3.17.0
+## 🎯 Business Context
 
--   **3.3. Frontend Architecture:**
-    *   **Next.js App Router:** Located in `src/app/`. Organizes the application by routes, with layouts, pages, loading states, and error boundaries.
-        *   Route Groups: `(auth)` for authentication pages, `(dashboard)` for main application sections.
-    *   **Component Structure:** Located in `src/components/`. 
-        *   `ui/`: Reusable, generic UI elements (likely from Shadcn UI).
-        *   `dashboard/`: Specific components related to dashboard features.
-        *   `common/`: Shared components like navigation, sidebar, header.
-    *   **State Management:** 
-        *   Primarily server-driven using Next.js Server Components for data fetching.
-        *   React Context for localized client-side UI state.
-        *   Zustand for global client-side state if needed.
-        *   TanStack React Query or SWR for managing server state, caching, and data synchronization on the client-side for dynamic interactions.
-    *   **Styling:** Tailwind CSS for utility-first styling, with `tailwind-merge` and `clsx` for managing conditional classes. Radix UI provides unstyled, accessible primitives, and Shadcn UI builds upon these with pre-styled components.
+### Vision & Mission
+- **Vision**: Empower dental practices with accessible, actionable data insights to optimize operations and improve patient care
+- **Mission**: Deliver a user-friendly, comprehensive dashboard that seamlessly integrates data sources and facilitates evidence-based decision making
 
--   **3.4. Backend Architecture:**
-    *   **API Routes:** Next.js API routes located in `src/app/api/` handle client requests, business logic, and interactions with the database and external services.
-    *   **API Route Structure (`src/app/api/`):** The API routes are organized by feature/resource, indicating a RESTful or resource-oriented approach:
-        *   `auth/`: Handles authentication, including session management (`session/`) and Google OAuth (`google/connect/`, `google/callback/`).
-        *   `clinics/`: Manages clinic data (e.g., CRUD operations, listing) and related provider information (`[clinicId]/providers/`).
-        *   `export/`: Provides endpoints for data export (e.g., `pdf/`, `csv/`).
-        *   `goals/`: CRUD operations for goals, potentially supporting `[goalId]` specific actions.
-        *   `google/`: Seems to be a duplicate or broader category for Google integrations, needs clarification if different from `google-sheets` or `auth/google`.
-        *   `google-sheets/`: Manages Google Sheets integration (discovery, synchronization, data mapping, validation).
-        *   `hygiene-production/`: Likely specific calculations or data retrieval for hygiene-related metrics.
-        *   `metrics/`: A central point for various metric types (financial, patients, appointments, providers, calls).
-        *   `providers/`: Manages provider-specific data (potentially top-level provider actions if not nested under clinics).
-        *   `users/`: Handles user management (CRUD, listing), including invitations (`invite/`) and `[userId]` specific actions.
-        *   `test/`: Contains test-related API endpoints.
-        *   `__tests__/`: Directory likely holding automated tests for the API routes.
-    *   **Supabase:**
-        *   **Database:** PostgreSQL instance for data persistence.
-        *   **Authentication:** Supabase Auth for user management (signup, login, session management).
-        *   **Storage:** Potentially for file uploads (e.g., report exports, clinic logos).
-        *   **Edge Functions:** For serverless functions that can be invoked via HTTP requests (directory `supabase/functions/` exists).
-    *   **Prisma:** ORM used for database access, providing type-safety and a fluent API for querying the Supabase PostgreSQL database. Schema located in `prisma/schema.prisma`.
-    *   **Data Flow Diagram (Example: Google Sheets Sync - *Conceptual*):**
-        ```mermaid
-        sequenceDiagram
-            participant User
-            participant Frontend
-            participant API_Route_Sync
-            participant GoogleSheetsAPI
-            participant SupabaseDB
+### Target Users
+- **Dental Clinic Owners**: High-level practice performance and financial oversight
+- **Practice Managers**: Daily operations management and staff performance tracking
+- **Office Administrators**: User management, data entry, and system configuration
+- **Dentists & Hygienists**: Individual performance tracking and goal management
 
-            User->>Frontend: Initiates Google Sheets Sync
-            Frontend->>API_Route_Sync: POST /api/google-sheets/sync (auth_token, sheet_id)
-            API_Route_Sync->>GoogleSheetsAPI: Fetch sheet data (credentials)
-            GoogleSheetsAPI-->>API_Route_Sync: Returns sheet data
-            API_Route_Sync->>API_Route_Sync: Process and transform data
-            API_Route_Sync->>SupabaseDB: Upsert transformed data (via Prisma)
-            SupabaseDB-->>API_Route_Sync: Sync confirmation
-            API_Route_Sync-->>Frontend: Sync status (success/failure)
-            Frontend-->>User: Display sync status
-        ```
+### Core Value Proposition
+- **Centralized Analytics**: Replace manual spreadsheet compilation with automated insights
+- **Real-time Visibility**: Live KPI tracking for immediate operational awareness
+- **Multi-location Support**: Secure, scalable architecture for practice groups
+- **Integration-first**: Seamless data flow from existing Google Sheets workflows
 
--   **3.5. Database Design:**
-    *   **Prisma Schema:** Defined in `prisma/schema.prisma`. Key models include:
-        *   `Clinic`: Represents a dental clinic with basic information, users, providers, metrics, goals, and data sources.
-        *   `User`: Represents application users, linked to a clinic and an optional Supabase `authId`. Roles include `office_manager`, `dentist`, `front_desk`, `admin`.
-        *   `Provider`: Represents dental care providers (dentists, hygienists) within a clinic.
-        *   `MetricDefinition`: Defines the types of metrics that can be tracked (e.g., financial, patient, appointment), including data type and calculation formula.
-        *   `DataSource`: Primarily configured for Google Sheets, storing spreadsheet ID, sheet name, sync status, and OAuth tokens. Linked to a clinic and optionally a provider.
-        *   `ColumnMapping`: Maps columns from a `DataSource` (e.g., Google Sheet column) to a `MetricDefinition`, allowing for data transformation.
-        *   `MetricValue`: Stores the actual data points for a given `MetricDefinition`, linked to a date, clinic, provider, and data source.
-        *   `Goal`: Tracks targets for specific `MetricDefinition`s over a time period, associated with a clinic or provider.
-        *   `Dashboard`: Stores user-specific dashboard configurations, including name, layout, and associated widgets. Linked to a `User`.
-        *   `Widget`: Represents individual components on a `Dashboard`, defining type (chart, counter, table), position, size, and configuration. Linked to a `Dashboard` and optionally a `MetricDefinition`.
-        *   **Multi-Tenant & Advanced Metrics Models:** The schema includes additions for multi-tenancy and more granular metric tracking:
-            *   `UserClinicRole`: Maps users to clinics with specific roles (e.g., `clinic_admin`, `provider`), facilitating multi-tenant access control.
-            *   `GoalTemplate`: Allows for creating reusable goal configurations, either system-wide or clinic-specific.
-            *   `FinancialMetric`: Tracks detailed financial transactions (production, collection, adjustments) with categorization.
-            *   `AppointmentMetric`: Tracks analytics related to appointments (scheduled, completed, cancelled, no-shows, production).
-            *   `CallMetric`: Tracks performance of calls (total, connected, voicemails, appointments scheduled from calls).
-            *   `PatientMetric`: Tracks key patient-related analytics (active, new, retention rate, average value).
-            *   `MetricAggregation`: Stores pre-computed metric aggregations (daily, weekly, monthly) for performance optimization.
-            *   (Potentially `GoogleCredential` for managing Google API access - hinted at end of schema).
-        *   *Note:* The schema shows fields like `uuidId` and `authId` being added, indicating an ongoing migration (e.g., from CUIDs to UUIDs, and tighter Supabase auth integration). The presence of "Phase 1/2/3" comments in the schema suggests a phased approach to these enhancements.
-    *   **Supabase Database Features:** Leverages PostgreSQL. Row Level Security (RLS) is likely used in conjunction with Supabase Auth and the `UserClinicRole` model to secure data access per user/clinic, enforcing multi-tenancy.
-    *   **Data Migration Strategy:** 
-        *   Prisma Migrate (`pnpm prisma migrate dev`) is used for schema migrations.
-        *   Custom data migration scripts are present in `scripts/data-migration/` (e.g., `migrate-to-uuid.ts`) for more complex data transformations not handled by schema migrations. Run using `tsx`.
+## 🚀 Quick Start
 
--   **3.6. Integrations:**
-    *   **Google Sheets API:** Core integration for data input/sync, using `@googleapis/drive` and `@googleapis/sheets`.
-    *   **AI Services:** Anthropic and OpenAI SDKs are included, primarily for the Task Master CLI, but could be leveraged for in-app features.
+### Prerequisites
+- **Node.js** 18+ with pnpm 10+
+- **Database**: Supabase project (or local PostgreSQL)
+- **Google Cloud Project** (for Sheets API integration)
 
--   **3.7. Authentication & Authorization:**
-    *   **Supabase Auth:** Handles user registration, login, and session management.
-    *   **Middleware (`middleware.ts`):** Located at the project root. It uses `@supabase/ssr` to create a Supabase client, manage user sessions by interacting with cookies, and protect routes. Unauthenticated users attempting to access protected paths are redirected to `/login`. Authenticated users attempting to access auth pages (e.g., `/login`, `/register`) are redirected to `/dashboard`. The middleware includes detailed logging for request processing, authentication status, and redirects. It matches all paths except for static assets (`_next/static`, `_next/image`, `favicon.ico`, and common image file extensions).
-    *   **Row Level Security (RLS):** Supabase RLS, likely in conjunction with the `UserClinicRole` model, is expected to be implemented to enforce data access policies based on user roles and clinic affiliation, crucial for multi-tenancy.
+### Installation
 
--   **3.8. Scalability & Performance Considerations: (*To be detailed further*)
-    *   Next.js features like Server Components, ISR (Incremental Static Regeneration), and Edge Functions can be leveraged.
-    *   Supabase is designed for scalability.
-    *   Database query optimization via Prisma.
-    *   Code splitting and lazy loading inherent in Next.js.
+1. **Clone the repository**
+   ```bash
+   git clone https://github.com/AojdevStudio/dental-dashboard.git
+   cd dental-dashboard
+   ```
 
--   **3.9. Security Considerations: (*To be detailed further*)
-    *   Supabase RLS for data access control.
-    *   Input validation (Zod).
-    *   Environment variables for sensitive keys.
-    *   Standard web security practices (e.g., Helmet, if applicable for custom server parts beyond Next.js defaults).
+2. **Install dependencies**
+   ```bash
+   pnpm install
+   ```
 
-## 4. Software Developer Perspective
+3. **Environment setup**
+   ```bash
+   cp .env.example .env
+   ```
+   
+   Configure your `.env` file:
+   ```env
+   # Supabase Configuration
+   NEXT_PUBLIC_SUPABASE_URL=your-supabase-project-url
+   NEXT_PUBLIC_SUPABASE_ANON_KEY=your-supabase-anon-key
+   DATABASE_URL=your-database-connection-string
+   DIRECT_URL=your-direct-database-url
+   
+   # Google API Integration
+   GOOGLE_CLIENT_ID=your-google-client-id
+   GOOGLE_CLIENT_SECRET=your-google-client-secret
+   GOOGLE_REDIRECT_URI=http://localhost:3000/api/auth/google/callback
+   
+   # Optional: AI Development Tools
+   ANTHROPIC_API_KEY=your-claude-api-key
+   ```
 
--   **4.1. Getting Started:**
-    *   **Prerequisites:** Node.js, pnpm.
-    *   **Installation:** 
-        1.  Clone repository: `git clone https://github.com/AojdevStudio/dental-dashboard.git && cd dental-dashboard`
-        2.  Install dependencies: `pnpm install`
-    *   **Environment Variables:** Copy `.env.example` to `.env` and populate with Supabase URL/Anon Key, and Anthropic/Perplexity API keys for Task Master.
-        ```env
-        # For the Next.js Application
-        NEXT_PUBLIC_SUPABASE_URL=your-supabase-url
-        NEXT_PUBLIC_SUPABASE_ANON_KEY=your-supabase-anon-key
+4. **Database setup**
+   ```bash
+   pnpm prisma:push     # Push schema to database
+   pnpm prisma:generate # Generate Prisma client
+   pnpm prisma:seed     # Seed with sample data
+   ```
 
-        # For Task Master CLI
-        ANTHROPIC_API_KEY=your-claude-api-key
-        # PERPLEXITY_API_KEY=your-perplexity-api-key (optional)
-        ```
-    *   **Database Setup:** Ensure Supabase project is set up. Run migrations: 
-        `pnpm prisma migrate dev --name init` (or appropriate name)
-        `pnpm prisma generate`
-    *   **Running the development server:** `pnpm dev` (uses Turbopack). Access at `http://localhost:3000`.
+5. **Start development server**
+   ```bash
+   pnpm dev
+   ```
+   
+   Visit [http://localhost:3000](http://localhost:3000) to see the application.
 
--   **4.2. Project Structure Deep Dive (combining `project-structure.md` and observations):
-    *   `src/`: Main application source code.
-        *   `app/`: Next.js App Router. Contains route groups like `(auth)` and `(dashboard)`, API routes in `api/`, root `layout.tsx` and `page.tsx`.
-        *   `components/`: Reusable React components. Current top-level structure based on `list_dir` output:
-            *   `auth/` (directory)
-            *   `common/` (directory)
-            *   `dashboard/` (directory)
-            *   `goals/` (directory)
-            *   `google-sheets/` (directory)
-            *   `ui/` (directory)
-            *   *(Note: This reflects the current top-level directories. The target `project-structure.md` outlines a more granular structure including `users/`, `__tests__/`, and specific file examples within these, indicating an evolving component organization.)*
-        *   `lib/`: Utility functions, Supabase/Prisma clients, helper modules, constants, date utilities, logger configuration (`logger.ts`).
-        *   `hooks/`: Custom React hooks. Current files found based on `list_dir` output:
-            *   `use-auth.ts`
-            *   `use-filters.ts`
-            *   `use-goals.ts`
-            *   `use-google-sheets.ts`
-            *   `use-metrics.ts`
-            *   `use-users.ts`
-            *   *(Note: This lists currently available hooks. The target `project-structure.md` suggests a more extensive set of hooks and a `__tests__/` directory, indicating ongoing development in this area.)*
-        *   `types/`: Contains shared TypeScript type definitions and interfaces. Current files found based on `list_dir` output:
-            *   `database.ts`
-            *   `supabase.ts`
-            *   *(Note: This lists currently available type files. The target `project-structure.md` details a more granular organization with numerous specific type files like `api.ts`, `auth.ts`, `domain.ts`, `index.ts`, etc. The file `database.ts` might correspond to the target `database.types.ts` and could contain Supabase-generated types. This area appears to be evolving towards the target structure.)*
-        *   `actions/` & `services/`: These exist but `project-structure.md` suggests their logic might be moved to API routes or lib utilities. This needs clarification or represents an ongoing refactor.
-        *   `generated/`: Auto-generated files, e.g., by Prisma.
-        *   `styles/`: Global stylesheets (e.g., `globals.css`).
-        *   `tests/`: Test files (Vitest).
-    *   `prisma/`: Prisma schema (`schema.prisma`), migrations, and generated client.
-    *   `supabase/`: Supabase specific configurations, edge functions (`functions/`), and migrations (`migrations/`).
-    *   `.ai/`: Task Magic system for AI-assisted development.
-        *   `tasks/`: Individual task markdown files.
-        *   `TASKS.md`: Master task checklist.
-        *   `memory/`: Archived tasks and logs.
-        *   `plans/`: Product Requirement Documents (PRDs).
-    *   `scripts/`: Node.js scripts, including the "Task Master" CLI (`dev.js`) for AI-driven development workflow management.
-    *   `public/`: Static assets served by Next.js.
-    *   `.windsurf/rules/` & `.cursor/rules/`: Project-specific development guidelines and AI agent rules.
-    *   `docs/`: Supplementary project documentation.
-    *   `memory-bank/`: Contextual information for AI agents.
+### First-time Setup
 
--   **4.3. Coding Conventions & Standards:**
-    *   **Biome:** Used for linting and formatting (`pnpm lint`, `pnpm format`). Configuration in `biome.json`.
-    *   **TypeScript:** Strict typing enforced. Follow best practices.
-    *   **Commenting:** Adhere to JSDoc3 standards as per `commenting-guidelines.md`.
-    *   **Naming Conventions:** Follow guidelines in `naming-conventions.md`.
-    *   **File Size:** Adhere to `file-size-guidelines.md`.
-    *   **Logging:** Use Winston as per `winston-logging-guidelines.md`.
-    *   Refer to `.windsurf/rules/` & `.cursor/rules/` for comprehensive guidelines.
+1. **Create a test admin user**
+   ```bash
+   pnpm dlx tsx scripts/create-test-admin.ts
+   ```
 
--   **4.4. API Route Structure (`src/app/api/`):** The API routes are organized by feature/resource, indicating a RESTful or resource-oriented approach:
-    *   `auth/`: Handles authentication, including session management (`session/`) and Google OAuth (`google/connect/`, `google/callback/`).
-    *   `clinics/`: Manages clinic data (e.g., CRUD operations, listing) and related provider information (`[clinicId]/providers/`).
-    *   `export/`: Provides endpoints for data export (e.g., `pdf/`, `csv/`).
-    *   `goals/`: CRUD operations for goals, potentially supporting `[goalId]` specific actions.
-    *   `google/`: Contains routes related to Google services, likely including OAuth and API interactions beyond just Sheets or Auth (e.g., `google/drive/`, `google/calendar/` if those were planned).
-    *   `google-sheets/`: Manages Google Sheets integration (discovery, synchronization, data mapping, validation).
-    *   `hygiene-production/`: Likely specific calculations or data retrieval for hygiene-related metrics.
-    *   `metrics/`: A central point for various metric types (financial, patients, appointments, providers, calls).
-    *   `providers/`: Manages provider-specific data (potentially top-level provider actions if not nested under clinics).
-    *   `users/`: Handles user management (CRUD, listing), including invitations (`invite/`) and `[userId]` specific actions.
-    *   `test/`: Contains test-related API endpoints for development or CI purposes.
-    *   `__tests__/`: Directory likely holding automated tests (e.g., integration tests) for the API routes.
+2. **Verify authentication flow**
+   ```bash
+   pnpm dlx tsx scripts/test-complete-auth.ts
+   ```
 
--   **4.5. Frontend Page Structure (`src/app/(dashboard)/`):** The dashboard section is organized into feature-specific pages using Next.js App Router conventions:
-    *   `dashboard/`: The main landing page for the dashboard. Includes `page.tsx`, `loading.tsx` (for Suspense), and `error.tsx` (for error boundaries).
-    *   `goals/`: Pages for creating (`create/page.tsx`), viewing (list at `page.tsx`), and managing individual goals (`[goalId]/page.tsx`).
-    *   `integrations/`: Manages data integrations (`page.tsx`), with a focus on `google-sheets/` which has sub-pages for `page.tsx`, `connect/page.tsx` (initiating OAuth), and `mapping/page.tsx` (configuring column mappings).
-    *   `reports/`: Pages for generating and viewing reports (`page.tsx`), possibly with export options (`export/page.tsx`).
-    *   `settings/`: Contains various application and user settings (`page.tsx`), broken down into:
-        *   `clinic/page.tsx` (managing clinic-specific settings)
-        *   `users/page.tsx` (listing/managing users) and `users/[userId]/page.tsx` (editing a specific user)
-        *   `providers/page.tsx` (listing/managing providers) and `providers/[providerId]/page.tsx` (editing a specific provider)
-    *   `layout.tsx`: Defines the common layout (e.g., sidebar, header) for all pages within the `(dashboard)` route group.
-    *   `providers.tsx`: Likely contains client-side context providers (e.g., TanStack Query, Zustand state management, Theme providers) wrapping the dashboard area.
+3. **Run the test suite**
+   ```bash
+   pnpm test              # Unit/integration tests
+   pnpm test:e2e          # End-to-end tests
+   ```
 
--   **4.6. Core Libraries & Utilities (`src/lib/`):** This directory houses shared modules, client initializations, and helper functions. The current structure based on `list_dir` output is as follows:
-    *   `api/`:
-        *   `middleware.ts`: Likely utilities or configurations related to API middleware.
-        *   `utils.ts`: API-specific utility functions.
-    *   `auth/`:
-        *   `config.ts`: Authentication configuration (e.g., Supabase URL, anon key for client-side, OAuth settings).
-        *   `middleware.ts`: Authentication-related middleware helpers or configurations for use with Next.js middleware.
-        *   `session.ts`: Utilities for managing user sessions on the client-side.
-    *   `database/`:
-        *   `__tests__/` (directory): Unit/integration tests for database logic.
-        *   `auth-context.ts`: Potentially for row-level security (RLS) or user context in database queries.
-        *   `client.ts`: This might be an alternative or older Prisma client initialization, or a generic database client.
-        *   `prisma.ts`: Configures and exports a singleton Prisma client instance (`PrismaClient` from `@/generated/prisma`). It implements the recommended Next.js pattern to prevent connection pool exhaustion by caching the client on the global object during development (hot reloading) and creating a fresh instance in production.
-        *   `queries/` (directory): Likely contains specific data retrieval functions or a data access layer (DAL).
-        *   `schemas/` (directory): Zod schemas for data validation related to database operations or API payloads.
-    *   `google-sheets/`:
-        *   `auth.ts`, `client.ts`, `mapping.ts`, `sync.ts`, `validation.ts`: Client-side utilities for Google Sheets integration (authentication, API client, data mapping, synchronization logic, validation helpers).
-    *   `metrics/`:
-        *   `aggregations.ts`, `calculations.ts`, `definitions.ts`, `transformations.ts`, `types.ts`: Utilities for defining, calculating, aggregating, and transforming metrics, along with related type definitions.
-    *   `supabase/`:
-        *   `client.ts`: Exports a factory function `createClient()` that initializes a Supabase client instance for browser-side (client component) operations using `createBrowserClient` from `@supabase/ssr`. It uses `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY` environment variables.
-        *   `server.ts`: Exports an asynchronous factory function `createClient()` that initializes a Supabase client for server-side operations (Server Components, API Routes). It uses `createServerClient` from `@supabase/ssr`, `cookies` from `next/headers` for cookie management, and environment variables. Includes specific handling for cookie operations within different server contexts.
-    *   `types/` (directory): This directory is currently **empty**. Project-wide shared types are primarily located in `src/types/`.
-    *   `utils/` (directory):
-        *   `client-logger.ts`: Specific logger configuration for client-side logging.
-        *   `cn.ts`: Utility for conditionally joining class names (common with Tailwind CSS).
-        *   `formatting.ts`: Data formatting utilities (e.g., dates, numbers, currency).
-        *   `logger.ts`: Implements the main Winston-based application logging system. It configures environment-specific log levels (e.g., debug for development, warn for production), a custom human-readable log format (with special handling for error objects and stack traces), and color-coded console output. It's designed to support multiple transports (console, file-based) and handle uncaught exceptions/rejections.
-    *   `utils.ts` (file at `src/lib/utils.ts`): General utility functions.
-    *   *(Note: The structure of `src/lib/` is quite detailed. The target `project-structure.md` provides a high-level overview. The key difference observed is the emptiness of `src/lib/types/`, with main types residing in `src/types/`. The actual file contents provide a good insight into the specific roles of these utilities.)*
+## 🧪 Testing Infrastructure
 
--   **4.7. Key Libraries & Their Usage (Examples):
-    *   **Prisma Client:** Used in API routes and server-side logic for database interactions. Example: `import { prisma } from '@/lib/prisma'; await prisma.user.findMany();`
-    *   **Supabase Client:** Used for authentication, storage, and invoking edge functions. Example: `import { supabase } from '@/lib/supabase'; const { data, error } = await supabase.auth.signInWithPassword(...)`
-    *   **React Hook Form & Zod:** For building forms and validating data. Schemas defined with Zod, passed to `useForm` resolver.
-    *   **Recharts:** For creating charts and visualizations in dashboard components.
-    *   **AI SDKs:** Used within the Task Master CLI (`scripts/`) for interacting with Anthropic/OpenAI.
+### Test Architecture
+The project uses a comprehensive testing strategy with multiple test types:
 
--   **4.8. API Development:**
-    *   API routes are defined within `src/app/api/` using Next.js file-system routing.
-    *   Standard HTTP methods (GET, POST, PUT, DELETE) are implemented as exported functions (e.g., `export async function GET(request: Request) {}`).
-    *   Logic involves request handling, data validation (Zod), interaction with Prisma/Supabase, and returning JSON responses.
+- **Unit Tests**: Component and utility function testing with Vitest
+- **Integration Tests**: API route and database interaction testing
+- **E2E Tests**: Full user workflow testing with Playwright
+- **Cloud Testing**: Tests run against branch databases for production parity
 
-    -   **4.8.1. Example API Route: User Session (`/api/auth/session`):**
-        *   **File:** `src/app/api/auth/session/route.ts`
-        *   **Functionality (Current):** This route currently contains placeholder implementations for both `GET` and `POST` request handlers.
-            *   `GET`: Returns `Response.json({ message: "Session GET placeholder" })`. Intended for session retrieval.
-            *   `POST`: Returns `Response.json({ message: "Session POST placeholder" })`. Intended for session creation/update.
-        *   **Status:** Marked with `// TODO:` comments, indicating that the actual session management logic (likely involving Supabase for session retrieval and updates) is pending implementation.
-        *   **Purpose (Intended):** This endpoint is expected to manage user sessions, allowing the client-side to fetch current session details and potentially refresh or modify session state.
+### Running Tests
 
-    -   **4.8.2. Example API Route: Google Sheets Discovery (`/api/google-sheets/discover`):**
-        *   **File:** `src/app/api/google-sheets/discover/route.ts`
-        *   **HTTP Method:** `POST`
-        *   **Authentication:** Requires authentication and the user to be a `clinicAdmin`. This is enforced by the `withAuth` higher-order component/middleware with the option `{ requireClinicAdmin: true }`.
-        *   **Request Body:** Expects a JSON object with a `spreadsheetId` (string, min 1 char), validated by `zod` schema (`discoverSchema`).
-        *   **Functionality (Current):**
-            *   Parses `spreadsheetId` from the request.
-            *   Currently **does not** interact with the Google Sheets API. A `TODO` comment indicates: `// TODO: Implement actual Google Sheets API discovery`.
-            *   Returns a **mock response** containing the provided `spreadsheetId`, a list of mock sheet names and IDs (e.g., `Sheet1`, `Production Data`), and a record of mock column names for each mock sheet.
-        *   **Response (Mock):** `ApiResponse.success({ spreadsheetId, sheets: mockSheets, columns: mockColumns })` where `mockSheets` and `mockColumns` are hardcoded.
-        *   **Status:** Placeholder/Mock implementation. The core logic for interacting with Google Sheets API to discover actual sheet names and columns is pending.
-        *   **Purpose (Intended):** This endpoint is designed to take a Google Spreadsheet ID, connect to the Google Sheets API (using appropriate user credentials/OAuth tokens managed by the backend), and return a list of all sheets (tabs) within that spreadsheet, along with the column headers for each sheet. This information is crucial for the user to then map columns for data import.
-        *   **Type Exports:** Exports `DiscoverRequest` and `DiscoverResponse` types for type-safe client-side interaction.
+```bash
+# Unit and Integration Tests
+pnpm test                    # Run all tests
+pnpm test:watch             # Watch mode
+pnpm test:coverage          # Coverage report
+pnpm test:cloud             # Tests with cloud database
 
-    -   **4.8.3. Example API Route: Google Sheets Sync (`/api/google-sheets/sync`):**
-        *   **File:** `src/app/api/google-sheets/sync/route.ts`
-        *   **HTTP Method:** `POST`
-        *   **Authentication:** Requires authentication and the user to be a `clinicAdmin` (via `withAuth` middleware).
-        *   **Request Body:** Expects JSON with `dataSourceId` (string, UUID) and `forceSync` (boolean, optional, default: `false`), validated by `syncSchema` (zod).
-        *   **Functionality (Current - Mixed Implementation):**
-            *   **Database Interactions (Implemented):**
-                *   Retrieves the specified `DataSource` using `googleSheetsQueries.getDataSourceById`, ensuring the authenticated user has access and fetching the associated token.
-                *   Checks if a sync is already in progress for the `DataSource` (if `forceSync` is false) and returns a 409 error if so.
-                *   Updates the `DataSource`'s `lastSyncedAt` timestamp and `connectionStatus` to 'active' using `googleSheetsQueries.updateDataSource`.
-                *   Fetches sync history for the `DataSource` using `googleSheetsQueries.getDataSourceSyncHistory`.
-            *   **Google Sheets API Interaction (Placeholder):**
-                *   The core logic for fetching data from Google Sheets, processing records based on mappings, and storing them is **not yet implemented**. A `TODO` comment states: `// TODO: Implement actual Google Sheets sync`.
-        *   **Response (Partially Mock):** Returns `ApiResponse.success` with:
-            *   The updated `dataSource` object (from DB).
-            *   `syncHistory` (from DB).
-            *   `syncedAt`: Current timestamp.
-            *   `recordsProcessed: 0` (placeholder value).
-            *   `errors: []` (placeholder value).
-        *   **Status:** This route has implemented the database state management aspects of a sync operation (checking status, updating timestamps, fetching history) but the crucial Google Sheets data fetching and processing part is a placeholder.
-        *   **Purpose (Intended):** To initiate a data synchronization process for a given `DataSource`. This involves fetching data from the linked Google Sheet, transforming it based on stored column mappings, and saving the processed metric values into the database. It should also log the outcome (success/failure, records processed, errors) to the sync history.
-        *   **Type Exports:** Exports `SyncRequest` and `SyncResponse` types.
+# End-to-End Tests
+pnpm test:e2e               # Run E2E tests
+pnpm test:e2e:ui            # Interactive mode
+pnpm test:e2e:headed        # Headed browser mode
+pnpm test:e2e:report        # View test report
 
-    -   **4.8.4. Example API Route: Google Sheets Column Mapping (`/api/google-sheets/mapping`):**
-        *   **File:** `src/app/api/google-sheets/mapping/route.ts`
-        *   **HTTP Methods Handled:** `GET`, `POST`, `PUT`, `DELETE` (Full CRUD for mappings).
-        *   **Authentication:** All methods require `clinicAdmin` privileges (via `withAuth` middleware).
-        *   **Key Functionality:** Manages the crucial step of defining how columns from a Google Sheet map to specific metric definitions within the application for a given data source.
-        *   **Schemas (Zod):** Uses `createMappingSchema`, `updateMappingSchema`, and `bulkMappingSchema` for request validation.
-        *   **`GET` Handler:**
-            *   Requires `dataSourceId` query parameter.
-            *   Retrieves and returns all column mappings for that data source using `googleSheetsQueries.getColumnMappings`.
-        *   **`POST` Handler (Dual Mode):**
-            *   **Bulk Mapping (Primary):** If `spreadsheetId` and `mappings` are in the body:
-                *   Executes a Prisma transaction to:
-                    1.  Create or update the `DataSource` (based on `clinicId` and `spreadsheetId`), setting/updating `sheetName`.
-                    2.  Ensure all `MetricDefinition`s targeted by the mappings exist for the clinic, creating standard ones if missing (from `STANDARD_METRICS`).
-                    3.  Delete all pre-existing `ColumnMapping`s for the `DataSource`.
-                    4.  Create new `ColumnMapping`s based on the request.
-                *   Returns `dataSourceId`, `mappingCount`, `createdMetrics`.
-            *   **Single Mapping:** If the body matches `createMappingSchema`, creates one `ColumnMapping` via `googleSheetsQueries.createColumnMapping`.
-        *   **`PUT` Handler:**
-            *   Requires `mappingId` query parameter.
-            *   Updates a specific `ColumnMapping` (identified by `mappingId`) using `googleSheetsQueries.updateColumnMapping` with data from the request body.
-        *   **`DELETE` Handler:**
-            *   Requires `mappingId` query parameter.
-            *   Deletes a specific `ColumnMapping` using `googleSheetsQueries.deleteColumnMapping`.
-        *   **Status:** This API route is substantially implemented, providing comprehensive CRUD operations for managing column mappings, including complex transactional logic for bulk updates. It relies heavily on database query functions in `googleSheetsQueries` and direct Prisma client usage for transactions.
-        *   **Type Exports:** `CreateMappingInput`, `UpdateMappingInput`, `ColumnMapping`.
+# Playwright Configuration
+pnpm playwright install     # Install browsers
+```
 
-    -   **4.8.5. Example API Route: Google Sheets Validate (`/api/google-sheets/validate`):**
-        *   **File:** `src/app/api/google-sheets/validate/route.ts`
-        *   **HTTP Method:** `POST`
-        *   **Authentication:** Requires `clinicAdmin` privileges (via `withAuth` middleware).
-        *   **Request Body:** Expects JSON with `dataSourceId` (string, UUID) and `sampleSize` (number, optional, default: 10, min:1, max:100), validated by `validateSchema` (zod).
-        *   **Functionality (Current - Mixed Implementation):**
-            *   **Database Interactions (Implemented):**
-                *   Retrieves the specified `DataSource` using `googleSheetsQueries.getDataSourceById`.
-                *   Fetches existing `ColumnMapping`s for the `DataSource` using `googleSheetsQueries.getColumnMappings`.
-            *   **Google Sheets API Interaction (Placeholder):**
-                *   The core logic for fetching data from Google Sheets, performing data type checks, comparing against mappings, and generating actual validation statistics or sample data is **not yet implemented**. A `TODO` comment states: `// TODO: Implement actual validation with Google Sheets API`.
-                *   Returns **mock validation results** including a hardcoded `isValid` status, mock errors/warnings, statistics, and sample data rows.
-        *   **Response (Partially Mock):** Returns `ApiResponse.success` with a `ValidateResponse` object containing:
-            *   `dataSource`: Basic info (`id`, `name`, `sheetName`).
-            *   `validation`: The mock validation results, including `isValid` (boolean), `sampleSize` (number), `errors` (array), `warnings` (array), `statistics` (object with row/column counts), and `sampleData` (array of row objects).
-            *   `mappings`: The existing column mappings for the data source, transformed to include `metricName`.
-        *   **Status:** This route has implemented the database interactions to fetch necessary context (data source info, mappings) but the actual validation against live Google Sheets data is a placeholder. The response structure is well-defined for when the GSheets API interaction is implemented.
-        *   **Purpose (Intended):** To allow users to validate their Google Sheet data against the configured column mappings before initiating a full data sync. This would involve fetching a sample of rows from the sheet, checking for data type mismatches, identifying unmapped columns, and providing a preview of how the data would be interpreted, thereby catching potential issues early.
-        *   **Type Exports:** `ValidateRequest`, `ValidateResponse`.
+### Test Environment Setup
 
-    -   **4.8.6. Example API Route: Google OAuth Connect (`/api/google/connect`):**
-        *   **File:** `src/app/api/google/connect/route.ts`
-        *   **HTTP Method:** `GET`
-        *   **Authentication:** Requires `clinicAdmin` privileges (via `withAuth` middleware).
-        *   **Purpose:** Initiates the Google OAuth 2.0 authentication flow, redirecting the user to Google's authorization server to grant permissions for accessing their Google Sheets/Drive data.
-        *   **Request Query Parameter:** `dataSourceId` (string, required) - Used to associate the Google authentication with a specific data source in the application. This ID is passed along in the OAuth `state` parameter.
-        *   **Core Logic:**
-            1.  Validates the presence of `dataSourceId`.
-            2.  Verifies the `DataSource` exists and the admin has access using `googleSheetsQueries.getDataSourceById`.
-            3.  Checks for the `GOOGLE_REDIRECT_URI` environment variable (critical for OAuth flow).
-            4.  Calls `generateAuthUrl(dataSourceId)` (from ` '@/services/google/auth'`) to construct the Google OAuth authorization URL. This service function encapsulates the logic for setting client ID, scopes (likely for Google Drive and Sheets), redirect URI, and including `dataSourceId` as state.
-            5.  Redirects the user (HTTP 302) to the generated Google authorization URL.
-        *   **Error Handling:** Uses `ApiError` for issues like missing `dataSourceId` (400), data source not found (404), or server misconfiguration (e.g., `GOOGLE_REDIRECT_URI` not set - 500). Catches errors from `generateAuthUrl`.
-        *   **Status:** This route appears to be fully implemented for initiating the Google OAuth flow.
-        *   **Key Dependencies:** `generateAuthUrl` service, `withAuth` middleware, `googleSheetsQueries`, `GOOGLE_REDIRECT_URI` environment variable.
+The project uses environment-specific testing:
 
-    -   **4.8.7. Example API Route: Google OAuth Callback (`/api/google/callback`):**
-        *   **File:** `src/app/api/google/callback/route.ts`
-        *   **HTTP Method:** `GET`
-        *   **Authentication:** Does not use `withAuth` as it's a direct callback from Google. Performs its own user authentication check (via Supabase) after receiving the callback and before processing tokens.
-        *   **Purpose:** Handles the redirect from Google after the user authorizes (or denies) application access. It exchanges the received authorization code for access and refresh tokens, then securely stores these tokens associated with the relevant `DataSource`.
-        *   **Request Query Parameters (from Google):**
-            *   `code`: Authorization code (if successful).
-            *   `state`: The `dataSourceId` passed during the connect phase.
-            *   `error`: Error identifier (if authorization failed).
-        *   **Core Logic:**
-            1.  Extracts `code`, `state` (as `dataSourceId`), and `error` from query parameters.
-            2.  Handles initial errors (Google-reported error, missing code/state) by redirecting to a frontend page (`/integrations/google-sheets/test`) with error parameters.
-            3.  Authenticates the current user via Supabase server client (`supabase.auth.getUser()`) and retrieves their `authContext`.
-            4.  Validates that the `DataSource` (identified by `dataSourceId` from `state`) exists and the authenticated user has access.
-            5.  Calls `handleAuthCallback(code)` (from ` '@/services/google/auth'`) to exchange the authorization code for Google API tokens (access token, refresh token, expiry date).
-            6.  Calls `googleSheetsQueries.updateDataSourceTokens` to store these tokens in the database, linking them to the `dataSourceId`.
-            7.  Redirects to the frontend page (`/integrations/google-sheets/test`) with success status and `dataSourceId`.
-        *   **Error Handling:** Comprehensive error handling for OAuth errors, missing parameters, user authentication failures, data source validation issues, token exchange failures, and database update failures. All errors lead to a redirect to the frontend test page with specific error messages in query parameters.
-        *   **Status:** This route appears to be fully implemented for handling the Google OAuth callback, token exchange, and storage.
-        *   **Key Dependencies:** `handleAuthCallback` service, `googleSheetsQueries`, `getAuthContextByAuthId`, Supabase server client.
+```bash
+# Test environment variables (.env.test)
+NODE_ENV=test
+DATABASE_URL=your-test-database-url
+NEXT_PUBLIC_SUPABASE_URL=your-test-supabase-url
+```
 
-    -   **4.8.8. Example API Route: Financial Metrics (`/api/metrics/financial`):**
-        *   **File:** `src/app/api/metrics/financial/route.ts`
-        *   **HTTP Method:** `GET` (currently)
-        *   **Authentication:** None explicitly applied in the placeholder.
-        *   **Functionality (Current):** Returns a static JSON response: `Response.json({ message: "Financial Metrics" })`.
-        *   **Status:** Placeholder. The actual logic for fetching, calculating, and returning financial metrics (likely involving database queries for `MetricValue` records, filtering by financial metric definitions, date ranges, and clinic context) is not yet implemented.
-        *   **Purpose (Intended):** To provide an endpoint for retrieving various financial metrics for a clinic, such as production, collections, adjustments, etc., potentially aggregated over specified time periods.
+### E2E Testing Features
 
-    -   **4.8.9. Example API Route: Patient Metrics (`/api/metrics/patients`):**
-        *   **File:** `src/app/api/metrics/patients/route.ts`
-        *   **HTTP Method:** `GET` (currently)
-        *   **Authentication:** None explicitly applied in the placeholder.
-        *   **Functionality (Current):** Returns a static JSON response: `Response.json({ message: "Patient Metrics" })`.
-        *   **Status:** Placeholder. The actual logic for fetching, calculating, and returning patient-related metrics (e.g., new patient counts, active patients, demographic distributions, appointment adherence) is not yet implemented.
-        *   **Purpose (Intended):** To provide an endpoint for retrieving key metrics related to the patient population of a clinic, supporting analysis of patient growth, retention, and characteristics.
+- **Multi-browser testing**: Chrome, Firefox, Safari, Mobile
+- **Authentication fixtures**: Automated login/signup flows
+- **Visual regression**: Screenshot comparisons
+- **Performance monitoring**: Core Web Vitals tracking
+- **Parallel execution**: Optimized test runtime
 
-    -   **4.8.10. Example API Route: Appointment Metrics (`/api/metrics/appointments`):**
-        *   **File:** `src/app/api/metrics/appointments/route.ts`
-        *   **HTTP Method:** `GET` (currently)
-        *   **Authentication:** None explicitly applied in the placeholder.
-        *   **Functionality (Current):** Returns a static JSON response: `Response.json({ message: "Appointment Metrics" })`.
-        *   **Status:** Placeholder. The actual logic for fetching, calculating, and returning appointment-related metrics (e.g., scheduled, completed, canceled, no-show rates, booking lead times) is not yet implemented.
-        *   **Purpose (Intended):** To provide an endpoint for retrieving key metrics related to dental appointments, helping to analyze operational efficiency, provider utilization, and patient compliance.
-        *   **Note on Metric Routes:** Based on the `financial`, `patients`, and `appointments` metric routes, it's observed that specific metric category API endpoints under `/api/metrics/` are currently placeholders. It is likely that `/api/metrics/providers/route.ts` and `/api/metrics/calls/route.ts` follow the same pattern.
+## 🏗️ Architecture Overview
 
-    -   **4.8.11. Example API Route: Goals Collection (`/api/goals`):**
-        *   **File:** `src/app/api/goals/route.ts`
-        *   **HTTP Methods:** `GET`, `POST`
-        *   **Authentication:** Both `GET` and `POST` handlers require authentication via `withAuth` middleware.
-        *   **Purpose:** Manages the collection of goals, allowing for listing goals with filtering and pagination, and creating new goals either directly or from templates.
-        *   **`GET` Handler (List Goals):**
-            *   **Query Parameters:** Supports filtering by `clinicId`, `providerId`, `metricDefinitionId`, `active` (boolean string), `timePeriod`. Supports pagination via `limit` and `offset`. Optionally includes goal progress calculation via `includeProgress=true`.
-            *   **Logic:** Calls `goalQueries.getGoals` with `authContext` and parsed filter/pagination options.
-            *   **Response:** Returns a paginated JSON response (`ApiResponse.paginated`) containing the list of goals, total count, page, and limit.
-        *   **`POST` Handler (Create Goal):**
-            *   **Request Body Validation:** Uses Zod schemas (`createGoalSchema`, `createFromTemplateSchema`) for robust validation.
-            *   **Functionality:** Supports two creation modes:
-                1.  **From Template:** If `templateId` is provided in the body. Calls `goalQueries.createGoalFromTemplate`.
-                2.  **Direct Creation:** If no `templateId`. Calls `goalQueries.createGoal`.
-            *   **Input (Direct):** `metricDefinitionId`, `timePeriod`, `startDate`, `endDate`, `targetValue`, `clinicId`, `providerId` (optional).
-            *   **Input (Template):** `templateId`, `clinicId`, `startDate`, `endDate`, `providerId` (optional), `targetValue` (optional - overrides template).
-            *   **Response:** Returns `ApiResponse.created` with the newly created goal object.
-        *   **Error Handling:** Uses `ApiError` for structured responses (e.g., bad request for Zod failures, forbidden/not found for query errors).
-        *   **Status:** Appears to be fully implemented and provides comprehensive goal management features.
-        *   **Key Dependencies:** `withAuth`, `goalQueries`, Zod, `ApiResponse`, `ApiError`.
-        *   **Type Exports:** `GetGoalsResponse`, `CreateGoalResponse`.
+### System Architecture
 
-    -   **4.8.12. Example API Route: Individual Goal (`/api/goals/[goalId]`):**
-        *   **File:** `src/app/api/goals/[goalId]/route.ts`
-        *   **HTTP Methods:** `GET`, `PUT`, `DELETE`
-        *   **Authentication:** All handlers use `withAuth`. `PUT` and `DELETE` additionally specify `{ requireClinicAdmin: true }` (and `PUT` includes an explicit role check).
-        *   **Purpose:** Manages individual goals identified by `goalId`.
-        *   **`GET` Handler (Fetch Goal):**
-            *   **Logic:** Calls `goalQueries.getGoalById`.
-            *   **Response:** Returns goal data or a 404 `ApiError` if not found.
-        *   **`PUT` Handler (Update Goal):**
-            *   **Request Body Validation:** Uses Zod schema `updateGoalSchema`.
-            *   **Logic:** Checks goal existence, verifies user permissions (admin/clinic_admin), then calls `goalQueries.updateGoal`.
-            *   **Response:** Returns updated goal data or appropriate `ApiError` (404, 403).
-        *   **`DELETE` Handler (Soft-Delete Goal):**
-            *   **Logic:** Checks goal existence, then calls `goalQueries.updateGoal` to set status to "cancelled".
-            *   **Response:** Returns success status or 404 `ApiError`.
-        *   **Error Handling:** Consistent use of `ApiError` for specific error conditions.
-        *   **Status:** Appears to be fully implemented for managing individual goals.
-        *   **Key Dependencies:** `withAuth`, `goalQueries`, Zod, `ApiResponse`, `ApiError`.
-        *   **Type Exports:** `GoalResponse`, `UpdateGoalInput`.
+The Dental Dashboard follows a modern multi-tenant architecture with strict security boundaries:
 
-    -   **4.8.13. Example API Route: Users Collection (`/api/users`):**
-        *   **File:** `src/app/api/users/route.ts`
-        *   **HTTP Methods:** `GET`, `POST`.
-        *   **Authentication:** Both handlers use `withAuth`.
-        *   **Purpose:** Manages the collection of users, primarily for listing users and creating new users.
-        *   **`GET` Handler (List Users):**
-            *   **Query Parameters:** Supports filtering by `clinicId`, `role`. Supports pagination via `limit`, `offset`.
-            *   **Logic:** Calls `userQueries.getUsers`.
-            *   **Response:** Paginated JSON response (`ApiResponse.paginated`) with user list, total, page, limit.
-        *   **`POST` Handler (Create User):**
-            *   **Request Body Validation:** Uses Zod schema `createUserSchema` (requires `email`, `name`, `role` (enum: "office_manager", "dentist", "front_desk", "admin"), `clinicId`). An optional `authId` can be part of the input to `userQueries.createUser` (though not explicitly in the API's Zod schema for `POST /api/users` body, it's part of the `CreateUserInput` type in `userQueries`).
-            *   **Logic:** Calls `userQueries.createUser(authContext, body)`. 
-                *   This query function validates that the calling user is a clinic admin for the target clinic.
-                *   It then creates records in the application's `User` and `UserClinicRole` tables within a database transaction.
-                *   **Important Note on User Invitation:** `userQueries.createUser` (called by this endpoint) **only manages records in the application's own database** (`User` and `UserClinicRole` tables). It **does not** interact with Supabase Auth to send an email invitation or create a Supabase Auth user. As of the current review, there is **no dedicated API endpoint** (e.g., `/api/users/invite`) to trigger Supabase Auth email invitations. This part of the user lifecycle (initiating the Supabase Auth account and sending an invite) must be handled through other means (e.g., Supabase console, a yet-to-be-developed server action calling Supabase admin functions, or a new dedicated API route).
-            *   **Response:** `ApiResponse.created` with the new application user data or `ApiError.forbidden` if permissions are insufficient.
-        *   **Note on `PATCH`/`DELETE` in this file:** This file also contains `PATCH` and `DELETE` handlers that attempt to parse a `userId` from the path. These are architecturally unconventional for a collection route and are superseded by the handlers in `src/app/api/users/[userId]/route.ts`.
-        *   **Status:** `GET` and `POST` handlers are conventional and appear fully implemented. The `PATCH` and `DELETE` handlers in this file should be considered deprecated or misplaced.
-        *   **Key Dependencies:** `withAuth`, `userQueries`, Zod, `ApiResponse`, `ApiError`.
-        *   **Type Exports:** `GetUsersResponse`, `CreateUserResponse`.
+```mermaid
+graph TB
+    subgraph "Client Layer"
+        UI[Next.js Frontend]
+        Auth[Authentication]
+    end
+    
+    subgraph "API Layer"
+        API[Next.js API Routes]
+        Middleware[Auth Middleware]
+        RLS[Row Level Security]
+    end
+    
+    subgraph "Data Layer"
+        DB[(Supabase PostgreSQL)]
+        Prisma[Prisma ORM]
+        Cache[Query Cache]
+    end
+    
+    subgraph "External Services"
+        Sheets[Google Sheets API]
+        GAS[Google Apps Script]
+        AI[AI Services]
+    end
+    
+    UI --> API
+    Auth --> Middleware
+    API --> Prisma
+    Prisma --> DB
+    RLS --> DB
+    API --> Sheets
+    Sheets --> GAS
+    
+    classDef client fill:#e1f5fe
+    classDef api fill:#f3e5f5
+    classDef data fill:#e8f5e8
+    classDef external fill:#fff3e0
+    
+    class UI,Auth client
+    class API,Middleware,RLS api
+    class DB,Prisma,Cache data
+    class Sheets,GAS,AI external
+```
 
-    -   **4.8.14. Example API Route: Individual User (`/api/users/[userId]`):**
-        *   **File:** `src/app/api/users/[userId]/route.ts`
-        *   **HTTP Methods:** `GET`, `PATCH`, `DELETE`.
-        *   **Authentication:** All handlers use `withAuth`.
-        *   **Purpose:** Manages individual users identified by `userId` from the path parameter.
-        *   **`GET` Handler (Fetch User by ID):**
-            *   **Logic:** Extracts `userId` from `params`. Calls `userQueries.getUserById`.
-            *   **Response:** Returns user data or `ApiError` (404 for not found, 403 for access denied).
-        *   **`PATCH` Handler (Update User):**
-            *   **Request Body Validation:** Uses Zod schema `updateUserSchema` (optional `name`, `role`, `lastLogin`). Note: `role` is a string here, differing from the enum in `createUserSchema`.
-            *   **Logic:** Extracts `userId` from `params`. Converts `lastLogin` to `Date`. Calls `userQueries.updateUser`.
-            *   **Response:** Returns updated user data or `ApiError` (404 for not found, 403 for permission denied).
-        *   **`DELETE` Handler (Delete User):**
-            *   **Logic:** Extracts `userId` from `params`. Calls `userQueries.deleteUser`.
-            *   **Response:** Returns success status or `ApiError` (404 for not found, 403 for permission denied by non-clinic-admin).
-        *   **Error Handling:** Consistent use of `ApiError` for specific error conditions.
-        *   **Status:** Appears to be fully implemented and correctly structured for managing individual user resources.
-        *   **Key Dependencies:** `withAuth`, `userQueries`, Zod, `ApiResponse`, `ApiError`.
-        *   **Type Exports:** `GetUserResponse`, `UpdateUserResponse`.
+### Multi-Tenant Security Model
 
-    -   **4.8.15. Example API Route: Clinics Collection (`/api/clinics`):**
-        *   **File:** `src/app/api/clinics/route.ts`
-        *   **HTTP Methods:** `GET`, `POST`.
-        *   **Purpose:** Manages the collection of clinics, for listing accessible clinics and creating new clinics.
-        *   **`GET` Handler (List Clinics):**
-            *   **Authentication:** `withAuth` (any authenticated user).
-            *   **Query Parameters:** Supports `includeInactive` (boolean) and pagination (`limit`, `offset`).
-            *   **Logic:** Calls `clinicQueries.getClinics`, respecting user's clinic associations via `authContext`.
-            *   **Response:** Paginated JSON (`ApiResponse.paginated`) with clinics list, total, page, limit.
-        *   **`POST` Handler (Create Clinic):**
-            *   **Authentication:** `withAuth` with `{ requireAdmin: true }` (global administrators only).
-            *   **Request Body Validation:** Uses Zod schema `createClinicSchema` (requires `name`, `location`; optional `status`).
-            *   **Logic:** Calls `clinicQueries.createClinic`.
-            *   **Response:** `ApiResponse.created` with new clinic data or `ApiError.forbidden` if not admin.
-        *   **Error Handling:** Consistent use of `ApiError`.
-        *   **Status:** Appears fully implemented for listing and creation, with appropriate access controls.
-        *   **Key Dependencies:** `withAuth`, `clinicQueries`, Zod, `ApiResponse`, `ApiError`.
-        *   **Type Exports:** `GetClinicsResponse`, `GetClinicResponse`, `CreateClinicResponse`.
+- **Row Level Security (RLS)**: Database-level access control ensuring data isolation
+- **Auth Context**: User clinic associations determine data access scope
+- **Role-Based Access**: Granular permissions (admin, clinic_admin, provider, user)
+- **API Middleware**: Comprehensive authentication and authorization checks
 
-    -   **4.8.16. Example API Route: Individual Clinic (`/api/clinics/[clinicId]`):**
-        *   **File:** `src/app/api/clinics/[clinicId]/route.ts`
-        *   **HTTP Methods:** `GET`, `PATCH`.
-        *   **Purpose:** Manages individual clinics identified by `clinicId`.
-        *   **`GET` Handler (Fetch Clinic by ID):**
-            *   **Authentication:** `withAuth` (user must have access to the clinic).
-            *   **Query Parameters:** Supports `includeProviders`, `includeUsers`, `includeMetrics` (booleans) for conditional data inclusion.
-            *   **Logic:** Extracts `clinicId` from `params`. Calls `clinicQueries.getClinicById`.
-            *   **Response:** Returns clinic data or `ApiError` (404 for not found, 403 for access denied).
-        *   **`PATCH` Handler (Update Clinic):**
-            *   **Authentication:** `withAuth` (user must be clinic admin for this clinic, checked in `clinicQueries.updateClinic`).
-            *   **Request Body Validation:** Uses Zod schema `updateClinicSchema` (optional `name`, `location`, `status`).
-            *   **Logic:** Extracts `clinicId` from `params`. Calls `clinicQueries.updateClinic`.
-            *   **Response:** Returns updated clinic data or `ApiError.forbidden`.
-        *   **Note on `DELETE`:** No `DELETE` handler is present in this file. Clinic deletion might be handled differently or restricted.
-        *   **Error Handling:** Consistent use of `ApiError`.
-        *   **Status:** Appears fully implemented for fetching and updating specific clinics.
-        *   **Key Dependencies:** `withAuth`, `clinicQueries`, Zod, `ApiResponse`, `ApiError`.
-        *   **Type Exports:** `GetClinicResponse`, `UpdateClinicResponse`, `GetClinicStatsResponse`.
+### Key Architectural Decisions
 
-    -   **4.8.17. Example API Route: Clinic Statistics (`/api/clinics/[clinicId]/statistics`):**
-        *   **File:** `src/app/api/clinics/[clinicId]/statistics/route.ts`
-        *   **HTTP Methods:** `GET`.
-        *   **Purpose:** Fetches aggregated statistics for a specific clinic.
-        *   **Authentication:** `withAuth` (user must have access to the clinic, checked in `clinicQueries`).
-        *   **Query Parameters:** Supports `startDate` and `endDate` for filtering statistics by a date range (processed by `getDateRangeParams`).
-        *   **Logic:** Extracts `clinicId` from `params`. Calls `clinicQueries.getClinicStatistics` with date range.
-        *   **Response:** Returns statistics data or `ApiError.forbidden` if access is denied.
-        *   **Error Handling:** Standard `ApiError` usage.
-        *   **Status:** Appears fully implemented.
-        *   **Key Dependencies:** `withAuth`, `clinicQueries`, `getDateRangeParams`, `ApiResponse`, `ApiError`.
-        *   **Type Exports:** `GetClinicStatisticsResponse`.
+- **Server Components First**: Leveraging Next.js 15 App Router for optimal performance
+- **Type-Safe Database Access**: Prisma ORM with full TypeScript integration
+- **Edge-Ready**: Designed for Vercel Edge Functions and global deployment
+- **Real-time Capable**: Supabase subscriptions for live data updates
 
-    -   **4.8.18. Example API Route: Providers Collection (`/api/providers`):**
-        *   **File:** `src/app/api/providers/route.ts`
-        *   **HTTP Methods:** `GET`, `POST`.
-        *   **Purpose:** Manages the collection of providers (listing and creation).
-        *   **Authentication & Authorization:** 
-            *   **CRITICAL ISSUE: This route currently lacks `withAuth` middleware or any other form of authentication/authorization.** As a result, these endpoints are unprotected and accessible by any unauthenticated client.
-        *   **`GET` Handler (List All Providers):**
-            *   **Logic:** Fetches all providers directly using `prisma.provider.findMany()`. Includes basic clinic info. No filtering or pagination.
-            *   **Response:** JSON array of all providers or a 500 error.
-        *   **`POST` Handler (Create Provider):**
-            *   **Request Body:** Expects `name`, `clinic_id`, and optional `first_name`, `last_name`, `email`, `provider_type`, `position`.
-            *   **Validation:** Basic check for `name` and `clinic_id`. No Zod schema used.
-            *   **Logic:** Creates a provider directly using `prisma.provider.create()`. Sets default `providerType` to 'other' and `status` to 'active'.
-            *   **Response:** Created provider data with 201 status, or 400/409/500 errors for specific issues.
-        *   **Individual Provider Operations:** Operations for fetching, updating, or deleting individual providers are not present in this file.
-        *   **Status:** Provides basic list and create functionality but has significant security vulnerabilities due to lack of authentication. Lacks robust validation and a query abstraction layer.
-        *   **Key Dependencies:** `prisma` (direct usage).
-        *   **Type Exports:** None explicitly defined in this file for API responses.
+## 💻 Development Workflow
 
-    -   **4.8.19. Example API Route: CSV Export (`/api/export/csv`):**
-        *   **File:** `src/app/api/export/csv/route.ts`
-        *   **HTTP Methods:** `POST` (currently).
-        *   **Purpose:** Intended for exporting data in CSV format.
-        *   **Authentication:** None (as it's a placeholder).
-        *   **Logic:** Currently returns a static JSON response: `{ message: "Export CSV" }`.
-        *   **Status:** Placeholder, not implemented.
+### Code Quality Pipeline
 
-    -   **4.8.20. Example API Route: PDF Export (`/api/export/pdf`):**
-        *   **File:** `src/app/api/export/pdf/route.ts`
-        *   **HTTP Methods:** `POST` (currently).
-        *   **Purpose:** Intended for exporting data in PDF format.
-        *   **Authentication:** None (as it's a placeholder).
-        *   **Logic:** Currently returns a static JSON response: `{ message: "Export PDF" }`.
-        *   **Status:** Placeholder, not implemented.
+Every code change must pass our comprehensive quality gates:
 
-    -   **4.8.21. Example API Route: Hygiene Production Sync (`/api/hygiene-production/sync`):**
-        *   **File:** `src/app/api/hygiene-production/sync/route.ts`
-        *   **HTTP Methods:** `POST`.
-        *   **Purpose:** Handles bulk upserting of hygiene production records, designed to be called by an external system (e.g., Google Apps Script).
-        *   **Authentication:** 
-            *   Does not use `withAuth` middleware.
-            *   Relies on a `supabase_key` field in the request body, compared against `process.env.SUPABASE_ANON_KEY`.
-            *   **Security Warning:** Using the public Supabase anonymous key for server-to-server authentication is insecure and not recommended. A dedicated secret API key or a more robust mechanism (e.g., JWT) should be implemented.
-        *   **Request Body Validation:** Uses Zod schema `hygieneProductionSyncSchema` for an array of `records` and the `supabase_key`.
-            *   Each record includes fields like `date`, `month_tab`, `hours_worked`, `estimated_production`, `verified_production`, `clinic_id`, `provider_id`, etc.
-        *   **Logic:**
-            1.  Validates request body and authenticates using `supabase_key`.
-            2.  Groups records by `clinic_id`.
-            3.  For each clinic's records:
-                *   Verifies clinic existence.
-                *   Creates a minimal 'system' `authContext`.
-                *   Transforms records to match the format for `upsertHygieneProduction` query.
-                *   Calls `upsertHygieneProduction` to save data.
-        *   **Response:** Returns `ApiResponse.success` with a summary object including `totalRecords`, `clinicsProcessed`, and arrays for `results` (per-clinic successes) and `errors` (per-clinic failures). Returns 401 for auth failure.
-        *   **Error Handling:** Handles unauthorized access, non-existent clinics, and logs errors during per-clinic processing.
-        *   **Status:** Functionally implemented for its purpose, but with a significant authentication security concern.
-        *   **Key Dependencies:** Zod, `ApiResponse`, `ApiError`, `prisma` (direct clinic lookup), `upsertHygieneProduction` query.
+```bash
+# Pre-commit Quality Checks
+pnpm format          # Biome code formatting
+pnpm typecheck      # TypeScript type checking
+pnpm biome:check    # Linting and code analysis
+pnpm test           # Unit and integration tests
 
-    -   **4.8.22. Example API Route: Hygiene Production Test (`/api/hygiene-production/test`):**
-        *   **File:** `src/app/api/hygiene-production/test/route.ts`
-        *   **HTTP Methods:** `GET`.
-        *   **Purpose:** Retrieves hygiene production records for a specified clinic and optional date, along with related clinic and provider information. Intended for testing data retrieval and integrity.
-        *   **Authentication:** 
-            *   Does not use `withAuth` middleware.
-            *   Creates a hardcoded 'test' `authContext` with admin privileges for the `clinicId` passed in the query parameters.
-            *   **Security Note:** This allows unauthenticated access to hygiene production data for any clinic if the endpoint is publicly accessible. Should be secured or restricted in production.
-        *   **Request Query Parameters:** `clinicId` (required), `date` (optional).
-        *   **Logic:**
-            1.  Extracts `clinicId` and `date`.
-            2.  Calls `getHygieneProduction` with the test `authContext` and a limit of 10 records.
-            3.  Fetches related clinic and provider details using `prisma`.
-        *   **Response:** `ApiResponse.success` with an object containing `clinic` info, `providers` list, `records` (hygiene production data), and a `summary`.
-        *   **Error Handling:** Returns 400 for missing `clinicId`, 500 for other errors.
-        *   **Status:** Functionally implemented for testing. Authentication method is a potential security risk if exposed.
-        *   **Key Dependencies:** `ApiResponse`, `getHygieneProduction` query, `prisma`.
+# Full Quality Pipeline
+pnpm code-quality   # All checks + build verification
+```
 
--   **4.9. State Management:**
-    *   **Server Components:** Default for data fetching and rendering static or server-processed content.
-    *   **Client Components (`'use client'`):** For interactive UI elements.
-    *   **React Context:** For simple, localized client-side state sharing.
-    *   **Zustand:** For more complex global client-side state management if needed.
-    *   **TanStack Query / SWR:** For managing asynchronous server state on the client, including caching, refetching, and optimistic updates.
+### Branch Strategy
 
--   **4.10. Testing:**
-    *   **Vitest:** Test runner for unit and integration tests.
-    *   Test files are typically co-located with components or in `src/tests/`.
-    *   Run tests: `pnpm test`, `pnpm test:watch`, `pnpm test:coverage`.
-    *   Configuration in `vitest.config.ts` and `vitest.integration.config.ts`.
+```bash
+# Feature development
+git checkout -b feature/your-feature-name
+# Make changes, commit frequently
+git commit -m "feat: implement provider filtering"
 
--   **4.11. Task Management (Task Magic System):
-    *   Core of the AI-assisted development workflow, managed via the Task Master CLI (`scripts/dev.js`).
-    *   Tasks defined in Markdown files in `.ai/tasks/`.
-    *   Master checklist in `.ai/TASKS.md`.
-    *   Completed tasks archived in `.ai/memory/tasks/` and logged in `.ai/memory/TASKS_LOG.md`.
-    *   PRDs in `.ai/plans/` can be parsed to generate tasks.
-    *   Refer to `README-task-master.md` and `.windsurf/rules/task-magic/` for details.
+# Before pushing
+pnpm pre-commit     # Run quality checks
+git push origin feature/your-feature-name
 
--   **4.12. Database Migrations:**
-    *   **Prisma Migrate:** `pnpm prisma migrate dev` for schema changes. Migrations stored in `prisma/migrations/`.
-    *   **Prisma Generate:** `pnpm prisma generate` to update Prisma Client after schema changes.
-    *   **Custom Data Migrations:** Scripts in `scripts/data-migration/` (e.g., `migrate-to-uuid.ts`) for complex data transformations not handled by schema migrations. Run using `tsx`.
+# Create PR when ready
+gh pr create --title "feat: Add provider filtering" --body "Description..."
+```
 
--   **4.13. Logging:**
-    *   **Winston:** Configured in `src/lib/logger.ts` (assumption, based on guidelines).
-    *   Follow `winston-logging-guidelines.md` for structured and contextual logging.
+### Database Workflow
 
--   **4.14. Environment Variables:**
-    *   Managed in `.env` (local, gitignored) and `.env.example` (template).
-    *   Next.js automatically loads variables prefixed with `NEXT_PUBLIC_` into the browser bundle.
+```bash
+# Schema changes
+pnpm prisma:push            # Push to development DB
+pnpm prisma:generate        # Generate new client
+pnpm prisma:studio          # Inspect data
 
--   **4.15. Deployment: (*To be detailed further - likely Vercel for Next.js*)
+# Data migrations
+pnpm migrate:uuid           # Run UUID migration
+pnpm migrate:validate       # Validate migration results
 
-## 5. Future Considerations & Roadmap Ideas
-   - (*To be populated as project understanding deepens or based on PRDs/Task Lists*)
-   - Potential enhancements based on target audience needs.
-   - Areas for refactoring (e.g., clarifying `actions/` and `services/` role).
-   - Expanding AI-driven features within the dashboard itself.
+# Testing with fresh data
+pnpm test:seed              # Seed test database
+```
 
+### Google Apps Script Deployment
+
+```bash
+# Deploy sync scripts
+pnpm gas:deploy             # Deploy all scripts
+pnpm gas:deploy:dentist     # Deploy dentist sync only
+pnpm gas:deploy:hygienist   # Deploy hygienist sync only
+
+# Health monitoring
+pnpm gas:health             # Check script health
+pnpm gas:status             # Deployment status
+```
+
+## 📡 API Documentation
+
+### Authentication Endpoints
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| `POST` | `/api/auth/register-comprehensive` | Complete user registration |
+| `GET` | `/api/auth/session` | Get current session |
+| `POST` | `/api/auth/complete-signup` | Complete signup process |
+| `GET` | `/api/auth/google/connect` | Initiate Google OAuth |
+| `GET` | `/api/auth/google/callback` | Handle OAuth callback |
+
+### Core API Routes
+
+#### Clinics
+- `GET /api/clinics` - List accessible clinics
+- `POST /api/clinics` - Create new clinic (admin only)
+- `GET /api/clinics/[clinicId]` - Get clinic details
+- `PATCH /api/clinics/[clinicId]` - Update clinic
+- `GET /api/clinics/[clinicId]/statistics` - Clinic analytics
+
+#### Providers
+- `GET /api/providers` - List providers
+- `POST /api/providers` - Create provider
+- `GET /api/providers/[providerId]` - Provider details
+- `GET /api/providers/[providerId]/metrics` - Provider metrics
+- `GET /api/providers/[providerId]/performance` - Performance data
+- `GET /api/providers/[providerId]/kpi` - KPI calculations
+
+#### Metrics & Analytics
+- `GET /api/metrics/financial` - Financial metrics
+- `GET /api/metrics/patients` - Patient analytics
+- `GET /api/metrics/appointments` - Appointment metrics
+- `GET /api/metrics/aggregated` - Pre-computed aggregations
+
+#### Goals & Tracking
+- `GET /api/goals` - List goals with filtering
+- `POST /api/goals` - Create goal or from template
+- `GET /api/goals/[goalId]` - Goal details
+- `PUT /api/goals/[goalId]` - Update goal
+- `DELETE /api/goals/[goalId]` - Soft delete goal
+
+### API Response Format
+
+All API responses follow a consistent format:
+
+```typescript
+// Success Response
+{
+  success: true,
+  data: T,
+  message?: string
+}
+
+// Error Response
+{
+  success: false,
+  error: {
+    code: string,
+    message: string,
+    details?: any
+  }
+}
+
+// Paginated Response
+{
+  success: true,
+  data: T[],
+  pagination: {
+    page: number,
+    limit: number,
+    total: number,
+    hasMore: boolean
+  }
+}
+```
+
+### Authentication & Authorization
+
+API routes use middleware-based auth:
+
+```typescript
+// Route with authentication
+export const GET = withAuth(async (request, { user }) => {
+  // Access authenticated user
+});
+
+// Route with role requirements
+export const POST = withAuth(async (request, { user, authContext }) => {
+  // Access user's clinic associations and roles
+}, { requireClinicAdmin: true });
+```
+
+## 🗄️ Database Schema
+
+### Core Models
+
+The database follows a multi-tenant design with the following key entities:
+
+#### Authentication & Users
+- **User**: Application users with clinic associations
+- **UserClinicRole**: Many-to-many relationship defining user roles per clinic
+
+#### Practice Management
+- **Clinic**: Top-level tenant with multiple locations
+- **Location**: Physical clinic locations (e.g., "Baytown", "Humble")
+- **Provider**: Healthcare providers (dentists, hygienists) with multi-location support
+
+#### Metrics & Analytics  
+- **MetricDefinition**: Configurable metric types (financial, patient, appointment)
+- **MetricValue**: Time-series data points for each metric
+- **MetricAggregation**: Pre-computed aggregations for performance
+
+#### Goals & Tracking
+- **Goal**: Practice and provider-specific targets
+- **GoalTemplate**: Reusable goal configurations
+
+#### Data Integration
+- **DataSource**: Google Sheets and other data source configurations
+- **ColumnMapping**: Maps external data columns to internal metrics
+
+### Row Level Security (RLS)
+
+Every table implements RLS policies ensuring:
+- Users only access data from their associated clinics
+- Role-based permissions (admin, clinic_admin, provider, user)
+- Automatic data isolation at the database level
+
+```sql
+-- Example RLS Policy
+CREATE POLICY "Users can only see their clinic's providers"
+  ON providers FOR SELECT
+  USING (clinic_id IN (
+    SELECT clinic_id FROM user_clinic_roles 
+    WHERE user_id = auth.uid()
+  ));
+```
+
+### Migration Strategy
+
+The project uses a phased migration approach:
+- **Phase 1**: Core multi-tenant schema
+- **Phase 2**: UUID support for external system integration  
+- **Phase 3**: Enhanced RLS and performance optimization
+
+## 🚢 Deployment
+
+### Production Environment
+
+**Primary Stack**:
+- **Frontend**: Vercel with Next.js optimization
+- **Database**: Supabase managed PostgreSQL
+- **CDN**: Vercel Edge Network with global caching
+- **Monitoring**: Vercel Analytics + Custom Winston logging
+
+**Environment Variables**:
+```bash
+# Production .env
+NEXT_PUBLIC_SUPABASE_URL=https://your-project.supabase.co
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your-production-anon-key
+DATABASE_URL=postgresql://postgres:[PASSWORD]@db.your-project.supabase.co:5432/postgres
+```
+
+### Deployment Workflow
+
+```bash
+# Production deployment
+git push origin main           # Automatic Vercel deployment
+
+# Database migrations
+pnpm prisma:push              # Apply schema changes
+pnpm prisma:generate          # Update client
+
+# Post-deployment validation
+pnpm gas:health:all           # Verify Google Apps Script health
+```
+
+### Environment Management
+
+- **Development**: Local development with Supabase local or cloud dev branch
+- **Staging**: Branch preview deployments on Vercel
+- **Production**: Main branch auto-deployment with environment promotion
+
+### Monitoring & Observability
+
+- **Application Logging**: Winston with structured JSON logging
+- **Error Tracking**: Built-in error boundaries with detailed context
+- **Performance**: Core Web Vitals monitoring via Vercel Analytics
+- **Database**: Supabase built-in monitoring and query performance insights
+
+## 🤝 Contributing
+
+### Development Guidelines
+
+1. **Follow the CLAUDE.md protocol** for comprehensive development partnership
+2. **Run quality checks** before every commit (`pnpm pre-commit`)
+3. **Write tests** for new features (aim for >80% coverage)
+4. **Update documentation** for API changes or new features
+5. **Use conventional commits** for clear changelog generation
+
+### Code Standards
+
+- **TypeScript**: Strict mode with explicit return types
+- **Components**: Prefer Server Components, use Client Components judiciously  
+- **API Routes**: Follow RESTful patterns with consistent error handling
+- **Database**: Always use auth context for multi-tenant queries
+- **Testing**: Unit tests for utilities, integration tests for APIs, E2E for workflows
+
+### Getting Help
+
+- **Issues**: Use GitHub Issues for bug reports and feature requests
+- **Discussions**: GitHub Discussions for questions and ideas
+- **Documentation**: Check `/docs` folder for detailed guides
+- **AI Assistant**: Use Claude Code integration for development support
+
+### Project Structure
+
+```
+src/
+├── app/                    # Next.js App Router
+│   ├── (dashboard)/       # Main application routes
+│   ├── (auth)/           # Authentication pages
+│   └── api/              # API routes
+├── components/           # React components
+│   ├── ui/              # Reusable UI components
+│   ├── dashboard/       # Dashboard-specific components
+│   └── providers/       # Provider management components
+├── lib/                 # Utilities and configurations
+│   ├── database/        # Prisma client and queries
+│   ├── auth/           # Authentication utilities
+│   └── utils/          # Helper functions
+├── hooks/              # Custom React hooks
+├── types/              # TypeScript type definitions
+└── styles/             # Global styles
+```
+
+---
+
+## 📄 License
+
+This project is proprietary software developed for dental practice management. Unauthorized reproduction or distribution is prohibited.
+
+## 🔗 Links
+
+- **Live Demo**: [Production URL]
+- **Documentation**: `/docs` folder
+- **API Reference**: Built-in API documentation
+- **Supabase Project**: [Supabase Dashboard]
+- **Linear Project**: [Project Management Board]
+
+---
+
+*Built with ❤️ for dental practices by the AOJDevStudio team.*

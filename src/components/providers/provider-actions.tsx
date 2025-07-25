@@ -62,7 +62,7 @@ export function ProviderActions({
 
       try {
         // Navigate to provider detail page using the dynamic route
-        router.push(`/providers/${provider.id}`);
+        router.push(`/dashboard/providers/${provider.id}`);
       } catch (error) {
         console.error('Navigation error:', error);
         console.error('Failed to navigate to provider details');
