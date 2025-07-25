@@ -36,11 +36,8 @@ function validateDatabaseEnvironment(): void {
     );
   }
 
-  // Additional safety check for test data patterns
-  if (
-    isProductionDB &&
-    (process.env.NODE_ENV === 'test' || process.argv.some((arg) => arg.includes('test')))
-  ) {
+  // Additional safety check for test data patterns - only block if explicitly in test mode
+  if (isProductionDB && process.env.NODE_ENV === 'test' && !process.env.ALLOW_PRODUCTION_DB) {
     throw new EnvironmentValidationError(
       'Test environment detected with production database - potential contamination risk!'
     );

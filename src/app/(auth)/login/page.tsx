@@ -9,7 +9,7 @@ import type React from 'react';
 
 import { signInWithOAuth } from '@/actions/auth/oauth';
 import { signInWithVerification } from '@/app/auth/actions';
-import { signInWithSupabaseOnly } from '@/app/auth/test-actions';
+import { signInWithClientAuth } from '@/app/auth/client-actions';
 import { useState, useTransition } from 'react';
 
 /**
@@ -29,13 +29,22 @@ export default function LoginPage(): React.ReactElement {
   const handleSignIn = (formData: FormData) => {
     startTransition(async () => {
       try {
-        // Use test-specific auth action when in test environment
-        const isTestEnvironment =
-          process.env.NODE_ENV === 'test' || window.location.hostname === 'localhost';
-
-        const result = isTestEnvironment
-          ? await signInWithSupabaseOnly(formData)
-          : await signInWithVerification(formData);
+        // Try server action first, fall back to client auth if context error
+        let result: { error: string | null; success: boolean } | undefined;
+        try {
+          result = await signInWithVerification(formData);
+        } catch (serverError) {
+          // If server action fails due to context issues, use client auth
+          if (
+            serverError instanceof Error &&
+            serverError.message.includes('cookies') &&
+            serverError.message.includes('request scope')
+          ) {
+            result = await signInWithClientAuth(formData);
+          } else {
+            throw serverError;
+          }
+        }
 
         if (result?.error) {
           setError(result.error);
@@ -44,7 +53,8 @@ export default function LoginPage(): React.ReactElement {
           // Manually redirect since server redirect throws in transitions
           window.location.href = '/dashboard';
         }
-      } catch (_error) {
+      } catch (error) {
+        console.error('Login error:', error);
         setError('An unexpected error occurred. Please try again.');
       }
     });
