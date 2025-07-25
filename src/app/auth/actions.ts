@@ -1,6 +1,6 @@
 'use server';
 
-import { prisma } from '@/lib/database/prisma';
+import { prisma } from '@/lib/database/client';
 import { createClient } from '@/lib/supabase/server';
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
@@ -31,21 +31,14 @@ export async function signInWithVerification(
 
   // Step 2: Verify user exists in database with proper setup
   try {
-    // First try to find by authId
     let dbUser = await prisma.user.findUnique({
       where: { authId: authData.user.id },
-      include: {
-        clinic: true,
-      },
     });
 
     // If not found by authId, try by email (for existing users before UUID migration)
     if (!dbUser && authData.user.email) {
       dbUser = await prisma.user.findUnique({
         where: { email: authData.user.email },
-        include: {
-          clinic: true,
-        },
       });
 
       // If found by email but authId doesn't match, update it
@@ -55,9 +48,6 @@ export async function signInWithVerification(
           data: {
             authId: authData.user.id,
             uuidId: authData.user.id, // Also set UUID for future migration
-          },
-          include: {
-            clinic: true,
           },
         });
       }
@@ -79,7 +69,7 @@ export async function signInWithVerification(
     }
 
     // Verify user has a clinic assignment (skip for system admins)
-    if (dbUser.role !== 'system_admin' && !(dbUser.clinicId && dbUser.clinic)) {
+    if (dbUser.role !== 'system_admin' && !dbUser.clinicId) {
       await supabase.auth.signOut();
 
       return {
@@ -109,7 +99,12 @@ export async function signInWithVerification(
 
     // Return success without redirect - let client handle navigation
     return { error: null, success: true };
-  } catch (_dbError) {
+  } catch (dbError) {
+    console.error('🚨 Database error caught in signInWithVerification:', dbError);
+    console.error('🚨 Error name:', (dbError as Error)?.name);
+    console.error('🚨 Error message:', (dbError as Error)?.message);
+    console.error('🚨 Error stack:', (dbError as Error)?.stack);
+
     // Sign them out to prevent partial access
     await supabase.auth.signOut();
 

@@ -17,9 +17,17 @@ function validateDatabaseEnvironment(): void {
   const nodeEnv = process.env.NODE_ENV;
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
 
-  // Critical: Detect production database
-  const isProductionDB = dbUrl?.includes('supabase.com') || supabaseUrl?.includes('supabase.co');
-  const _isTestEnvironment = nodeEnv === 'test' || dbUrl?.includes('localhost');
+  // Define known test database identifiers
+  const testDbIdentifiers = [
+    'bxnkocxoacakljbcnulv', // Test Supabase project ID
+    'localhost',
+  ];
+
+  // Critical: Detect production vs test database
+  const isTestDB = testDbIdentifiers.some((id) => dbUrl?.includes(id) || supabaseUrl?.includes(id));
+  const isProductionDB =
+    (dbUrl?.includes('supabase.com') || supabaseUrl?.includes('supabase.co')) && !isTestDB;
+  const _isTestEnvironment = nodeEnv === 'test' || isTestDB;
 
   // Block production access unless explicitly allowed
   if (isProductionDB && !process.env.ALLOW_PRODUCTION_DB) {

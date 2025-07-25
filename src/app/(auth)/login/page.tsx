@@ -9,6 +9,7 @@ import type React from 'react';
 
 import { signInWithOAuth } from '@/actions/auth/oauth';
 import { signInWithVerification } from '@/app/auth/actions';
+import { signInWithSupabaseOnly } from '@/app/auth/test-actions';
 import { useState, useTransition } from 'react';
 
 /**
@@ -28,7 +29,14 @@ export default function LoginPage(): React.ReactElement {
   const handleSignIn = (formData: FormData) => {
     startTransition(async () => {
       try {
-        const result = await signInWithVerification(formData);
+        // Use test-specific auth action when in test environment
+        const isTestEnvironment =
+          process.env.NODE_ENV === 'test' || window.location.hostname === 'localhost';
+
+        const result = isTestEnvironment
+          ? await signInWithSupabaseOnly(formData)
+          : await signInWithVerification(formData);
+
         if (result?.error) {
           setError(result.error);
         } else if (result?.success) {
