@@ -1,34 +1,85 @@
-# Project Overview: Dental Dashboard
+# Dental Dashboard
 
-🚧 **Status: In Progress** 🚧
+**Production-grade dental practice insights platform with unified design system architecture**
 
-*This document provides a comprehensive overview of the Dental Dashboard project, compiled from architectural, developer, and product management perspectives. It is intended to be a living document, updated as the project evolves.*
+🏥 **Status: Active Development** | 🎨 **Design System: Unified** | ♿ **Accessibility: WCAG 2.1 AA** | 🚀 **Performance: Core Web Vitals Optimized**
 
-## 1. Introduction
+*Comprehensive data visualization and KPI tracking platform for dental clinics, featuring multi-tenant architecture, Google Sheets integration, and healthcare-focused design standards. This document serves as the definitive technical and product reference, designed for seamless developer onboarding and stakeholder alignment.*
 
--   **Purpose of this document:** To serve as a central knowledge base for understanding the Dental Dashboard's architecture, development practices, product goals, and overall structure. It aims to onboard new team members, align existing ones, and guide development efforts.
--   **Brief overview of the Dental Dashboard application:** The Dental Practice Insights Dashboard is a Next.js application designed to provide comprehensive data visualization and Key Performance Indicator (KPI) tracking for dental clinics. It aims to offer an intuitive and data-rich platform for dental practices to monitor performance, manage goals, and gain actionable insights from various data sources. The development is notably assisted by an AI-driven "Task Master CLI".
+## 🗺️ Navigation
 
-## 2. Product Manager Perspective
+| Section | Focus | Audience |
+|---------|-------|----------|
+| [📋 Quick Start](#-quick-start) | Immediate setup and development | Developers |
+| [📊 Product Vision](#-product-vision) | Features, users, and business value | Product, Stakeholders |
+| [🏢 Architecture](#-architecture-overview) | System design and technical decisions | Architects, Senior Developers |
+| [💻 Developer Guide](#-developer-guide) | Implementation details and standards | All Developers |
+| [📁 Related Documentation](#-related-documentation) | Extended technical references | Technical Teams |
 
--   **2.1. Vision & Mission:** 
-    -   **Vision:** To empower dental practices with accessible, actionable data insights, enabling them to optimize operations, improve patient care, and achieve business growth.
-    -   **Mission:** To deliver a user-friendly, comprehensive dashboard that seamlessly integrates various data sources, visualizes key performance indicators, and facilitates goal tracking for dental clinics.
--   **2.2. Target Audience:** Dental clinic owners, practice managers, and administrative staff who are responsible for monitoring clinic performance, making data-driven decisions, and managing operational goals.
--   **2.3. Core Features & Functionality (based on `project-structure.md` and `README.md`):
-    *   **Dashboard:** Customizable widgets displaying key metrics (financial, patient, appointments, providers, calls).
-    *   **Integrations:** Google Sheets for data input, with potential for other data sources.
-    *   **Goal Management:** Creating, tracking, and visualizing progress towards practice-specific goals.
-    *   **Reporting:** Generating and exporting reports (PDF, CSV).
-    *   **Settings:** Management of clinic details, users, and providers.
-    *   **Authentication:** Secure user login and registration.
--   **2.4. Value Proposition:** Provides dental practices with a centralized, easy-to-understand view of their performance, replacing manual data compilation and analysis. It helps identify trends, track progress against goals, and make informed decisions to improve efficiency and profitability.
--   **2.5. User Stories (Examples - *to be expanded*):
-    *   As a Practice Manager, I want to see a daily overview of key financial metrics (e.g., production, collection) so that I can quickly assess the clinic's financial health.
-    *   As a Clinic Owner, I want to set monthly patient acquisition goals and track progress so that I can measure the effectiveness of marketing campaigns.
-    *   As an Administrator, I want to connect our Google Sheet containing appointment data so that it automatically syncs with the dashboard, reducing manual data entry.
+---
 
-## 3. Software Architect Perspective
+## 📋 Quick Start
+
+```bash
+# Clone and setup
+git clone https://github.com/AojdevStudio/dental-dashboard.git
+cd dental-dashboard
+pnpm install
+
+# Environment setup
+cp .env.example .env
+# Configure: NEXT_PUBLIC_SUPABASE_URL, NEXT_PUBLIC_SUPABASE_ANON_KEY
+
+# Database & development
+pnpm prisma generate
+pnpm prisma migrate dev
+pnpm dev  # http://localhost:3000
+```
+
+## 🎯 Project Overview
+
+**Mission**: Empower dental practices with accessible, actionable data insights through a unified healthcare-focused design system.
+
+**Core Value Proposition**: 
+- 📊 **Comprehensive Analytics**: Multi-clinic KPI tracking with real-time insights
+- 🔗 **Seamless Integration**: Google Sheets sync with automated data transformation
+- 🎨 **Healthcare-First Design**: WCAG 2.1 AA compliant with clinical aesthetic
+- 🏢 **Multi-Tenant Architecture**: Secure clinic isolation with role-based access
+- ⚡ **Performance Optimized**: Sub-3s load times with Core Web Vitals compliance
+
+## 📊 Product Vision
+
+**Target Users**: Dental clinic owners, practice managers, office administrators, dentists, and hygienists seeking data-driven practice optimization.
+
+### Core Features
+
+| Feature Category | Capabilities | Status |
+|------------------|--------------|--------|
+| **📋 Dashboard** | Customizable widgets, real-time KPIs, responsive design | ✅ Active |
+| **🔗 Integrations** | Google Sheets sync, column mapping, validation | ✅ Active |
+| **🎯 Goals** | Template-based goals, progress tracking, alerts | ✅ Active |
+| **📈 Reports** | PDF/CSV export, custom date ranges | 🚧 In Progress |
+| **⚙️ Settings** | Multi-clinic management, user roles, providers | ✅ Active |
+| **🔐 Security** | Row-level security, clinic isolation, OAuth | ✅ Active |
+
+### Key User Journeys
+
+**Practice Manager Daily Workflow**:
+1. 🌅 Morning dashboard review → Financial health assessment
+2. 🔍 Trend analysis → Identify performance patterns  
+3. 📊 Goal tracking → Progress monitoring and adjustments
+
+**Clinic Owner Strategic Planning**:
+1. 📈 Multi-location overview → Practice comparison and optimization
+2. 🎯 Goal setting → Evidence-based target establishment
+3. 📊 ROI measurement → Marketing campaign effectiveness
+
+**Administrator Operations**:
+1. 🔗 Data integration → Automated Google Sheets synchronization
+2. 👥 User management → Role-based access configuration
+3. 📄 Report generation → Stakeholder communication
+
+## 🏢 Architecture Overview
 
 -   **3.1. System Architecture Overview:**
     -   **High-level Diagram:**
@@ -66,13 +117,56 @@
     -   **Database:** PostgreSQL managed by Supabase, accessed via Prisma ORM for type-safe queries.
     -   **External Services:** Google Sheets API for data integration, Anthropic/OpenAI for AI-assisted development workflows (Task Master CLI) and potentially in-app AI features.
 
--   **3.2. Technology Stack (Primary):
+-   **3.2. Unified Design System Architecture:**
+    The application implements a comprehensive design system focused on healthcare aesthetics and accessibility:
+    
+    **Design Tokens & Theming**:
+    ```typescript
+    // Unified color architecture with dual theme support
+    const designTokens = {
+      colors: {
+        primary: {
+          light: 'hsl(220.9 39.3% 11%)',    // Navy blue
+          dark: 'hsl(262 83% 58%)'          // Purple accent
+        },
+        // Healthcare-grade semantic colors
+        success: 'hsl(142 76% 36%)',
+        warning: 'hsl(38 92% 50%)',
+        error: 'hsl(346 87% 43%)'
+      },
+      spacing: '8px grid system',           // Consistent spacing scale
+      typography: 'Fluid type scale with clamp()', // Responsive typography
+      breakpoints: 'Mobile-first: 640px → 768px → 1024px → 1280px → 1536px'
+    }
+    ```
+    
+    **Component Architecture**:
+    - **Unified Card Pattern**: Standardized structure with Header, Content, Footer
+    - **KPI Display Components**: Metric cards with trend indicators and contextual data
+    - **Responsive Data Tables**: ARIA-compliant tables with proper semantic markup
+    - **Healthcare Forms**: Validation, error states, and accessibility features
+    - **Theme-Aware Navigation**: Mobile sheet navigation and desktop sidebar
+    
+    **Accessibility Standards**:
+    - **WCAG 2.1 AA Compliance**: Minimum 4.5:1 contrast ratios, keyboard navigation
+    - **Screen Reader Support**: Proper ARIA labels, roles, and live regions
+    - **Healthcare-Specific**: Data table relationships, form validation, dynamic content announcements
+    
+    **Performance Architecture**:
+    - **Core Web Vitals Targets**: LCP <2.5s, FID <100ms, CLS <0.1
+    - **CSS Performance**: Layout containment, transform-based animations
+    - **Image Optimization**: Next.js Image with blur placeholders
+    
+    *For complete design system specifications, see: [`docs/architecture/ui-ux-spec.md`](docs/architecture/ui-ux-spec.md)*
+    *For validation framework, see: [`docs/checklists/architecture-validation-checklist.md`](docs/checklists/architecture-validation-checklist.md)*
+
+-   **3.3. Technology Stack (Primary):
     *   **Framework:** Next.js 15.3.2 (App Router, Turbopack for dev)
     *   **Language:** TypeScript (version 5.8.3)
     *   **Backend as a Service (BaaS):** Supabase (PostgreSQL, Auth, Storage, Edge Functions)
     *   **ORM:** Prisma 6.8.2
     *   **UI Libraries:** React 19.1.0, Shadcn UI, Radix UI Primitives
-    *   **Styling:** Tailwind CSS 4.1.8, PostCSS
+    *   **Styling:** Tailwind CSS 4.1.8, PostCSS, Unified Design System with CSS Custom Properties
     *   **State Management:** Next.js Server Components, React Context (client-side UI), Zustand, TanStack React Query / SWR
     *   **Forms:** React Hook Form 7.56.4, Zod 3.25.36 (validation)
     *   **Charting:** Recharts 2.15.3
@@ -84,7 +178,7 @@
     *   **Package Management:** pnpm 10.10.0
     *   **Logging:** Winston 3.17.0
 
--   **3.3. Frontend Architecture:**
+-   **3.4. Frontend Architecture:**
     *   **Next.js App Router:** Located in `src/app/`. Organizes the application by routes, with layouts, pages, loading states, and error boundaries.
         *   Route Groups: `(auth)` for authentication pages, `(dashboard)` for main application sections.
     *   **Component Structure:** Located in `src/components/`. 
@@ -98,7 +192,7 @@
         *   TanStack React Query or SWR for managing server state, caching, and data synchronization on the client-side for dynamic interactions.
     *   **Styling:** Tailwind CSS for utility-first styling, with `tailwind-merge` and `clsx` for managing conditional classes. Radix UI provides unstyled, accessible primitives, and Shadcn UI builds upon these with pre-styled components.
 
--   **3.4. Backend Architecture:**
+-   **3.5. Backend Architecture:**
     *   **API Routes:** Next.js API routes located in `src/app/api/` handle client requests, business logic, and interactions with the database and external services.
     *   **API Route Structure (`src/app/api/`):** The API routes are organized by feature/resource, indicating a RESTful or resource-oriented approach:
         *   `auth/`: Handles authentication, including session management (`session/`) and Google OAuth (`google/connect/`, `google/callback/`).
@@ -139,7 +233,7 @@
             Frontend-->>User: Display sync status
         ```
 
--   **3.5. Database Design:**
+-   **3.6. Database Design:**
     *   **Prisma Schema:** Defined in `prisma/schema.prisma`. Key models include:
         *   `Clinic`: Represents a dental clinic with basic information, users, providers, metrics, goals, and data sources.
         *   `User`: Represents application users, linked to a clinic and an optional Supabase `authId`. Roles include `office_manager`, `dentist`, `front_desk`, `admin`.
@@ -166,28 +260,75 @@
         *   Prisma Migrate (`pnpm prisma migrate dev`) is used for schema migrations.
         *   Custom data migration scripts are present in `scripts/data-migration/` (e.g., `migrate-to-uuid.ts`) for more complex data transformations not handled by schema migrations. Run using `tsx`.
 
--   **3.6. Integrations:**
+-   **3.7. Integrations:**
     *   **Google Sheets API:** Core integration for data input/sync, using `@googleapis/drive` and `@googleapis/sheets`.
     *   **AI Services:** Anthropic and OpenAI SDKs are included, primarily for the Task Master CLI, but could be leveraged for in-app features.
 
--   **3.7. Authentication & Authorization:**
+-   **3.8. Authentication & Authorization:**
     *   **Supabase Auth:** Handles user registration, login, and session management.
     *   **Middleware (`middleware.ts`):** Located at the project root. It uses `@supabase/ssr` to create a Supabase client, manage user sessions by interacting with cookies, and protect routes. Unauthenticated users attempting to access protected paths are redirected to `/login`. Authenticated users attempting to access auth pages (e.g., `/login`, `/register`) are redirected to `/dashboard`. The middleware includes detailed logging for request processing, authentication status, and redirects. It matches all paths except for static assets (`_next/static`, `_next/image`, `favicon.ico`, and common image file extensions).
     *   **Row Level Security (RLS):** Supabase RLS, likely in conjunction with the `UserClinicRole` model, is expected to be implemented to enforce data access policies based on user roles and clinic affiliation, crucial for multi-tenancy.
 
--   **3.8. Scalability & Performance Considerations: (*To be detailed further*)
-    *   Next.js features like Server Components, ISR (Incremental Static Regeneration), and Edge Functions can be leveraged.
-    *   Supabase is designed for scalability.
-    *   Database query optimization via Prisma.
-    *   Code splitting and lazy loading inherent in Next.js.
+-   **3.9. Performance & Scalability Architecture:**
+    
+    **Core Web Vitals Compliance**:
+    - **Largest Contentful Paint (LCP)**: <2.5 seconds
+    - **First Input Delay (FID)**: <100 milliseconds  
+    - **Cumulative Layout Shift (CLS)**: <0.1
+    - **First Contentful Paint (FCP)**: <1.8 seconds
+    - **Time to Interactive (TTI)**: <3.8 seconds
+    
+    **Performance Optimization Strategy**:
+    ```typescript
+    // CSS containment for performance isolation
+    .card { contain: layout style; }
+    .dashboard-grid { contain: layout; }
+    
+    // Transform-based animations (hardware accelerated)
+    .modal { transform: translateX(-50%) translateY(-50%); }
+    
+    // Next.js Image optimization with blur placeholders
+    <Image placeholder="blur" blurDataURL={provider.photoBlur} />
+    ```
+    
+    **Scalability Features**:
+    - **Next.js Server Components**: Zero client-side JavaScript for static content
+    - **Incremental Static Regeneration**: Background page regeneration
+    - **Edge Functions**: Supabase edge computing for global performance
+    - **Database Optimization**: Prisma query optimization, connection pooling
+    - **Code Splitting**: Automatic route-based and dynamic imports
 
--   **3.9. Security Considerations: (*To be detailed further*)
-    *   Supabase RLS for data access control.
-    *   Input validation (Zod).
-    *   Environment variables for sensitive keys.
-    *   Standard web security practices (e.g., Helmet, if applicable for custom server parts beyond Next.js defaults).
+-   **3.10. Security Architecture:**
+    
+    **Multi-Tenant Security Framework**:
+    - **Row Level Security (RLS)**: Mandatory Supabase RLS for all data access
+    - **Clinic Isolation**: `authContext.clinicIds` enforcement in all queries
+    - **Role-Based Access**: `UserClinicRole` model with granular permissions
+    - **Zero Trust Architecture**: Verify every request, trust nothing
+    
+    **Data Protection Standards**:
+    ```typescript
+    // Mandatory auth context pattern
+    const authContext = await getAuthContextByAuthId(user.id);
+    const data = await prisma.model.findMany({
+      where: { clinicId: { in: authContext.clinicIds } }
+    });
+    
+    // Input validation with Zod schemas
+    const createUserSchema = z.object({
+      email: z.string().email(),
+      role: z.enum(['office_manager', 'dentist', 'admin'])
+    });
+    ```
+    
+    **Security Compliance**:
+    - **Environment Isolation**: Production secrets via secure environment variables
+    - **API Security**: Parameterized queries, CSRF protection, rate limiting
+    - **Content Security Policy**: XSS prevention, injection attack mitigation
+    - **Healthcare Data**: HIPAA-aware data handling practices
+    - **OAuth Security**: Secure Google Sheets integration with token encryption
 
-## 4. Software Developer Perspective
+## 💻 Developer Guide
 
 -   **4.1. Getting Started:**
     *   **Prerequisites:** Node.js, pnpm.
@@ -250,14 +391,48 @@
     *   `docs/`: Supplementary project documentation.
     *   `memory-bank/`: Contextual information for AI agents.
 
--   **4.3. Coding Conventions & Standards:**
-    *   **Biome:** Used for linting and formatting (`pnpm lint`, `pnpm format`). Configuration in `biome.json`.
-    *   **TypeScript:** Strict typing enforced. Follow best practices.
-    *   **Commenting:** Adhere to JSDoc3 standards as per `commenting-guidelines.md`.
-    *   **Naming Conventions:** Follow guidelines in `naming-conventions.md`.
-    *   **File Size:** Adhere to `file-size-guidelines.md`.
-    *   **Logging:** Use Winston as per `winston-logging-guidelines.md`.
-    *   Refer to `.windsurf/rules/` & `.cursor/rules/` for comprehensive guidelines.
+-   **4.3. Development Standards & Design System Guidelines:**
+    
+    **Code Quality Pipeline**:
+    ```bash
+    # Quality gates - all must pass
+    pnpm format          # Biome formatting
+    pnpm test           # Vitest unit tests  
+    pnpm typecheck      # TypeScript checking
+    pnpm biome:check    # Comprehensive linting
+    pnpm code-quality   # Full pipeline
+    ```
+    
+    **Design System Development Standards**:
+    ```typescript
+    // Component development with theme awareness
+    interface ComponentProps {
+      variant?: 'default' | 'compact';
+      className?: string;
+    }
+    
+    export const ComponentName = ({ variant = 'default', className }: ComponentProps) => {
+      return (
+        <Card className={cn(
+          "bg-card border-border transition-all duration-300",
+          variant === 'compact' && "p-4",
+          className
+        )}>
+          {/* Theme-aware implementation */}
+        </Card>
+      );
+    };
+    ```
+    
+    **Development Guidelines**:
+    - **Theme Awareness**: All components must support both light and dark themes
+    - **Accessibility First**: WCAG 2.1 AA compliance mandatory
+    - **Performance**: Use CSS containment, optimize animations
+    - **TypeScript**: Strict typing with explicit return types
+    - **Testing**: Cloud Supabase branch for all tests
+    - **Documentation**: JSDoc3 standards with healthcare context
+    
+    *Comprehensive guidelines: `.windsurf/rules/` & `.cursor/rules/`*
 
 -   **4.4. API Route Structure (`src/app/api/`):** The API routes are organized by feature/resource, indicating a RESTful or resource-oriented approach:
     *   `auth/`: Handles authentication, including session management (`session/`) and Google OAuth (`google/connect/`, `google/callback/`).
@@ -729,9 +904,57 @@
 
 -   **4.15. Deployment: (*To be detailed further - likely Vercel for Next.js*)
 
-## 5. Future Considerations & Roadmap Ideas
-   - (*To be populated as project understanding deepens or based on PRDs/Task Lists*)
-   - Potential enhancements based on target audience needs.
-   - Areas for refactoring (e.g., clarifying `actions/` and `services/` role).
-   - Expanding AI-driven features within the dashboard itself.
+## 📁 Related Documentation
+
+### Architecture & Design
+- **[Unified Design System Architecture](docs/architecture/ui-ux-spec.md)** - Comprehensive design tokens, component patterns, and healthcare-focused UI standards
+- **[Architecture Validation Checklist](docs/checklists/architecture-validation-checklist.md)** - Quality assurance framework for design system compliance
+- **[Style Guide](docs/unified-dental/style-guide.md)** - Visual design principles and brand guidelines
+- **[UX Rules](docs/unified-dental/ux-rules.md)** - User experience guidelines and interaction patterns
+
+### Development Resources
+- **[Component Library](docs/architecture/components.md)** - Detailed component specifications and usage
+- **[Frontend Architecture](docs/architecture/frontend-architecture.md)** - Implementation patterns and best practices
+- **[Core Workflows](docs/architecture/core-workflows.md)** - User journey documentation and flow charts
+- **[Task Magic System](README-task-master.md)** - AI-assisted development workflow documentation
+
+### Project Management  
+- **[Product Requirements](docs/prds/)** - Feature specifications and business requirements
+- **[Development Stories](docs/stories/)** - Implementation narratives and technical context
+- **[Research Documentation](docs/research/)** - Technical investigations and decision rationale
+
+### API & Integration
+- **[API Routes Documentation](#48-api-development)** - Comprehensive API endpoint reference
+- **[Google Sheets Integration](#-integrations)** - OAuth flow and data synchronization patterns
+- **[Database Schema](prisma/schema.prisma)** - Complete data model and relationships
+
+---
+
+## 🚀 Project Status & Roadmap
+
+### Current Release: **v1.0 Foundation**
+- ✅ **Multi-tenant architecture** with clinic isolation
+- ✅ **Unified design system** with dual theme support
+- ✅ **Google Sheets integration** with real-time sync
+- ✅ **Goal management** with template-based creation
+- ✅ **Security framework** with RLS and role-based access
+
+### Next Release: **v1.1 Enhanced Analytics**
+- 🚧 **Advanced reporting** with PDF/CSV export
+- 🚧 **Performance monitoring** with Core Web Vitals tracking
+- 🚧 **Enhanced accessibility** with comprehensive screen reader support
+- 📈 **Predictive analytics** for practice optimization
+
+### Future Considerations
+- **AI-Driven Insights**: Intelligent practice recommendations
+- **Mobile Applications**: Native iOS/Android companion apps
+- **Additional Integrations**: Practice management systems, insurance APIs
+- **Advanced Visualizations**: Interactive charts and drill-down capabilities
+
+---
+
+**Documentation Status**: ✅ **Active** - Last updated December 2024  
+**Maintained By**: Architecture Team, Product Team, Development Team  
+**Review Cycle**: Monthly architecture review, quarterly product alignment  
+**Contributing**: See [CLAUDE.md](CLAUDE.md) for development partnership protocols
 

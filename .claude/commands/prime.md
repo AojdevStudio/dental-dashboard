@@ -18,7 +18,7 @@ task_definition:
   instructions:
     - description: 'Run `git ls-files` to understand the codebase structure and file organization.'
       command: 'git ls-files'
-    - description: 'Read the README.md to understand the project purpose, setup instructions, and key information.'
+    - description: 'Read the CLAUDE.md to understand the project purpose, setup instructions, and key information.'
       file: 'README.md'
     - description: 'Read the CHANGELOG.md to understand recent changes and version history.'
       file: 'CHANGELOG.md'
