@@ -198,7 +198,7 @@ describe('Sidebar Navigation - Providers Page Integration', () => {
       
       expect(screen.getByText('Clinic')).toBeInTheDocument();
       expect(screen.getByText('Users')).toBeInTheDocument();
-      expect(screen.getByText('Providers')).toBeInTheDocument(); // Settings sub-item
+      expect(screen.getAllByText('Providers')).toHaveLength(2); // Main nav + Settings sub-item
     });
 
     it('should maintain other links active states independently', () => {

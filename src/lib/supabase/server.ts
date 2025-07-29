@@ -4,7 +4,6 @@
  * configured for use in server-side environments (e.g., Server Components, API Routes).
  */
 
-import { validateServerEnvironment } from '@/lib/config/environment';
 import { type CookieOptions, createServerClient } from '@supabase/ssr';
 import { cookies } from 'next/headers';
 
@@ -27,11 +26,21 @@ import { cookies } from 'next/headers';
 export async function createClient() {
   const cookieStore = await cookies();
 
-  // Use validated environment configuration instead of non-null assertions
-  // This provides clear error messages if configuration is missing
-  const { NEXT_PUBLIC_SUPABASE_URL, NEXT_PUBLIC_SUPABASE_ANON_KEY } = validateServerEnvironment();
+  // Use direct environment access for server client to avoid validation timing issues
+  // The validateServerEnvironment() function can cause timing issues in server contexts
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
-  return createServerClient(NEXT_PUBLIC_SUPABASE_URL, NEXT_PUBLIC_SUPABASE_ANON_KEY, {
+  // Fallback validation with clear error messages
+  if (!(supabaseUrl && supabaseAnonKey)) {
+    throw new Error(
+      `Missing Supabase configuration. Please check your environment variables:
+      NEXT_PUBLIC_SUPABASE_URL: ${supabaseUrl ? '✓' : '✗ Missing'}
+      NEXT_PUBLIC_SUPABASE_ANON_KEY: ${supabaseAnonKey ? '✓' : '✗ Missing'}`
+    );
+  }
+
+  return createServerClient(supabaseUrl, supabaseAnonKey, {
     cookies: {
       getAll() {
         return cookieStore.getAll();

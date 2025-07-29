@@ -1,5 +1,5 @@
-import { DataMigration } from '@/scripts/data-migration/migrate-to-uuid';
-import { MigrationValidator } from '@/scripts/data-migration/validate-migration';
+import { DataMigration } from '@/scripts/database/data-migration/migrate-to-uuid';
+import { MigrationValidator } from '@/scripts/database/data-migration/validate-migration';
 import { PrismaClient } from '@prisma/client';
 import { v4 as uuidv4 } from 'uuid';
 /**

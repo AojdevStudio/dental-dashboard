@@ -4,7 +4,6 @@
  * configured for use in client-side (browser) environments.
  */
 
-import { validateClientEnvironment } from '@/lib/config/environment';
 import { createBrowserClient } from '@supabase/ssr';
 
 /**
@@ -18,9 +17,19 @@ import { createBrowserClient } from '@supabase/ssr';
  * @throws {Error} If required environment variables are not properly configured.
  */
 export function createClient() {
-  // Use validated environment configuration instead of non-null assertions
-  // This provides clear error messages if configuration is missing
-  const { NEXT_PUBLIC_SUPABASE_URL, NEXT_PUBLIC_SUPABASE_ANON_KEY } = validateClientEnvironment();
+  // Use direct environment access for browser client to avoid validation timing issues
+  // The validateClientEnvironment() function was causing hydration errors
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
-  return createBrowserClient(NEXT_PUBLIC_SUPABASE_URL, NEXT_PUBLIC_SUPABASE_ANON_KEY);
+  // Fallback validation with clear error messages
+  if (!(supabaseUrl && supabaseAnonKey)) {
+    throw new Error(
+      `Missing Supabase configuration. Please check your environment variables:
+      NEXT_PUBLIC_SUPABASE_URL: ${supabaseUrl ? '✓' : '✗ Missing'}
+      NEXT_PUBLIC_SUPABASE_ANON_KEY: ${supabaseAnonKey ? '✓' : '✗ Missing'}`
+    );
+  }
+
+  return createBrowserClient(supabaseUrl, supabaseAnonKey);
 }

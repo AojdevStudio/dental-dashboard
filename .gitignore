@@ -38,6 +38,14 @@ yarn-error.log*
 .env.test.local
 .env.production.local
 .env
+.env.test
+
+# Security - Never commit files with credentials
+GITHUB-SECRETS-SETUP.md
+*-SECRETS-*.md
+
+# Generated reports (hook-generated, temporary)
+docs/reports/code-quality-session-*.md
 
 # vercel
 .vercel
@@ -59,6 +67,9 @@ logs
 
 # Storybook
 storybook-static/
+
+# Claude backup directory
+.claude.bak/
 
 # Added by Claude Task Master
 dev-debug.log
@@ -86,6 +97,3 @@ repomix-*.xml
 repomix.config.json
 
 .agentic-tdd-archives/
-
-#Claude
-*claude.md

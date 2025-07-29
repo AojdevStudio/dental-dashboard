@@ -1,0 +1,202 @@
+{
+  "taskId": "AOJ-63",
+  "taskTitle": "Provider Dashboard Visualizations with KPI Charts and Real Database Data",
+  "decompositionStrategy": "parallel_feature_streams",
+  "estimatedTotalTime": "30 minutes",
+  "parallelismFactor": "5.7x faster than sequential",
+  "parallelAgents": [
+    {
+      "agentId": "routing_agent",
+      "agentRole": "Fix provider detail routing and 404 errors",
+      "focusArea": "Navigation & Routing",
+      "dependencies": [],
+      "filesToCreate": ["app/providers/[id]/page.tsx", "app/providers/[id]/loading.tsx"],
+      "filesToModify": ["lib/routing.ts", "components/navigation.tsx"],
+      "testContracts": ["routing.test.js", "navigation.test.js"],
+      "validationCriteria": [
+        "All provider links navigate correctly",
+        "No 404 errors on provider detail pages",
+        "Navigation breadcrumbs work"
+      ],
+      "estimatedTime": "20 minutes",
+      "canStartImmediately": true,
+      "workspaceSetup": {
+        "contextFile": "workspaces/routing_agent/agent_context.json",
+        "fileList": "workspaces/routing_agent/files_to_work_on.txt",
+        "testContracts": "workspaces/routing_agent/test_contracts.txt",
+        "checklist": "workspaces/routing_agent/validation_checklist.txt"
+      }
+    },
+    {
+      "agentId": "chart_agent",
+      "agentRole": "Build KPI chart components and visualization library",
+      "focusArea": "Data Visualization",
+      "dependencies": [],
+      "filesToCreate": [
+        "components/charts/KPIChart.tsx",
+        "components/charts/ProviderMetrics.tsx",
+        "lib/chart-utils.ts"
+      ],
+      "filesToModify": ["lib/chart-config.ts", "components/ui/chart.tsx"],
+      "testContracts": ["chart-components.test.js", "visualization.test.js"],
+      "validationCriteria": [
+        "Charts render with mock data",
+        "Responsive design works on mobile",
+        "Chart interactions function properly"
+      ],
+      "estimatedTime": "25 minutes",
+      "canStartImmediately": true,
+      "workspaceSetup": {
+        "contextFile": "workspaces/chart_agent/agent_context.json",
+        "fileList": "workspaces/chart_agent/files_to_work_on.txt",
+        "testContracts": "workspaces/chart_agent/test_contracts.txt",
+        "checklist": "workspaces/chart_agent/validation_checklist.txt"
+      }
+    },
+    {
+      "agentId": "routing_agent",
+      "agentRole": "Fix provider detail routing and 404 errors",
+      "focusArea": "Navigation & Routing",
+      "dependencies": [],
+      "filesToCreate": ["app/providers/[id]/page.tsx", "app/providers/[id]/loading.tsx"],
+      "filesToModify": ["lib/routing.ts", "components/navigation.tsx"],
+      "testContracts": ["routing.test.js", "navigation.test.js"],
+      "validationCriteria": [
+        "All provider links navigate correctly",
+        "No 404 errors on provider detail pages",
+        "Navigation breadcrumbs work"
+      ],
+      "estimatedTime": "20 minutes",
+      "canStartImmediately": true,
+      "workspaceSetup": {
+        "contextFile": "workspaces/routing_agent/agent_context.json",
+        "fileList": "workspaces/routing_agent/files_to_work_on.txt",
+        "testContracts": "workspaces/routing_agent/test_contracts.txt",
+        "checklist": "workspaces/routing_agent/validation_checklist.txt"
+      }
+    },
+    {
+      "agentId": "chart_agent",
+      "agentRole": "Build KPI chart components and visualization library",
+      "focusArea": "Data Visualization",
+      "dependencies": [],
+      "filesToCreate": [
+        "components/charts/KPIChart.tsx",
+        "components/charts/ProviderMetrics.tsx",
+        "lib/chart-utils.ts"
+      ],
+      "filesToModify": ["lib/chart-config.ts", "components/ui/chart.tsx"],
+      "testContracts": ["chart-components.test.js", "visualization.test.js"],
+      "validationCriteria": [
+        "Charts render with mock data",
+        "Responsive design works on mobile",
+        "Chart interactions function properly"
+      ],
+      "estimatedTime": "25 minutes",
+      "canStartImmediately": true,
+      "workspaceSetup": {
+        "contextFile": "workspaces/chart_agent/agent_context.json",
+        "fileList": "workspaces/chart_agent/files_to_work_on.txt",
+        "testContracts": "workspaces/chart_agent/test_contracts.txt",
+        "checklist": "workspaces/chart_agent/validation_checklist.txt"
+      }
+    },
+    {
+      "agentId": "chart_agent",
+      "agentRole": "Build KPI chart components and visualization library",
+      "focusArea": "Data Visualization",
+      "dependencies": [],
+      "filesToCreate": [
+        "components/charts/KPIChart.tsx",
+        "components/charts/ProviderMetrics.tsx",
+        "lib/chart-utils.ts"
+      ],
+      "filesToModify": ["lib/chart-config.ts", "components/ui/chart.tsx"],
+      "testContracts": ["chart-components.test.js", "visualization.test.js"],
+      "validationCriteria": [
+        "Charts render with mock data",
+        "Responsive design works on mobile",
+        "Chart interactions function properly"
+      ],
+      "estimatedTime": "25 minutes",
+      "canStartImmediately": true,
+      "workspaceSetup": {
+        "contextFile": "workspaces/chart_agent/agent_context.json",
+        "fileList": "workspaces/chart_agent/files_to_work_on.txt",
+        "testContracts": "workspaces/chart_agent/test_contracts.txt",
+        "checklist": "workspaces/chart_agent/validation_checklist.txt"
+      }
+    },
+    {
+      "agentId": "data_agent",
+      "agentRole": "Implement KPI calculations and database integration",
+      "focusArea": "Data Layer",
+      "dependencies": [],
+      "filesToCreate": ["lib/kpi-calculations.ts", "lib/provider-analytics.ts"],
+      "filesToModify": ["lib/api/providers.ts", "lib/database/queries.ts"],
+      "testContracts": ["api.test.js", "data-integration.test.js", "kpi-logic.test.js"],
+      "validationCriteria": [
+        "KPI calculations are accurate",
+        "Database queries perform well",
+        "Data transformations work correctly"
+      ],
+      "estimatedTime": "30 minutes",
+      "canStartImmediately": true,
+      "workspaceSetup": {
+        "contextFile": "workspaces/data_agent/agent_context.json",
+        "fileList": "workspaces/data_agent/files_to_work_on.txt",
+        "testContracts": "workspaces/data_agent/test_contracts.txt",
+        "checklist": "workspaces/data_agent/validation_checklist.txt"
+      }
+    },
+    {
+      "agentId": "chart_agent",
+      "agentRole": "Build KPI chart components and visualization library",
+      "focusArea": "Data Visualization",
+      "dependencies": [],
+      "filesToCreate": [
+        "components/charts/KPIChart.tsx",
+        "components/charts/ProviderMetrics.tsx",
+        "lib/chart-utils.ts"
+      ],
+      "filesToModify": ["lib/chart-config.ts", "components/ui/chart.tsx"],
+      "testContracts": ["chart-components.test.js", "visualization.test.js"],
+      "validationCriteria": [
+        "Charts render with mock data",
+        "Responsive design works on mobile",
+        "Chart interactions function properly"
+      ],
+      "estimatedTime": "25 minutes",
+      "canStartImmediately": true,
+      "workspaceSetup": {
+        "contextFile": "workspaces/chart_agent/agent_context.json",
+        "fileList": "workspaces/chart_agent/files_to_work_on.txt",
+        "testContracts": "workspaces/chart_agent/test_contracts.txt",
+        "checklist": "workspaces/chart_agent/validation_checklist.txt"
+      }
+    }
+  ],
+  "integrationPlan": {
+    "mergeOrder": [
+      "routing_agent",
+      "chart_agent",
+      "routing_agent",
+      "chart_agent",
+      "chart_agent",
+      "data_agent",
+      "chart_agent"
+    ],
+    "validationSteps": [
+      "Run agent-specific tests",
+      "Cross-agent integration tests",
+      "Full test suite validation",
+      "E2E testing"
+    ],
+    "estimatedIntegrationTime": "10 minutes"
+  },
+  "coordination": {
+    "statusFile": "shared/coordination/parallel-agent-status.json",
+    "resultsAggregation": "shared/coordination/agent-results.json",
+    "conflictResolution": "shared/coordination/merge-conflicts.json"
+  }
+}

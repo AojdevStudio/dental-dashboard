@@ -50,11 +50,23 @@ interface Location {
   isActive: boolean;
 }
 
+interface ProcessedRecord {
+  locationName: string;
+  date: string;
+  production: number;
+  status: string;
+}
+
 Deno.serve(async (req: Request) => {
+  console.log('🚀 FUNCTION START: Edge function invoked at', new Date().toISOString());
+  console.log('📥 REQUEST METHOD:', req.method);
+  console.log('📥 REQUEST URL:', req.url);
+  
   const startTime = Date.now();
 
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
+    console.log('✅ CORS: Handling OPTIONS preflight request');
     return new Response(null, {
       status: 200,
       headers: {
@@ -67,6 +79,7 @@ Deno.serve(async (req: Request) => {
 
   // Only allow POST requests
   if (req.method !== 'POST') {
+    console.log('❌ METHOD: Invalid method', req.method, 'expected POST');
     return new Response(
       JSON.stringify({
         success: false,
@@ -81,12 +94,19 @@ Deno.serve(async (req: Request) => {
       }
     );
   }
+  
+  console.log('✅ METHOD: POST request confirmed');
 
   try {
+    console.log('🔧 ENV: Reading environment variables...');
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
     const supabaseServiceRoleKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
+    
+    console.log('🔧 ENV: SUPABASE_URL present:', !!supabaseUrl);
+    console.log('🔧 ENV: SERVICE_ROLE_KEY present:', !!supabaseServiceRoleKey);
 
     if (!(supabaseUrl && supabaseServiceRoleKey)) {
+      console.log('❌ ENV: Missing environment variables');
       return new Response(
         JSON.stringify({
           success: false,
@@ -101,18 +121,68 @@ Deno.serve(async (req: Request) => {
         }
       );
     }
+    
+    console.log('✅ ENV: Environment variables validated');
 
+    console.log('🔗 CLIENT: Creating Supabase client...');
     const supabase = createClient(supabaseUrl, supabaseServiceRoleKey, {
       auth: {
         autoRefreshToken: false,
         persistSession: false,
       },
     });
-    const body: ImportRequest = await req.json();
+    console.log('✅ CLIENT: Supabase client created');
+    
+    console.log('📦 BODY: Reading request body...');
+    let body: ImportRequest;
+    try {
+      body = await req.json();
+      console.log('📦 BODY: Request body parsed successfully');
+    } catch (jsonError) {
+      console.error('💥 JSON: Failed to parse request body');
+      console.error('💥 JSON ERROR:', jsonError);
+      throw new Error(`Invalid JSON in request body: ${jsonError instanceof Error ? jsonError.message : String(jsonError)}`);
+    }
+    
     const { clinicId, dataSourceId, records, upsert = true, dryRun = false } = body;
+    console.log('📦 BODY: Extracted variables - clinicId:', !!clinicId, 'dataSourceId:', !!dataSourceId, 'records:', records?.length || 0);
+
+    // DEBUG: Log received request details
+    try {
+      console.log('🔍 DEBUG: Attempting to log request body...');
+      console.log('Received request body:', JSON.stringify(body, null, 2));
+      console.log('🔍 DEBUG: Request body logged successfully');
+    } catch (jsonError) {
+      console.error('💥 DEBUG: Failed to stringify body:', jsonError);
+      console.log('🔍 DEBUG: Body type:', typeof body);
+      console.log('🔍 DEBUG: Body keys:', Object.keys(body || {}));
+    }
+    
+    console.log('clinicId:', clinicId, 'records length:', records?.length);
+
+    // DETAILED VALIDATION DEBUGGING
+    console.log('🔍 VALIDATION: Starting request validation...');
+    
+    try {
+      console.log('🔍 VALIDATION: clinicId present:', !!clinicId);
+      console.log('🔍 VALIDATION: clinicId type:', typeof clinicId);
+      console.log('🔍 VALIDATION: clinicId value:', clinicId);
+      
+      console.log('🔍 VALIDATION: records present:', !!records);
+      console.log('🔍 VALIDATION: records type:', typeof records);
+      console.log('🔍 VALIDATION: records is array:', Array.isArray(records));
+      console.log('🔍 VALIDATION: records length:', records?.length);
+      console.log('🔍 VALIDATION: records length > 0:', (records?.length || 0) > 0);
+    } catch (validationError) {
+      console.error('💥 VALIDATION: Error during validation debugging:', validationError);
+    }
 
     // Validate required fields and request size limits
     if (!(clinicId && records && Array.isArray(records)) || records.length === 0) {
+      console.log('❌ VALIDATION: Validation failed');
+      console.log('❌ VALIDATION: Failing condition - clinicId && records && Array.isArray(records):', !!(clinicId && records && Array.isArray(records)));
+      console.log('❌ VALIDATION: Failing condition - records.length === 0:', records?.length === 0);
+      
       return new Response(
         JSON.stringify({
           success: false,
@@ -127,6 +197,8 @@ Deno.serve(async (req: Request) => {
         }
       );
     }
+    
+    console.log('✅ VALIDATION: Request validation passed');
 
     // SECURITY: Limit request size to prevent abuse
     if (records.length > 5000) {
@@ -144,6 +216,8 @@ Deno.serve(async (req: Request) => {
         }
       );
     }
+
+    // Edge function uses service role - no RLS context needed for clinic validation
 
     const clinicQueryStart = Date.now();
     const { data: clinic, error: clinicError } = await supabase
@@ -194,6 +268,81 @@ Deno.serve(async (req: Request) => {
         }
       );
     }
+
+    // PHASE 1: DATA SOURCE MANAGEMENT
+    // Ensure data source exists or create it
+    let resolvedDataSourceId: string | null = null;
+    
+    if (dataSourceId) {
+      console.log('Managing data source:', dataSourceId);
+      
+      try {
+        // Check if data source already exists
+        const { data: existingDataSource, error: dsQueryError } = await supabase
+          .from('data_sources')
+          .select('id, name, connection_status')
+          .eq('id', dataSourceId)
+          .maybeSingle();
+
+        if (dsQueryError) {
+          console.error('Error querying data source:', dsQueryError);
+          // Continue without data source if query fails
+        } else if (existingDataSource) {
+          console.log('Found existing data source:', existingDataSource.name);
+          resolvedDataSourceId = existingDataSource.id;
+        } else {
+          // Create new data source
+          console.log('Creating new data source:', dataSourceId);
+          
+          // Use provided metadata or sensible defaults
+          const spreadsheetId = body.spreadsheetId || `unknown-spreadsheet-${Date.now()}`;
+          const sheetName = body.sheetName || 'Financial Data';
+          const spreadsheetName = body.spreadsheetName || 'Location Financial Data';
+          
+          const newDataSource = {
+            id: dataSourceId,
+            name: spreadsheetName,
+            spreadsheet_id: spreadsheetId,
+            sheet_name: sheetName,
+            clinic_id: clinicId,
+            sync_frequency: 'manual',
+            connection_status: 'active',
+            access_token: 'service-role-access', // Using service role for edge function
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString(),
+          };
+          
+          console.log('🔍 DATA_SOURCE: Creating with metadata:', {
+            spreadsheetId,
+            sheetName,
+            spreadsheetName,
+            clinicId
+          });
+
+          const { data: createdDataSource, error: dsCreateError } = await supabase
+            .from('data_sources')
+            .insert(newDataSource)
+            .select('id')
+            .single();
+
+          if (dsCreateError) {
+            console.error('Failed to create data source:', dsCreateError);
+            console.log('Continuing without data source reference...');
+            // Continue processing without data source - set to null
+            resolvedDataSourceId = null;
+          } else {
+            console.log('Successfully created data source:', createdDataSource.id);
+            resolvedDataSourceId = createdDataSource.id;
+          }
+        }
+      } catch (error) {
+        console.error('Data source management error:', error);
+        // Continue processing without data source
+        resolvedDataSourceId = null;
+      }
+    }
+    
+    console.log('Resolved data source ID:', resolvedDataSourceId);
 
     // Create location name to ID mapping
     const locationMap = new Map<string, Location>();
@@ -340,7 +489,7 @@ Deno.serve(async (req: Request) => {
           insuranceIncome,
           totalCollections,
           unearned,
-          dataSourceId,
+          dataSourceId: resolvedDataSourceId,
         });
       } catch (error) {
         errors.push(
@@ -383,7 +532,7 @@ Deno.serve(async (req: Request) => {
       failed: 0,
     };
 
-    const processedRecords = [];
+    const processedRecords: ProcessedRecord[] = [];
 
     if (upsert && validRecords.length > 0) {
       // PERFORMANCE FIX: Batch check for existing records
@@ -423,7 +572,7 @@ Deno.serve(async (req: Request) => {
             insuranceIncome: item.insuranceIncome,
             totalCollections: item.totalCollections,
             unearned: item.unearned,
-            // Skip data_source_id for now - table is empty and has complex requirements
+            data_source_id: item.dataSourceId, // Now using resolved data source ID
           };
 
           const existingId = existingMap.get(recordKey);
@@ -436,6 +585,8 @@ Deno.serve(async (req: Request) => {
               .eq('id', existingId);
 
             if (error) {
+              console.error('Database update error:', error);
+              console.error('Failed record data:', JSON.stringify(recordData, null, 2));
               throw error;
             }
             results.updated++;
@@ -448,6 +599,8 @@ Deno.serve(async (req: Request) => {
             });
 
             if (error) {
+              console.error('Database insert error:', error);
+              console.error('Failed record data:', JSON.stringify(recordData, null, 2));
               throw error;
             }
             results.created++;
@@ -483,7 +636,7 @@ Deno.serve(async (req: Request) => {
             insuranceIncome: item.insuranceIncome,
             totalCollections: item.totalCollections,
             unearned: item.unearned,
-            // Skip data_source_id for now - table is empty and has complex requirements
+            data_source_id: item.dataSourceId, // Now using resolved data source ID
           };
 
           const { error } = await supabase.from('location_financial').insert({
@@ -493,6 +646,8 @@ Deno.serve(async (req: Request) => {
           });
 
           if (error) {
+            console.error('Database insert error (non-upsert):', error);
+            console.error('Failed record data:', JSON.stringify(recordData, null, 2));
             throw error;
           }
 
@@ -514,14 +669,26 @@ Deno.serve(async (req: Request) => {
       }
     }
 
-    // Update data source sync timestamp if provided
-    if (dataSourceId && results.created + results.updated > 0) {
+    // PHASE 3: UPDATE DATA SOURCE SYNC METADATA
+    if (resolvedDataSourceId && results.created + results.updated > 0) {
       try {
-        await supabase
+        console.log('Updating data source sync timestamp:', resolvedDataSourceId);
+        const { error: syncUpdateError } = await supabase
           .from('data_sources')
-          .update({ last_synced_at: new Date().toISOString() })
-          .eq('id', dataSourceId);
-      } catch (_error) {}
+          .update({ 
+            last_synced_at: new Date().toISOString(),
+            updated_at: new Date().toISOString()
+          })
+          .eq('id', resolvedDataSourceId);
+          
+        if (syncUpdateError) {
+          console.error('Failed to update data source sync timestamp:', syncUpdateError);
+        } else {
+          console.log('Successfully updated data source sync timestamp');
+        }
+      } catch (error) {
+        console.error('Error updating data source metadata:', error);
+      }
     }
 
     const totalTime = Date.now() - startTime;
@@ -535,6 +702,17 @@ Deno.serve(async (req: Request) => {
         processedRecords: processedRecords.slice(0, 10),
         totalProcessed: processedRecords.length,
         executionTime: totalTime,
+        dataSource: {
+          id: resolvedDataSourceId,
+          name: resolvedDataSourceId ? 'Google Sheets Location Financial Sync' : null,
+          status: resolvedDataSourceId ? 'active' : 'not_configured',
+        },
+        audit: {
+          clinicId,
+          syncedAt: new Date().toISOString(),
+          recordsProcessed: processedRecords.length,
+          dataSourceUsed: !!resolvedDataSourceId,
+        },
       }),
       {
         status: 200,
@@ -546,6 +724,14 @@ Deno.serve(async (req: Request) => {
     );
   } catch (error) {
     const totalTime = Date.now() - startTime;
+    
+    console.error('💥 FATAL ERROR: Unhandled exception in edge function');
+    console.error('💥 ERROR TYPE:', typeof error);
+    console.error('💥 ERROR INSTANCEOF Error:', error instanceof Error);
+    console.error('💥 ERROR MESSAGE:', error instanceof Error ? error.message : String(error));
+    console.error('💥 ERROR STACK:', error instanceof Error ? error.stack : 'No stack trace');
+    console.error('💥 ERROR FULL OBJECT:', JSON.stringify(error, null, 2));
+    console.error('💥 EXECUTION TIME:', totalTime, 'ms');
 
     return new Response(
       JSON.stringify({
@@ -554,6 +740,11 @@ Deno.serve(async (req: Request) => {
         details: error instanceof Error ? error.message : 'Unknown error',
         stack: error instanceof Error ? error.stack : undefined,
         executionTime: totalTime,
+        debugInfo: {
+          errorType: typeof error,
+          errorString: String(error),
+          timestamp: new Date().toISOString(),
+        },
       }),
       {
         status: 500,

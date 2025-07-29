@@ -32,13 +32,16 @@ const getProvidersHandler: ApiHandler = async (
     const { page, limit } = getPaginationParams(searchParams);
 
     // Apply multi-tenant filtering - providers can only see providers from their clinic
+    // Exception: System admins can see all providers when no specific clinic is requested
     const filters = {
       ...queryParams,
       clinicId:
         queryParams.clinicId ||
-        (authContext.clinicIds && authContext.clinicIds.length > 0
-          ? authContext.clinicIds[0]
-          : undefined),
+        (authContext.isSystemAdmin
+          ? undefined // System admins see all providers when no specific clinic requested
+          : authContext.clinicIds && authContext.clinicIds.length > 0
+            ? authContext.clinicIds[0]
+            : undefined),
     };
 
     // Fetch providers with database-level pagination

@@ -8,10 +8,28 @@
 import { createClient, type SupabaseClient } from '@supabase/supabase-js';
 import { v4 as uuidv4 } from 'uuid';
 
-// Use environment variables for Supabase credentials
+// CRITICAL SAFETY CHECK: Prevent production database contamination
+if (process.env.NODE_ENV === 'production') {
+  throw new Error('❌ RLS test helpers cannot be used in production environment!');
+}
+
+if (process.env.NEXT_PUBLIC_SUPABASE_URL?.includes('supabase.co')) {
+  throw new Error('❌ RLS test helpers detected production Supabase URL! Use local test database only.');
+}
+
+if (!process.env.NEXT_PUBLIC_SUPABASE_URL?.includes('localhost')) {
+  throw new Error('❌ RLS test helpers must use localhost test database. Current URL: ' + process.env.NEXT_PUBLIC_SUPABASE_URL);
+}
+
+// Use environment variables for Supabase credentials - MUST be localhost for tests
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || 'http://localhost:54321';
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '';
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || '';
+
+// Additional validation
+if (!supabaseUrl.includes('localhost')) {
+  throw new Error('❌ Test helpers can only connect to localhost Supabase instance!');
+}
 
 // Admin client for setting up tests (bypasses RLS)
 export const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey);

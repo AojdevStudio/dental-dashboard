@@ -130,8 +130,7 @@ describe('Providers Error Boundary Component', () => {
    * object and optional digest property.
    */
   it('accepts error object with optional digest property', () => {
-    const errorWithDigest = new Error('Test') as Error & { digest?: string };
-    errorWithDigest.digest = 'abc123';
+    const errorWithDigest = Object.assign(new Error('Test'), { digest: 'abc123' }) as Error & { digest?: string };
     
     const mockReset = vi.fn();
     
@@ -216,8 +215,9 @@ describe('Providers Error Boundary Component', () => {
    * preserve the error prop for potential logging.
    */
   it('preserves error context for logging purposes', () => {
-    const testError = new Error('Critical database failure');
-    testError.stack = 'Error stack trace...';
+    const testError = Object.assign(new Error('Critical database failure'), { 
+      stack: 'Error stack trace...' 
+    });
     
     const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
     

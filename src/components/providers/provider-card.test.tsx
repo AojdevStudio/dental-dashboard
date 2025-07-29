@@ -3,8 +3,17 @@ import React from 'react';
 import { describe, expect, it, vi } from 'vitest';
 import { render, screen, within, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { CompactProviderCard, ProviderCard } from './provider-card'; // Ensure ProviderCard is imported if Actions is used directly
 import type { ProviderWithLocations } from '../../types/providers';
+
+// Create a test query client
+const createTestQueryClient = () => new QueryClient({
+  defaultOptions: {
+    queries: { retry: false },
+    mutations: { retry: false },
+  },
+});
 
 // Mock provider data
 const mockProvider: ProviderWithLocations = {
@@ -77,12 +86,15 @@ describe('CompactProviderCard', () => {
   it('should call onManageLocations with the provider when "Manage Locations" is clicked', async () => {
     const user = userEvent.setup();
     const mockOnManageLocations = vi.fn();
+    const queryClient = createTestQueryClient();
 
     render(
-      <CompactProviderCard
-        provider={mockProvider}
-        onManageLocations={mockOnManageLocations}
-      />
+      <QueryClientProvider client={queryClient}>
+        <CompactProviderCard
+          provider={mockProvider}
+          onManageLocations={mockOnManageLocations}
+        />
+      </QueryClientProvider>
     );
 
     // Find the dropdown trigger button by its accessible name
@@ -108,8 +120,13 @@ describe('CompactProviderCard', () => {
 
   it('should not render "Manage Locations" menu item if onManageLocations is not provided', async () => {
     const user = userEvent.setup();
+    const queryClient = createTestQueryClient();
 
-    render(<CompactProviderCard provider={mockProvider} />);
+    render(
+      <QueryClientProvider client={queryClient}>
+        <CompactProviderCard provider={mockProvider} />
+      </QueryClientProvider>
+    );
 
     const menuTriggerButton = screen.getByRole('button', { name: /more actions/i });
     await user.click(menuTriggerButton);

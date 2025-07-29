@@ -519,5 +519,5 @@ function createProvider({ name, email, phone, address, specialty }: ProviderInpu
 
 ---
 
-**Last Updated**: December 2024
+**Last Updated**: June 2025
 **Navigation**: [Back to Architecture Index](./index.md)

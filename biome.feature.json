@@ -1,0 +1,48 @@
+{
+  "$schema": "https://biomejs.dev/schemas/1.9.4/schema.json",
+  "extends": ["./biome.json"],
+  "linter": {
+    "rules": {
+      "suspicious": {
+        "noExplicitAny": "warn"
+      },
+      "complexity": {
+        "noExcessiveCognitiveComplexity": "warn",
+        "noForEach": "warn",
+        "useArrowFunction": "warn"
+      },
+      "style": {
+        "noNonNullAssertion": "error",
+        "useConst": "warn",
+        "useTemplate": "warn",
+        "noVar": "warn",
+        "useNodejsImportProtocol": "warn",
+        "useNumberNamespace": "warn",
+        "useImportType": "warn",
+        "useExportType": "warn",
+        "noInferrableTypes": "warn",
+        "noNamespace": "warn",
+        "useAsConstAssertion": "warn",
+        "noCommaOperator": "warn",
+        "noParameterAssign": "warn",
+        "useDefaultParameterLast": "warn",
+        "useEnumInitializers": "warn",
+        "useExponentiationOperator": "warn",
+        "useNumericLiterals": "warn",
+        "useShorthandFunctionType": "warn",
+        "useSingleVarDeclarator": "warn",
+        "noUselessElse": "warn",
+        "noUnusedTemplateLiteral": "warn",
+        "useSelfClosingElements": "warn",
+        "useWhile": "warn"
+      },
+      "correctness": {
+        "noUnusedVariables": "warn",
+        "noUnusedImports": "warn"
+      },
+      "nursery": {
+        "noConsole": "warn"
+      }
+    }
+  }
+}

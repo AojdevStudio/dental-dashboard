@@ -2,7 +2,7 @@ import { describe, it, expect, beforeAll, afterAll, beforeEach, vi } from 'vites
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { createClient } from '@supabase/supabase-js';
-import { prisma } from '@/lib/database/prisma';
+import { prisma } from '@/lib/database/client';
 import { v4 as uuidv4 } from 'uuid';
 import ProvidersPage from './page';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';

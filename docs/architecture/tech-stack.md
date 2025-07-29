@@ -1,5 +1,10 @@
 # Technology Stack
 
+## ⚠️ CRITICAL: Package Manager
+**ALWAYS use `pnpm` for ALL commands. NEVER use `npm` or `yarn`.**
+- Commands: `pnpm install`, `pnpm dev`, `pnpm test`, `pnpm biome:fix`
+- See: `docs/architecture/dev-command-guidelines.md` for complete reference
+
 ## Overview
 
 This document details all technologies, frameworks, libraries, and tools used in the Dental Dashboard project. Each technology is listed with its specific version, purpose, and key considerations for AI agents working with the codebase.

@@ -1,0 +1,44 @@
+id: d119ddb4-72b9-4830-9c48-a2267c5ea03e
+identifier: AOJ-103
+title: '🔴 CRITICAL: Fix CI/CD Pipeline Failures from PR #55'
+description: |-
+  ## Priority: 🔴 Critical
+
+  ## Context
+
+  PR [AojdevStudio/dental-dashboard#55](https://linear.app/aojdevstudio/review/featdashboard-provider-dashboard-visualizations-with-kpi-charts-a0381ae4a480) introduced CI/CD failures that need immediate resolution.
+
+  ## Current Failures
+
+  * **Code Quality Checks**: Failing (likely Biome linting errors)
+  * **Dependency Security Audit**: Failing
+
+  ## Tasks
+
+  - [ ] Run `pnpm format` and `pnpm biome:check` locally to identify issues
+  - [ ] Fix all Biome linting errors
+  - [ ] Run `pnpm audit` to identify security vulnerabilities
+  - [ ] Update or replace vulnerable dependencies
+  - [ ] Ensure all quality gates pass (`pnpm code-quality`)
+  - [ ] Verify CI passes on new PR
+
+  ## Acceptance Criteria
+
+  * All CI checks passing green
+  * No security vulnerabilities in dependencies
+  * Code adheres to project quality standards
+
+  ## References
+
+  * Related PR: [AojdevStudio/dental-dashboard#55](https://linear.app/aojdevstudio/review/featdashboard-provider-dashboard-visualizations-with-kpi-charts-a0381ae4a480)
+  * Branch: feature/story-1-1-provider-dashboard-visualizations-base
+priority: 0
+priorityLabel: No priority
+state:
+  name: Backlog
+assignee:
+team:
+  name: AOJDevstudio
+project:
+createdAt: '2025-07-19T19:10:03.000Z'
+updatedAt: '2025-07-19T19:10:05.004Z'

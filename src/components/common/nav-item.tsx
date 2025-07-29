@@ -18,6 +18,66 @@ interface NavItemComponentProps {
   onItemClick?: (itemId: string) => void;
 }
 
+// Helper function to determine if nav item is active
+function checkIsActive(href: string, pathname: string | null): boolean {
+  if (!pathname) {
+    return false;
+  }
+  if (href === '/') {
+    return pathname === '/';
+  }
+  if (href === '/dashboard') {
+    return pathname === '/dashboard';
+  }
+  return pathname === href || pathname.startsWith(`${href}/`);
+}
+
+// Extracted component for nav item content
+function NavItemContent({
+  item,
+  isActive,
+  isCollapsed,
+  isNested,
+  isExpanded,
+  hasChildren,
+}: {
+  item: NavItem;
+  isActive: boolean;
+  isCollapsed: boolean;
+  isNested: boolean;
+  isExpanded: boolean;
+  hasChildren: boolean;
+}) {
+  const iconElement = item.icon && (
+    <item.icon
+      className={cn('h-5 w-5 flex-shrink-0', isActive ? 'text-primary' : 'text-muted-foreground')}
+      aria-hidden="true"
+    />
+  );
+
+  if (isCollapsed) {
+    return <>{iconElement}</>;
+  }
+
+  return (
+    <>
+      {iconElement}
+      <span className={cn('flex-1 truncate', isNested ? 'text-sm' : '')}>{item.title}</span>
+      {item.badge && (
+        <Badge variant="secondary" className="ml-auto">
+          {item.badge}
+        </Badge>
+      )}
+      {hasChildren && (
+        <ChevronDown
+          className={cn('h-4 w-4 transition-transform', isExpanded && 'rotate-180')}
+          aria-hidden="true"
+        />
+      )}
+    </>
+  );
+}
+
 export function NavItemComponent({
   item,
   isCollapsed = false,
@@ -27,11 +87,8 @@ export function NavItemComponent({
   onItemClick,
 }: NavItemComponentProps) {
   const pathname = usePathname();
-  const isActive =
-    item.href === '/'
-      ? pathname === '/'
-      : pathname === item.href || pathname?.startsWith(`${item.href}/`);
-  const hasChildren = item.children && item.children.length > 0;
+  const isActive = checkIsActive(item.href, pathname);
+  const hasChildren = Boolean(item.children && item.children.length > 0);
 
   const handleClick = (e: React.MouseEvent) => {
     if (hasChildren && onToggle) {
@@ -43,35 +100,17 @@ export function NavItemComponent({
     }
   };
 
-  const content = (
-    <>
-      {item.icon && (
-        <item.icon
-          className={cn(
-            'h-5 w-5 flex-shrink-0',
-            isActive ? 'text-primary' : 'text-muted-foreground'
-          )}
-          aria-hidden="true"
-        />
-      )}
-      {!isCollapsed && (
-        <>
-          <span className={cn('flex-1 truncate', isNested ? 'text-sm' : '')}>{item.title}</span>
-          {item.badge && (
-            <Badge variant="secondary" className="ml-auto">
-              {item.badge}
-            </Badge>
-          )}
-          {hasChildren && (
-            <ChevronDown
-              className={cn('h-4 w-4 transition-transform', isExpanded && 'rotate-180')}
-              aria-hidden="true"
-            />
-          )}
-        </>
-      )}
-    </>
-  );
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === ' ') {
+      e.preventDefault();
+      if (hasChildren && onToggle) {
+        onToggle();
+      }
+      if (onItemClick) {
+        onItemClick(item.id);
+      }
+    }
+  };
 
   const className = cn(
     'flex items-center gap-3 rounded-lg px-3 py-2 transition-all hover:bg-accent',
@@ -81,17 +120,30 @@ export function NavItemComponent({
     isCollapsed && 'justify-center'
   );
 
+  const content = (
+    <NavItemContent
+      item={item}
+      isActive={isActive}
+      isCollapsed={isCollapsed}
+      isNested={isNested}
+      isExpanded={isExpanded}
+      hasChildren={hasChildren}
+    />
+  );
+
   if (item.external || hasChildren) {
     return (
       <a
         href={item.href}
         onClick={handleClick}
+        onKeyDown={handleKeyDown}
         className={className}
         target={item.external ? '_blank' : undefined}
         rel={item.external ? 'noopener noreferrer' : undefined}
         aria-current={isActive ? 'page' : undefined}
         aria-expanded={hasChildren ? isExpanded : undefined}
         aria-disabled={item.disabled}
+        aria-label={isCollapsed ? item.title : undefined}
       >
         {content}
       </a>
@@ -102,9 +154,11 @@ export function NavItemComponent({
     <Link
       href={item.href}
       onClick={handleClick}
+      onKeyDown={handleKeyDown}
       className={className}
       aria-current={isActive ? 'page' : undefined}
       aria-disabled={item.disabled}
+      aria-label={isCollapsed ? item.title : undefined}
     >
       {content}
     </Link>
