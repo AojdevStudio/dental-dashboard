@@ -1,0 +1,892 @@
+{
+  "metadata": {
+    "name": "Hygienist Sync v2.1 Multi-Provider System",
+    "version": "2.1.0",
+    "created": "2025-01-09T00:00:00Z",
+    "priority": "high",
+    "estimatedHours": 40,
+    "developer": "unassigned",
+    "lastUpdated": "2025-01-09T00:00:00Z",
+    "systemContext": "dental-dashboard-hygienist-sync"
+  },
+
+  "businessObjective": {
+    "problem": "The current hygienist sync system requires manual configuration changes and redeployment when hygienists leave or new ones are hired. Staff turnover disrupts data continuity and requires technical intervention for each change.",
+    "solution": "Create a resilient multi-provider hygienist sync system that automatically detects providers, maintains historical data integrity, and enables self-service provider onboarding through the dashboard UI.",
+    "benefits": [
+      "Eliminates manual Apps Script redeployment for staff changes",
+      "Preserves historical data when staff changes occur",
+      "Enables business users to manage provider onboarding without IT",
+      "Maintains sync continuity during staff transitions",
+      "Supports unlimited hygienist scaling across clinics"
+    ],
+    "successMetrics": {
+      "zeroDowntimeTransitions": "Staff changes cause zero sync interruption",
+      "selfServiceOnboarding": "95% of provider additions completed via UI",
+      "dataPreservation": "100% historical data retention during transitions",
+      "syncResilience": "Auto-recovery from missing provider mappings"
+    }
+  },
+
+  "users": {
+    "primaryUsers": {
+      "role": "Clinic Administrators and Practice Managers",
+      "count": "2-5 per clinic",
+      "technicalLevel": "low-medium",
+      "responsibilities": [
+        "Add new hygienists through dashboard",
+        "Deactivate departing hygienists",
+        "Monitor sync status and health",
+        "Manage provider assignments"
+      ]
+    },
+    "secondaryUsers": {
+      "role": "Hygienists",
+      "count": "1-3 per clinic",
+      "technicalLevel": "low",
+      "responsibilities": [
+        "Use Google Sheets for data entry",
+        "Understand their provider status",
+        "Report sync issues"
+      ]
+    },
+    "systemAdmins": {
+      "role": "IT Support and System Administrators",
+      "count": "1-2 across all clinics",
+      "technicalLevel": "high",
+      "responsibilities": [
+        "Handle complex provider mappings",
+        "Troubleshoot sync failures",
+        "Perform system-level configuration"
+      ]
+    },
+    "permissions": {
+      "required": ["read", "write", "manage_providers"],
+      "clinicAdmins": ["admin@kamdental.com"],
+      "systemAdmins": ["it@kamdental.com"]
+    }
+  },
+
+  "googleServices": {
+    "spreadsheet": {
+      "required": true,
+      "operations": ["read", "write", "format", "protect"],
+      "specificMethods": [
+        "SpreadsheetApp.getActiveSpreadsheet",
+        "sheet.getRange",
+        "sheet.setValues",
+        "sheet.getLastRow",
+        "sheet.insertSheet"
+      ],
+      "sheetStructure": {
+        "monthlyTabs": {
+          "pattern": ["MMM-YY", "MMM YYYY"],
+          "examples": ["Jan-25", "Feb-25", "March 2025"],
+          "columns": [
+            "Date",
+            "Hours Worked",
+            "Estimated Production",
+            "Verified Production",
+            "Production Goal",
+            "Variance %",
+            "Bonus",
+            "Scheduled",
+            "Canceled",
+            "No Show",
+            "Completed",
+            "Hygiene Production",
+            "Per Patient",
+            "New Patients",
+            "Periodontal %",
+            "Periodontal Completed",
+            "Fluoride %",
+            "Doctor Exam %",
+            "Scheduled %",
+            "Reappointment Rate",
+            "Daily Goal"
+          ],
+          "dataTypes": [
+            "date",
+            "number",
+            "currency",
+            "currency",
+            "currency",
+            "percentage",
+            "currency",
+            "number",
+            "number",
+            "number",
+            "number",
+            "currency",
+            "currency",
+            "number",
+            "percentage",
+            "number",
+            "percentage",
+            "percentage",
+            "percentage",
+            "percentage",
+            "currency"
+          ],
+          "validations": [
+            "date_required",
+            "hours_range(0-12)",
+            "production_positive",
+            "production_positive",
+            "goal_positive",
+            "percentage_range(-100,500)",
+            "bonus_non_negative",
+            "count_non_negative",
+            "count_non_negative",
+            "count_non_negative",
+            "count_non_negative",
+            "production_positive",
+            "production_positive",
+            "count_non_negative",
+            "percentage_range(0,100)",
+            "count_non_negative",
+            "percentage_range(0,100)",
+            "percentage_range(0,100)",
+            "percentage_range(0,100)",
+            "percentage_range(0,100)",
+            "goal_positive"
+          ]
+        },
+        "logTab": {
+          "name": "Hygiene-Sync-Log",
+          "columns": ["Timestamp", "Status", "Records Processed", "Errors", "Provider", "Details"],
+          "autoCreate": true,
+          "protected": false
+        }
+      },
+      "namingConvention": {
+        "required": "Provider name must be detectable in spreadsheet name",
+        "patterns": [
+          "Adriane Fontenot - Hygiene Production 2025",
+          "Kia Redfearn Hygiene Tracker",
+          "[Provider Name] + [Optional Context] + [Year]"
+        ],
+        "detectionRules": [
+          "Case insensitive provider name matching",
+          "Partial name matching (first or last name)",
+          "Remove common keywords (hygiene, production, tracker, etc.)"
+        ]
+      }
+    },
+    "drive": {
+      "required": true,
+      "operations": ["getFileById", "getFoldersByName", "createFolder"],
+      "folderStructure": {
+        "root": "Hygienist Production Data",
+        "subfolders": ["Active Providers", "Inactive Providers", "Archive", "Templates"]
+      }
+    },
+    "gmail": {
+      "required": true,
+      "operations": ["sendEmail", "createDraft"],
+      "templates": {
+        "syncSuccess": {
+          "subject": "Hygienist Sync Complete - {{providerName}} - {{date}}",
+          "bodyType": "html",
+          "recipients": "dynamic_based_on_provider"
+        },
+        "syncFailure": {
+          "subject": "ALERT: Hygienist Sync Failed - {{providerName}} - {{error}}",
+          "bodyType": "html",
+          "recipients": "admin_and_provider"
+        },
+        "newProviderDetected": {
+          "subject": "New Hygienist Detected - {{providerName}} - Action Required",
+          "bodyType": "html",
+          "recipients": "admin_only"
+        },
+        "providerDeactivated": {
+          "subject": "Provider Sync Stopped - {{providerName}} - {{date}}",
+          "bodyType": "html",
+          "recipients": "admin_only"
+        }
+      }
+    },
+    "properties": {
+      "required": true,
+      "operations": ["getScriptProperties", "setProperties", "deleteProperty"],
+      "properties": {
+        "SUPABASE_URL": "string",
+        "SUPABASE_SERVICE_ROLE_KEY": "string",
+        "DASHBOARD_API_URL": "string_optional",
+        "PROVIDER_AUTO_DETECTION": "boolean_default_true",
+        "SYNC_ENABLED": "boolean_default_true",
+        "LAST_SYNC_STATUS": "string",
+        "DETECTED_PROVIDER_CODE": "string",
+        "PROVIDER_CONFIDENCE_LEVEL": "string"
+      }
+    }
+  },
+
+  "triggers": {
+    "primary": {
+      "type": "timeBased",
+      "configuration": {
+        "frequency": "daily",
+        "specificTime": "06:00",
+        "timezone": "America/Chicago",
+        "function": "syncAllHygieneData"
+      }
+    },
+    "secondary": [
+      {
+        "type": "onEdit",
+        "configuration": {
+          "function": "onEditHygieneSync",
+          "conditions": ["edit_in_month_tabs", "avoid_log_tab"]
+        }
+      },
+      {
+        "type": "timeBased",
+        "configuration": {
+          "frequency": "hourly",
+          "function": "healthCheckSync",
+          "purpose": "Monitor sync health and provider status"
+        }
+      }
+    ]
+  },
+
+  "dataFlow": {
+    "inputs": {
+      "googleSheets": {
+        "type": "spreadsheet",
+        "location": "Dynamic - current active spreadsheet",
+        "format": "Structured tabular data with monthly tabs",
+        "validation": [
+          "Provider detection from spreadsheet name",
+          "Month tab pattern validation",
+          "Column header fuzzy matching",
+          "Data type validation per column"
+        ]
+      },
+      "dashboardAPI": {
+        "type": "REST API",
+        "location": "{{DASHBOARD_API_URL}}/api/providers",
+        "format": "JSON",
+        "purpose": "Retrieve active provider configurations",
+        "validation": [
+          "Provider exists in database",
+          "Provider is active status",
+          "Clinic access permissions"
+        ]
+      }
+    },
+    "processing": {
+      "steps": [
+        {
+          "order": 1,
+          "action": "Detect Provider from Spreadsheet Name",
+          "transformation": "Apply regex patterns to extract provider identity",
+          "errorHandling": "Log unknown providers, send admin notification"
+        },
+        {
+          "order": 2,
+          "action": "Resolve Provider and Clinic IDs",
+          "transformation": "Use ExternalIdMapping table to get database IDs",
+          "fallback": "Use hardcoded clinic IDs as last resort"
+        },
+        {
+          "order": 3,
+          "action": "Validate Provider Status",
+          "transformation": "Check provider.status = 'active' in database",
+          "errorHandling": "Stop sync for inactive providers, preserve data"
+        },
+        {
+          "order": 4,
+          "action": "Extract Monthly Tab Data",
+          "transformation": "Parse each month tab matching patterns",
+          "batching": "Process 500 rows per API call"
+        },
+        {
+          "order": 5,
+          "action": "Transform Data for Database",
+          "transformation": "Map columns to hygiene_production schema",
+          "validation": "Apply business rules and data type checks"
+        },
+        {
+          "order": 6,
+          "action": "Upsert to Supabase",
+          "transformation": "Insert new records, update existing by date+provider",
+          "transaction": "Use database transactions for batch operations"
+        },
+        {
+          "order": 7,
+          "action": "Update External Mappings",
+          "transformation": "Ensure provider mappings exist and are current",
+          "purpose": "Maintain sync resilience"
+        },
+        {
+          "order": 8,
+          "action": "Log Sync Results",
+          "transformation": "Write to spreadsheet log tab and system logs",
+          "metrics": "Track records processed, errors, performance"
+        }
+      ]
+    },
+    "outputs": {
+      "supabaseDatabase": {
+        "type": "database",
+        "table": "hygiene_production",
+        "format": "Normalized relational data",
+        "frequency": "Per trigger execution",
+        "relationships": [
+          "Links to Provider via providerId",
+          "Links to Clinic via clinicId",
+          "References ExternalIdMapping for sync resilience"
+        ]
+      },
+      "syncLogs": {
+        "type": "spreadsheet",
+        "location": "Hygiene-Sync-Log tab",
+        "format": "Chronological log entries",
+        "retention": "30 days in spreadsheet, permanent in database"
+      },
+      "notifications": {
+        "type": "email",
+        "recipients": ["clinic_admins", "system_admins"],
+        "frequency": "On errors or significant events",
+        "templates": "Defined in googleServices.gmail.templates"
+      }
+    }
+  },
+
+  "providerManagement": {
+    "detectionSystem": {
+      "method": "Automatic from spreadsheet name",
+      "patterns": {
+        "adriane_fontenot": ["/adriane/i", "/fontenot/i", "/adriane.*fontenot/i"],
+        "kia_redfearn": ["/kia/i", "/redfearn/i", "/kia.*redfearn/i"]
+      },
+      "extensibility": "New patterns added to shared-multi-provider-utils.gs",
+      "fallbackMode": "Manual provider selection dialog if auto-detection fails"
+    },
+    "onboardingWorkflow": {
+      "newHygienistProcess": [
+        {
+          "step": 1,
+          "actor": "Clinic Admin",
+          "action": "Create Provider via Dashboard UI",
+          "location": "/providers/new",
+          "requiredFields": [
+            "name (required)",
+            "firstName (optional)",
+            "lastName (optional)",
+            "email (optional but recommended)",
+            "providerType = 'hygienist'",
+            "clinicId (auto-selected)",
+            "status = 'active'"
+          ],
+          "validation": [
+            "Unique email across system",
+            "Valid clinic assignment",
+            "Provider type consistency"
+          ]
+        },
+        {
+          "step": 2,
+          "actor": "System",
+          "action": "Generate Provider Code and External Mapping",
+          "details": "Auto-generate providerCode from name (e.g., 'sarah_johnson')",
+          "mapping": "Create ExternalIdMapping entry for sync system integration"
+        },
+        {
+          "step": 3,
+          "actor": "Clinic Admin or IT",
+          "action": "Create Google Sheet with Provider Name",
+          "naming": "Must include provider name for auto-detection",
+          "example": "'Sarah Johnson - Hygiene Production 2025'"
+        },
+        {
+          "step": 4,
+          "actor": "IT or Power User",
+          "action": "Deploy Apps Script to New Sheet",
+          "method": "Copy from template or use clasp deployment",
+          "configuration": "Run setupHygieneSync() function"
+        },
+        {
+          "step": 5,
+          "actor": "Apps Script",
+          "action": "Auto-detect Provider and Start Sync",
+          "validation": "Provider detection from sheet name",
+          "fallback": "Prompt for manual provider selection if detection fails"
+        }
+      ]
+    },
+    "departureWorkflow": {
+      "hygienistLeavingProcess": [
+        {
+          "step": 1,
+          "actor": "Clinic Admin",
+          "action": "Deactivate Provider in Dashboard",
+          "location": "/providers/[id]/edit",
+          "change": "Set status = 'inactive'",
+          "preserveData": "All historical data remains intact"
+        },
+        {
+          "step": 2,
+          "actor": "System",
+          "action": "Stop Sync for Inactive Provider",
+          "behavior": "Apps Script detects inactive status and stops processing",
+          "notification": "Send admin notification about sync stoppage"
+        },
+        {
+          "step": 3,
+          "actor": "Clinic Admin (Optional)",
+          "action": "Archive Google Sheet",
+          "location": "Move to 'Inactive Providers' folder",
+          "purpose": "Organizational cleanup, not required for system function"
+        },
+        {
+          "step": 4,
+          "actor": "System",
+          "action": "Maintain Historical Data Access",
+          "behavior": "Dashboard continues showing historical metrics",
+          "reportingImpact": "Provider shows in historical reports but not current metrics"
+        }
+      ]
+    },
+    "statusTransitions": {
+      "active": {
+        "description": "Provider is currently employed and sync is enabled",
+        "syncBehavior": "Full sync processing",
+        "dashboardVisibility": "Visible in all current and historical views"
+      },
+      "inactive": {
+        "description": "Provider has left or is temporarily disabled",
+        "syncBehavior": "Sync stops, but historical data preserved",
+        "dashboardVisibility": "Hidden from current views, visible in historical"
+      },
+      "pending": {
+        "description": "Provider created but not yet fully configured",
+        "syncBehavior": "Sync disabled until status changed to active",
+        "dashboardVisibility": "Visible to admins only"
+      }
+    }
+  },
+
+  "integrations": {
+    "supabase": {
+      "endpoint": "{{SUPABASE_URL}}/rest/v1",
+      "authentication": "service_role_key",
+      "operations": ["SELECT", "INSERT", "UPDATE", "UPSERT"],
+      "tables": ["hygiene_production", "providers", "clinics", "external_id_mappings"],
+      "rls": "Bypassed using service role key",
+      "rateLimit": "Supabase standard limits"
+    },
+    "dashboardAPI": {
+      "endpoint": "{{DASHBOARD_API_URL}}/api",
+      "authentication": "API key or service account",
+      "operations": ["GET /providers", "POST /providers", "PUT /providers/{id}"],
+      "purpose": "Retrieve active provider configurations and manage provider lifecycle",
+      "fallback": "Direct Supabase access if API unavailable"
+    },
+    "externalMappings": {
+      "system": "hygienist_sync",
+      "entities": {
+        "providers": {
+          "ADRIANE_PROVIDER": "Maps to Adriane Fontenot provider ID",
+          "KIA_PROVIDER": "Maps to Kia Redfearn provider ID",
+          "extensible": "New providers get auto-generated external IDs"
+        },
+        "clinics": {
+          "HUMBLE_CLINIC": "Maps to KamDental Humble clinic ID",
+          "BAYTOWN_CLINIC": "Maps to KamDental Baytown clinic ID"
+        }
+      },
+      "resilience": "System survives database reseeds by maintaining external mappings"
+    }
+  },
+
+  "errorHandling": {
+    "strategies": {
+      "providerNotDetected": {
+        "action": "Show provider selection dialog",
+        "fallback": "Manual provider code entry",
+        "notification": "Email admin about unknown provider",
+        "logging": "Log detection attempt details"
+      },
+      "providerInactive": {
+        "action": "Stop sync gracefully",
+        "message": "Provider is inactive, sync disabled",
+        "notification": "Email admin about inactive provider sync attempt",
+        "dataPreservation": "No data deletion, sync just stops"
+      },
+      "missingMapping": {
+        "action": "Attempt mapping creation",
+        "fallback": "Use hardcoded clinic IDs from configuration",
+        "escalation": "Email IT support for manual mapping creation",
+        "recovery": "Retry sync after mapping resolution"
+      },
+      "supabaseQuotaExceeded": {
+        "action": "Exponential backoff with jitter",
+        "maxRetries": 3,
+        "baseDelay": 1000,
+        "notification": "Alert admin if quota consistently exceeded"
+      },
+      "invalidData": {
+        "action": "Skip invalid rows, continue processing",
+        "validation": "Log validation errors with row details",
+        "reporting": "Include data quality metrics in sync summary"
+      },
+      "networkFailure": {
+        "action": "Retry with exponential backoff",
+        "maxRetries": 5,
+        "circuitBreaker": "Stop retrying after sustained failures"
+      },
+      "authenticationFailure": {
+        "action": "Immediately fail and alert admin",
+        "notification": "Critical security notification",
+        "remediation": "Check credentials and permissions"
+      }
+    },
+    "logging": {
+      "level": "INFO",
+      "destinations": ["Spreadsheet log tab", "Google Apps Script console", "Supabase logs table"],
+      "retention": "30 days in spreadsheet, 90 days in database",
+      "format": "Structured JSON with timestamp, level, message, context"
+    },
+    "notifications": {
+      "criticalErrors": ["admin@kamdental.com", "it@kamdental.com"],
+      "warnings": ["admin@kamdental.com"],
+      "infoUpdates": ["Optional clinic-specific notifications"],
+      "throttling": "Max 1 email per error type per hour"
+    }
+  },
+
+  "performanceRequirements": {
+    "expectedVolume": {
+      "recordsPerProvider": "200-400 per month (daily entries)",
+      "simultaneousProviders": "2-5 initially, up to 20 future",
+      "totalRecordsPerSync": "Up to 2000 records",
+      "syncFrequency": "Daily at 6 AM, on-demand edits"
+    },
+    "executionLimits": {
+      "maxExecutionTime": "300 seconds (5 minutes)",
+      "batchSize": 500,
+      "memoryUsage": "Conservative object creation",
+      "apiCallsPerExecution": "< 50 calls to stay within quotas"
+    },
+    "performanceTargets": {
+      "syncDuration": "< 60 seconds for typical daily sync",
+      "errorRate": "< 1% of sync operations",
+      "uptime": "99.5% sync success rate",
+      "dataLatency": "Same-day processing for manual edits"
+    },
+    "cachingStrategy": {
+      "providerMappings": "Cache in ScriptProperties for 24 hours",
+      "clinicConfigurations": "Cache in ScriptProperties for 7 days",
+      "externalMappings": "Cache in CacheService for 1 hour"
+    },
+    "optimization": {
+      "bulkOperations": "Batch database operations where possible",
+      "dataValidation": "Front-load validation to fail fast",
+      "parallelization": "Process multiple month tabs in parallel where safe",
+      "memoization": "Cache expensive calculations within execution"
+    }
+  },
+
+  "security": {
+    "authentication": {
+      "method": "Supabase Service Role Key",
+      "storage": "Google Apps Script PropertiesService",
+      "rotation": "Quarterly key rotation recommended",
+      "permissions": "Bypasses RLS for system operations"
+    },
+    "authorization": {
+      "clinicIsolation": "Providers can only sync to their assigned clinic",
+      "dataAccess": "Service account has full access for sync operations",
+      "userInteraction": "Limited to setup wizards and manual functions"
+    },
+    "oauthScopes": [
+      "https://www.googleapis.com/auth/spreadsheets",
+      "https://www.googleapis.com/auth/drive.readonly",
+      "https://www.googleapis.com/auth/gmail.send"
+    ],
+    "dataClassification": "Internal - Dental Practice PHI",
+    "encryption": {
+      "atRest": "Supabase managed encryption",
+      "inTransit": "HTTPS for all API calls",
+      "credentials": "Google Apps Script secure properties"
+    },
+    "auditLog": {
+      "enabled": true,
+      "events": [
+        "Provider detection attempts",
+        "Sync operations and results",
+        "Configuration changes",
+        "Error conditions"
+      ],
+      "retention": "90 days minimum",
+      "compliance": "HIPAA considerations for dental PHI"
+    },
+    "accessControl": {
+      "spreadsheetAccess": "Edit permissions required for sync",
+      "adminFunctions": "Restricted to authorized users",
+      "apiKeys": "Secured in script properties, not in code"
+    }
+  },
+
+  "testing": {
+    "testEnvironments": {
+      "development": {
+        "supabaseUrl": "Development branch URL",
+        "testProviders": ["Test Hygienist 1", "Test Hygienist 2"],
+        "testData": "Sample production data with known values"
+      },
+      "staging": {
+        "purpose": "Pre-production validation",
+        "dataVolume": "Production-like data volumes",
+        "providers": "Real provider names with test data"
+      }
+    },
+    "testScenarios": {
+      "happyPath": [
+        "New provider auto-detection and first sync",
+        "Daily sync with new production data",
+        "Multi-month data sync",
+        "Provider status change handling"
+      ],
+      "edgeCases": [
+        "Spreadsheet with no matching provider patterns",
+        "Multiple providers in single sheet name",
+        "Empty month tabs or malformed data",
+        "Missing column headers",
+        "Inactive provider attempting sync",
+        "Network failures during sync",
+        "Database unavailable scenarios"
+      ],
+      "errorRecovery": [
+        "Resume sync after partial failure",
+        "Handle missing external mappings",
+        "Recover from authentication errors",
+        "Process after quota exceeded"
+      ]
+    },
+    "validationCriteria": [
+      "Provider detection accuracy > 95%",
+      "Data integrity: All valid records synced correctly",
+      "Error handling: Graceful failure and recovery",
+      "Performance: Sync completes within time limits",
+      "Notifications: Appropriate alerts sent for all error conditions"
+    ],
+    "rollbackPlan": {
+      "dataRollback": "Database transaction rollback for failed syncs",
+      "configRollback": "Restore previous Apps Script version",
+      "providerRollback": "Reactivate previous provider if needed"
+    }
+  },
+
+  "deployment": {
+    "environment": "production",
+    "deploymentType": "standalone_per_provider",
+    "deploymentMethod": {
+      "option1_manual": {
+        "steps": [
+          "Copy script files to new Google Apps Script project",
+          "Attach to hygienist's spreadsheet",
+          "Run setupHygieneSync() to configure credentials",
+          "Test provider detection and sync",
+          "Enable automated triggers"
+        ]
+      },
+      "option2_clasp": {
+        "command": "pnpm gas:deploy:hygienist [provider-name]",
+        "automation": "Automated deployment with provider-specific configuration",
+        "testing": "Built-in validation of provider detection and mappings"
+      }
+    },
+    "versionControl": {
+      "repository": "git@github.com:kamdental/dental-dashboard.git",
+      "branch": "feature/hygienist-sync-multi-provider",
+      "path": "scripts/deployment/google-apps-script/deploy-hygienist-sync-v2.1-multi-provider/"
+    },
+    "configuration": {
+      "perProviderSettings": {
+        "autoDetection": true,
+        "syncFrequency": "daily",
+        "notificationLevel": "errors_and_warnings"
+      },
+      "systemWideSettings": {
+        "maxConcurrentSyncs": 5,
+        "globalRateLimit": "respects Supabase quotas",
+        "fallbackMode": "degraded_service_continues"
+      }
+    }
+  },
+
+  "maintenance": {
+    "documentation": {
+      "userGuide": true,
+      "path": "/docs/user-guides/hygienist-sync-guide.md",
+      "technicalDocs": true,
+      "path": "/docs/technical/hygienist-sync-architecture.md",
+      "apiReference": true,
+      "path": "/docs/api/hygienist-sync-functions.md"
+    },
+    "monitoring": {
+      "healthChecks": [
+        "Provider detection accuracy",
+        "Sync success rate",
+        "Data quality metrics",
+        "API response times"
+      ],
+      "metrics": [
+        "Daily sync completion rate",
+        "Average sync duration",
+        "Error rate by error type",
+        "Provider onboarding success rate"
+      ],
+      "alerts": [
+        "Sync failure rate > 5%",
+        "New unknown provider detected",
+        "Provider mapping errors",
+        "Consecutive sync failures"
+      ],
+      "dashboards": "Sync health visible in main dashboard"
+    },
+    "updates": {
+      "frequency": "As needed for business requirements",
+      "changeProcess": [
+        "Feature request via Linear",
+        "Requirements analysis",
+        "Development and testing",
+        "Staged rollout to providers",
+        "Production deployment"
+      ],
+      "emergencyUpdates": "Direct deployment for critical fixes"
+    },
+    "backups": {
+      "codeBackup": "Git version control",
+      "configBackup": "Script properties exported daily",
+      "dataBackup": "Supabase automated backups"
+    }
+  },
+
+  "dependencies": {
+    "googleAppsScriptLibraries": [],
+    "externalServices": [
+      "Supabase PostgreSQL Database",
+      "Dental Dashboard API",
+      "Google Workspace Services"
+    ],
+    "internalDependencies": [
+      "shared-sync-utils.gs",
+      "shared-multi-provider-utils.gs",
+      "enhanced-logging.gs",
+      "retry-utils.gs"
+    ],
+    "prerequisites": [
+      "Provider created in dashboard database",
+      "External ID mappings configured",
+      "Supabase service role key available",
+      "Google Sheet with detectable provider name"
+    ],
+    "systemRequirements": {
+      "googleWorkspace": "Business or Enterprise plan",
+      "spreadsheetPermissions": "Edit access required",
+      "networkAccess": "Outbound HTTPS to Supabase"
+    }
+  },
+
+  "compliance": {
+    "dataProtection": {
+      "hipaaConsiderations": "Dental practice PHI handling",
+      "dataMinimization": "Only sync necessary production metrics",
+      "consentManagement": "Provider awareness of data sync"
+    },
+    "auditRequirements": {
+      "auditTrail": "Complete sync operation logging",
+      "dataLineage": "Track data from sheets to database",
+      "accessLogging": "Log all provider detection and mapping operations"
+    },
+    "businessContinuity": {
+      "disasterRecovery": "Sync can restart from last successful point",
+      "serviceAvailability": "Degraded mode continues with cached mappings",
+      "dataRecovery": "Point-in-time recovery from Supabase backups"
+    }
+  },
+
+  "acceptance": {
+    "functionalRequirements": [
+      "FR-1: System must automatically detect provider from spreadsheet name with 95% accuracy",
+      "FR-2: New providers can be added via dashboard UI without Apps Script changes",
+      "FR-3: Inactive providers stop syncing but preserve all historical data",
+      "FR-4: Sync must complete within 5 minutes for typical daily volumes",
+      "FR-5: System must recover gracefully from missing provider mappings",
+      "FR-6: All sync operations must be logged with appropriate detail level",
+      "FR-7: Critical errors must trigger immediate admin notifications",
+      "FR-8: System must support unlimited provider scaling within performance limits"
+    ],
+    "nonFunctionalRequirements": [
+      "NFR-1: Performance: Process 2000 records in < 300 seconds",
+      "NFR-2: Reliability: 99.5% sync success rate",
+      "NFR-3: Usability: Provider onboarding requires no technical knowledge",
+      "NFR-4: Maintainability: New providers added without code changes",
+      "NFR-5: Security: All PHI handled according to HIPAA guidelines",
+      "NFR-6: Scalability: Support up to 20 concurrent providers",
+      "NFR-7: Availability: System degradation acceptable, complete failure not"
+    ],
+    "businessRules": [
+      "BR-1: Only active providers can sync data",
+      "BR-2: Each provider can only sync to their assigned primary clinic",
+      "BR-3: Historical data must never be automatically deleted",
+      "BR-4: Provider status changes must be immediately reflected in sync behavior",
+      "BR-5: Unknown providers must trigger admin notification",
+      "BR-6: External mappings must survive database reseeds",
+      "BR-7: Sync operations must be idempotent"
+    ],
+    "definitionOfDone": [
+      "All functional requirements tested and verified",
+      "All error scenarios handled with appropriate notifications",
+      "Provider onboarding workflow tested end-to-end",
+      "Provider departure workflow tested end-to-end",
+      "Performance requirements met under expected load",
+      "Security review completed and approved",
+      "Documentation updated and reviewed",
+      "Deployment procedures tested in staging environment",
+      "Admin training materials created",
+      "Production deployment completed successfully"
+    ]
+  },
+
+  "riskManagement": {
+    "identifiedRisks": [
+      {
+        "risk": "Provider detection failure leads to sync stoppage",
+        "impact": "High - Data not current in dashboard",
+        "probability": "Medium",
+        "mitigation": "Fallback to manual provider selection dialog"
+      },
+      {
+        "risk": "Database reseed breaks external mappings",
+        "impact": "High - All syncs fail until mappings restored",
+        "probability": "Low",
+        "mitigation": "Mapping validation and auto-recreation logic"
+      },
+      {
+        "risk": "Performance degradation with many providers",
+        "impact": "Medium - Slow syncs, potential timeouts",
+        "probability": "Medium",
+        "mitigation": "Batch processing and parallel execution optimization"
+      },
+      {
+        "risk": "Staff turnover creates knowledge gaps",
+        "impact": "Medium - Difficulty maintaining and troubleshooting",
+        "probability": "High",
+        "mitigation": "Comprehensive documentation and self-service features"
+      }
+    ],
+    "contingencyPlans": [
+      "Rollback to previous version if deployment issues",
+      "Manual provider mapping entry if auto-detection fails",
+      "Direct Supabase sync if dashboard API unavailable",
+      "Email-based error reporting if dashboard notifications fail"
+    ]
+  }
+}
