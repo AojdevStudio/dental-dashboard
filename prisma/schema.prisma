@@ -575,7 +575,7 @@ model HygieneProduction {
   estimatedProduction Decimal? @map("estimated_production") @db.Decimal(10, 2)
   verifiedProduction  Decimal? @map("verified_production") @db.Decimal(10, 2)
   productionGoal      Decimal? @map("production_goal") @db.Decimal(10, 2)
-  variancePercentage  Decimal? @map("variance_percentage") @db.Decimal(5, 4)
+  variancePercentage  Decimal? @map("variance_percentage") @db.Decimal(10, 2)
   bonusAmount         Decimal? @map("bonus_amount") @db.Decimal(10, 2)
   createdAt           DateTime @default(now()) @map("created_at")
   updatedAt           DateTime @updatedAt @map("updated_at")
