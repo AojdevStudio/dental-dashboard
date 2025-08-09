@@ -129,6 +129,131 @@ function mapHeaders_(headers) {
 }
 
 /**
+ * Extract and validate date value from row
+ * @param {Array<any>} row The row data
+ * @param {object} mapping The column mapping
+ * @param {number} rowIndex The row index for logging
+ * @param {string} monthTab The month tab name
+ * @param {string} timezone The timezone
+ * @return {string|null} Formatted date string or null if invalid
+ */
+function extractDateValue_(row, mapping, rowIndex, monthTab, timezone) {
+  const dateColumnIndex = mapping.date !== undefined ? mapping.date : -1;
+  if (dateColumnIndex === -1) {
+    Logger.log(`extractDateValue_: CRITICAL - 'date' column not found in mapping for '${monthTab}'. Row ${rowIndex + 1} will be skipped.`);
+    return null;
+  }
+  
+  const dateValue = row[dateColumnIndex];
+  const date = parseDateForSupabase_(dateValue, timezone);
+  if (!date) {
+    Logger.log(`extractDateValue_: Skipped row ${rowIndex + 1} in '${monthTab}' due to invalid or missing date. Value: '${dateValue}'`);
+    return null;
+  }
+  
+  // Validate that the date is not in the future
+  const today = new Date();
+  const todayString = Utilities.formatDate(today, timezone, "yyyy-MM-dd");
+  if (date > todayString) {
+    Logger.log(`extractDateValue_: Skipped row ${rowIndex + 1} in '${monthTab}' due to future date. Date: '${date}' is after today: '${todayString}'`);
+    return null;
+  }
+  
+  return date;
+}
+
+/**
+ * Extract financial data from row
+ * @param {Array<any>} row The row data
+ * @param {object} mapping The column mapping
+ * @param {number} rowIndex The row index for logging
+ * @param {string} monthTab The month tab name
+ * @return {object} Object containing extracted financial data and hasEssentialData flag
+ */
+function extractFinancialData_(row, mapping, rowIndex, monthTab) {
+  const financialData = {};
+  let hasEssentialData = false;
+  
+  for (const mappedKey in mapping) {
+    if (mapping.hasOwnProperty(mappedKey) && mappedKey !== 'date') {
+      const columnIndex = mapping[mappedKey];
+      
+      if (columnIndex !== undefined && columnIndex !== -1 && columnIndex < row.length) {
+        let value = row[columnIndex];
+        if (typeof value === 'string') {
+          value = value.trim();
+        }
+        
+        const supabaseFieldKey = mappedKey.replace(/([A-Z])/g, '_$1').toLowerCase();
+        
+        if (['hoursWorked', 'estimatedProduction', 'verifiedProduction', 'productionGoal', 'variancePercentage', 'bonusAmount'].includes(mappedKey)) {
+          let numericValue = parseFloat(cleanNumeric_(value));
+          if (Number.isNaN(numericValue)) {
+            numericValue = null;
+          }
+          
+          // Cap variance_percentage to prevent database overflow (DECIMAL(10,2))
+          if (mappedKey === 'variancePercentage' && numericValue !== null) {
+            if (numericValue > 99999999.99) {
+              Logger.log(`Capping variance_percentage from ${numericValue} to 99999999.99 for row ${rowIndex + 1}`);
+              numericValue = 99999999.99;
+            } else if (numericValue < -99999999.99) {
+              Logger.log(`Capping variance_percentage from ${numericValue} to -99999999.99 for row ${rowIndex + 1}`);
+              numericValue = -99999999.99;
+            }
+          }
+          
+          financialData[supabaseFieldKey] = numericValue;
+          
+          if (numericValue === null && (mappedKey === 'verifiedProduction' || mappedKey === 'estimatedProduction')) {
+            Logger.log(`extractFinancialData_: Null numeric value for critical field '${mappedKey}' in '${monthTab}', row ${rowIndex + 1}. Original value: '${value}'`);
+          }
+          if (numericValue !== null && (mappedKey === 'estimatedProduction' || mappedKey === 'verifiedProduction')) {
+            hasEssentialData = true;
+          }
+        } else if (mappedKey === 'uuid') {
+          financialData.id = String(value || Utilities.getUuid());
+        } else {
+          financialData[supabaseFieldKey] = value;
+        }
+      } else {
+        const supabaseFieldKey = mappedKey.replace(/([A-Z])/g, '_$1').toLowerCase();
+        financialData[supabaseFieldKey] = null;
+        if (columnIndex === -1) {
+          Logger.log(`extractFinancialData_: Column for '${mappedKey}' was not found in sheet headers (mapping index -1) for '${monthTab}'. Setting to null.`);
+        }
+      }
+    }
+  }
+  
+  return { financialData, hasEssentialData };
+}
+
+/**
+ * Build the final hygiene record
+ * @param {object} data Combined data for the record
+ * @return {object} Complete hygiene record
+ */
+function buildHygieneRecord_(data) {
+  const record = {
+    ...data.financialData,
+    date: data.date,
+    clinic_id: data.clinicId,
+    provider_id: data.providerId,
+    month_tab: data.monthTab,
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString()
+  };
+  
+  // Ensure 'id' is present
+  if (!record.id) {
+    record.id = Utilities.getUuid();
+  }
+  
+  return record;
+}
+
+/**
  * Parses a single row of hygiene data based on predefined mapping.
  *
  * @param {Array<any>} row The row data from the sheet.
@@ -142,117 +267,36 @@ function mapHeaders_(headers) {
  */
 function parseHygieneRow_(row, mapping, monthTab, clinicId, providerId, rowIndex, timezone) {
   try {
-    const record = {};
-    let hasEssentialData = false; // Flag to check if core financial data is present
-
-    // Date parsing - use lowercase 'date' key from the mapping object
-    const dateColumnIndex = mapping.date !== undefined ? mapping.date : -1; // Access with lowercase 'date'
-    if (dateColumnIndex === -1) {
-        Logger.log(`parseHygieneRow_: CRITICAL - 'date' column not found in mapping for '${monthTab}'. Row ${rowIndex + 1} will be skipped.`);
-        return null;
-    }
-    const dateValue = row[dateColumnIndex];
-    const date = parseDateForSupabase_(dateValue, timezone);
+    // Step 1: Extract and validate date
+    const date = extractDateValue_(row, mapping, rowIndex, monthTab, timezone);
     if (!date) {
-      Logger.log(`parseHygieneRow_: Skipped row ${rowIndex !== undefined ? '#' + (rowIndex + 1) : '(unknown_row)'} in '${monthTab}' due to invalid or missing date. Value: '${dateValue}'`);
-      return null; 
-    }
-    
-    // Validate that the date is not in the future (beyond today)
-    const today = new Date();
-    const todayString = Utilities.formatDate(today, timezone, "yyyy-MM-dd");
-    if (date > todayString) {
-      Logger.log(`parseHygieneRow_: Skipped row ${rowIndex !== undefined ? '#' + (rowIndex + 1) : '(unknown_row)'} in '${monthTab}' due to future date. Date: '${date}' is after today: '${todayString}'`);
       return null;
     }
     
-    record.date = date;
-
-    // Process other mapped columns using their expected keys from HYGIENE_COLUMN_HEADERS (which map to lowercase in the mapping object)
-    // The `mapping` object created by `mapHeaders_` has lowercase keys like `hoursWorked`, `estimatedProduction` etc.
-    // The loop `for (const key in mapping)` will iterate over these lowercase keys.
-
-    for (const mappedKey in mapping) { // e.g., mappedKey could be 'hoursWorked', 'uuid' etc.
-      if (mapping.hasOwnProperty(mappedKey) && mappedKey !== 'date') { // Skip date as it's handled, and it's already lowercase
-        const columnIndex = mapping[mappedKey]; // This is the index from the sheet
-        
-        if (columnIndex !== undefined && columnIndex !== -1 && columnIndex < row.length) {
-          let value = row[columnIndex];
-          if (typeof value === 'string') {
-            value = value.trim();
-          }
-
-          // Determine the Supabase field name (snake_case) from the mappedKey
-          // This assumes mappedKey (e.g., 'hoursWorked') needs to become 'hours_worked'
-          const supabaseFieldKey = mappedKey.replace(/([A-Z])/g, '_$1').toLowerCase(); 
-
-          // Logic based on the original HYGIENE_COLUMN_HEADERS keys is tricky here directly
-          // We should standardize based on the lowercase mappedKey
-          if (['hoursWorked', 'estimatedProduction', 'verifiedProduction', 'productionGoal', 'variancePercentage', 'bonusAmount'].includes(mappedKey)) {
-            let numericValue = parseFloat(cleanNumeric_(value));
-            if (Number.isNaN(numericValue)) {
-              numericValue = null;
-            }
-            
-            // Cap variance_percentage to prevent database overflow (NUMERIC(5,4) = max ±9.9999)
-            if (mappedKey === 'variancePercentage' && numericValue !== null) {
-              if (numericValue > 9.9999) {
-                Logger.log(`Capping variance_percentage from ${numericValue} to 9.9999 for row ${rowIndex + 1}`);
-                numericValue = 9.9999;
-              } else if (numericValue < -9.9999) {
-                Logger.log(`Capping variance_percentage from ${numericValue} to -9.9999 for row ${rowIndex + 1}`);
-                numericValue = -9.9999;
-              }
-            }
-            
-            record[supabaseFieldKey] = numericValue;
-            if (numericValue === null && (mappedKey === 'verifiedProduction' || mappedKey === 'estimatedProduction')) {
-              Logger.log(`parseHygieneRow_: Null numeric value for critical field '${mappedKey}' in '${monthTab}', row ${rowIndex !== undefined ? '#' + (rowIndex + 1) : '(unknown_row)'}. Original value: '${value}'`);
-            }
-            if (numericValue !== null && (mappedKey === 'estimatedProduction' || mappedKey === 'verifiedProduction')) {
-              hasEssentialData = true; 
-            }
-          } else if (mappedKey === 'uuid') {
-            record.id = String(value || Utilities.getUuid()); 
-          } else {
-            // For any other direct string fields if necessary (currently none in HYGIENE_COLUMN_HEADERS requiring special handling this way)
-            // This part might need review based on actual HYGIENE_COLUMN_HEADERS
-            record[supabaseFieldKey] = value;
-          }
-        } else {
-          // Initialize field as null if column is not present, out of bounds, or not mapped (-1)
-          const supabaseFieldKey = mappedKey.replace(/([A-Z])/g, '_$1').toLowerCase();
-          record[supabaseFieldKey] = null;
-          if (columnIndex === -1){
-            Logger.log(`parseHygieneRow_: Column for '${mappedKey}' was not found in sheet headers (mapping index -1) for '${monthTab}'. Setting to null.`);
-          }
-        }
-      }
-    }
-
-    // If no essential financial data was found beyond the date, consider it a row to skip
-    // This helps avoid syncing rows that only have a date and nothing else of value.
-    if (!hasEssentialData && !record.id) { // if no financial data and no pre-existing UUID
-      Logger.log(`parseHygieneRow_: Skipped row ${rowIndex !== undefined ? '#' + (rowIndex + 1) : '(unknown_row)' } in '${monthTab}' due to no essential financial data (and no existing UUID).`);
-      return null; 
+    // Step 2: Extract financial data
+    const { financialData, hasEssentialData } = extractFinancialData_(row, mapping, rowIndex, monthTab);
+    
+    // Step 3: Check if we have essential data
+    if (!hasEssentialData && !financialData.id) {
+      Logger.log(`parseHygieneRow_: Skipped row ${rowIndex + 1} in '${monthTab}' due to no essential financial data (and no existing UUID).`);
+      return null;
     }
     
-    // Add common fields
-    record.clinic_id = clinicId;
-    record.provider_id = providerId; // Use the passed providerId
-    record.month_tab = monthTab;
-    record.created_at = new Date().toISOString();
-    record.updated_at = new Date().toISOString();
-
-    // Ensure 'id' is present, generate if it was not in the sheet
-    if (!record.id) {
-      record.id = Utilities.getUuid();
+    // Step 4: Validate clinic_id
+    if (!clinicId) {
+      Logger.log(`parseHygieneRow_: CRITICAL ERROR - clinic_id is null/undefined at parse time!`);
+      Logger.log(`parseHygieneRow_: Row ${rowIndex + 1} in '${monthTab}' cannot be synced without clinic_id`);
+      return null;
     }
     
-    // Remove provider_name as it's no longer used
-    // delete record.provider_name; // Ensure this field is not present
-
-    return record;
+    // Step 5: Build and return the record
+    return buildHygieneRecord_({
+      date,
+      financialData,
+      clinicId,
+      providerId,
+      monthTab
+    });
 
   } catch (error) {
     Logger.log(`Error in parseHygieneRow_ for month tab "${monthTab}", providerId "${providerId}", row ${rowIndex !== undefined ? '#' + (rowIndex + 1) : '(unknown_row)'}, data "${row.join(',')}": ${error.message} (Stack: ${error.stack})`);
