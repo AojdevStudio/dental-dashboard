@@ -1,5 +1,6 @@
 'use client';
 
+import clientLogger from '@/lib/utils/client-logger';
 import { AlertCircle, RefreshCw } from 'lucide-react';
 import type { ReactNode } from 'react';
 import type React from 'react';
@@ -25,7 +26,7 @@ export function ComponentErrorBoundary({
   showErrorDetails = false,
 }: ComponentErrorBoundaryProps) {
   const handleError = (error: Error, errorInfo: React.ErrorInfo) => {
-    console.error(`Component Error in ${componentName || 'Unknown Component'}:`, {
+    clientLogger.error(`Component Error in ${componentName || 'Unknown Component'}`, {
       error: error.message,
       stack: error.stack,
       componentStack: errorInfo.componentStack,

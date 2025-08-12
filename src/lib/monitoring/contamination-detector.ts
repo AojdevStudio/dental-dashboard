@@ -4,6 +4,7 @@
  */
 
 import { prisma } from '../database/client';
+import logger from '../utils/logger';
 
 export interface ContaminationAlert {
   type: 'test_email' | 'fake_data' | 'unusual_pattern' | 'test_clinic';
@@ -74,7 +75,10 @@ async function scanTestEmails(): Promise<ContaminationAlert[]> {
       }
     }
   } catch (error) {
-    console.error('Error scanning test emails:', error);
+    logger.error('Error scanning test emails during contamination check', {
+      error: error instanceof Error ? error.message : String(error),
+      stack: error instanceof Error ? error.stack : undefined,
+    });
   }
 
   return alerts;
@@ -111,7 +115,10 @@ async function scanTestClinics(): Promise<ContaminationAlert[]> {
       });
     }
   } catch (error) {
-    console.error('Error scanning test clinics:', error);
+    logger.error('Error scanning test clinics during contamination check', {
+      error: error instanceof Error ? error.message : String(error),
+      stack: error instanceof Error ? error.stack : undefined,
+    });
   }
 
   return alerts;
@@ -143,7 +150,10 @@ async function scanUnusualPatterns(): Promise<ContaminationAlert[]> {
       });
     }
   } catch (error) {
-    console.error('Error scanning unusual patterns:', error);
+    logger.error('Error scanning unusual patterns during contamination check', {
+      error: error instanceof Error ? error.message : String(error),
+      stack: error instanceof Error ? error.stack : undefined,
+    });
   }
 
   return alerts;
@@ -170,17 +180,18 @@ export async function scanForTestDataContamination(): Promise<ContaminationScanR
   };
 
   if (result.isContaminated) {
-    console.error('🚨 TEST DATA CONTAMINATION DETECTED!');
-    console.error(`Found ${result.totalIssues} contamination issues`);
-
-    // Log critical alerts
-    const criticalAlerts = allAlerts.filter((alert) => alert.severity === 'critical');
-    if (criticalAlerts.length > 0) {
-      console.error('CRITICAL ISSUES:');
-      for (const alert of criticalAlerts) {
-        console.error(`- ${alert.details}`);
-      }
-    }
+    logger.error('Test data contamination detected in production database', {
+      totalIssues: result.totalIssues,
+      scanTimestamp: result.scanTimestamp.toISOString(),
+      criticalAlerts: allAlerts.filter((a) => a.severity === 'critical').length,
+      alerts: allAlerts.map((alert) => ({
+        type: alert.type,
+        severity: alert.severity,
+        details: alert.details,
+        recordCount: alert.recordCount,
+        affectedTable: alert.affectedTable,
+      })),
+    });
   } else {
   }
 
@@ -227,7 +238,10 @@ export async function emergencyContaminationCheck(): Promise<boolean> {
 
     return testEmailCount > 0;
   } catch (error) {
-    console.error('Emergency contamination check failed:', error);
+    logger.error('Emergency contamination check failed', {
+      error: error instanceof Error ? error.message : String(error),
+      stack: error instanceof Error ? error.stack : undefined,
+    });
     return false;
   }
 }

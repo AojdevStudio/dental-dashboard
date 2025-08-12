@@ -1,4 +1,4 @@
-import { type Page, test as base, expect } from '@playwright/test';
+import { type Page, test as base } from '@playwright/test';
 
 /**
  * Debug version of Supabase Authentication Fixture
@@ -74,4 +74,4 @@ export const test = base.extend<SupabaseAuthFixtures>({
   },
 });
 
-export { expect };
+export { expect } from '@playwright/test';

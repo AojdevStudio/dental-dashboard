@@ -1,4 +1,4 @@
-import { test as base } from '@playwright/test';
+import { type Page, test as base } from '@playwright/test';
 
 /**
  * Authentication Fixture
@@ -8,7 +8,7 @@ import { test as base } from '@playwright/test';
  */
 
 type AuthFixtures = {
-  authenticatedPage: undefined;
+  authenticatedPage: Page;
 };
 
 export const test = base.extend<AuthFixtures>({
@@ -25,6 +25,6 @@ export const test = base.extend<AuthFixtures>({
     await page.waitForURL('**/dashboard/**', { timeout: 10000 });
 
     // Use the authenticated page in tests
-    await use();
+    await use(page);
   },
 });

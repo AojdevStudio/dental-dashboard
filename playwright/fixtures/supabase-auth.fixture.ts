@@ -1,5 +1,4 @@
-import { type Page, test as base, expect } from '@playwright/test';
-
+import { type Page, test as base } from '@playwright/test';
 /**
  * Supabase Authentication Fixture
  *
@@ -18,7 +17,8 @@ export const test = base.extend<SupabaseAuthFixtures>({
 
     // Wait for the login form to be ready
     await page.waitForLoadState('networkidle');
-    await page.waitForTimeout(1000); // Give the page time to fully load
+    // Wait for login form elements to be available
+    await page.waitForSelector('input[type="email"], input[name="email"]');
 
     // Use the admin credentials (hardcoded for test database)
     const email = 'admin@kamdental.com';
@@ -37,8 +37,12 @@ export const test = base.extend<SupabaseAuthFixtures>({
     const signInButton = page.locator('button[type="submit"], button:has-text("Sign in")').first();
     await signInButton.waitFor({ state: 'visible' });
 
-    // Add a small delay before clicking to ensure form is ready
-    await page.waitForTimeout(500);
+    // Ensure form is ready by waiting for button to be enabled
+    await signInButton.waitFor({ state: 'visible' });
+    await page.waitForFunction(() => {
+      const button = document.querySelector('button[type="submit"], button:has-text("Sign in")');
+      return button && !button.hasAttribute('disabled');
+    });
     await signInButton.click();
 
     // Wait for successful redirect to dashboard
@@ -83,4 +87,4 @@ export const test = base.extend<SupabaseAuthFixtures>({
     await use(page);
   },
 });
-export { expect };
+export { expect } from '@playwright/test';

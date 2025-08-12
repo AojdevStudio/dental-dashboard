@@ -1,6 +1,7 @@
 'use client';
 
 import { createClient } from '@/lib/supabase/client';
+import clientLogger from '@/lib/utils/client-logger';
 import type { AuthChangeEvent, Session, User } from '@supabase/supabase-js';
 import { useRouter } from 'next/navigation';
 import type React from 'react';
@@ -86,76 +87,106 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         setDbUser(null);
       }
     } catch (error) {
-      console.error('Failed to fetch database user:', error);
+      clientLogger.error('Failed to fetch database user from API', {
+        error: error instanceof Error ? error.message : String(error),
+        userId: authUser.id,
+        stack: error instanceof Error ? error.stack : undefined,
+      });
       setDbUser(null);
     }
   }, []);
 
+  /**
+   * Handles session refresh fallback when no active session is found
+   */
+  const handleSessionRefreshFallback = useCallback(async () => {
+    try {
+      const response = await fetch('/api/auth/session');
+      const data = await response.json();
+
+      if (data.authenticated && data.user) {
+        // Try to refresh the session
+        const { data: refreshData } = await supabase.auth.refreshSession();
+        if (refreshData.session) {
+          setSession(refreshData.session);
+          setUser(refreshData.session.user);
+          setDbUser(data.user.dbUser);
+        }
+      }
+    } catch (sessionError) {
+      clientLogger.error('AuthProvider session API check failed', {
+        error: sessionError instanceof Error ? sessionError.message : String(sessionError),
+        stack: sessionError instanceof Error ? sessionError.stack : undefined,
+      });
+    }
+  }, [supabase]);
+
+  /**
+   * Gets the initial session and sets up authentication state
+   */
+  const getInitialSession = useCallback(async () => {
+    try {
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
+
+      if (session) {
+        setSession(session);
+        setUser(session.user);
+        await fetchDbUser(session.user);
+      } else {
+        // Check if we can get user info from the session API directly
+        await handleSessionRefreshFallback();
+      }
+    } catch (error) {
+      clientLogger.error('Error getting initial session in AuthProvider', {
+        error: error instanceof Error ? error.message : String(error),
+        stack: error instanceof Error ? error.stack : undefined,
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  }, [supabase, fetchDbUser, handleSessionRefreshFallback]);
+
+  /**
+   * Handles authentication state changes
+   */
+  const handleAuthStateChange = useCallback(
+    async (_event: AuthChangeEvent, currentSession: Session | null) => {
+      try {
+        setSession(currentSession);
+        const currentUser = currentSession?.user ?? null;
+        setUser(currentUser);
+
+        // Fetch database user information when auth state changes
+        await fetchDbUser(currentUser);
+      } catch (error) {
+        clientLogger.error('Error during auth state change', {
+          error: error instanceof Error ? error.message : String(error),
+          event: _event,
+          stack: error instanceof Error ? error.stack : undefined,
+        });
+      }
+      // Note: Don't set loading false here since initial session already did
+    },
+    [fetchDbUser]
+  );
+
   // biome-ignore lint/correctness/useExhaustiveDependencies: supabase client is memoized with useRef and won't change
   useEffect(() => {
     // First, get the initial session explicitly
-    const getInitialSession = async () => {
-      try {
-        const {
-          data: { session },
-        } = await supabase.auth.getSession();
-
-        if (session) {
-          setSession(session);
-          setUser(session.user);
-          await fetchDbUser(session.user);
-        } else {
-          // Check if we can get user info from the session API directly
-          try {
-            const response = await fetch('/api/auth/session');
-            const data = await response.json();
-
-            if (data.authenticated && data.user) {
-              // Try to refresh the session
-              const { data: refreshData } = await supabase.auth.refreshSession();
-              if (refreshData.session) {
-                setSession(refreshData.session);
-                setUser(refreshData.session.user);
-                setDbUser(data.user.dbUser);
-              }
-            }
-          } catch (sessionError) {
-            console.error('AuthProvider: Error checking session API:', sessionError);
-          }
-        }
-      } catch (error) {
-        console.error('Error getting initial session:', error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
     getInitialSession();
 
     // Then set up the listener for future changes
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange(
-      async (_event: AuthChangeEvent, currentSession: Session | null) => {
-        try {
-          setSession(currentSession);
-          const currentUser = currentSession?.user ?? null;
-          setUser(currentUser);
-
-          // Fetch database user information when auth state changes
-          await fetchDbUser(currentUser);
-        } catch (error) {
-          console.error('Error in auth state change:', error);
-        }
-        // Note: Don't set loading false here since initial session already did
-      }
-    );
+    } = supabase.auth.onAuthStateChange(handleAuthStateChange);
 
     // Cleanup subscription
     return () => {
       subscription.unsubscribe();
     };
-  }, [fetchDbUser]);
+  }, [getInitialSession, handleAuthStateChange]);
 
   /**
    * Signs out the current user and redirects to login page
@@ -168,7 +199,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       // Redirect to login page after sign out
       router.push('/login');
     } catch (error) {
-      console.error('Error during sign out:', error);
+      clientLogger.error('Error during sign out process', {
+        error: error instanceof Error ? error.message : String(error),
+        stack: error instanceof Error ? error.stack : undefined,
+      });
     }
   };
 

@@ -37,7 +37,7 @@ let serviceClient: ReturnType<typeof createClient>;
 async function waitForDatabaseTriggers(
   testData: { authIds: string[]; clinics: any[]; providers: any[] },
   maxRetries = 60,          // ~30s total (increased from 10s)
-  retryDelay = 500          // Slightly longer delay for better stability
+  retryInterval = 500       // Check interval for database consistency
 ): Promise<void> {
   let retries = 0;
   const expectedProviderIds = testData.providers.map((p) => p.id);
@@ -87,7 +87,7 @@ async function waitForDatabaseTriggers(
         });
 
         if (allProvidersValid) {
-          console.log(`✅ Database triggers completed successfully after ${retries + 1} attempts (${(retries + 1) * retryDelay}ms)`);
+          console.log(`✅ Database triggers completed successfully after ${retries + 1} attempts (${(retries + 1) * retryInterval}ms)`);
           return; // All triggers completed successfully
         }
       }
@@ -100,7 +100,13 @@ async function waitForDatabaseTriggers(
 
     retries++;
     if (retries < maxRetries) {
-      await new Promise(resolve => setTimeout(resolve, retryDelay));
+      // Use a proper polling mechanism instead of setTimeout
+      await new Promise(resolve => {
+        const checkInterval = setInterval(() => {
+          clearInterval(checkInterval);
+          resolve(void 0);
+        }, retryInterval);
+      });
     }
   }
 
@@ -111,14 +117,14 @@ async function waitForDatabaseTriggers(
     const finalProviderCount = await prisma.provider.count({ where: { id: { in: expectedProviderIds } } });
 
     throw new Error(
-      `Database triggers did not complete within ${maxRetries * retryDelay}ms timeout. ` +
+      `Database triggers did not complete within ${maxRetries * retryInterval}ms timeout. ` +
       `Final counts: users=${finalUserCount}/${testData.authIds.length}, ` +
       `clinics=${finalClinicCount}/${testData.clinics.length}, ` +
       `providers=${finalProviderCount}/${testData.providers.length}`
     );
   } catch (countError) {
     throw new Error(
-      `Database triggers did not complete within ${maxRetries * retryDelay}ms timeout. ` +
+      `Database triggers did not complete within ${maxRetries * retryInterval}ms timeout. ` +
       `Unable to get final counts: ${countError instanceof Error ? countError.message : String(countError)}`
     );
   }

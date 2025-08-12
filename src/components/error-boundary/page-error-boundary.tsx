@@ -1,5 +1,6 @@
 'use client';
 
+import clientLogger from '@/lib/utils/client-logger';
 import type { ReactNode } from 'react';
 import type React from 'react';
 import { ErrorBoundary } from './error-boundary';
@@ -18,7 +19,7 @@ interface PageErrorBoundaryProps {
 export function PageErrorBoundary({ children, pageName }: PageErrorBoundaryProps) {
   const handleError = (error: Error, errorInfo: React.ErrorInfo) => {
     // Log page-level error with additional context
-    console.error(`Page Error in ${pageName || 'Unknown Page'}:`, {
+    clientLogger.error(`Page Error in ${pageName || 'Unknown Page'}`, {
       error: error.message,
       stack: error.stack,
       componentStack: errorInfo.componentStack,
@@ -61,7 +62,7 @@ export function DashboardErrorBoundary({ children }: { children: ReactNode }) {
 export function AuthErrorBoundary({ children }: { children: ReactNode }) {
   const handleAuthError = (error: Error, errorInfo: React.ErrorInfo) => {
     // Log auth-specific error
-    console.error('Authentication Error:', {
+    clientLogger.error('Authentication Error occurred', {
       error: error.message,
       stack: error.stack,
       componentStack: errorInfo.componentStack,
@@ -74,7 +75,9 @@ export function AuthErrorBoundary({ children }: { children: ReactNode }) {
         localStorage.removeItem('auth-state');
         sessionStorage.clear();
       } catch (e) {
-        console.warn('Failed to clear auth state:', e);
+        clientLogger.warn('Failed to clear auth state', {
+          error: e instanceof Error ? e.message : String(e),
+        });
       }
     }
   };

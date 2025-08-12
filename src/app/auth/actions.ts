@@ -2,6 +2,7 @@
 
 import { prisma } from '@/lib/database/client';
 import { createClient } from '@/lib/supabase/server';
+import logger from '@/lib/utils/logger';
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 
@@ -100,10 +101,13 @@ export async function signInWithVerification(
     // Return success without redirect - let client handle navigation
     return { error: null, success: true };
   } catch (dbError) {
-    console.error('🚨 Database error caught in signInWithVerification:', dbError);
-    console.error('🚨 Error name:', (dbError as Error)?.name);
-    console.error('🚨 Error message:', (dbError as Error)?.message);
-    console.error('🚨 Error stack:', (dbError as Error)?.stack);
+    logger.error('Database error during sign-in verification', {
+      error: dbError instanceof Error ? dbError.message : String(dbError),
+      errorName: (dbError as Error)?.name,
+      stack: (dbError as Error)?.stack,
+      userId: authData.user?.id,
+      email: authData.user?.email,
+    });
 
     // Sign them out to prevent partial access
     await supabase.auth.signOut();

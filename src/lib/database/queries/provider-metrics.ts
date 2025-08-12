@@ -3,6 +3,7 @@
  */
 
 import { prisma } from '@/lib/database/prisma';
+import logger from '@/lib/utils/logger';
 import type {
   DateRange,
   MetricsPeriod,
@@ -747,7 +748,12 @@ export async function getProviderKPIDashboard(params: {
       },
     };
   } catch (error) {
-    console.error('Error in getProviderKPIDashboard:', error);
+    logger.error('Error calculating provider KPI dashboard', {
+      error: error instanceof Error ? error.message : String(error),
+      stack: error instanceof Error ? error.stack : undefined,
+      providerId: params.providerId,
+      clinicId: params.clinicId,
+    });
     return {
       success: false,
       error: {

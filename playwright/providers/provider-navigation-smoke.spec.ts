@@ -1,22 +1,22 @@
-import { mockTest as test, expect } from '../fixtures/mock-auth.fixture';
+import { test, expect } from '../fixtures/supabase-auth.fixture';
 import type { Page } from '@playwright/test';
 
 /**
- * Provider Navigation Smoke Tests (Mock Authentication)
+ * Provider Navigation Smoke Tests (Supabase Authentication)
  * 
- * These tests verify basic navigation functionality using mock authentication
+ * These tests verify basic navigation functionality using Supabase authentication
  * without requiring a seeded database. They focus on UI behavior and routing.
  */
 
-test.describe('Provider Navigation Smoke Tests (Mock Auth)', () => {
-  test.beforeEach(async ({ mockAuthenticatedPage }) => {
-    const page = mockAuthenticatedPage;
+test.describe('Provider Navigation Smoke Tests (Supabase Auth)', () => {
+  test.beforeEach(async ({ authenticatedPage }) => {
+    const page = authenticatedPage;
     // Mock authentication is already handled by the fixture
     await page.goto('/dashboard');
   });
 
-  test('should navigate to providers page without errors', async ({ mockAuthenticatedPage }) => {
-    const page = mockAuthenticatedPage;
+  test('should navigate to providers page without errors', async ({ authenticatedPage }) => {
+    const page = authenticatedPage;
     
     // Navigate to providers page
     await page.goto('/dashboard/providers');
@@ -42,8 +42,8 @@ test.describe('Provider Navigation Smoke Tests (Mock Auth)', () => {
     console.log('✅ Providers page loaded successfully with mock authentication');
   });
 
-  test('should handle provider detail page routing', async ({ mockAuthenticatedPage }) => {
-    const page = mockAuthenticatedPage;
+  test('should handle provider detail page routing', async ({ authenticatedPage }) => {
+    const page = authenticatedPage;
     
     // Test navigation to a specific provider ID (even if it doesn't exist)
     await page.goto('/dashboard/providers/test-provider-id');
@@ -62,8 +62,8 @@ test.describe('Provider Navigation Smoke Tests (Mock Auth)', () => {
     console.log('✅ Provider detail page routing works with mock authentication');
   });
 
-  test('should display dashboard navigation elements', async ({ mockAuthenticatedPage }) => {
-    const page = mockAuthenticatedPage;
+  test('should display dashboard navigation elements', async ({ authenticatedPage }) => {
+    const page = authenticatedPage;
     
     await page.goto('/dashboard/providers');
     await page.waitForLoadState('networkidle');
@@ -77,8 +77,8 @@ test.describe('Provider Navigation Smoke Tests (Mock Auth)', () => {
     console.log('✅ Dashboard navigation elements present');
   });
 
-  test('should handle breadcrumb navigation structure', async ({ mockAuthenticatedPage }) => {
-    const page = mockAuthenticatedPage;
+  test('should handle breadcrumb navigation structure', async ({ authenticatedPage }) => {
+    const page = authenticatedPage;
     
     // Test breadcrumb navigation
     await page.goto('/dashboard/providers/test-provider-id');
@@ -105,8 +105,8 @@ test.describe('Provider Navigation Smoke Tests (Mock Auth)', () => {
     console.log(foundBreadcrumbs ? '✅ Breadcrumb structure found' : 'ℹ️ No breadcrumb structure detected');
   });
 
-  test('should maintain authenticated state across navigation', async ({ mockAuthenticatedPage }) => {
-    const page = mockAuthenticatedPage;
+  test('should maintain authenticated state across navigation', async ({ authenticatedPage }) => {
+    const page = authenticatedPage;
     
     // Navigate between different dashboard pages
     await page.goto('/dashboard');

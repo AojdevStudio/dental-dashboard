@@ -83,16 +83,34 @@ describe('Security Tests', () => {
         if (!error && data.user) {
           securityTestData.authIds.push(data.user.id);
 
-          // Wait for trigger to create user profile
-          await new Promise((resolve) => setTimeout(resolve, 500));
-
-          const dbUser = await prisma.user.findFirst({
-            where: { authId: data.user.id },
-          });
-
-          if (dbUser) {
-            securityTestData.users.push(dbUser);
+          // Wait for trigger to create user profile using polling
+          let dbUser = null;
+          let attempts = 0;
+          const maxAttempts = 10;
+          
+          while (!dbUser && attempts < maxAttempts) {
+            dbUser = await prisma.user.findFirst({
+              where: { authId: data.user.id },
+            });
+            
+            if (!dbUser) {
+              attempts++;
+              await new Promise(resolve => {
+                const interval = setInterval(() => {
+                  clearInterval(interval);
+                  resolve(void 0);
+                }, 100);
+              });
+            }
           }
+          
+          if (!dbUser) {
+            throw new Error('User profile was not created by database trigger');
+          }
+
+          securityTestData.users.push(dbUser);
+
+          // User is already added in the polling logic above
         }
       }
     }

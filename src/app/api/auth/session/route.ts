@@ -1,12 +1,46 @@
 import { cachedJson } from '@/lib/api/cache-headers';
-import { prisma } from '@/lib/database/prisma';
+import { prisma } from '@/lib/database/client';
 import { createClient } from '@/lib/supabase/server';
 
 /**
- * Get current user session with database role information
- * Used by client-side components to determine user permissions
+ * Retrieves the current user session with comprehensive database role and clinic information
+ *
+ * This endpoint serves as the primary session validation mechanism for client-side components.
+ * It combines Supabase authentication data with database user information to provide
+ * a complete user context including roles, clinic associations, and permissions.
+ *
+ * The response is cached appropriately based on authentication status:
+ * - Successful authentication: SHORT_CACHE (private cache)
+ * - Failed authentication: NO_CACHE to prevent stale auth state
+ *
+ * @returns Promise<Response> JSON response containing authentication status and user data
+ *
+ * @example
+ * // Successful response
+ * {
+ *   authenticated: true,
+ *   user: {
+ *     authId: "supabase-user-id",
+ *     email: "user@example.com",
+ *     dbUser: {
+ *       id: "database-user-id",
+ *       email: "user@example.com",
+ *       name: "John Doe",
+ *       role: "clinic_admin",
+ *       clinicId: "clinic-123",
+ *       isSystemAdmin: false
+ *     }
+ *   }
+ * }
+ *
+ * @example
+ * // Failed authentication response
+ * {
+ *   authenticated: false,
+ *   error: "No user session found"
+ * }
  */
-export async function GET() {
+export async function GET(): Promise<Response> {
   try {
     const supabase = await createClient();
     const {
@@ -77,7 +111,27 @@ export async function GET() {
   }
 }
 
-export function POST(_request: Request) {
+/**
+ * Handles session creation and update operations
+ *
+ * This endpoint is currently a placeholder for session management functionality
+ * that will handle operations like session refresh, explicit login/logout,
+ * or session metadata updates.
+ *
+ * @param _request - The incoming POST request (currently unused)
+ * @returns Promise<Response> JSON response indicating placeholder status
+ *
+ * @todo Implement actual session creation/update logic
+ * @todo Add proper authentication and validation
+ * @todo Define session update schema and validation
+ *
+ * @example
+ * // Current placeholder response
+ * {
+ *   message: "Session POST placeholder"
+ * }
+ */
+export function POST(_request: Request): Response {
   // TODO: Implement session creation/update logic
   return Response.json({ message: 'Session POST placeholder' });
 }

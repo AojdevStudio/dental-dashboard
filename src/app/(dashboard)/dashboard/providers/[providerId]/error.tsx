@@ -2,6 +2,7 @@
 
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import clientLogger from '@/lib/utils/client-logger';
 import { AlertTriangle, ArrowLeft, RefreshCw } from 'lucide-react';
 import Link from 'next/link';
 import { useEffect } from 'react';
@@ -20,7 +21,12 @@ interface ProviderDetailErrorProps {
 export default function ProviderDetailError({ error, reset }: ProviderDetailErrorProps) {
   useEffect(() => {
     // Log error details for debugging
-    console.error('Provider detail page error:', error);
+    clientLogger.error('Provider detail page error occurred', {
+      error: error.message,
+      digest: error.digest,
+      stack: error.stack,
+      errorType: error.constructor.name,
+    });
   }, [error]);
 
   // Determine error type and provide appropriate messaging

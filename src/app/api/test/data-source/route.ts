@@ -1,6 +1,6 @@
 import { withAuth } from '@/lib/api/middleware';
 import { ApiError } from '@/lib/api/utils';
-import { prisma } from '@/lib/database/prisma';
+import { prisma } from '@/lib/database/client';
 import { NextResponse } from 'next/server';
 
 /**

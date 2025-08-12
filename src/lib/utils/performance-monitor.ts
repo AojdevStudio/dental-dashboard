@@ -5,6 +5,8 @@
  * load times remain under 2 seconds and chart rendering under 1 second
  */
 
+import clientLogger from './client-logger';
+
 interface PerformanceMetric {
   name: string;
   startTime: number;
@@ -48,7 +50,10 @@ class PerformanceMonitor {
   end(name: string, metadata?: Record<string, unknown>): number {
     const metric = this.metrics.get(name);
     if (!metric) {
-      console.warn(`Performance metric "${name}" was not started`);
+      clientLogger.warn('Performance metric was not started', {
+        metricName: name,
+        availableMetrics: Array.from(this.metrics.keys()),
+      });
       return 0;
     }
 
@@ -141,9 +146,13 @@ class PerformanceMonitor {
     }
 
     if (threshold && duration > threshold) {
-      console.warn(
-        `Performance threshold exceeded for "${name}": ${duration.toFixed(2)}ms > ${threshold}ms`
-      );
+      const metric = this.metrics.get(name);
+      clientLogger.warn('Performance threshold exceeded', {
+        metricName: name,
+        duration: duration.toFixed(2),
+        threshold,
+        metadata: metric?.metadata,
+      });
 
       // In production, you might want to send this to a monitoring service
       if (typeof window !== 'undefined' && 'navigator' in window && 'sendBeacon' in navigator) {

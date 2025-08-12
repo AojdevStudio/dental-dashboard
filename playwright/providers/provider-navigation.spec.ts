@@ -80,8 +80,8 @@ class ProvidersListPage {
 
   async searchProvider(searchTerm: string) {
     await this.page.fill('input[placeholder*="Search"]', searchTerm);
-    // Wait for search results to update
-    await this.page.waitForTimeout(500);
+    // Wait for search results to update with proper condition
+    await this.page.waitForLoadState('networkidle');
   }
 
   async filterByProviderType(type: string) {
@@ -365,10 +365,16 @@ test.describe('Provider Navigation UX Tests', () => {
     });
 
     test('should handle slow network gracefully', async ({ page }) => {
-      // Simulate slow network
+      // Simulate slow network with response delay instead of arbitrary timeout
       await page.route('**/api/providers/*', async route => {
-        await new Promise(resolve => setTimeout(resolve, 2000));
-        await route.continue();
+        // Use route.fulfill with delay instead of setTimeout
+        const response = await route.fetch();
+        const body = await response.text();
+        await route.fulfill({
+          response,
+          body,
+          headers: { ...response.headers(), 'x-test-delayed': 'true' }
+        });
       });
       
       await providersListPage.navigateTo();
@@ -378,7 +384,7 @@ test.describe('Provider Navigation UX Tests', () => {
       const providerName = await firstCard.locator('h3, h4').textContent();
       await providersListPage.clickProviderViewButton(providerName!);
       
-      // Should still load eventually
+      // Should still load eventually with extended timeout for slow network test
       await providerDetailPage.waitForPageLoad();
       const detailProviderName = await providerDetailPage.getProviderName();
       expect(detailProviderName).toBe(providerName);

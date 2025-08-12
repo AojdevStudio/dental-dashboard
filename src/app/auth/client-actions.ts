@@ -1,6 +1,7 @@
 'use client';
 
 import { createClient } from '@/lib/supabase/client';
+import clientLogger from '@/lib/utils/client-logger';
 
 /**
  * Client-side authentication that works in browser environments
@@ -31,7 +32,10 @@ export async function signInWithClientAuth(
     // Authentication successful - the browser client will handle session management
     return { error: null, success: true };
   } catch (error) {
-    console.error('🚨 Client auth error:', error);
+    clientLogger.error('Client authentication error occurred', {
+      error: error instanceof Error ? error.message : String(error),
+      stack: error instanceof Error ? error.stack : undefined,
+    });
     return {
       error: 'Authentication failed. Please try again.',
       success: false,

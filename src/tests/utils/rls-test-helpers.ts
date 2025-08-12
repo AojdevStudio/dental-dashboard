@@ -6,6 +6,7 @@
 import { createClient } from '@supabase/supabase-js';
 import { v4 as uuidv4 } from 'uuid';
 import { validateTestEnvironment } from '@/lib/config/environment';
+import logger from '@/lib/utils/logger';
 
 const testEnv = validateTestEnvironment();
 
@@ -212,7 +213,10 @@ export async function cleanupTestData(
       .delete()
       .in('id', clinics.map(c => c.id));
   } catch (error) {
-    console.error('Error cleaning up test data:', error);
+    logger.error('Error cleaning up test data', {
+      error: error instanceof Error ? error.message : String(error),
+      stack: error instanceof Error ? error.stack : undefined
+    });
   }
 }
 

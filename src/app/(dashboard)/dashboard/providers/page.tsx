@@ -1,6 +1,7 @@
 'use client';
 import { ProviderFilters } from '@/components/providers/provider-filters';
 import { ProviderNavigation } from '@/components/providers/provider-navigation';
+import clientLogger from '@/lib/utils/client-logger';
 import type { ProviderWithLocations } from '@/types/providers';
 import { useSearchParams } from 'next/navigation';
 import { useEffect, useState } from 'react';
@@ -116,7 +117,16 @@ export default function ProvidersPage() {
 
     // Helper function to handle fetch errors
     const handleFetchError = (err: unknown) => {
-      console.error('Error fetching providers data:', err);
+      clientLogger.error('Failed to fetch providers data', {
+        error: err instanceof Error ? err.message : String(err),
+        errorType: err instanceof Error ? err.constructor.name : 'Unknown',
+        page,
+        limit,
+        search,
+        providerType: validProviderType,
+        locationId,
+        status: validStatus,
+      });
       setIsError(true);
       setError(err instanceof Error ? err : new Error('Unknown error'));
       setProvidersData({ providers: [], total: 0 });

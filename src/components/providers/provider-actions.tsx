@@ -1,5 +1,6 @@
 'use client';
 
+import clientLogger from '@/lib/utils/client-logger';
 import type { ProviderWithLocations } from '@/types/providers';
 import { useRouter } from 'next/navigation';
 import React, { cloneElement, isValidElement } from 'react';
@@ -64,8 +65,12 @@ export function ProviderActions({
         // Navigate to provider detail page using the dynamic route
         router.push(`/dashboard/providers/${provider.id}`);
       } catch (error) {
-        console.error('Navigation error:', error);
-        console.error('Failed to navigate to provider details');
+        clientLogger.error('Provider navigation error', {
+          error: error instanceof Error ? error.message : String(error),
+          providerId: provider.id,
+          providerName: provider.name,
+          route: `/dashboard/providers/${provider.id}`,
+        });
       }
     },
     [router, onCustomViewProvider]

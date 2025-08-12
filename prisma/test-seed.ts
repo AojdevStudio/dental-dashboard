@@ -83,7 +83,10 @@ async function seedTestAdminUser() {
       email: testData.adminUser.email,
       name: testData.adminUser.name,
     },
-    create: testData.adminUser,
+    create: {
+      ...testData.adminUser,
+      role: 'admin',
+    },
   });
   return user;
 }
@@ -112,14 +115,17 @@ async function seedTestProviders(clinicId: string) {
   const providers: { id: string }[] = [];
 
   for (const providerData of testData.providers) {
+    const { type, ...providerDataWithoutType } = providerData;
     const provider = await prisma.provider.upsert({
       where: { id: providerData.id },
       update: {
-        ...providerData,
+        ...providerDataWithoutType,
+        providerType: type,
         clinicId,
       },
       create: {
-        ...providerData,
+        ...providerDataWithoutType,
+        providerType: type,
         clinicId,
       },
     });
@@ -130,43 +136,19 @@ async function seedTestProviders(clinicId: string) {
   return providers;
 }
 
-async function seedTestMetrics(providers: { id: string }[]) {
-  // Create some basic metrics for testing
-  for (const provider of providers) {
-    await prisma.providerMetric.upsert({
-      where: {
-        providerId_date: {
-          providerId: provider.id,
-          date: new Date('2024-01-01'),
-        },
-      },
-      update: {},
-      create: {
-        providerId: provider.id,
-        date: new Date('2024-01-01'),
-        production: 5000,
-        collection: 4500,
-        adjustments: 200,
-        newPatients: 15,
-        activePatients: 120,
-        appointmentsScheduled: 45,
-        appointmentsCompleted: 42,
-        appointmentsNoShow: 3,
-      },
-    });
-  }
+function seedTestMetrics(providers: { id: string }[]) {
+  // Note: providerMetric model no longer exists in the current schema
+  // Metrics are now stored in different models like FinancialMetric, AppointmentMetric, etc.
+  // This function is kept as a placeholder for future test metric seeding
+  console.info(
+    `Skipping metric seeding for ${providers.length} providers - model no longer exists`
+  );
 }
 
 async function cleanupExistingTestData() {
   try {
     // Delete in reverse dependency order
-    await prisma.providerMetric.deleteMany({
-      where: {
-        provider: {
-          clinicId: testData.clinic.id,
-        },
-      },
-    });
+    // Note: providerMetric model no longer exists, skip this deletion
 
     await prisma.provider.deleteMany({
       where: { clinicId: testData.clinic.id },

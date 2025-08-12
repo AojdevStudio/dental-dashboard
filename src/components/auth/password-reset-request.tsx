@@ -31,7 +31,7 @@ export function PasswordResetRequest(): React.ReactElement {
    *
    * @param {React.FormEvent} e - The form submission event
    */
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
     // Basic email validation
@@ -46,11 +46,9 @@ export function PasswordResetRequest(): React.ReactElement {
     setErrorMessage('');
 
     try {
-      // In a real implementation, this would call an API endpoint
-      // For now, we'll simulate a successful request after a delay
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-
-      // Simulate successful submission
+      // TODO: Replace with actual Supabase password reset request
+      // await supabase.auth.resetPasswordForEmail(email);
+      // For now, immediately simulate successful submission
       setSubmitStatus('success');
     } catch (_error) {
       setSubmitStatus('error');
