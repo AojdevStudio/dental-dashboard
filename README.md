@@ -109,18 +109,18 @@ The Dental Dashboard is a production-grade Next.js application designed to empow
    Configure your `.env` file:
    ```env
    # Supabase Configuration
-   NEXT_PUBLIC_SUPABASE_URL=your-supabase-project-url
-   NEXT_PUBLIC_SUPABASE_ANON_KEY=your-supabase-anon-key
-   DATABASE_URL=your-database-connection-string
-   DIRECT_URL=your-direct-database-url
+   NEXT_PUBLIC_SUPABASE_URL=REPLACE_WITH_YOUR_SUPABASE_URL
+   NEXT_PUBLIC_SUPABASE_ANON_KEY=REPLACE_WITH_YOUR_ANON_KEY
+   DATABASE_URL=REPLACE_WITH_YOUR_DATABASE_URL
+   DIRECT_URL=REPLACE_WITH_YOUR_DIRECT_URL
    
    # Google API Integration
-   GOOGLE_CLIENT_ID=your-google-client-id
-   GOOGLE_CLIENT_SECRET=your-google-client-secret
+   GOOGLE_CLIENT_ID=REPLACE_WITH_YOUR_CLIENT_ID
+   GOOGLE_CLIENT_SECRET=REPLACE_WITH_YOUR_CLIENT_SECRET
    GOOGLE_REDIRECT_URI=http://localhost:3000/api/auth/google/callback
    
    # Optional: AI Development Tools
-   ANTHROPIC_API_KEY=your-claude-api-key
+   ANTHROPIC_API_KEY=REPLACE_WITH_YOUR_API_KEY
    ```
 
 4. **Database setup**
