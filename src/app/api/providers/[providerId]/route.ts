@@ -1,7 +1,8 @@
 import { type ApiHandler, withAuth } from '@/lib/api/middleware';
 import { apiError, apiSuccess, handleApiError } from '@/lib/api/utils';
 import type { AuthContext } from '@/lib/database/auth-context';
-import { prisma } from '@/lib/database/prisma';
+import { prisma } from '@/lib/database/client';
+import logger from '@/lib/utils/logger';
 import type { ISODateString, ProviderWithLocations } from '@/types/providers';
 import type { NextResponse } from 'next/server';
 import { z } from 'zod';
@@ -147,7 +148,16 @@ const getProviderHandler: ApiHandler = async (
 
     return apiSuccess(provider) as NextResponse;
   } catch (error) {
-    console.error('Error fetching provider:', error);
+    const resolvedParams = await params.catch(() => ({}) as Record<string, string | string[]>);
+    const currentProviderId =
+      'providerId' in resolvedParams ? (resolvedParams.providerId as string) : undefined;
+
+    logger.error('API error fetching provider', {
+      error: error instanceof Error ? error.message : String(error),
+      providerId: currentProviderId || 'unknown',
+      userId: authContext.userId,
+      stack: error instanceof Error ? error.stack : undefined,
+    });
     return handleApiError(error);
   }
 };
@@ -234,7 +244,16 @@ const updateProviderHandler: ApiHandler = async (
 
     return apiSuccess(updatedProvider) as NextResponse;
   } catch (error) {
-    console.error('Error updating provider:', error);
+    const resolvedParams = await params.catch(() => ({}) as Record<string, string | string[]>);
+    const currentProviderId =
+      'providerId' in resolvedParams ? (resolvedParams.providerId as string) : undefined;
+
+    logger.error('API error updating provider', {
+      error: error instanceof Error ? error.message : String(error),
+      providerId: currentProviderId || 'unknown',
+      userId: authContext.userId,
+      stack: error instanceof Error ? error.stack : undefined,
+    });
     return handleApiError(error);
   }
 };

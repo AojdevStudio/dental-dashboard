@@ -16,18 +16,18 @@
 ## Acceptance Criteria (ACs)
 
 ### AC1: Provider Detail Page Navigation
-- [x] Provider "View" buttons navigate to functional detail pages without 404 errors
-- [x] URL pattern `/dashboard/providers/[providerId]` resolves correctly
-- [x] Support for both UUID and slug-based provider identification
-- [x] Proper error boundaries and 404 handling for invalid provider IDs
-- [x] Breadcrumb navigation integration with back button functionality
+- [] Provider "View" buttons navigate to functional detail pages without 404 errors
+- [] URL pattern `/dashboard/providers/[providerId]` resolves correctly
+- [] Support for both UUID and slug-based provider identification
+- [] Proper error boundaries and 404 handling for invalid provider IDs
+- [] Breadcrumb navigation integration with back button functionality
 
 ### AC2: KPI Metrics Dashboard
-- [x] Financial KPIs display: production totals, collection rates, overhead percentages
-- [x] Performance KPIs show: goal achievement, variance analysis, trend calculations
-- [x] Patient KPIs include: patient count, appointment efficiency, case acceptance rates
-- [x] Comparative KPIs display: provider ranking, clinic averages, benchmark comparisons
-- [x] All metrics load in <2 seconds with real database data
+- [] Financial KPIs display: production totals, collection rates, overhead percentages
+- [] Performance KPIs show: goal achievement, variance analysis, trend calculations
+- [] Patient KPIs include: patient count, appointment efficiency, case acceptance rates
+- [] Comparative KPIs display: provider ranking, clinic averages, benchmark comparisons
+- [] All metrics load in <2 seconds with real database data
 
 ### AC3: Interactive Chart Visualizations
 - [ ] Line charts for production trends and goal progress over time

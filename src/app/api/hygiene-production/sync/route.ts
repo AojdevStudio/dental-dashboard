@@ -26,11 +26,12 @@ const hygieneProductionSyncSchema = z.object({
 });
 
 // Helper function to validate sync request and authenticate
-function validateSyncRequest(supabase_key: string) {
+function validateSyncRequest(supabase_key: string): boolean {
   const expectedKey = process.env.SUPABASE_ANON_KEY;
   if (!expectedKey || supabase_key !== expectedKey) {
     throw new ApiError('Unauthorized', 401);
   }
+  return true;
 }
 
 // Helper function to group records by clinic

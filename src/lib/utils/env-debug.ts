@@ -2,6 +2,9 @@
 const fs = typeof window === 'undefined' ? require('node:fs') : null;
 const path = typeof window === 'undefined' ? require('node:path') : null;
 
+// Import client logger for browser compatibility
+import clientLogger from './client-logger';
+
 /**
  * Environment debugging utility to help identify environment loading issues
  * Useful for troubleshooting environment variable problems in worktree setups
@@ -122,7 +125,10 @@ export function getSafeEnvVar(varName: string, fallback?: string): string | unde
   }
 
   if (fallback !== undefined) {
-    console.warn(`⚠️  Environment variable ${varName} not found, using fallback`);
+    clientLogger.warn('Environment variable not found, using fallback', {
+      variableName: varName,
+      fallbackValue: fallback,
+    });
     return fallback;
   }
 

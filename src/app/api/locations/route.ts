@@ -2,7 +2,7 @@ import { prisma } from '@/lib/database/client';
 import type { Prisma } from '@prisma/client';
 import { type NextRequest, NextResponse } from 'next/server';
 
-export async function GET(request: NextRequest) {
+export async function GET(request: NextRequest): Promise<NextResponse> {
   try {
     const { searchParams } = new URL(request.url);
     const clinicId = searchParams.get('clinicId');
@@ -71,7 +71,7 @@ export async function GET(request: NextRequest) {
   }
 }
 
-export async function POST(request: NextRequest) {
+export async function POST(request: NextRequest): Promise<NextResponse> {
   try {
     const body = await request.json();
     const { clinicId, name, address, isActive = true } = body;

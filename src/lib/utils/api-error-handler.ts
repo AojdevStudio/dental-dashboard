@@ -6,6 +6,7 @@
  */
 
 import { NextResponse } from 'next/server';
+import logger from './logger';
 
 export interface ApiError {
   message: string;
@@ -90,7 +91,7 @@ export function validationError(
   message: string,
   details?: Record<string, unknown>,
   context?: ApiErrorContext
-) {
+): NextResponse<ApiErrorResponse> {
   return createErrorResponse(message, 400, 'VALIDATION_ERROR', details, context);
 }
 
@@ -100,7 +101,7 @@ export function validationError(
 export function authenticationError(
   message = 'Authentication required',
   context?: ApiErrorContext
-) {
+): NextResponse<ApiErrorResponse> {
   return createErrorResponse(message, 401, 'AUTHENTICATION_ERROR', undefined, context);
 }
 
@@ -110,14 +111,17 @@ export function authenticationError(
 export function authorizationError(
   message = 'Insufficient permissions',
   context?: ApiErrorContext
-) {
+): NextResponse<ApiErrorResponse> {
   return createErrorResponse(message, 403, 'AUTHORIZATION_ERROR', undefined, context);
 }
 
 /**
  * Handles not found errors
  */
-export function notFoundError(resource = 'Resource', context?: ApiErrorContext) {
+export function notFoundError(
+  resource = 'Resource',
+  context?: ApiErrorContext
+): NextResponse<ApiErrorResponse> {
   return createErrorResponse(`${resource} not found`, 404, 'NOT_FOUND', undefined, context);
 }
 
@@ -128,14 +132,17 @@ export function conflictError(
   message: string,
   details?: Record<string, unknown>,
   context?: ApiErrorContext
-) {
+): NextResponse<ApiErrorResponse> {
   return createErrorResponse(message, 409, 'CONFLICT_ERROR', details, context);
 }
 
 /**
  * Handles rate limiting errors
  */
-export function rateLimitedError(message = 'Too many requests', context?: ApiErrorContext) {
+export function rateLimitedError(
+  message = 'Too many requests',
+  context?: ApiErrorContext
+): NextResponse<ApiErrorResponse> {
   return createErrorResponse(message, 429, 'RATE_LIMITED', undefined, context);
 }
 
@@ -146,7 +153,7 @@ export function internalError(
   message = 'Internal server error',
   error?: Error,
   context?: ApiErrorContext
-) {
+): NextResponse<ApiErrorResponse> {
   const details = error
     ? {
         originalError: error.message,
@@ -164,7 +171,7 @@ export function databaseError(
   message = 'Database operation failed',
   error?: Error,
   context?: ApiErrorContext
-) {
+): NextResponse<ApiErrorResponse> {
   const details = error
     ? {
         originalError: error.message,
@@ -183,7 +190,7 @@ export function externalServiceError(
   message?: string,
   error?: Error,
   context?: ApiErrorContext
-) {
+): NextResponse<ApiErrorResponse> {
   const errorMessage = message || `${service} service unavailable`;
   const details = error
     ? {
@@ -205,7 +212,11 @@ export function withErrorHandling<T extends unknown[]>(
     try {
       return await handler(...args);
     } catch (error) {
-      console.error('Unhandled API error:', error);
+      logger.error('Unhandled API error in route handler', {
+        error: error instanceof Error ? error.message : String(error),
+        stack: error instanceof Error ? error.stack : undefined,
+        errorType: error instanceof Error ? error.constructor.name : 'Unknown',
+      });
 
       if (error instanceof Error) {
         return internalError('An unexpected error occurred', error);
@@ -287,15 +298,24 @@ export class NotFoundError extends Error {
  * Logs API errors with context
  */
 function logApiError(error: ApiError, context?: ApiErrorContext): void {
-  const logData = {
+  const _logData = {
     error,
     context,
     timestamp: new Date().toISOString(),
   };
 
-  if (process.env.NODE_ENV === 'development') {
-    console.error('API Error:', logData);
-  }
+  // Always log API errors using structured logging
+  logger.error('API Error occurred', {
+    errorMessage: error.message,
+    errorCode: error.code,
+    errorStatus: error.status,
+    errorDetails: error.details,
+    requestId: error.requestId,
+    endpoint: context?.endpoint,
+    method: context?.method,
+    userId: context?.userId,
+    additionalContext: context?.additionalContext,
+  });
 
   // In production, send to logging service
   if (process.env.NODE_ENV === 'production') {

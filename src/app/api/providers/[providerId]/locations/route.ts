@@ -16,7 +16,7 @@ interface ProviderLocationUpdateData {
 export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ providerId: string }> }
-) {
+): Promise<NextResponse> {
   try {
     const { providerId } = await params;
     const { searchParams } = new URL(request.url);
@@ -101,7 +101,7 @@ export async function GET(
 export async function POST(
   request: NextRequest,
   { params }: { params: Promise<{ providerId: string }> }
-) {
+): Promise<NextResponse> {
   try {
     const { providerId } = await params;
     const body = await request.json();

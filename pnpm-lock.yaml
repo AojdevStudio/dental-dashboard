@@ -153,7 +153,7 @@ importers:
         version: 12.23.6(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
       next:
         specifier: 15.3.2
-        version: 15.3.2(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
+        version: 15.3.2(@playwright/test@1.54.1)(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
       next-themes:
         specifier: ^0.4.6
         version: 0.4.6(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
@@ -215,9 +215,12 @@ importers:
       "@google/clasp":
         specifier: 3.0.5-alpha
         version: 3.0.5-alpha(@types/node@20.19.9)(typescript@5.8.3)
+      "@playwright/test":
+        specifier: ^1.54.1
+        version: 1.54.1
       "@stagewise/toolbar-next":
         specifier: ^0.1.2
-        version: 0.1.2(@types/react@19.1.8)(jiti@2.4.2)(next@15.3.2(react-dom@19.1.0(react@19.1.0))(react@19.1.0))(postcss@8.5.6)(react-dom@19.1.0(react@19.1.0))(react@19.1.0)(tsx@4.20.3)(typescript@5.8.3)(use-sync-external-store@1.5.0(react@19.1.0))(vite@7.0.5(@types/node@20.19.9)(jiti@2.4.2)(lightningcss@1.30.1)(tsx@4.20.3))
+        version: 0.1.2(@types/react@19.1.8)(jiti@2.4.2)(next@15.3.2(@playwright/test@1.54.1)(react-dom@19.1.0(react@19.1.0))(react@19.1.0))(postcss@8.5.6)(react-dom@19.1.0(react@19.1.0))(react@19.1.0)(tsx@4.20.3)(typescript@5.8.3)(use-sync-external-store@1.5.0(react@19.1.0))(vite@7.0.5(@types/node@20.19.9)(jiti@2.4.2)(lightningcss@1.30.1)(tsx@4.20.3))
       "@tailwindcss/postcss":
         specifier: ^4.1.11
         version: 4.1.11
@@ -245,6 +248,9 @@ importers:
       "@types/uuid":
         specifier: ^10.0.0
         version: 10.0.0
+      dotenv-cli:
+        specifier: ^9.0.0
+        version: 9.0.0
       husky:
         specifier: ^9.1.7
         version: 9.1.7
@@ -1453,6 +1459,14 @@ packages:
         integrity: sha512-+1VkjdD0QBLPodGrJUeqarH8VAIvQODIbwh9XpP5Syisf7YoQgsJKPNFoqqLQlu+VQ/tVSshMR6loPMn8U+dPg==,
       }
     engines: { node: ">=14" }
+
+  "@playwright/test@1.54.1":
+    resolution:
+      {
+        integrity: sha512-FS8hQ12acieG2dYSksmLOF7BNxnVf2afRJdCuM1eMSxj6QTSE6G4InGF7oApGgDb65MX7AwMVlIkpru0yZA4Xw==,
+      }
+    engines: { node: ">=18" }
+    hasBin: true
 
   "@preact/compat@18.3.1":
     resolution:
@@ -4089,10 +4103,31 @@ packages:
         integrity: sha512-nRCa7CK3VTrM2NmGkIy4cbK7IZlgBE/PYMn55rrXefr5xXDP0LdtfPnblFDoVdcAfslJ7or6iqAUnx0CCGIWQA==,
       }
 
+  dotenv-cli@9.0.0:
+    resolution:
+      {
+        integrity: sha512-NhGrQum/u1VTBxnSnlNwVkTP3gojYO8T6Fntyru93wbR1hPo8aFhDFJiBPmkT0771i7f5Rd7EQDaOreS8jY8gA==,
+      }
+    hasBin: true
+
+  dotenv-expand@10.0.0:
+    resolution:
+      {
+        integrity: sha512-GopVGCpVS1UKH75VKHGuQFqS1Gusej0z4FyQkPdwjil2gNIv+LNsqBlboOzpJFZKVT95GkCyWJbBSdFEFUWI2A==,
+      }
+    engines: { node: ">=12" }
+
   dotenv@16.6.1:
     resolution:
       {
         integrity: sha512-uBq4egWHTcTt33a72vpSG0z3HnPuIl6NqYcTrKEg2azoEyl2hpW0zqlxysq2pK9HlDIHyHyakeYaYnSAwd8bow==,
+      }
+    engines: { node: ">=12" }
+
+  dotenv@17.2.0:
+    resolution:
+      {
+        integrity: sha512-Q4sgBT60gzd0BB0lSyYD3xM4YxrXA9y4uBDof1JNYGzOXrQdQ6yX+7XIAqoFOGQFOTK1D3Hts5OllpxMDZFONQ==,
       }
     engines: { node: ">=12" }
 
@@ -4542,6 +4577,14 @@ packages:
         integrity: sha512-Z4XaCL6dUDHfP/jT25jJKMmtxvuwbkrD1vNSMFlo9lNLY2c5FHYSQgHPRZUjAB26TpDEoW9HCOgplrdbaPV/ew==,
       }
     engines: { node: ">=14.14" }
+
+  fsevents@2.3.2:
+    resolution:
+      {
+        integrity: sha512-xiqMQR4xAeHTuB9uWm+fFRcIOgKBMiOBP+eXiyT7jsgVCq1bkVygt00oASowB7EdtpOHaaPgKt812P9ab+DDKA==,
+      }
+    engines: { node: ^8.16.0 || ^10.6.0 || >=11.0.0 }
+    os: [darwin]
 
   fsevents@2.3.3:
     resolution:
@@ -5514,6 +5557,12 @@ packages:
       }
     engines: { node: ">=16 || 14 >=14.17" }
 
+  minimist@1.2.8:
+    resolution:
+      {
+        integrity: sha512-2yyAR8qBkN3YuheJanUpWC5U3bb5osDywNB8RzDVlDwDHbocAJveqqj1u8+SVD7jkWT4yvsHCpWqqWqAxb0zCA==,
+      }
+
   minipass@7.1.2:
     resolution:
       {
@@ -6014,6 +6063,22 @@ packages:
       {
         integrity: sha512-/Jm5M4RvtBFVkKWRu2BLUTNP8/M2a+UwuAX+ae4770q1qVGtfjG+WTCupoZixokjmHiry8uI+dlY8KXYV5HVVQ==,
       }
+
+  playwright-core@1.54.1:
+    resolution:
+      {
+        integrity: sha512-Nbjs2zjj0htNhzgiy5wu+3w09YetDx5pkrpI/kZotDlDUaYk0HVA5xrBVPdow4SAUIlhgKcJeJg4GRKW6xHusA==,
+      }
+    engines: { node: ">=18" }
+    hasBin: true
+
+  playwright@1.54.1:
+    resolution:
+      {
+        integrity: sha512-peWpSwIBmSLi6aW2auvrUtf2DqY16YYcCMO8rTVx486jKmDTJg7UAhyrraP98GB8BoPURZP8+nxO7TSd4cPr5g==,
+      }
+    engines: { node: ">=18" }
+    hasBin: true
 
   postcss-load-config@6.0.1:
     resolution:
@@ -8409,6 +8474,10 @@ snapshots:
   "@pkgjs/parseargs@0.11.0":
     optional: true
 
+  "@playwright/test@1.54.1":
+    dependencies:
+      playwright: 1.54.1
+
   "@preact/compat@18.3.1(preact@10.26.9)":
     dependencies:
       preact: 10.26.9
@@ -9363,11 +9432,11 @@ snapshots:
 
   "@sindresorhus/merge-streams@4.0.0": {}
 
-  "@stagewise/toolbar-next@0.1.2(@types/react@19.1.8)(jiti@2.4.2)(next@15.3.2(react-dom@19.1.0(react@19.1.0))(react@19.1.0))(postcss@8.5.6)(react-dom@19.1.0(react@19.1.0))(react@19.1.0)(tsx@4.20.3)(typescript@5.8.3)(use-sync-external-store@1.5.0(react@19.1.0))(vite@7.0.5(@types/node@20.19.9)(jiti@2.4.2)(lightningcss@1.30.1)(tsx@4.20.3))":
+  "@stagewise/toolbar-next@0.1.2(@types/react@19.1.8)(jiti@2.4.2)(next@15.3.2(@playwright/test@1.54.1)(react-dom@19.1.0(react@19.1.0))(react@19.1.0))(postcss@8.5.6)(react-dom@19.1.0(react@19.1.0))(react@19.1.0)(tsx@4.20.3)(typescript@5.8.3)(use-sync-external-store@1.5.0(react@19.1.0))(vite@7.0.5(@types/node@20.19.9)(jiti@2.4.2)(lightningcss@1.30.1)(tsx@4.20.3))":
     dependencies:
       "@stagewise/toolbar-react": 0.1.2(@types/react@19.1.8)(jiti@2.4.2)(postcss@8.5.6)(react-dom@19.1.0(react@19.1.0))(react@19.1.0)(tsx@4.20.3)(typescript@5.8.3)(use-sync-external-store@1.5.0(react@19.1.0))(vite@7.0.5(@types/node@20.19.9)(jiti@2.4.2)(lightningcss@1.30.1)(tsx@4.20.3))
       "@types/react": 19.1.8
-      next: 15.3.2(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
+      next: 15.3.2(@playwright/test@1.54.1)(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
       react: 19.1.0
     transitivePeerDependencies:
       - "@microsoft/api-extractor"
@@ -10212,7 +10281,18 @@ snapshots:
       "@babel/runtime": 7.27.6
       csstype: 3.1.3
 
+  dotenv-cli@9.0.0:
+    dependencies:
+      cross-spawn: 7.0.6
+      dotenv: 17.2.0
+      dotenv-expand: 10.0.0
+      minimist: 1.2.8
+
+  dotenv-expand@10.0.0: {}
+
   dotenv@16.6.1: {}
+
+  dotenv@17.2.0: {}
 
   dunder-proto@1.0.1:
     dependencies:
@@ -10560,6 +10640,9 @@ snapshots:
       graceful-fs: 4.2.11
       jsonfile: 6.1.0
       universalify: 2.0.1
+
+  fsevents@2.3.2:
+    optional: true
 
   fsevents@2.3.3:
     optional: true
@@ -11115,6 +11198,8 @@ snapshots:
     dependencies:
       brace-expansion: 2.0.2
 
+  minimist@1.2.8: {}
+
   minipass@7.1.2: {}
 
   minizlib@3.0.2:
@@ -11171,7 +11256,7 @@ snapshots:
       react: 19.1.0
       react-dom: 19.1.0(react@19.1.0)
 
-  next@15.3.2(react-dom@19.1.0(react@19.1.0))(react@19.1.0):
+  next@15.3.2(@playwright/test@1.54.1)(react-dom@19.1.0(react@19.1.0))(react@19.1.0):
     dependencies:
       "@next/env": 15.3.2
       "@swc/counter": 0.1.3
@@ -11191,6 +11276,7 @@ snapshots:
       "@next/swc-linux-x64-musl": 15.3.2
       "@next/swc-win32-arm64-msvc": 15.3.2
       "@next/swc-win32-x64-msvc": 15.3.2
+      "@playwright/test": 1.54.1
       sharp: 0.34.3
     transitivePeerDependencies:
       - "@babel/core"
@@ -11395,6 +11481,14 @@ snapshots:
       confbox: 0.1.8
       mlly: 1.7.4
       pathe: 2.0.3
+
+  playwright-core@1.54.1: {}
+
+  playwright@1.54.1:
+    dependencies:
+      playwright-core: 1.54.1
+    optionalDependencies:
+      fsevents: 2.3.2
 
   postcss-load-config@6.0.1(jiti@2.4.2)(postcss@8.5.6)(tsx@4.20.3):
     dependencies:

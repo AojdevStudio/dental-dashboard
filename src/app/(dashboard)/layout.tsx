@@ -1,5 +1,6 @@
 import { getAuthContext } from '@/lib/database/auth-context';
 import { prisma } from '@/lib/database/prisma';
+import logger from '@/lib/utils/logger';
 import type React from 'react';
 import DashboardLayout from './layout-client';
 
@@ -44,7 +45,11 @@ export default async function DashboardLayoutServer({
       }
     }
   } catch (error) {
-    console.error('DashboardLayoutServer: Error getting auth context:', error);
+    logger.error('Failed to get auth context in dashboard layout', {
+      error: error instanceof Error ? error.message : String(error),
+      errorType: error instanceof Error ? error.constructor.name : 'Unknown',
+      stack: error instanceof Error ? error.stack : undefined,
+    });
     // Continue with empty context and let client-side handle auth
   }
 

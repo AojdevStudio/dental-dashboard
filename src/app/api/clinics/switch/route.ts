@@ -1,7 +1,7 @@
 import { getAuthContext, updateSelectedClinic } from '@/lib/database/auth-context';
 import { type NextRequest, NextResponse } from 'next/server';
 
-export async function POST(request: NextRequest) {
+export async function POST(request: NextRequest): Promise<NextResponse> {
   try {
     const authContext = await getAuthContext();
 

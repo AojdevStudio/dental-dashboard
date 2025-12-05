@@ -100,8 +100,32 @@ describe('Multi-Tenant Integration Tests', () => {
       }
     }
 
-    // Wait for triggers to create user profiles
-    await new Promise((resolve) => setTimeout(resolve, 2000));
+    // Wait for triggers to create user profiles using proper polling
+    let allUsersCreated = false;
+    let attempts = 0;
+    const maxAttempts = 40; // 20 seconds total
+    
+    while (!allUsersCreated && attempts < maxAttempts) {
+      const userCount = await prisma.user.count({
+        where: { authId: { in: testData.authIds } },
+      });
+      
+      if (userCount === testData.authIds.length) {
+        allUsersCreated = true;
+      } else {
+        attempts++;
+        await new Promise(resolve => {
+          const interval = setInterval(() => {
+            clearInterval(interval);
+            resolve(void 0);
+          }, 500);
+        });
+      }
+    }
+    
+    if (!allUsersCreated) {
+      throw new Error('User profiles were not created by database triggers within timeout');
+    }
   });
 
   afterAll(async () => {

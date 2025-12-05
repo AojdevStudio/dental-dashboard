@@ -1,8 +1,8 @@
-import { prisma } from '@/lib/database/prisma';
+import { prisma } from '@/lib/database/client';
 import { createClient } from '@/lib/supabase/server';
 import { NextResponse } from 'next/server';
 
-export async function POST() {
+export async function POST(): Promise<NextResponse> {
   try {
     // Get the current user from Supabase Auth
     const supabase = await createClient();

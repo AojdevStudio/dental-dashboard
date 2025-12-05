@@ -6,6 +6,7 @@ import { withAuth } from '@/lib/api/middleware';
 import { ApiError, apiError, apiSuccess } from '@/lib/api/utils';
 import type { AuthContext } from '@/lib/database/auth-context';
 import { calculateProviderMetrics } from '@/lib/metrics/provider-calculations';
+import logger from '@/lib/utils/logger';
 import type { MetricsQueryParams, ProviderMetrics } from '@/types/provider-metrics';
 import { NextResponse } from 'next/server';
 import { z } from 'zod';
@@ -196,7 +197,27 @@ export const GET = withAuth(
       );
       return response;
     } catch (error) {
-      console.error('Provider metrics API error:', error);
+      const params = await context.params.catch(() => ({}) as Record<string, string | string[]>);
+      const providerId = 'providerId' in params ? (params.providerId as string) : undefined;
+
+      // Create safe queryParams for logging
+      const safeQueryParams = {
+        period: 'monthly',
+        clinicId: undefined,
+        startDate: undefined,
+        endDate: undefined,
+        includeComparative: true,
+        includeGoals: true,
+        refreshCache: false,
+      };
+
+      logger.error('Provider metrics API error', {
+        error: error instanceof Error ? error.message : String(error),
+        providerId: providerId || 'unknown',
+        userId: context.authContext.userId,
+        queryParams: safeQueryParams,
+        stack: error instanceof Error ? error.stack : undefined,
+      });
 
       if (error instanceof ApiError) {
         return apiError(error.message, error.statusCode);
@@ -235,7 +256,15 @@ export const POST = withAuth(
         timestamp: new Date().toISOString(),
       });
     } catch (error) {
-      console.error('Provider metrics cache refresh error:', error);
+      const params = await context.params;
+      const providerId = params.providerId as string;
+
+      logger.error('Provider metrics cache refresh error', {
+        error: error instanceof Error ? error.message : String(error),
+        providerId,
+        userId: context.authContext.userId,
+        stack: error instanceof Error ? error.stack : undefined,
+      });
 
       if (error instanceof ApiError) {
         return apiError(error.message, error.statusCode);
@@ -292,7 +321,15 @@ export const HEAD = withAuth(
         headers,
       });
     } catch (error) {
-      console.error('Provider metrics cache status error:', error);
+      const params = await context.params;
+      const providerId = params.providerId as string;
+
+      logger.error('Provider metrics cache status error', {
+        error: error instanceof Error ? error.message : String(error),
+        providerId,
+        userId: context.authContext.userId,
+        stack: error instanceof Error ? error.stack : undefined,
+      });
       return new NextResponse(null, { status: 500 });
     }
   }

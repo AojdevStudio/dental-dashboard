@@ -15,6 +15,7 @@
     "prisma:push": "prisma db push",
     "prisma:studio": "pnpm prisma studio",
     "prisma:seed": "pnpm dlx tsx prisma/seed.ts",
+    "test:seed": "dotenv -e .env.test -- pnpm dlx tsx prisma/test-seed.ts",
     "postinstall": "prisma generate",
     "list": "node scripts/dev.js list",
     "generate": "node scripts/dev.js generate",
@@ -53,7 +54,11 @@
     "gas:health:hygienist": "node scripts/deployment/gas-health-check.cjs --type=hygienist",
     "ci:test": "./scripts/ci-local.sh",
     "fix:all": "pnpm biome:fix && pnpm prettier:yaml && pnpm typecheck",
-    "biome:branch": "./scripts/biome-branch-check.sh"
+    "biome:branch": "./scripts/biome-branch-check.sh",
+    "test:e2e": "dotenv -e .env.test -- playwright test",
+    "test:e2e:ui": "playwright test --ui",
+    "test:e2e:headed": "playwright test --headed",
+    "test:e2e:report": "playwright show-report"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.39.0",
@@ -127,6 +132,7 @@
     "@aojdevstudio/cdev": "^0.0.8",
     "@biomejs/biome": "^1.9.4",
     "@google/clasp": "3.0.5-alpha",
+    "@playwright/test": "^1.54.1",
     "@stagewise/toolbar-next": "^0.1.2",
     "@tailwindcss/postcss": "^4.1.11",
     "@testing-library/jest-dom": "^6.6.3",
@@ -137,6 +143,7 @@
     "@types/react": "^19.1.8",
     "@types/react-dom": "^19.1.6",
     "@types/uuid": "^10.0.0",
+    "dotenv-cli": "^9.0.0",
     "husky": "^9.1.7",
     "jsdom": "^26.1.0",
     "pg": "^8.16.3",

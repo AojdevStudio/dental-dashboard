@@ -1,5 +1,6 @@
 'use client';
 
+import clientLogger from '@/lib/utils/client-logger';
 import { AlertTriangle, Home, RefreshCw } from 'lucide-react';
 import { Component, type ErrorInfo, type ReactNode } from 'react';
 import type React from 'react';
@@ -119,14 +120,17 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
       url: typeof window !== 'undefined' ? window.location.href : 'unknown',
     };
 
-    // Log to console in development
-    if (process.env.NODE_ENV === 'development') {
-      console.group(`🚨 Error Boundary Caught Error [${errorId}]`);
-      console.error('Error:', error);
-      console.error('Error Info:', errorInfo);
-      console.error('Full Report:', errorReport);
-      console.groupEnd();
-    }
+    // Always log error details using structured logging
+    clientLogger.error('Error boundary caught error', {
+      errorId,
+      level,
+      message: error.message,
+      stack: error.stack,
+      componentStack: errorInfo.componentStack,
+      timestamp: errorReport.timestamp,
+      userAgent: errorReport.userAgent,
+      url: errorReport.url,
+    });
 
     // In production, you might want to send this to an error reporting service
     if (process.env.NODE_ENV === 'production') {

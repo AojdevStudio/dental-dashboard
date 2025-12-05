@@ -1,13 +1,30 @@
 import { PrismaClient } from '@prisma/client';
+import winston from 'winston';
 
 const prisma = new PrismaClient();
+
+// Create logger for seeding operations
+const logger = winston.createLogger({
+  level: 'info',
+  format: winston.format.combine(
+    winston.format.timestamp(),
+    winston.format.printf(({ timestamp, level, message, ...meta }) => {
+      const metaStr = Object.keys(meta).length ? ` ${JSON.stringify(meta)}` : '';
+      return `${timestamp} [${level.toUpperCase()}] ${message}${metaStr}`;
+    })
+  ),
+  transports: [
+    new winston.transports.Console()
+  ]
+});
 
 // CRITICAL SAFETY CHECK: Prevent accidental test data seeding in production
 function validateSeedEnvironment() {
   const dbUrl = process.env.DATABASE_URL;
   
-  console.log('🔍 Validating seed environment...');
-  console.log('DATABASE_URL:', dbUrl?.substring(0, 50) + '...');
+  logger.info('Validating seed environment', {
+    databaseUrl: dbUrl?.substring(0, 50) + '...'
+  });
   
   // This seed file contains PRODUCTION data for KamDental clinics
   // It should ONLY run against production or development databases
@@ -17,14 +34,14 @@ function validateSeedEnvironment() {
     throw new Error('❌ Production seed file should not run against local test database (localhost:54322)!');
   }
   
-  console.log('✅ Seed environment validation passed');
+  logger.info('Seed environment validation passed');
 }
 
 async function main() {
   // Validate environment before seeding
   validateSeedEnvironment();
   
-  console.log('🌱 Starting KamDental production data seeding...');
+  logger.info('Starting KamDental production data seeding');
   
   // Upsert the two KamDental clinics (idempotent)
   const clinics = await Promise.all([
@@ -214,11 +231,11 @@ async function main() {
       } catch (_error) {}
     }
   } else {
-    console.log('⚠️ Unable to find clinics - skipping provider creation');
+    logger.warn('Unable to find clinics - skipping provider creation');
   }
 
   // Create provider-location relationships
-  console.log('🔗 Creating provider-location relationships...');
+  logger.info('Creating provider-location relationships');
   
   const locationMappings = [
     // Kamdi Irondi - works at both locations (primary: Humble)
@@ -256,7 +273,11 @@ async function main() {
       }
 
       if (!provider) {
-        console.log(`⚠️ Provider not found for mapping: ${mapping.providerEmail || `${mapping.providerFirstName} ${mapping.providerLastName}`}`);
+        logger.warn('Provider not found for mapping', {
+          providerEmail: mapping.providerEmail,
+          providerName: `${mapping.providerFirstName} ${mapping.providerLastName}`,
+          locationName: mapping.locationName
+        });
         continue;
       }
 
@@ -271,7 +292,10 @@ async function main() {
       });
 
       if (!location) {
-        console.log(`⚠️ Location not found: ${mapping.locationName}`);
+        logger.warn('Location not found', {
+          locationName: mapping.locationName,
+          providerName: provider.name
+        });
         continue;
       }
 
@@ -297,13 +321,21 @@ async function main() {
         }
       });
 
-      console.log(`✅ Created/updated provider-location: ${provider.name} -> ${mapping.locationName} (primary: ${mapping.isPrimary})`);
+      logger.info('Created/updated provider-location relationship', {
+        providerName: provider.name,
+        locationName: mapping.locationName,
+        isPrimary: mapping.isPrimary
+      });
     } catch (error) {
-      console.log(`❌ Failed to create provider-location mapping: ${error}`);
+      logger.error('Failed to create provider-location mapping', {
+        error: error instanceof Error ? error.message : String(error),
+        providerName: `${mapping.providerFirstName} ${mapping.providerLastName}`,
+        locationName: mapping.locationName
+      });
     }
   }
 
-  console.log('🔗 Provider-location relationships completed');
+  logger.info('Provider-location relationships completed');
 
   await prisma.$executeRawUnsafe('GRANT USAGE ON SCHEMA public TO service_role;');
 

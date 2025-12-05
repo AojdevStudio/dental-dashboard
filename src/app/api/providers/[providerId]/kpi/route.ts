@@ -2,6 +2,7 @@ import { type ApiHandler, withAuth } from '@/lib/api/middleware';
 import { apiError, apiSuccess, handleApiError } from '@/lib/api/utils';
 import type { AuthContext } from '@/lib/database/auth-context';
 import { getProviderKPIDashboard } from '@/lib/database/queries/provider-metrics';
+import logger from '@/lib/utils/logger';
 import { z } from 'zod';
 
 /**
@@ -148,7 +149,28 @@ const getProviderKPIHandler: ApiHandler = async (
 
     return apiSuccess(response);
   } catch (error) {
-    console.error('Error fetching provider KPI data:', error);
+    const resolvedParams = await params.catch(() => ({}) as Record<string, string | string[]>);
+    const currentProviderId =
+      'providerId' in resolvedParams ? (resolvedParams.providerId as string) : undefined;
+
+    // Create safe validated params for logging
+    const safeValidatedParams = {
+      period: 'monthly',
+      startDate: undefined,
+      endDate: undefined,
+      locationId: undefined,
+      includeComparisons: true,
+      includeTrends: true,
+      compareToProvider: undefined,
+    };
+
+    logger.error('API error fetching provider KPI data', {
+      error: error instanceof Error ? error.message : String(error),
+      providerId: currentProviderId,
+      userId: authContext.userId,
+      queryParams: safeValidatedParams,
+      stack: error instanceof Error ? error.stack : undefined,
+    });
     return handleApiError(error);
   }
 };

@@ -5,6 +5,8 @@
  * This module provides validation functions that MUST be called before any test data operations.
  */
 
+import logger from './logger';
+
 export class TestEnvironmentError extends Error {
   constructor(message: string) {
     super(`🛡️ TEST ENVIRONMENT GUARD: ${message}`);
@@ -90,8 +92,13 @@ export function withTestEnvironmentValidation<T>(operation: () => T | Promise<T>
   validateTestDatabase();
   validateTestEnvFile();
 
-  // This console.info is intentional for test environment validation logging
-  console.info('✅ Test environment validation passed - proceeding with test operation');
+  // Log test environment validation success using structured logging
+  logger.info('Test environment validation passed', {
+    nodeEnv: process.env.NODE_ENV,
+    databaseUrl: `${process.env.DATABASE_URL?.substring(0, 50)}...`,
+    supabaseUrl: process.env.NEXT_PUBLIC_SUPABASE_URL,
+    operation: 'test-environment-validation',
+  });
 
   return operation();
 }

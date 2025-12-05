@@ -89,7 +89,16 @@ export const calculateTrend = (
   return { direction, percentage: Math.abs(percentageChange) };
 };
 
-export const getDataRange = (data: ChartDataPoint[], valueKey: string) => {
+/**
+ * Calculates min, max, and average for a dataset
+ * @param data - Array of chart data points
+ * @param valueKey - Key to extract values from data points
+ * @returns Object with min, max, and avg values
+ */
+export const getDataRange = (
+  data: ChartDataPoint[],
+  valueKey: string
+): { min: number; max: number; avg: number } => {
   const values = data.map((item) => item[valueKey] || 0).filter((v) => typeof v === 'number');
 
   if (values.length === 0) {
@@ -147,7 +156,17 @@ export const getChartDimensions = (
   return { width: containerWidth, height };
 };
 
-export const exportChartData = (data: ChartDataPoint[], filename: string) => {
+/**
+ * Exports chart data to CSV file
+ * @param data - Array of chart data points to export
+ * @param filename - Name for the downloaded file (without extension)
+ */
+export const exportChartData = (data: ChartDataPoint[], filename: string): void => {
+  if (data.length === 0) {
+    console.warn('No data to export');
+    return;
+  }
+
   const csvContent = [
     Object.keys(data[0]).join(','),
     ...data.map((row) => Object.values(row).join(',')),

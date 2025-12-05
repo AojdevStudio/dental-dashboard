@@ -30,7 +30,7 @@ export function PasswordResetConfirm(): React.ReactElement {
    * Handles form submission for password reset
    * @param {React.FormEvent} e - Form submission event
    */
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
     setIsLoading(true);
@@ -51,8 +51,8 @@ export function PasswordResetConfirm(): React.ReactElement {
     // TODO: Implement actual password reset logic with Supabase
     // This is a placeholder implementation
     try {
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+      // TODO: Replace with actual Supabase password reset API call
+      // await supabase.auth.updateUser({ password: newPassword });
 
       // For now, just show a success message
       alert('Password reset functionality will be implemented in a future update.');

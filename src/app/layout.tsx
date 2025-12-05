@@ -18,7 +18,7 @@ import { Geist, Geist_Mono } from 'next/font/google';
 import type React from 'react';
 import '@/styles/globals.css';
 import { StagewiseToolbar } from '@stagewise/toolbar-next';
-import { Providers } from './(dashboard)/providers';
+import { Providers } from './(dashboard)/dashboard-providers';
 
 /**
  * Stagewise toolbar configuration

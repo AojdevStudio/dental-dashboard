@@ -70,7 +70,28 @@ interface LocationSummaryAccumulator {
 }
 
 /**
- * Build common where clause for provider queries
+ * Builds a common Prisma where clause for provider queries with multi-tenant filtering
+ *
+ * This function constructs a type-safe Prisma where clause based on the provided
+ * filter parameters. It handles various filtering options including clinic, location,
+ * provider type, and status filtering with proper defaults for inactive providers.
+ *
+ * @param params - Filter parameters for building the where clause
+ * @param params.providerId - Optional specific provider ID to filter by
+ * @param params.clinicId - Optional clinic ID for multi-tenant filtering
+ * @param params.providerType - Optional provider type (dentist, hygienist, etc.)
+ * @param params.status - Optional explicit status filter (active/inactive)
+ * @param params.includeInactive - Whether to include inactive providers (default: false)
+ * @param params.locationId - Optional location ID for location-specific filtering
+ * @returns Prisma.ProviderWhereInput object for use in provider queries
+ *
+ * @example
+ * // Filter active dentists in a specific clinic
+ * const where = buildProviderWhereClause({
+ *   clinicId: 'clinic-123',
+ *   providerType: 'dentist',
+ *   includeInactive: false
+ * });
  */
 function buildProviderWhereClause(params: {
   providerId?: string;
@@ -194,7 +215,19 @@ function buildProviderQueryOptions(
 }
 
 /**
- * Transform raw provider data to ProviderWithLocations format
+ * Transforms raw Prisma provider data to the standardized ProviderWithLocations format
+ *
+ * This function converts the complex nested Prisma query results into a clean,
+ * standardized format suitable for API responses. It handles location relationships,
+ * primary location identification, and date formatting.
+ *
+ * @param providers - Array of raw provider data from Prisma queries
+ * @returns Array of transformed ProviderWithLocations objects
+ *
+ * @example
+ * // Transform Prisma results for API response
+ * const rawProviders = await prisma.provider.findMany({ include: ... });
+ * const formattedProviders = transformProviderData(rawProviders);
  */
 function transformProviderData(providers: RawProviderData[]): ProviderWithLocations[] {
   return providers.map((provider) => {
@@ -268,7 +301,36 @@ export async function getProvidersWithLocations(
 }
 
 /**
- * Get provider performance metrics by location
+ * Retrieves detailed provider performance metrics aggregated by location
+ *
+ * This function executes complex SQL queries to gather production metrics
+ * for providers across different locations. It handles both dentist and hygienist
+ * production data with location-specific calculations and goal tracking.
+ *
+ * Key Features:
+ * - Location-specific production aggregation
+ * - Support for both dentist and hygienist metrics
+ * - Goal variance calculations
+ * - Date range filtering with proper bounds
+ * - Multi-location provider support
+ *
+ * @param params - Performance query parameters
+ * @param params.providerId - Optional specific provider to analyze
+ * @param params.locationId - Optional location to filter by
+ * @param params.clinicId - Optional clinic for multi-tenant filtering
+ * @param params.startDate - Start date for the performance period
+ * @param params.endDate - End date for the performance period
+ * @param params.providerType - Optional provider type filter (dentist/hygienist)
+ * @returns Promise<ProviderPerformanceMetrics[]> Array of performance metrics by location
+ *
+ * @example
+ * // Get dentist performance for current month
+ * const metrics = await getProviderPerformanceByLocation({
+ *   providerId: 'provider-123',
+ *   providerType: 'dentist',
+ *   startDate: new Date('2024-01-01'),
+ *   endDate: new Date('2024-01-31')
+ * });
  */
 export async function getProviderPerformanceByLocation(params: {
   providerId?: string;
@@ -415,7 +477,24 @@ export async function getProviderPerformanceByLocation(params: {
 }
 
 /**
- * Get providers for a specific location
+ * Retrieves all providers associated with a specific location
+ *
+ * This is a convenience function that wraps getProvidersWithLocations
+ * with location-specific filtering. Useful for location management
+ * and staffing analysis.
+ *
+ * @param locationId - The location ID to filter providers by
+ * @param params - Optional additional filter parameters
+ * @param params.providerType - Optional provider type filter
+ * @param params.includeInactive - Whether to include inactive providers
+ * @returns Promise<ProviderWithLocations[]> Array of providers at the specified location
+ *
+ * @example
+ * // Get all active dentists at a location
+ * const dentists = await getProvidersByLocation('location-123', {
+ *   providerType: 'dentist',
+ *   includeInactive: false
+ * });
  */
 export function getProvidersByLocation(
   locationId: string,
@@ -431,7 +510,25 @@ export function getProvidersByLocation(
 }
 
 /**
- * Get location summary for providers (useful for AOJ-41 dashboard)
+ * Generates comprehensive location summary with provider distribution and counts
+ *
+ * This function provides an overview of provider distribution across locations,
+ * including counts by provider type and primary location assignments.
+ * Particularly useful for dashboard widgets and administrative overviews.
+ *
+ * The summary includes:
+ * - Total provider count per location
+ * - Provider type breakdown (dentists, hygienists)
+ * - Primary location assignments
+ * - Active provider filtering
+ *
+ * @param clinicId - Optional clinic ID for multi-tenant filtering
+ * @returns Promise<LocationSummaryValue[]> Array of location summaries with provider data
+ *
+ * @example
+ * // Get location summary for clinic dashboard
+ * const locationSummary = await getProviderLocationSummary('clinic-123');
+ * // Returns summary with counts: { total: 12, dentists: 5, hygienists: 7, primary: 8 }
  */
 export async function getProviderLocationSummary(
   clinicId?: string
@@ -572,7 +669,21 @@ export async function getProvidersWithLocationsPaginated(
 }
 
 /**
- * Get a specific provider with detailed location information
+ * Retrieves detailed information for a specific provider including all location relationships
+ *
+ * This function fetches comprehensive provider data including location associations,
+ * primary location identification, and relationship metadata. Returns null if the
+ * provider is not found.
+ *
+ * @param providerId - The unique identifier of the provider to retrieve
+ * @returns Promise<ProviderWithLocations | null> Complete provider data or null if not found
+ *
+ * @example
+ * // Get provider for detail view
+ * const provider = await getProviderWithLocationDetails('provider-123');
+ * if (provider) {
+ *   console.log(`Provider: ${provider.name}, Locations: ${provider.locations.length}`);
+ * }
  */
 export async function getProviderWithLocationDetails(
   providerId: string
@@ -582,7 +693,31 @@ export async function getProviderWithLocationDetails(
 }
 
 /**
- * Calculate period start and end dates based on period type
+ * Calculates period start and end dates based on the specified period type
+ *
+ * This utility function converts period types (daily, weekly, monthly, etc.)
+ * into concrete Date objects for database queries. If explicit start/end dates
+ * are provided, they take precedence over the period type.
+ *
+ * Period Calculations:
+ * - daily: Current date (00:00:00 to 23:59:59)
+ * - weekly: Current week (Sunday to Saturday)
+ * - monthly: Current month (1st to last day)
+ * - quarterly: Current quarter (3-month periods)
+ * - yearly: Current year (Jan 1 to Dec 31)
+ *
+ * @param period - The period type to calculate dates for
+ * @param startDate - Optional explicit start date (overrides period calculation)
+ * @param endDate - Optional explicit end date (overrides period calculation)
+ * @returns Object containing calculated periodStart and periodEnd Date objects
+ *
+ * @example
+ * // Get current month dates
+ * const { periodStart, periodEnd } = calculatePeriodDates('monthly');
+ *
+ * @example
+ * // Use explicit date range
+ * const dates = calculatePeriodDates('monthly', new Date('2024-01-01'), new Date('2024-01-31'));
  */
 function calculatePeriodDates(
   period: 'daily' | 'weekly' | 'monthly' | 'quarterly' | 'yearly',
@@ -654,7 +789,25 @@ type LocationProductionData = {
 };
 
 /**
- * Aggregate production data by location
+ * Aggregates provider production data by location with performance optimizations
+ *
+ * This function efficiently processes performance metrics to create location-level
+ * summaries. It uses Map data structures for O(n) complexity and calculates
+ * weighted averages, variance, and goal tracking across providers.
+ *
+ * Aggregation includes:
+ * - Total production per location
+ * - Weighted average production (total/production days)
+ * - Goal aggregation and variance calculations
+ * - Performance percentage calculations
+ *
+ * @param productionData - Array of provider performance metrics to aggregate
+ * @returns LocationProductionData[] Array of aggregated metrics by location
+ *
+ * @example
+ * // Aggregate performance data for location dashboard
+ * const locationMetrics = aggregateProductionByLocation(providerMetrics);
+ * // Returns: [{ locationId: 'loc-1', total: 50000, average: 2500, variance: 5000 }]
  */
 function aggregateProductionByLocation(
   productionData: ProviderPerformanceMetrics[]
@@ -703,7 +856,26 @@ function aggregateProductionByLocation(
 }
 
 /**
- * Fetch provider goals for a given period
+ * Fetches provider-specific goals for a given time period with metric definitions
+ *
+ * This function retrieves goal data from the database including associated
+ * metric definitions and calculates achievement rates. Goals are filtered
+ * by date range and provider/clinic context.
+ *
+ * @param providerId - The provider's unique identifier
+ * @param clinicId - The clinic context for multi-tenant filtering
+ * @param periodStart - Start date for goal period filtering
+ * @param periodEnd - End date for goal period filtering
+ * @returns Promise<object> Goal summary with achievement metrics and details
+ *
+ * @example
+ * // Get goals for provider in current month
+ * const goals = await fetchProviderGoals(
+ *   'provider-123',
+ *   'clinic-456',
+ *   new Date('2024-01-01'),
+ *   new Date('2024-01-31')
+ * );
  */
 async function fetchProviderGoals(
   providerId: string,
@@ -789,7 +961,25 @@ async function fetchProviderProductionData(
 }
 
 /**
- * Calculate production metrics from performance data
+ * Calculates comprehensive production metrics from raw performance data
+ *
+ * This function processes an array of performance metrics to compute
+ * aggregate values including totals, averages, goals, and variance calculations.
+ * Uses production days for weighted average calculations.
+ *
+ * Metrics Calculated:
+ * - Total production across all records
+ * - Weighted average production (total/production days)
+ * - Goal totals and variance from goals
+ * - Percentage variance calculations
+ *
+ * @param productionData - Array of provider performance metrics
+ * @returns Object containing calculated production metrics
+ *
+ * @example
+ * // Calculate metrics for provider dashboard
+ * const metrics = calculateProductionMetrics(performanceData);
+ * // Returns: { totalProduction: 45000, averageProduction: 2250, variance: 2000 }
  */
 function calculateProductionMetrics(productionData: ProviderPerformanceMetrics[]) {
   const totalProduction = productionData.reduce((sum, data) => sum + data.totalProduction, 0);
@@ -840,7 +1030,45 @@ async function getProviderGoalsData(
 }
 
 /**
- * Get comprehensive provider performance metrics
+ * Retrieves comprehensive provider performance metrics with goals, trends, and location breakdowns
+ *
+ * This is the main function for generating complete provider performance reports.
+ * It combines production data, goal tracking, location-specific metrics, and
+ * period calculations to provide a comprehensive performance overview.
+ *
+ * Features:
+ * - Flexible period calculations (daily, weekly, monthly, quarterly, yearly)
+ * - Location-specific performance breakdowns
+ * - Goal tracking and achievement analysis
+ * - Variance calculations and trending
+ * - Multi-tenant security with clinic validation
+ *
+ * @param params - Comprehensive performance query parameters
+ * @param params.providerId - The provider's unique identifier
+ * @param params.period - Time period for metrics (default: 'monthly')
+ * @param params.startDate - Optional explicit start date
+ * @param params.endDate - Optional explicit end date
+ * @param params.locationId - Optional location filter
+ * @param params.includeGoals - Whether to include goal data (default: true)
+ * @param params.clinicId - Optional clinic validation for access control
+ * @returns Promise<object | null> Complete performance metrics or null if provider not found
+ *
+ * @example
+ * // Get monthly performance with goals
+ * const metrics = await getProviderPerformanceMetrics({
+ *   providerId: 'provider-123',
+ *   period: 'monthly',
+ *   includeGoals: true
+ * });
+ *
+ * @example
+ * // Get performance for specific location and date range
+ * const metrics = await getProviderPerformanceMetrics({
+ *   providerId: 'provider-456',
+ *   startDate: new Date('2024-01-01'),
+ *   endDate: new Date('2024-01-31'),
+ *   locationId: 'location-789'
+ * });
  */
 export async function getProviderPerformanceMetrics(params: {
   providerId: string;

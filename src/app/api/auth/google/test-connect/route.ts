@@ -1,9 +1,9 @@
-import { prisma } from '@/lib/database/prisma';
+import { prisma } from '@/lib/database/client';
 import { createClient } from '@/lib/supabase/server';
 import { generateAuthUrl } from '@/services/google/auth';
 import { type NextRequest, NextResponse } from 'next/server';
 
-export async function GET(request: NextRequest) {
+export async function GET(request: NextRequest): Promise<NextResponse> {
   const { searchParams } = new URL(request.url);
   const dataSourceId = searchParams.get('dataSourceId');
 

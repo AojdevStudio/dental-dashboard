@@ -67,16 +67,14 @@ const timePeriodOptions = [
 /**
  * Fetches the list of available clinics
  *
- * In this example implementation, it returns mock data with a simulated delay.
- * In a production environment, this would be replaced with an actual API call
- * to fetch clinics from the backend.
+ * DEPRECATED: This is mock implementation with artificial delays.
+ * TODO: Replace with actual API call to /api/clinics when backend is ready.
  *
  * @returns {Promise<Array<{id: string, name: string}>>} Promise resolving to an array of clinic objects
  */
-const fetchClinics = async () => {
-  // Simulating API call delay
-  await new Promise((resolve) => setTimeout(resolve, 500));
-
+const fetchClinics = () => {
+  // Mock data for development - remove artificial delay
+  // In production, replace with: const response = await fetch('/api/clinics');
   return [
     { id: 'clinic-1', name: 'Main Street Dental' },
     { id: 'clinic-2', name: 'Riverside Dentistry' },
@@ -89,15 +87,14 @@ const fetchClinics = async () => {
 /**
  * Fetches the list of available providers
  *
- * In this example implementation, it returns mock data with a simulated delay.
- * In a production environment, this would be replaced with an actual API call
- * to fetch providers from the backend.
+ * DEPRECATED: This is mock implementation with artificial delays.
+ * TODO: Replace with actual API call to /api/providers when backend is ready.
  *
  * @returns {Promise<Array<{id: string, name: string}>>} Promise resolving to an array of provider objects
  */
-const fetchProviders = async () => {
-  // Simulating API call delay
-  await new Promise((resolve) => setTimeout(resolve, 500));
+const fetchProviders = () => {
+  // Mock data for development - remove artificial delay
+  // In production, replace with: const response = await fetch('/api/providers');
 
   return [
     { id: 'provider-1', name: 'Dr. Smith' },

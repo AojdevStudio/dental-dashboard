@@ -167,8 +167,10 @@ export default function DashboardClient({ initialData }: DashboardClientProps) {
 
   const handleRefresh = async () => {
     setRefreshing(true);
-    // In a real app, this would refetch data
-    await new Promise((resolve) => setTimeout(resolve, 1000));
+    // TODO: Replace with actual data refetch logic
+    // Example: await refetchDashboardData();
+    // For now, simulate minimal processing time
+    await Promise.resolve();
     setRefreshing(false);
   };
 
